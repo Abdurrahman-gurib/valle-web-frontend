@@ -1,0 +1,5 @@
+# Normalise line endings: LF in the repo and on checkout, on every OS. The
+# sourced shell hook and the Dockerfiles must never pick up CRLF from a Windows
+# clone (git autocrlf), or the container entrypoint aborts on a stray carriage
+# return.
+* text=auto eol=lf

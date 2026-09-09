@@ -1,0 +1,24 @@
+#!/bin/sh
+# Sourced by the nginx image's entrypoint before the envsubst template step
+# (files named *.envsh are sourced, so the export below reaches it).
+#
+# nginx's `resolver` directive does not read /etc/resolv.conf, so hand it the
+# platform's nameserver(s): Railway's private DNS (an IPv6 address, which nginx
+# wants in brackets), Docker's embedded DNS (127.0.0.11), or whatever the host
+# provides. Set NGINX_RESOLVER explicitly to override.
+if [ -z "${NGINX_RESOLVER:-}" ]; then
+  _ns=""
+  # "|| [ -n ... ]" keeps a final line that lacks a trailing newline.
+  while read -r _key _val _rest || [ -n "$_key" ]; do
+    [ "$_key" = "nameserver" ] || continue
+    case "$_val" in *:*) _val="[$_val]" ;; esac
+    _ns="$_ns $_val"
+  done < /etc/resolv.conf
+  _ns="${_ns# }"
+  if [ -z "$_ns" ]; then
+    echo "05-resolver.envsh: WARNING no nameserver in /etc/resolv.conf, assuming Docker embedded DNS 127.0.0.11"
+  fi
+  export NGINX_RESOLVER="${_ns:-127.0.0.11}"
+  unset _ns _key _val _rest
+fi
+echo "05-resolver.envsh: NGINX_RESOLVER=$NGINX_RESOLVER API_UPSTREAM=${API_UPSTREAM:-unset} PORT=${PORT:-unset}"

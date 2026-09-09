@@ -1,0 +1,56 @@
+# Continuous integration for the site. Railway deploys `main` on its own
+# (GitHub autodeploy); with "Wait for CI" enabled on the Railway service, a
+# deployment only starts once this workflow has passed.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Superseded pull-request runs are cancelled; pushes to main queue instead, so
+# every main commit gets a real pass/fail for Railway's "Wait for CI" to act on.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    name: Docker image builds and nginx config renders
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: valle-web:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Render the template exactly as the entrypoint does at start-up, in both
+      # shapes it must support, and let nginx validate the result.
+      - name: nginx -t, Railway shape (private network, IPv6 resolver)
+        run: |
+          docker run --rm \
+            -e PORT=80 -e API_UPSTREAM=api.railway.internal:3001 -e TRUST_EDGE_HEADERS=1 \
+            valle-web:ci sh -c 'echo "nameserver fd12::10" > /etc/resolv.conf && /docker-entrypoint.sh nginx -t && grep -F "resolver [fd12::10]" /etc/nginx/conf.d/default.conf'
+      - name: nginx -t, docker compose shape (image defaults)
+        run: |
+          docker run --rm valle-web:ci \
+            sh -c '/docker-entrypoint.sh nginx -t && grep -E "^ *resolver " /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf'
