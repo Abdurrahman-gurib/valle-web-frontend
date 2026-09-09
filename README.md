@@ -51,5 +51,6 @@ session cookie is `SameSite=Strict`, so a cross-origin API would never receive i
 
 Production runs on Railway as the `web` service of the `valle-web` project, deployed
 automatically from `main` of this repository (GitHub Actions CI runs first, see
-`.github/workflows/ci.yml`). The runbook lives in the backend repository:
+`.github/workflows/ci.yml`). The Railway project itself (both services, the database, variables, healthchecks) is
+defined in the backend repository's .railway/railway.ts, and the runbook lives there too:
 [valle-web-backend/DEPLOYMENT.md](https://github.com/Abdurrahman-gurib/valle-web-backend/blob/main/DEPLOYMENT.md).
