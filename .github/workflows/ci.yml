@@ -54,3 +54,26 @@ jobs:
         run: |
           docker run --rm valle-web:ci \
             sh -c '/docker-entrypoint.sh nginx -t && grep -E "^ *resolver " /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf'
+
+  # Continuous deployment fallback. Railway's GitHub integration (preferred)
+  # deploys main on its own once the Railway GitHub App has access to this
+  # repository. Until then, or instead, a RAILWAY_TOKEN repository secret
+  # (a Railway project token) makes this job upload and deploy the checked-out
+  # commit after every check above has passed. Never enable both, or each push
+  # deploys twice. See DEPLOYMENT.md in valle-web-backend.
+  deploy:
+    name: Deploy to Railway (only when RAILWAY_TOKEN is set)
+    needs: [test, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - if: env.RAILWAY_TOKEN == ''
+        run: echo "RAILWAY_TOKEN is not set, skipping (Railway's GitHub autodeploy handles deploys)."
+      - if: env.RAILWAY_TOKEN != ''
+        uses: actions/checkout@v4
+      - if: env.RAILWAY_TOKEN != ''
+        run: npm install -g @railway/cli
+      - if: env.RAILWAY_TOKEN != ''
+        run: railway up --service web --ci --message "GitHub Actions ${{ github.sha }}"
