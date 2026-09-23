@@ -3,6 +3,7 @@ import { Hero } from './home/Hero';
 import { SlopeMarquee } from './home/SlopeMarquee';
 import { QuickPlan } from './home/QuickPlan';
 import { ParkMap } from './home/ParkMap';
+import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 import { ClassicsRail } from './home/ClassicsRail';
 import { WildestLocals } from './home/WildestLocals';
 import { DineTeasers } from './home/DineTeasers';
@@ -18,6 +19,8 @@ export default function HomePage() {
       <SlopeMarquee />
       <QuickPlan />
       <ParkMap />
+      <QuadMap />
+      <ZiplineMap />
       <ClassicsRail />
       <WildestLocals />
       <DineTeasers />

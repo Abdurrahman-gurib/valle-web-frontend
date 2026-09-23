@@ -18,7 +18,7 @@ interface SelPinModel {
   btnClick: () => void;
 }
 
-function PinButton({ p, i, on, isMobile, onClick }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void }) {
+export function PinButton({ p, i, on, isMobile, onClick }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void }) {
   const [h, bind] = useHover();
   const sub = p.kind === 'sub';
   const base = isMobile ? (sub ? 17 : 21) : (sub ? 30 : 36);
