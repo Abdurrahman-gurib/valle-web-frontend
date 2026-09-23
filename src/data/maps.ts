@@ -51,12 +51,8 @@ export interface MapRoute {
 
 export const QUAD_MAP = {
   img: '/images/quad-map.webp', width: 1741, height: 1604,
-  // Per-route variants with the other loop dimmed and blurred (generated from the official map).
-  routeImgs: { discovery: '/images/quad-map-discovery.webp', adventure: '/images/quad-map-adventure.webp' } as Record<string, string>,
-  // Both loops dimmed: the layer under the reveal animation.
+  // Both loops dimmed: the chosen loop is traced on top as a glowing line (see quadTrails.ts).
   dimImg: '/images/quad-map-dim.webp',
-  // The reveal grows out of the quad base.
-  revealOrigin: [71.3, 57.6] as [number, number],
 };
 
 const DRIVER = { k: 'DRIVER', v: '16 yrs + · driving licence' };

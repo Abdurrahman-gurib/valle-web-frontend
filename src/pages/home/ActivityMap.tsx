@@ -8,6 +8,7 @@ import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { PinButton } from './ParkMap';
 import type { MapLine, MapPin, MapRoute } from '../../data/maps';
+import type { TrailEdge } from '../../data/quadTrails';
 
 const MONO = "'Chivo Mono',monospace";
 const HEAD = "'Barlow',sans-serif";
@@ -16,11 +17,10 @@ export interface ActivityMapProps {
   eyebrow: string;             // e.g. "03 · QUAD & BUGGY · 2 LOOPS"
   title: string;
   intro: string;
-  /**
-   * `routeImgs`: optional per-route variant of the map (other trails dimmed). With `dimImg` (every trail
-   * dimmed) underneath, the selected variant is revealed with a glowing sweep from `revealOrigin`.
-   */
-  map: { img: string; width: number; height: number; routeImgs?: Record<string, string>; dimImg?: string; revealOrigin?: [number, number] };
+  /** `dimImg`: the map with every trail dimmed, used as the base when trails are traced on top. */
+  map: { img: string; width: number; height: number; dimImg?: string };
+  /** Quad: trail centrelines per route id, traced outward from the base when that route is picked. */
+  trails?: Record<string, TrailEdge[]>;
   /** Route selected on first render (defaults to the first). */
   defaultRoute?: string;
   alt: string;
@@ -166,7 +166,7 @@ function Lightbox({ shots, idx, onClose, onStep }: { shots: { src: string; cap: 
  * a route selector, tappable numbered pins (photo + restrictions + price) and a
  * photo strip. Same look and feel as the walking-trail sitemap above it.
  */
-export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
+export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
   const goto = useGoto();
   const isMobile = useIsMobile();
   const priceFrom = usePriceFrom();
@@ -262,9 +262,12 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const traceStyle = (i: number, extra: React.CSSProperties = {}): React.CSSProperties => ({
     strokeDasharray: 1, strokeDashoffset: 1, animation: `vtrace ${TRACE}s ease-out ${i * TRACE}s forwards`, ...extra,
   });
-  // Quad: the active map layer (dimmed variant or the full map) revealed from the base with a glowing sweep.
-  const activeLayer = map.routeImgs ? (map.routeImgs[route.id] || map.img) : null;
-  const revealAt = map.revealOrigin ? `${map.revealOrigin[0]}% ${map.revealOrigin[1]}%` : '50% 50%';
+  // Quad: trail centrelines for the chosen loop(s), traced outward from the base. A route without its
+  // own trail (the 2 h Advenature Tour) traces every loop.
+  const trailSets = trails ? (trails[route.id] ? [route.id] : Object.keys(trails)) : [];
+  const trailReach = Math.max(1, ...trailSets.flatMap((id) => (trails as Record<string, TrailEdge[]>)[id].map((e) => e.d0 + e.len)));
+  const trailSpeed = trailReach / 3.4;   // px per second: any loop finishes tracing in ~3.4 s
+  const trailColor = (id: string) => routes.find((r) => r.id === id)?.color || '#FFFFFF';
   const priceMain = priceFrom(route.priceCat, route.priceRow);
   const price2 = route.priceCat2 && route.priceRow2 ? priceFrom(route.priceCat2, route.priceRow2) : null;
 
@@ -295,20 +298,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                   height={map.height}
                   style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: `${map.width} / ${map.height}`, objectFit: 'contain' }}
                 />
-                {activeLayer && (
-                  <Img
-                    key={route.id}
-                    src={activeLayer}
-                    alt=""
-                    aria-hidden
-                    priority
-                    placeholder="transparent"
-                    width={map.width}
-                    height={map.height}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'contain', pointerEvents: 'none', ['--vreveal-at' as string]: revealAt, animation: 'vreveal 1.8s cubic-bezier(.4,0,.2,1) both' }}
-                  />
-                )}
-                {(drawRoutes || extraLines) && (
+                {(drawRoutes || extraLines || trails) && (
                   <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
                     <defs>
                       <filter id="amglow" x="-20%" y="-20%" width="140%" height="140%">
@@ -322,6 +312,19 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
                       </g>
                     ))}
+                    {trailSets.map((id) => (trails as Record<string, TrailEdge[]>)[id].map((e, i) => {
+                      const pts = e.pts.map((p) => p.join(',')).join(' ');
+                      const anim = (w: number, extra: React.CSSProperties = {}): React.CSSProperties => ({
+                        strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
+                        animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${e.d0 / trailSpeed}s forwards`, ...extra,
+                      });
+                      return (
+                        <g key={id + i}>
+                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeOpacity={0.45} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 3.2 : 2.6)} />
+                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 1.5 : 1.25)} />
+                        </g>
+                      );
+                    }))}
                     {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
                     {drawRoutes && cables.map((s, i) => (
                       <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
