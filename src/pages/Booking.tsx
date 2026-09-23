@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { Activity, BookingRequest } from '../types';
+import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
@@ -91,12 +91,13 @@ function BookCard({ m }: { m: CardModel }) {
 }
 
 /* 2 · YOUR DAY: one cart line */
-function CartLine({ a }: { a: Activity }) {
+function CartLine({ line }: { line: SelLine }) {
   const app = useApp();
   const goto = useGoto();
   const [hx, bindX] = useHover();
-  const c = app.sel[a.id] || {};
-  const price = app.activityPrice(a.id);
+  const a = line.act;
+  const c = line.qty;
+  const price = line.price;
   const isFlat = a.mode === 'flat';
   const amt = isFlat ? price * (c.u || 0) : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
   const each = isFlat
@@ -114,20 +115,21 @@ function CartLine({ a }: { a: Activity }) {
       </div>
       <div style={{ flex: 1, minWidth: '130px' }}>
         <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{a.name}</div>
+        {line.variant && <div style={{ fontSize: '11.5px', color: '#7333FF', fontWeight: 600, marginTop: '2px' }}>{line.variant}</div>}
         <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{each}</div>
       </div>
       {!isFlat && (
         <>
-          <Stepper tag="ADULTS" val={c.a || 0} inc={() => app.bumpSel(a.id, 'a', 1)} dec={() => app.bumpSel(a.id, 'a', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
-          <Stepper tag="CHILD 3–12" val={c.k || 0} inc={() => app.bumpSel(a.id, 'k', 1)} dec={() => app.bumpSel(a.id, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+          <Stepper tag="ADULTS" val={c.a || 0} inc={() => app.bumpSel(line.key, 'a', 1)} dec={() => app.bumpSel(line.key, 'a', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+          <Stepper tag="CHILD 3–12" val={c.k || 0} inc={() => app.bumpSel(line.key, 'k', 1)} dec={() => app.bumpSel(line.key, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
         </>
       )}
       {isFlat && (
-        <Stepper tag={unitName} val={c.u || 0} inc={() => app.bumpSel(a.id, 'u', 1)} dec={() => app.bumpSel(a.id, 'u', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+        <Stepper tag={unitName} val={c.u || 0} inc={() => app.bumpSel(line.key, 'u', 1)} dec={() => app.bumpSel(line.key, 'u', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
       )}
       <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{money(amt)}</div>
       <button
-        onClick={() => app.toggleSel(a.id)}
+        onClick={() => app.toggleSel(a.id, line.variant)}
         title="Remove"
         {...bindX}
         style={{
@@ -278,7 +280,7 @@ export default function BookingPage() {
   const tIso = todayIso();
 
   const bookCards = catalog.ACTS.filter((a) => a.mode === 'pp' || a.mode === 'flat').map(card);
-  const cartActs = booking.selActs;
+  const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
     ? 'PARK ENTRY'
     : cartActs.length + ' EXPERIENCE' + (cartActs.length > 1 ? 'S' : '') + ' + ENTRY';
@@ -322,7 +324,7 @@ export default function BookingPage() {
       adults,
       kids,
       rate: rate ?? 'rr',
-      items: Object.entries(sel).map(([id, c]) => ({ id, adults: c.a, kids: c.k, units: c.u })),
+      items: booking.selLines.map((l) => ({ id: l.act.id, variant: l.variant, adults: l.qty.a, kids: l.qty.k, units: l.qty.u })),
       name: name.trim(),
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
@@ -413,7 +415,7 @@ export default function BookingPage() {
                     <Stepper tag="CHILD 3–12" val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
                     <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{entryAmt}</div>
                   </div>
-                  {cartActs.map((a) => <CartLine key={a.id} a={a} />)}
+                  {cartActs.map((l) => <CartLine key={l.key} line={l} />)}
                   {cartActs.length === 0 && (
                     <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.55)' }}>
                       No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.

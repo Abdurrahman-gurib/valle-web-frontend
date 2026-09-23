@@ -1,17 +1,30 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { useGoto } from '../../lib/nav';
 import { money } from '../../lib/format';
+import { PULSE_NAMES } from '../../lib/card';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
+import { Stripes } from '../../components/Stripes';
 import { PinButton } from './ParkMap';
 import type { MapLine, MapPin, MapRoute } from '../../data/maps';
 import type { TrailEdge } from '../../data/quadTrails';
+import type { MapGallery, MapShot } from '../../data/mapGalleries';
 
 const MONO = "'Chivo Mono',monospace";
 const HEAD = "'Barlow',sans-serif";
+
+/** Frosted panel over the map (Vallé purple glass). */
+const GLASS: CSSProperties = {
+  background: 'linear-gradient(155deg, rgba(52,0,87,.58), rgba(31,0,51,.74))',
+  backdropFilter: 'blur(18px) saturate(1.45)',
+  WebkitBackdropFilter: 'blur(18px) saturate(1.45)',
+  border: '1px solid rgba(255,255,255,.22)',
+  boxShadow: '0 30px 60px -24px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.28)',
+  color: '#FFFFFF',
+};
 
 export interface ActivityMapProps {
   eyebrow: string;             // e.g. "03 · QUAD & BUGGY · 2 LOOPS"
@@ -33,7 +46,7 @@ export interface ActivityMapProps {
   signature?: [string, string];
   /** Always-visible extra lines in their own colour (bicycle zipline, Nepalese bridge). */
   extraLines?: MapLine[];
-  gallery?: { src: string; cap: string }[];
+  gallery?: MapGallery;
   footNote: string;
   footTag: string;
   hint: string;
@@ -53,16 +66,37 @@ interface Popup {
   btnClick: () => void;
 }
 
-/** "from" price for a route, following the visitor's resident / non-resident choice. */
-function usePriceFrom() {
+/** One bookable option of a route: the experience id plus the exact price-list row. */
+interface Bookable { id: string; variant: string; price: string; label: string }
+
+/** Resolves a route's price-list rows (by label prefix) into bookable options at the visitor's rate. */
+function useBookables() {
   const catalog = useCatalog();
   const app = useApp();
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
-  return (cat: string, prefix: string): string | null => {
+  const find = (cat: string, prefix: string, label: string): Bookable | null => {
     const row = (catalog.PL[cat] || []).find((r) => r.n.toLowerCase().startsWith(prefix.toLowerCase()));
     if (!row) return null;
-    return money(row[rk]) + (app.rate ? '' : ' (RR)');
+    return { id: cat, variant: row.n, price: money(row[rk]) + (app.rate ? '' : ' (RR)'), label };
   };
+  return (r: MapRoute): Bookable[] => {
+    const out: Bookable[] = [];
+    const a = find(r.priceCat, r.priceRow, r.priceCat === 'zipline' ? 'ZIPLINE' : r.priceCat.toUpperCase());
+    if (a) out.push(a);
+    if (r.priceCat2 && r.priceRow2) {
+      const b = find(r.priceCat2, r.priceRow2, r.priceLabel2 || r.priceCat2.toUpperCase());
+      if (b) out.push(b);
+    }
+    return out;
+  };
+}
+
+function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string; size?: number }) {
+  return (
+    <span style={{ fontSize: size, letterSpacing: '.18em', color, fontWeight: 700 }} title={PULSE_NAMES[n] + ' pulse'}>
+      {'●'.repeat(n)}<span style={{ opacity: 0.35 }}>{'○'.repeat(5 - n)}</span>
+    </span>
+  );
 }
 
 function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () => void }) {
@@ -72,13 +106,17 @@ function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () =>
       {...bind}
       onClick={onClick}
       style={{
-        flexShrink: 0, border: '1.5px solid ' + (on ? r.color : 'rgba(255,255,255,.28)'), cursor: 'pointer',
-        background: on ? r.color : (h ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.04)'),
-        color: on ? r.fg : '#FFFFFF', borderRadius: 999, padding: '9px 14px 9px 10px', display: 'flex', alignItems: 'center', gap: 9,
-        fontFamily: 'inherit', textAlign: 'left', transition: 'all .18s ease',
+        flexShrink: 0, cursor: 'pointer', borderRadius: 999, padding: '9px 16px 9px 11px', display: 'flex', alignItems: 'center', gap: 9,
+        fontFamily: 'inherit', textAlign: 'left', transition: 'all .2s ease',
+        border: '1px solid ' + (on ? r.color : (h ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.22)')),
+        background: on ? r.color : (h ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.07)'),
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        color: on ? r.fg : '#FFFFFF',
+        boxShadow: on ? `0 10px 26px -10px ${r.color}` : 'inset 0 1px 0 rgba(255,255,255,.12)',
+        transform: h && !on ? 'translateY(-1px)' : 'none',
       }}
     >
-      <span style={{ width: 12, height: 12, borderRadius: 999, background: r.color, border: '2px solid ' + (on ? r.fg : '#FFFFFF'), flexShrink: 0 }} />
+      <span style={{ width: 12, height: 12, borderRadius: 999, background: r.color, border: '2px solid ' + (on ? r.fg : '#FFFFFF'), flexShrink: 0, boxShadow: on ? 'none' : `0 0 10px ${r.color}` }} />
       <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
         <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13.5, textTransform: 'uppercase' }}>{r.name}</span>
         <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{r.tag}</span>
@@ -87,41 +125,53 @@ function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () =>
   );
 }
 
+function GlassBtn({ label, onClick, primary, on, small, style }: { label: string; onClick: () => void; primary?: boolean; on?: boolean; small?: boolean; style?: CSSProperties }) {
+  const [h, bind] = useHover();
+  const bg = primary
+    ? (h ? '#D91E44' : '#FF3358')
+    : on ? '#33FF74' : (h ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.12)');
+  return (
+    <button
+      {...bind}
+      onClick={onClick}
+      style={{
+        border: primary || on ? 0 : '1px solid rgba(255,255,255,.3)', background: bg, cursor: 'pointer', fontFamily: 'inherit',
+        color: on ? '#340057' : '#FFFFFF', fontSize: small ? 11 : 12.5, fontWeight: 700, padding: small ? '8px 12px' : '11px 16px', borderRadius: 999,
+        transition: 'all .18s ease', boxShadow: primary ? '0 10px 24px -8px rgba(255,51,88,.6)' : 'none', whiteSpace: 'nowrap',
+        ...style,
+      }}
+    >{label}</button>
+  );
+}
+
 function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string; top: string; transform: string; onClose: () => void }) {
-  const [hBtn, bindBtn] = useHover();
   const [hX, bindX] = useHover();
   return (
-    <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 6, width: 'min(360px,94%)' }}>
-      <div style={{ pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', background: '#FFFFFF', borderRadius: 14, overflow: 'hidden', boxShadow: '0 18px 44px -10px rgba(31,0,51,.65)', animation: 'vfadeup .22s ease both' }}>
-        <div style={{ width: 104, flexShrink: 0, background: '#EBE2FF' }}>
-          <Img src={p.img} alt={p.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 7, width: 'min(360px,94%)' }}>
+      <div style={{ ...GLASS, pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', borderRadius: 16, overflow: 'hidden', animation: 'vfadeup .22s ease both' }}>
+        <div style={{ width: 108, flexShrink: 0, background: 'rgba(255,255,255,.08)' }}>
+          <Img src={p.img} alt={p.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        <div style={{ flex: 1, minWidth: 0, padding: '11px 13px 12px' }}>
-          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)', border: p.badgeColor === '#FFFFFF' ? '1px solid #EBE2FF' : 0 }}>{p.badge}</span>
-          <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 14.5, textTransform: 'uppercase', marginTop: 6, lineHeight: 1, color: '#340057' }}>{p.name}</div>
-          <div style={{ fontSize: 11.5, color: 'rgba(52,0,87,.7)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.sub}</div>
+        <div style={{ flex: 1, minWidth: 0, padding: '12px 14px 13px' }}>
+          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
+          <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', marginTop: 7, lineHeight: 1 }}>{p.name}</div>
+          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.78)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.sub}</div>
           {p.facts.length > 0 && (
-            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: '3px 10px', fontFamily: MONO, fontSize: 9.5, color: '#340057' }}>
+            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: '3px 10px', fontFamily: MONO, fontSize: 9.5 }}>
               {p.facts.map((f) => (
-                <span key={f.k}><span style={{ opacity: 0.55 }}>{f.k} </span><b>{f.v}</b></span>
+                <span key={f.k}><span style={{ opacity: 0.6 }}>{f.k} </span><b style={{ color: '#FFFC33' }}>{f.v}</b></span>
               ))}
             </div>
           )}
-          <button
-            {...bindBtn}
-            onClick={p.btnClick}
-            style={{ marginTop: 8, border: 0, background: hBtn ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, color: '#FFFFFF', padding: '8px 15px', borderRadius: 999 }}
-          >
-            {p.btnLabel}
-          </button>
+          <GlassBtn small label={p.btnLabel} onClick={p.btnClick} style={{ marginTop: 9 }} />
         </div>
         <button
           {...bindX}
           onClick={onClose}
           aria-label="Close"
           style={{
-            position: 'absolute', top: 8, right: 8, border: '1px solid ' + (hX ? '#FF3358' : '#EBE2FF'), background: '#FFFFFF',
-            color: hX ? '#FF3358' : 'rgba(52,0,87,.6)', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
+            position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? '#FF3358' : 'rgba(255,255,255,.12)',
+            color: '#FFFFFF', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
           }}
         >
           ×
@@ -131,50 +181,174 @@ function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string
   );
 }
 
-function GalleryShot({ src, cap, onClick }: { src: string; cap: string; onClick: () => void }) {
+/** The chosen route: photo, copy, price, limits and the booking controls. Floats over the map on desktop. */
+function RouteCard({ route, options, overlay }: { route: MapRoute; options: Bookable[]; overlay: boolean }) {
+  const app = useApp();
+  const goto = useGoto();
+  const [hImg, bindImg] = useHover();
+  const added = options.map((o) => app.isSelected(o.id, o.variant));
+  const anyAdded = added.some(Boolean);
+  const bookNow = () => {
+    if (!anyAdded && options[0]) app.toggleSel(options[0].id, options[0].variant);
+    goto.booking();
+  };
+  return (
+    <aside
+      key={route.id}
+      style={{
+        ...GLASS, borderRadius: 20, overflow: 'hidden', animation: 'vfadeup .3s ease both',
+        ...(overlay ? { position: 'absolute', right: 18, bottom: 18, width: 312, zIndex: 6 } : { marginTop: 14 }),
+      }}
+    >
+      <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
+        <Img src={route.img} alt={route.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
+        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{route.tag}</span>
+        <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{route.name}</div>
+      </div>
+      <div style={{ padding: '12px 15px 15px' }}>
+        <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,.8)', margin: 0, display: '-webkit-box', WebkitLineClamp: overlay ? 3 : 6, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{route.blurb}</p>
+        <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,.25)', paddingTop: 9, display: 'grid', gap: 4, fontFamily: MONO, fontSize: 10.5 }}>
+          {options.map((o) => (
+            <div key={o.variant} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.65 }}>{options.length > 1 ? o.label : 'FROM'}</span><b style={{ color: '#FFFC33' }}>{o.price}</b></div>
+          ))}
+          {route.facts.filter((f) => f.k !== 'NOTE').map((f) => (
+            <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.65, textAlign: 'left', flexShrink: 0 }}>{f.k}</span><b>{f.v}</b></div>
+          ))}
+          {route.facts.filter((f) => f.k === 'NOTE').map((f) => (
+            <div key={f.k} style={{ fontSize: 9.5, opacity: 0.7, lineHeight: 1.4 }}>{f.v}</div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+          {options.map((o, i) => (
+            <GlassBtn
+              key={o.variant}
+              small
+              on={added[i]}
+              label={added[i] ? '✓ ' + (options.length > 1 ? o.label : 'Added') : '+ ' + (options.length > 1 ? o.label : 'Add to My Day')}
+              onClick={() => app.toggleSel(o.id, o.variant)}
+              style={{ flex: 1, minWidth: 0 }}
+            />
+          ))}
+          <GlassBtn primary small label={anyAdded ? 'Book →' : 'Book now →'} onClick={bookNow} style={{ flex: 1 }} />
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big?: boolean }) {
   const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} style={{ border: 0, padding: 0, background: 'transparent', cursor: 'pointer', position: 'relative', flexShrink: 0, width: 168, height: 118, borderRadius: 12, overflow: 'hidden', scrollSnapAlign: 'start' }}>
-      <Img src={src} alt={cap} surface="dark" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .35s ease' }} />
-      <span style={{ position: 'absolute', left: 8, right: 8, bottom: 7, fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', color: '#FFFFFF', textShadow: '0 1px 4px rgba(0,0,0,.7)', textAlign: 'left', textTransform: 'uppercase' }}>{cap}</span>
+    <button
+      {...bind}
+      onClick={onClick}
+      style={{
+        border: '1px solid rgba(255,255,255,.14)', padding: 0, background: 'rgba(255,255,255,.04)', cursor: 'pointer', position: 'relative',
+        borderRadius: 14, overflow: 'hidden', scrollSnapAlign: 'start', gridRow: big ? '1 / span 2' : undefined, gridColumn: big ? 'span 2' : undefined,
+        boxShadow: h ? '0 18px 40px -18px rgba(0,0,0,.8)' : 'none', transition: 'box-shadow .3s ease',
+      }}
+    >
+      <Img src={s.src} alt={`${s.tag}: ${s.cap}`} surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
+      <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 9 }}><Pulse n={s.thrill} size={9} /></span>
+      <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
+        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{s.tag}</span>
+        {big && <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 16, color: '#FFFFFF', textTransform: 'uppercase', lineHeight: 1.05, display: 'block', marginTop: 4 }}>{s.cap}</span>}
+      </span>
     </button>
   );
 }
 
-function Lightbox({ shots, idx, onClose, onStep }: { shots: { src: string; cap: string }[]; idx: number; onClose: () => void; onStep: (d: number) => void }) {
-  const s = shots[idx];
-  const nav = (label: string, d: number, side: 'left' | 'right') => (
-    <button onClick={(e) => { e.stopPropagation(); onStep(d); }} aria-label={label} style={{ position: 'absolute', top: '50%', [side]: 14, transform: 'translateY(-50%)', width: 42, height: 42, borderRadius: 999, border: '1px solid rgba(255,255,255,.35)', background: 'rgba(31,0,51,.6)', color: '#FFFFFF', fontSize: 20, cursor: 'pointer' }}>{d < 0 ? '‹' : '›'}</button>
+/** Photo view in the Vallé template: eyebrow, tilted headline, copy, pulse level, tagged photo and thumbnails. */
+function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: MapGallery; idx: number; onClose: () => void; onStep: (d: number) => void; onPick: (i: number) => void; cta: string; onCta: () => void }) {
+  const s = g.shots[idx];
+  const isMobile = useIsMobile();
+  const [hLead, bindLead] = useHover();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowRight') onStep(1);
+      else if (e.key === 'ArrowLeft') onStep(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [onClose, onStep]);
+  const navBtn = (d: number, side: 'left' | 'right') => (
+    <button onClick={(e) => { e.stopPropagation(); onStep(d); }} aria-label={d < 0 ? 'Previous photo' : 'Next photo'} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 14, transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 999, fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{d < 0 ? '‹' : '›'}</button>
   );
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(31,0,51,.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(12px,4vw,48px)', animation: 'vfadeup .2s ease both' }}>
-      <div style={{ position: 'relative', maxWidth: 1100, width: '100%' }} onClick={(e) => e.stopPropagation()}>
-        <Img src={s.src} alt={s.cap} priority surface="dark" style={{ width: '100%', maxHeight: '78vh', objectFit: 'contain', borderRadius: 14, display: 'block' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 10, fontFamily: MONO, fontSize: 11, letterSpacing: '.1em', color: 'rgba(255,255,255,.8)', textTransform: 'uppercase' }}>
-          <span>{s.cap}</span><span>{idx + 1} / {shots.length}</span>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,0,40,.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', overflowY: 'auto', padding: 'clamp(10px,3vw,40px)', animation: 'vfade .2s ease both' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: 1180, margin: '0 auto', background: '#340057', borderRadius: 26, overflow: 'hidden', boxShadow: '0 50px 120px -40px rgba(0,0,0,.9)', animation: 'vfadeup .3s ease both' }}>
+        <Stripes height={12} />
+        <div style={{ padding: 'clamp(18px,3vw,34px)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 320px' }}>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{g.eyebrow}</span>
+              <div style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom', marginTop: 12 }}>
+                <h2 style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.4vw,58px)', lineHeight: 0.84, margin: 0, textTransform: 'uppercase', color: '#FFFFFF' }}>
+                  {g.t1}<br /><span style={{ color: '#FFFC33' }}>{g.t2}</span>
+                </h2>
+              </div>
+            </div>
+            <div style={{ flex: '1 1 300px', maxWidth: 460 }}>
+              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0 }}>{g.copy}</p>
+              <div style={{ ...GLASS, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '8px 16px 8px 14px', marginTop: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.14em', opacity: 0.8 }}>THRILL WITH VALLÉ</span>
+                <Pulse n={s.thrill} />
+                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, color: '#FFFC33', textTransform: 'uppercase' }}>{PULSE_NAMES[s.thrill]}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 20, position: 'relative', height: isMobile ? 'min(62vh,420px)' : 'min(58vh,560px)', borderRadius: 18, overflow: 'hidden', background: '#260040' }}>
+            <Img key={s.src} src={s.src} alt={`${s.tag}: ${s.cap}`} priority surface="dark" {...bindLead} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .7s ease', transform: hLead ? 'scale(1.03)' : 'scale(1)', animation: 'vfade .35s ease both' }} />
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '18px 20px', background: 'linear-gradient(to top,rgba(31,0,51,.88),transparent)' }}>
+              <span style={{ background: '#FF3358', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{s.tag}</span>
+              <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{s.cap}</div>
+            </div>
+            <span style={{ ...GLASS, position: 'absolute', top: 12, right: 12, borderRadius: 999, padding: '6px 12px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.1em' }}>{idx + 1} / {g.shots.length}</span>
+            {navBtn(-1, 'left')}
+            {navBtn(1, 'right')}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12, padding: '2px 0 6px', scrollbarWidth: 'none' }}>
+            {g.shots.map((t, i) => (
+              <button key={t.src} onClick={() => onPick(i)} aria-label={t.tag} style={{ flexShrink: 0, width: 92, height: 62, borderRadius: 10, overflow: 'hidden', padding: 0, cursor: 'pointer', border: '2px solid ' + (i === idx ? '#FFFC33' : 'rgba(255,255,255,.12)'), opacity: i === idx ? 1 : 0.65, transition: 'all .2s', background: '#260040' }}>
+                <Img src={t.src} alt="" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
+            <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>{g.foot}</span>
+            <GlassBtn primary label={cta} onClick={onCta} style={{ marginLeft: 'auto', padding: '14px 26px', fontSize: 14.5 }} />
+          </div>
         </div>
-        {nav('Previous photo', -1, 'left')}
-        {nav('Next photo', 1, 'right')}
-        <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: -8, right: -8, width: 34, height: 34, borderRadius: 999, border: 0, background: '#FFFC33', color: '#340057', fontWeight: 700, cursor: 'pointer', fontSize: 16 }}>×</button>
+        <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 22, right: 18, width: 38, height: 38, borderRadius: 999, border: 0, background: '#FFFC33', color: '#340057', fontWeight: 800, cursor: 'pointer', fontSize: 18, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>×</button>
       </div>
     </div>
   );
 }
 
 /**
- * Interactive activity map (Quad & Buggy, Ziplines): the official route map with
- * a route selector, tappable numbered pins (photo + restrictions + price) and a
- * photo strip. Same look and feel as the walking-trail sitemap above it.
+ * Interactive activity map (Quad & Buggy, Ziplines): the official route map at full width with
+ * glass route tabs, tappable numbered pins (photo + limits + price), a floating route card that
+ * books the chosen tour straight into My Day, and a photo wall in the Vallé template.
  */
 export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
   const goto = useGoto();
+  const app = useApp();
   const isMobile = useIsMobile();
-  const priceFrom = usePriceFrom();
+  const bookables = useBookables();
   const [routeId, setRouteId] = useState(defaultRoute || routes[0].id);
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
 
   const route = routes.find((r) => r.id === routeId) || routes[0];
+  const options = bookables(route);
 
   // Pins visible for this route: landmarks always, route pins only when they belong to it.
   const visible = useMemo(() => {
@@ -227,17 +401,13 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
     } else if (pp.facts) badge = 'SUSPENDED THRILL';
     const facts: Fact[] = [];
     if (isRoutePin) {
-      const pr = priceFrom(route.priceCat, route.priceRow);
-      if (pr) facts.push({ k: 'FROM', v: pr });
-      if (route.priceCat2 && route.priceRow2) {
-        const pr2 = priceFrom(route.priceCat2, route.priceRow2);
-        if (pr2) facts.push({ k: route.priceLabel2 || 'ALSO', v: pr2 });
-      }
+      if (options[0]) facts.push({ k: 'FROM', v: options[0].price });
+      if (options[1]) facts.push({ k: options[1].label, v: options[1].price });
       facts.push(...route.facts.filter((f) => f.k !== 'NOTE'));
     } else {
       if (pp.priceCat && pp.priceRow) {
-        const pr = priceFrom(pp.priceCat, pp.priceRow);
-        if (pr) facts.push({ k: 'FROM', v: pr });
+        const o = bookables({ ...route, priceCat: pp.priceCat, priceRow: pp.priceRow, priceCat2: undefined, priceRow2: undefined })[0];
+        if (o) facts.push({ k: 'FROM', v: o.price });
       }
       if (pp.facts) facts.push(...pp.facts);
     }
@@ -259,7 +429,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   // Cables only, in flying order, each traced after the previous one (dash animation, see global.css).
   const cables = segments.filter((s) => s.cable);
   const TRACE = 0.55; // seconds per cable
-  const traceStyle = (i: number, extra: React.CSSProperties = {}): React.CSSProperties => ({
+  const traceStyle = (i: number, extra: CSSProperties = {}): CSSProperties => ({
     strokeDasharray: 1, strokeDashoffset: 1, animation: `vtrace ${TRACE}s ease-out ${i * TRACE}s forwards`, ...extra,
   });
   // Quad: trail centrelines for the chosen loop(s), traced outward from the base. A route without its
@@ -268,12 +438,14 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const trailReach = Math.max(1, ...trailSets.flatMap((id) => (trails as Record<string, TrailEdge[]>)[id].map((e) => e.d0 + e.len)));
   const trailSpeed = trailReach / 3.4;   // px per second: any loop finishes tracing in ~3.4 s
   const trailColor = (id: string) => routes.find((r) => r.id === id)?.color || '#FFFFFF';
-  const priceMain = priceFrom(route.priceCat, route.priceRow);
-  const price2 = route.priceCat2 && route.priceRow2 ? priceFrom(route.priceCat2, route.priceRow2) : null;
+
+  const ctaLabel = options[0] && app.isSelected(options[0].id, options[0].variant) ? `✓ ${route.name} is in My Day →` : `Add ${route.name} to my day →`;
+  const onCta = () => { if (options[0] && !app.isSelected(options[0].id, options[0].variant)) app.toggleSel(options[0].id, options[0].variant); setShot(-1); app.openDay(); };
 
   return (
     <section style={{ background: '#260040', padding: 'clamp(40px,6vw,80px) 0 clamp(48px,7vw,88px)', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: 0, left: '-2%', right: '-2%', height: 10, background: 'repeating-linear-gradient(-45deg,#FFFC33 0 14px,#340057 14px 28px)', transform: 'rotate(.6deg)' }} />
+      <div style={{ position: 'absolute', left: '50%', top: '40%', width: 1400, height: 1400, marginLeft: -700, borderRadius: 999, background: `radial-gradient(circle, ${route.color}22, rgba(31,0,51,0) 55%)`, pointerEvents: 'none', transition: 'background .6s ease' }} />
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid rgba(255,255,255,.25)', paddingBottom: 28 }}>
           <h2 style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, color: '#FFFFFF', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{title}</h2>
@@ -285,7 +457,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
           {routes.map((r) => <RouteTab key={r.id} r={r} on={r.id === route.id} onClick={() => selectRoute(r.id)} />)}
         </div>
 
-        <div data-reveal="1" style={{ marginTop: 16, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0,1fr) 300px', gap: 18, alignItems: 'start' }}>
+        <div data-reveal="1" style={{ marginTop: 16 }}>
           <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
             <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
               <div style={{ position: 'relative' }}>
@@ -314,7 +486,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                     ))}
                     {trailSets.map((id) => (trails as Record<string, TrailEdge[]>)[id].map((e, i) => {
                       const pts = e.pts.map((p) => p.join(',')).join(' ');
-                      const anim = (w: number, extra: React.CSSProperties = {}): React.CSSProperties => ({
+                      const anim = (w: number, extra: CSSProperties = {}): CSSProperties => ({
                         strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
                         animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${e.d0 / trailSpeed}s forwards`, ...extra,
                       });
@@ -362,6 +534,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               </div>
               <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(115deg, rgba(255,255,255,.1), rgba(255,255,255,0) 46%)', mixBlendMode: 'screen' }} />
               {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform} onClose={() => setSel('')} />}
+              {!isMobile && <RouteCard route={route} options={options} overlay />}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
               <span>{hint}</span>
@@ -372,51 +545,37 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               </span>
             </div>
           </div>
-
-          {/* Route card */}
-          <aside style={{ background: '#FFFFFF', borderRadius: 18, overflow: 'hidden', boxShadow: '0 30px 60px -30px rgba(0,0,0,.6)', animation: 'vfadeup .25s ease both' }} key={route.id}>
-            <div style={{ position: 'relative', height: 150, background: '#EBE2FF' }}>
-              <Img src={route.img} alt={route.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 9, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)', border: route.color === '#FFFFFF' ? '1px solid #EBE2FF' : 0 }}>{route.tag}</span>
-            </div>
-            <div style={{ padding: '14px 16px 16px', color: '#340057' }}>
-              <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', lineHeight: 0.95 }}>{route.name}</div>
-              <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(52,0,87,.75)', margin: '8px 0 0' }}>{route.blurb}</p>
-              <div style={{ marginTop: 12, borderTop: '1px dashed #EBE2FF', paddingTop: 10, display: 'grid', gridTemplateColumns: '1fr', gap: 5, fontFamily: MONO, fontSize: 10.5 }}>
-                {priceMain && <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.6 }}>FROM</span><b>{priceMain}</b></div>}
-                {price2 && <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.6 }}>{route.priceLabel2 || 'ALSO'}</span><b>{price2}</b></div>}
-                {route.facts.map((f) => (
-                  <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.6, textAlign: 'left', flexShrink: 0 }}>{f.k}</span><span style={{ fontWeight: f.k === 'NOTE' ? 400 : 700, fontSize: f.k === 'NOTE' ? 9.5 : 10.5 }}>{f.v}</span></div>
-                ))}
-              </div>
-              <RouteCta label={(route.priceCat === 'zipline' ? 'Book this zipline' : 'Book this ride') + ' →'} onClick={() => goto.detail(route.priceCat)} />
-            </div>
-          </aside>
+          {isMobile && <RouteCard route={route} options={options} overlay={false} />}
         </div>
 
-        {gallery && gallery.length > 0 && (
-          <div style={{ marginTop: 18 }}>
-            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 0 10px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
-              {gallery.map((g, i) => <GalleryShot key={g.src} src={g.src} cap={g.cap} onClick={() => setShot(i)} />)}
+        {gallery && gallery.shots.length > 0 && (
+          <div style={{ marginTop: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{gallery.eyebrow}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{gallery.shots.length} PHOTOS · TAP TO OPEN</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 120 : 150}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? 170 : 214, gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
+              {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
             </div>
           </div>
         )}
 
-        <div style={{ border: '1.5px dashed rgba(255,255,255,.35)', borderRadius: 16, padding: '16px 22px', color: 'rgba(255,255,255,.8)', marginTop: 10, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 13.5, lineHeight: 1.55, flex: 1, minWidth: 260 }}>{footNote}</div>
+        <div style={{ ...GLASS, borderRadius: 16, padding: '16px 22px', marginTop: 10, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: 13.5, lineHeight: 1.55, flex: 1, minWidth: 260, color: 'rgba(255,255,255,.85)' }}>{footNote}</div>
           <div style={{ fontFamily: MONO, fontSize: 11, opacity: 0.8 }}>{footTag}</div>
         </div>
       </div>
       {gallery && shot >= 0 && (
-        <Lightbox shots={gallery} idx={shot} onClose={() => setShot(-1)} onStep={(d) => setShot((s) => (s + d + gallery.length) % gallery.length)} />
+        <ValleLightbox
+          g={gallery}
+          idx={shot}
+          onClose={() => setShot(-1)}
+          onStep={(d) => setShot((s) => (s + d + gallery.shots.length) % gallery.shots.length)}
+          onPick={(i) => setShot(i)}
+          cta={ctaLabel}
+          onCta={onCta}
+        />
       )}
     </section>
-  );
-}
-
-function RouteCta({ label, onClick }: { label: string; onClick: () => void }) {
-  const [h, bind] = useHover();
-  return (
-    <button {...bind} onClick={onClick} style={{ marginTop: 12, width: '100%', border: 0, background: h ? '#7333FF' : '#340057', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, padding: '11px 16px', borderRadius: 999 }}>{label}</button>
   );
 }

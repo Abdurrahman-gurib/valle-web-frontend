@@ -136,8 +136,18 @@ export type Sel = Record<string, SelEntry>;
 
 export interface BookingLine { label: string; amt: string; }
 
+/** One priced "My Day" line: an experience, optionally one of its catalog.PL options. */
+export interface SelLine {
+  key: string;               // sel key (see lib/sel.ts)
+  act: Activity;
+  variant?: string;          // exact catalog.PL row label, when a specific option was chosen
+  price: number;             // unit price at the current rate
+  qty: SelEntry;
+}
+
 export interface BookingSummary {
-  selActs: Activity[];
+  selActs: Activity[];       // distinct experiences in the cart
+  selLines: SelLine[];       // every cart line, in catalog order
   lines: BookingLine[];
   hasDiscount: boolean;
   discount: number;
@@ -151,7 +161,7 @@ export interface BookingRequest {
   adults: number;
   kids: number;
   rate: RateKey;
-  items: { id: string; adults?: number; kids?: number; units?: number }[];
+  items: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[];
   name: string;
   phone?: string;
   email?: string;

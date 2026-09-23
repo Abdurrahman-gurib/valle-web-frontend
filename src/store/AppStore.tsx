@@ -3,7 +3,8 @@ import {
 } from 'react';
 import type { BookingSummary, RateKey, Sel, SelEntry } from '../types';
 import { useCatalog } from './CatalogContext';
-import { computeBooking, priceFor } from './booking';
+import { computeBooking, priceFor, variantPrice } from './booking';
+import { parseSelKey, selKey } from '../lib/sel';
 
 interface AppState {
   // rate
@@ -20,10 +21,13 @@ interface AppState {
   sel: Sel;
   selCount: number;
   hasSel: boolean;
-  toggleSel: (id: string) => void;
-  bumpSel: (id: string, key: 'a' | 'k' | 'u', d: number) => void;
+  /** Add / remove an experience, or one priced option of it (a catalog.PL row label). */
+  toggleSel: (id: string, variant?: string) => void;
+  /** `key` is a sel key (experience id, or id + option; see lib/sel.ts). */
+  bumpSel: (key: string, field: 'a' | 'k' | 'u', d: number) => void;
   clearSel: () => void;
-  isSelected: (id: string) => boolean;
+  /** Without `variant`: is any line of this experience in the cart. */
+  isSelected: (id: string, variant?: string) => boolean;
 
   // party & visit
   adults: number;
@@ -56,7 +60,7 @@ interface AppState {
 
   // pricing
   booking: BookingSummary;
-  activityPrice: (id: string) => number;
+  activityPrice: (id: string, variant?: string) => number;
 }
 
 const Ctx = createContext<AppState | null>(null);
@@ -121,11 +125,15 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   // count a line the drawer and the cart cannot show. Same object when nothing is stale.
   useEffect(() => {
     setSel((s) => {
-      const ids = Object.keys(s);
-      const live = ids.filter((id) => catalog.ACTS.some((a) => a.id === id));
-      if (live.length === ids.length) return s;
+      const keys = Object.keys(s);
+      const live = keys.filter((key) => {
+        const { id, variant } = parseSelKey(key);
+        if (!catalog.ACTS.some((a) => a.id === id)) return false;
+        return !variant || (catalog.PL[id] || []).some((r) => r.n === variant);
+      });
+      if (live.length === keys.length) return s;
       const next: Sel = {};
-      for (const id of live) next[id] = s[id];
+      for (const key of live) next[key] = s[key];
       return next;
     });
   }, [catalog]);
@@ -136,27 +144,28 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     setRateGate(false);
   }, []);
 
-  const toggleSel = useCallback((id: string) => {
+  const toggleSel = useCallback((id: string, variant?: string) => {
+    const key = selKey(id, variant);
     setSel((s) => {
       const next = { ...s };
-      if (next[id]) {
-        delete next[id];
+      if (next[key]) {
+        delete next[key];
       } else {
         const act = catalog.ACTS.find((x) => x.id === id);
-        next[id] = act && act.mode === 'flat' ? { u: 1 } : { a: Math.max(1, adults), k: kids };
+        next[key] = act && act.mode === 'flat' ? { u: 1 } : { a: Math.max(1, adults), k: kids };
       }
       return next;
     });
   }, [catalog, adults, kids]);
 
-  const bumpSel = useCallback((id: string, key: 'a' | 'k' | 'u', d: number) => {
+  const bumpSel = useCallback((key: string, field: 'a' | 'k' | 'u', d: number) => {
     setSel((s) => {
-      const cur = s[id];
+      const cur = s[key];
       if (!cur) return s;
-      const entry = { ...cur, [key]: Math.max(0, Math.min(12, (cur[key] || 0) + d)) };
+      const entry = { ...cur, [field]: Math.max(0, Math.min(12, (cur[field] || 0) + d)) };
       const next = { ...s };
-      if ((entry.a || 0) + (entry.k || 0) + (entry.u || 0) <= 0) delete next[id];
-      else next[id] = entry;
+      if ((entry.a || 0) + (entry.k || 0) + (entry.u || 0) <= 0) delete next[key];
+      else next[key] = entry;
       return next;
     });
   }, []);
@@ -184,7 +193,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     toggleSel,
     bumpSel,
     clearSel,
-    isSelected: (id: string) => !!sel[id],
+    isSelected: (id: string, variant?: string) => (variant ? !!sel[selKey(id, variant)] : Object.keys(sel).some((k) => parseSelKey(k).id === id)),
 
     adults,
     kids,
@@ -213,9 +222,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     closeDay: () => setDayOpen(false),
 
     booking,
-    activityPrice: (id: string) => {
+    activityPrice: (id: string, variant?: string) => {
       const act = catalog.ACTS.find((a) => a.id === id);
-      return act ? priceFor(catalog, act, rate) : 0;
+      if (!act) return 0;
+      const vp = variant ? variantPrice(catalog, id, variant, rate) : null;
+      return vp ?? priceFor(catalog, act, rate);
     },
   }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel]);
 

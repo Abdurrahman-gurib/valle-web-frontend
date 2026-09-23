@@ -4,7 +4,7 @@ import { useGoto } from '../lib/nav';
 import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
-import type { Activity } from '../types';
+import type { SelLine } from '../types';
 
 const qtyBtn: React.CSSProperties = {
   border: 0, background: '#FFFFFF', borderRadius: 6, width: 22, height: 22, cursor: 'pointer',
@@ -29,13 +29,14 @@ function Qty({ tag, val, dec, inc }: { tag: string; val: number; dec: () => void
   );
 }
 
-function CartRow({ a }: { a: Activity }) {
+function CartRow({ line }: { line: SelLine }) {
   const app = useApp();
   const goto = useGoto();
   const [hRem, bindRem] = useHover();
-  const c = app.sel[a.id] || {};
+  const a = line.act;
+  const c = line.qty;
   const isFlat = a.mode === 'flat';
-  const price = app.activityPrice(a.id);
+  const price = line.price;
   const amt = isFlat
     ? price * (c.u || 0)
     : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
@@ -54,15 +55,16 @@ function CartRow({ a }: { a: Activity }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
+        {line.variant && <div style={{ fontSize: 10.5, color: '#7333FF', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.variant}</div>}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, flexWrap: 'wrap' }}>
           {!isFlat && (
             <>
-              <Qty tag="AD" val={c.a || 0} dec={() => app.bumpSel(a.id, 'a', -1)} inc={() => app.bumpSel(a.id, 'a', 1)} />
-              <Qty tag="CH" val={c.k || 0} dec={() => app.bumpSel(a.id, 'k', -1)} inc={() => app.bumpSel(a.id, 'k', 1)} />
+              <Qty tag="AD" val={c.a || 0} dec={() => app.bumpSel(line.key, 'a', -1)} inc={() => app.bumpSel(line.key, 'a', 1)} />
+              <Qty tag="CH" val={c.k || 0} dec={() => app.bumpSel(line.key, 'k', -1)} inc={() => app.bumpSel(line.key, 'k', 1)} />
             </>
           )}
           {isFlat && (
-            <Qty tag={unitName} val={c.u || 0} dec={() => app.bumpSel(a.id, 'u', -1)} inc={() => app.bumpSel(a.id, 'u', 1)} />
+            <Qty tag={unitName} val={c.u || 0} dec={() => app.bumpSel(line.key, 'u', -1)} inc={() => app.bumpSel(line.key, 'u', 1)} />
           )}
         </div>
       </div>
@@ -70,7 +72,7 @@ function CartRow({ a }: { a: Activity }) {
         <span style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 11.5 }}>{money(amt)}</span>
         <button
           {...bindRem}
-          onClick={() => app.toggleSel(a.id)}
+          onClick={() => app.toggleSel(a.id, line.variant)}
           title="Remove"
           style={{
             border: `1px solid ${hRem ? '#FF3358' : '#EBE2FF'}`, background: 'transparent',
@@ -95,7 +97,7 @@ export function MyDayDrawer() {
 
   if (!app.dayOpen) return null;
 
-  const cartActs = catalog.ACTS.filter((a) => app.sel[a.id]);
+  const cartActs = app.booking.selLines;
   const cartCountLabel =
     cartActs.length === 0
       ? 'PARK ENTRY'
@@ -137,7 +139,7 @@ export function MyDayDrawer() {
             <Qty tag="CH" val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 11.5, minWidth: 64, textAlign: 'right' }}>{entryAmt}</span>
           </div>
-          {cartActs.map((a) => <CartRow key={a.id} a={a} />)}
+          {cartActs.map((l) => <CartRow key={l.key} line={l} />)}
           {cartActs.length === 0 && (
             <div style={{ textAlign: 'center', padding: '28px 10px' }}>
               <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 19, textTransform: 'uppercase' }}>Nothing here yet</div>
