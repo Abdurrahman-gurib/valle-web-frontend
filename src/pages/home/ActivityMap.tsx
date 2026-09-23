@@ -31,7 +31,7 @@ export interface ActivityMapProps {
   title: string;
   intro: string;
   /** `dimImg`: the map with every trail dimmed, used as the base when trails are traced on top. */
-  map: { img: string; width: number; height: number; dimImg?: string };
+  map: { img: string; width: number; height: number; dimImg?: string; routeImgs?: Record<string, string> };
   /** Quad: trail centrelines per route id, traced outward from the base when that route is picked. */
   trails?: Record<string, TrailEdge[]>;
   /** Route selected on first render (defaults to the first). */
@@ -484,19 +484,32 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
                       </g>
                     ))}
-                    {trailSets.map((id) => (trails as Record<string, TrailEdge[]>)[id].map((e, i) => {
-                      const pts = e.pts.map((p) => p.join(',')).join(' ');
-                      const anim = (w: number, extra: CSSProperties = {}): CSSProperties => ({
+                    {/* Quad trails: the trace is a mask that uncovers the designer's own trail artwork (the full-colour
+                        map over the dimmed one), so what appears is the printed loop, not a drawn stroke. A faint
+                        glow under it follows the same path. */}
+                    {trails && trailSets.length > 0 && (() => {
+                      const edges = trailSets.flatMap((id) => trails[id].map((e) => ({ ...e, id })));
+                      const anim = (e: TrailEdge, w: number, extra: CSSProperties = {}): CSSProperties => ({
                         strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
                         animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${e.d0 / trailSpeed}s forwards`, ...extra,
                       });
+                      const maskId = 'trailmask-' + route.id;
                       return (
-                        <g key={id + i}>
-                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeOpacity={0.45} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 3.2 : 2.6)} />
-                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 1.5 : 1.25)} />
-                        </g>
+                        <>
+                          <defs>
+                            <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+                              {edges.map((e, i) => (
+                                <polyline key={i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" style={anim(e, 3)} />
+                              ))}
+                            </mask>
+                          </defs>
+                          {edges.map((e, i) => (
+                            <polyline key={'glow' + i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke={trailColor(e.id)} strokeOpacity={0.4} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(e, 2.4)} />
+                          ))}
+                          <image href={map.routeImgs?.[route.id] || map.img} x="0" y="0" width="100" height="100" preserveAspectRatio="none" mask={`url(#${maskId})`} />
+                        </>
                       );
-                    }))}
+                    })()}
                     {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
                     {drawRoutes && cables.map((s, i) => (
                       <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
