@@ -16,8 +16,13 @@ export interface ActivityMapProps {
   eyebrow: string;             // e.g. "03 · QUAD & BUGGY · 2 LOOPS"
   title: string;
   intro: string;
-  /** `routeImgs`: optional per-route variant of the map (other trails dimmed), cross-faded on selection. */
-  map: { img: string; width: number; height: number; routeImgs?: Record<string, string> };
+  /**
+   * `routeImgs`: optional per-route variant of the map (other trails dimmed). With `dimImg` (every trail
+   * dimmed) underneath, the selected variant is revealed with a glowing sweep from `revealOrigin`.
+   */
+  map: { img: string; width: number; height: number; routeImgs?: Record<string, string>; dimImg?: string; revealOrigin?: [number, number] };
+  /** Route selected on first render (defaults to the first). */
+  defaultRoute?: string;
   alt: string;
   routes: MapRoute[];
   pins: MapPin[];              // route pins (with `routes`) and landmarks (without)
@@ -161,11 +166,11 @@ function Lightbox({ shots, idx, onClose, onStep }: { shots: { src: string; cap: 
  * a route selector, tappable numbered pins (photo + restrictions + price) and a
  * photo strip. Same look and feel as the walking-trail sitemap above it.
  */
-export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, gallery, footNote, footTag, hint }: ActivityMapProps) {
+export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
   const goto = useGoto();
   const isMobile = useIsMobile();
   const priceFrom = usePriceFrom();
-  const [routeId, setRouteId] = useState(routes[0].id);
+  const [routeId, setRouteId] = useState(defaultRoute || routes[0].id);
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
 
@@ -251,8 +256,15 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   // Route geometry (zipline) in image-percentage space.
   const sigPts = drawRoutes && signature && route.signature ? [byCode[signature[0]], byCode[signature[1]]] : null;
   const seg = (s: { a: MapPin; b: MapPin }) => ({ x1: s.a.px, y1: s.a.py, x2: s.b.px, y2: s.b.py });
-  const mapVariants = map.routeImgs ? Object.entries(map.routeImgs) : [];
-  const activeVariant = map.routeImgs?.[route.id];
+  // Cables only, in flying order, each traced after the previous one (dash animation, see global.css).
+  const cables = segments.filter((s) => s.cable);
+  const TRACE = 0.55; // seconds per cable
+  const traceStyle = (i: number, extra: React.CSSProperties = {}): React.CSSProperties => ({
+    strokeDasharray: 1, strokeDashoffset: 1, animation: `vtrace ${TRACE}s ease-out ${i * TRACE}s forwards`, ...extra,
+  });
+  // Quad: the active map layer (dimmed variant or the full map) revealed from the base with a glowing sweep.
+  const activeLayer = map.routeImgs ? (map.routeImgs[route.id] || map.img) : null;
+  const revealAt = map.revealOrigin ? `${map.revealOrigin[0]}% ${map.revealOrigin[1]}%` : '50% 50%';
   const priceMain = priceFrom(route.priceCat, route.priceRow);
   const price2 = route.priceCat2 && route.priceRow2 ? priceFrom(route.priceCat2, route.priceRow2) : null;
 
@@ -266,7 +278,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
         </div>
         <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 15.5, lineHeight: 1.55, maxWidth: '60ch', margin: '18px 0 0' }}>{intro}</p>
 
-        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '22px 0 6px', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '22px 0 6px', scrollbarWidth: 'none', flexWrap: isMobile ? 'nowrap' : 'wrap' }}>
           {routes.map((r) => <RouteTab key={r.id} r={r} on={r.id === route.id} onClick={() => selectRoute(r.id)} />)}
         </div>
 
@@ -275,7 +287,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
             <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
               <div style={{ position: 'relative' }}>
                 <Img
-                  src={map.img}
+                  src={map.dimImg || map.img}
                   alt={alt}
                   surface="dark"
                   placeholder="#2E0A4E"
@@ -283,20 +295,21 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                   height={map.height}
                   style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: `${map.width} / ${map.height}`, objectFit: 'contain' }}
                 />
-                {mapVariants.map(([id, src]) => (
+                {activeLayer && (
                   <Img
-                    key={id}
-                    src={src}
+                    key={route.id}
+                    src={activeLayer}
                     alt=""
                     aria-hidden
+                    priority
                     placeholder="transparent"
                     width={map.width}
                     height={map.height}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'contain', opacity: activeVariant === src ? 1 : 0, transition: 'opacity .45s ease', pointerEvents: 'none' }}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'contain', pointerEvents: 'none', ['--vreveal-at' as string]: revealAt, animation: 'vreveal 1.8s cubic-bezier(.4,0,.2,1) both' }}
                   />
-                ))}
+                )}
                 {(drawRoutes || extraLines) && (
-                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+                  <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
                     <defs>
                       <filter id="amglow" x="-20%" y="-20%" width="140%" height="140%">
                         <feGaussianBlur stdDeviation="0.6" />
@@ -309,13 +322,15 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
                       </g>
                     ))}
-                    {drawRoutes && segments.filter((s) => s.cable).map((s, i) => (
-                      <line key={'g' + i} {...seg(s)} stroke={route.color} strokeOpacity={0.55} filter="url(#amglow)" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 9 : 11 }} />
+                    {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
+                    {drawRoutes && cables.map((s, i) => (
+                      <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
                     ))}
-                    {drawRoutes && segments.map((s, i) => s.cable ? (
-                      <line key={'c' + i} {...seg(s)} stroke={route.color} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2.5 : 3.5 }} />
-                    ) : (
-                      <line key={'w' + i} {...seg(s)} stroke="#FFFFFF" strokeOpacity={0.85} strokeDasharray="1.2 1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                    {drawRoutes && cables.map((s, i) => (
+                      <line key={'c' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 0.6 : 0.34 })} />
+                    ))}
+                    {drawRoutes && cables.map((s, i) => (
+                      <circle key={'s' + i} cx={s.b.px} cy={s.b.py} r={0.9} fill="#FFFFFF" style={{ opacity: 0, animation: `vspark .6s ease-out ${(i + 1) * TRACE - 0.1}s forwards` }} />
                     ))}
                     {sigPts && sigPts[0] && sigPts[1] && (
                       <>
@@ -336,6 +351,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       i={0}
                       on={sel === p.n}
                       isMobile={isMobile}
+                      scale={0.72}
                       onClick={() => setSel((cur) => (cur === p.n ? '' : p.n))}
                     />
                   );
@@ -349,7 +365,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               <span style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                 <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#FF3358', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />ROUTE STOP</span>
                 <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#33FF74', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />LANDMARK</span>
-                {drawRoutes && <span><span style={{ display: 'inline-block', width: 14, borderTop: '2px dotted #FFF', marginRight: 5, verticalAlign: 3 }} />WALK BETWEEN PLATFORMS</span>}
                 {extraLines?.map((l) => <span key={l.label}><span style={{ display: 'inline-block', width: 14, borderTop: `2px ${l.dashed ? 'dashed' : 'solid'} ${l.color}`, marginRight: 5, verticalAlign: 3 }} />{l.label}</span>)}
               </span>
             </div>

@@ -26,9 +26,10 @@ export function ZiplineMap() {
   const pins = [...ZIP_STATIONS, ...ZIP_LANDMARKS];
   return (
     <ActivityMap
-      eyebrow="04 · ZIPLINES · 5 TOURS"
+      eyebrow="04 · ZIPLINES · 8 TOURS"
+      defaultRoute="advenature"
       title="The zipline network"
-      intro="Every cable in the valley on the official zipline map, plus the bicycle zipline and the Nepalese bridge. Choose a tour and its lines light up, numbered from launch to landing, with dotted walks between platforms. Tap a platform for the view, the height and weight limits and the price."
+      intro="Every cable in the valley on the official zipline map, plus the bicycle zipline and the Nepalese bridge. Choose one of the eight tours and watch its lines trace across the valley, numbered from launch to landing. Tap a platform for the view, the height and weight limits and the price."
       map={ZIP_MAP}
       alt="Vallé zipline map: launch platforms, The Signature 1.5 km line, the Coloured Earth and both waterfalls"
       routes={ZIP_ROUTES}
@@ -40,7 +41,7 @@ export function ZiplineMap() {
       gallery={ZIP_GALLERY}
       hint="PICK A TOUR · TAP A PLATFORM"
       footNote="Minimum height 1 m 10 on every tour, 1 m 40 and 40 kg minimum on the tours that include The Signature. Maximum 120 kg, with the limit on The Signature varying with wind direction. Closed shoes, full harness, briefing and guides included."
-      footTag="ROUTE LAYOUTS INDICATIVE · WEATHER DEPENDENT"
+      footTag="8 TOURS · 1 TO 11 LINES · WEATHER DEPENDENT"
     />
   );
 }

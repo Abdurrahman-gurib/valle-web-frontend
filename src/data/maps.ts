@@ -50,9 +50,13 @@ export interface MapRoute {
 // ---------------------------------------------------------------- QUAD & BUGGY
 
 export const QUAD_MAP = {
-  img: '/images/quad-map.webp', width: 1741, height: 1613,
+  img: '/images/quad-map.webp', width: 1741, height: 1604,
   // Per-route variants with the other loop dimmed and blurred (generated from the official map).
   routeImgs: { discovery: '/images/quad-map-discovery.webp', adventure: '/images/quad-map-adventure.webp' } as Record<string, string>,
+  // Both loops dimmed: the layer under the reveal animation.
+  dimImg: '/images/quad-map-dim.webp',
+  // The reveal grows out of the quad base.
+  revealOrigin: [71.3, 57.6] as [number, number],
 };
 
 const DRIVER = { k: 'DRIVER', v: '16 yrs + · driving licence' };
@@ -93,18 +97,18 @@ export const QUAD_ROUTES: MapRoute[] = [
 ];
 
 export const QUAD_PINS: MapPin[] = [
-  { n: 'Q', px: 69.8, py: 57.0, kind: 'main', name: 'Quad & Buggy Base', sub: 'Briefing, helmets and the convoy line-up. Both loops start and finish here, a short walk from reception.', img: '/images/map/quad-family-convoy.webp', go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
-  { n: 'A', px: 65.2, py: 44.3, kind: 'sub', name: 'Park Entrance & Reception', sub: 'Tickets, licence check and the photo kiosk. Parking is just below the gate.', img: '/images/trail-reception.webp', go: 'plan', btnLabel: 'Plan your visit' },
-  { n: '1', px: 41.4, py: 27.3, kind: 'main', name: 'The Trail Split', sub: 'Where the yellow Discovery loop and the red Adventure track part ways. Discovery riders head north, Adventure riders dive west.', img: '/images/map/quad-forest-track.webp', routes: ['discovery', 'adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
-  { n: '2', px: 50.5, py: 18.6, kind: 'main', name: 'Northern Ridge Run', sub: 'The high, fast section of the Discovery loop with the whole valley opening up on your right.', img: '/images/map/quad-pov-ridge.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'buggy', btnLabel: 'Buggy details' },
-  { n: '3', px: 76.1, py: 28.8, kind: 'main', name: '23 Coloured Earth', sub: 'The loop skirts the 23 Coloured Earth: volcanic sands in 23 shades that never mix. Stop for the photo.', img: '/images/map/quad-coloured-earth-stop.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'coloured', btnLabel: 'About the earth' },
-  { n: '4', px: 80.9, py: 32.9, kind: 'main', name: 'Chamouzé Waterfall', sub: 'The convoy pauses above the Chamouzé falls, right beside the restaurant terrace.', img: '/images/chamouze-waterfall.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
-  { n: '5', px: 75.2, py: 36.6, kind: 'main', name: 'Vacoas Waterfall', sub: '8 to 9 m high and 16 to 18 m wide, named after the rare Vacoas plants preserved around it.', img: '/images/vacoas-waterfall.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
-  { n: '6', px: 34.5, py: 50.8, kind: 'main', name: 'Kazmaël Viewpoint', sub: 'Vue panoramique: the old Kazmaël house on its hilltop, with the south coast on the horizon on a clear day.', img: '/images/map/quad-kazmael-view.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
-  { n: '7', px: 13.7, py: 38.4, kind: 'main', name: 'Cheveux d’Ange Waterfall', sub: 'The “angel hair” falls, the furthest point west of the estate and only reachable on the red track.', img: '/images/map/waterfall-tall-couple.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
-  { n: '8', px: 17.8, py: 70.7, kind: 'main', name: 'The Mud Bowl', sub: 'The far west loop: ruts, puddles and the mud you were promised. Dress for it.', img: '/images/map/quad-mud-2.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
-  { n: '9', px: 44.8, py: 74.7, kind: 'main', name: 'Forest Loop & River Ford', sub: 'Singletrack under the canopy with a splash through the river before the climb home.', img: '/images/map/quad-river-splash.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
-  { n: 'AF', px: 64.4, py: 71.6, kind: 'sub', name: 'Animal Farm', sub: 'Giant tortoises, albino deer and the rest of the Green Zone locals, just off the last stretch of the red track.', img: '/images/map/tortoise-farm.webp', go: 'detail', goArg: 'animals', btnLabel: 'Meet the animals' },
+  { n: 'Q', px: 71.3, py: 57.6, kind: 'main', name: 'Quad & Buggy Base', sub: 'Briefing, helmets and the convoy line-up. Both loops start and finish here, a short walk from reception.', img: '/images/map/quad-family-convoy.webp', go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
+  { n: 'A', px: 66.3, py: 43.8, kind: 'sub', name: 'Park Entrance & Reception', sub: 'Tickets, licence check and the photo kiosk. Parking is just below the gate.', img: '/images/trail-reception.webp', go: 'plan', btnLabel: 'Plan your visit' },
+  { n: '1', px: 40.8, py: 25.5, kind: 'main', name: 'The Trail Split', sub: 'Where the yellow Discovery loop and the red Adventure track part ways. Discovery riders head north, Adventure riders dive west.', img: '/images/map/quad-forest-track.webp', routes: ['discovery', 'adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
+  { n: '2', px: 50.5, py: 16.1, kind: 'main', name: 'Northern Ridge Run', sub: 'The high, fast section of the Discovery loop with the whole valley opening up on your right.', img: '/images/map/quad-pov-ridge.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'buggy', btnLabel: 'Buggy details' },
+  { n: '3', px: 78.0, py: 27.1, kind: 'main', name: '23 Coloured Earth', sub: 'The loop skirts the 23 Coloured Earth: volcanic sands in 23 shades that never mix. Stop for the photo.', img: '/images/map/quad-coloured-earth-stop.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'coloured', btnLabel: 'About the earth' },
+  { n: '4', px: 83.2, py: 31.5, kind: 'main', name: 'Chamouzé Waterfall', sub: 'The convoy pauses above the Chamouzé falls, right beside the restaurant terrace.', img: '/images/chamouze-waterfall.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
+  { n: '5', px: 77.1, py: 35.5, kind: 'main', name: 'Vacoas Waterfall', sub: '8 to 9 m high and 16 to 18 m wide, named after the rare Vacoas plants preserved around it.', img: '/images/vacoas-waterfall.webp', routes: ['discovery', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
+  { n: '6', px: 33.4, py: 50.9, kind: 'main', name: 'Kazmaël Viewpoint', sub: 'Vue panoramique: the old Kazmaël house on its hilltop, with the south coast on the horizon on a clear day.', img: '/images/map/quad-kazmael-view.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
+  { n: '7', px: 11.0, py: 37.5, kind: 'main', name: 'Cheveux d’Ange Waterfall', sub: 'The “angel hair” falls, the furthest point west of the estate and only reachable on the red track.', img: '/images/map/waterfall-tall-couple.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'waterfalls', btnLabel: 'See the falls' },
+  { n: '8', px: 15.4, py: 72.4, kind: 'main', name: 'The Mud Bowl', sub: 'The far west loop: ruts, puddles and the mud you were promised. Dress for it.', img: '/images/map/quad-mud-2.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
+  { n: '9', px: 44.4, py: 76.7, kind: 'main', name: 'Forest Loop & River Ford', sub: 'Singletrack under the canopy with a splash through the river before the climb home.', img: '/images/map/quad-river-splash.webp', routes: ['adventure', 'advenature'], go: 'detail', goArg: 'quad', btnLabel: 'Quad details' },
+  { n: 'AF', px: 65.5, py: 73.3, kind: 'sub', name: 'Animal Farm', sub: 'Giant tortoises, albino deer and the rest of the Green Zone locals, just off the last stretch of the red track.', img: '/images/map/tortoise-farm.webp', go: 'detail', goArg: 'animals', btnLabel: 'Meet the animals' },
 ];
 
 // ---------------------------------------------------------------- ZIPLINES
@@ -119,14 +123,48 @@ const WIND = { k: 'NOTE', v: 'Weight limit varies with wind direction. Includes 
 
 export const ZIP_ROUTES: MapRoute[] = [
   {
+    id: 'plunge',
+    name: 'The Plunge',
+    tag: '500 M · 1 LINE',
+    color: '#5EEAD4', fg: '#340057',
+    blurb: 'One long drop from the Valley Canopy platform straight into the valley hub, running right beside the bicycle zipline. The quickest way to find out if you like flying.',
+    priceCat: 'zipline', priceRow: 'The Plunge',
+    facts: [ZH110, ZW120],
+    stations: ['9', '7'],
+    img: '/images/map/zip-canopy.webp',
+  },
+  {
+    id: 'waterfall',
+    name: 'Waterfall Zipline',
+    tag: '300 M · 2 LINES',
+    color: '#7DD3FC', fg: '#340057',
+    blurb: 'Two lines at the Chamouzé waterfall: 200 m from the summit platform straight over the cascade and the restaurant terrace, then a 100 m hop back up.',
+    priceCat: 'zipline', priceRow: 'Waterfall Zipline',
+    facts: [ZH110, ZW120],
+    stations: ['3', '10', '5'],
+    img: '/images/map/zip-waterfall-pov-2.webp',
+  },
+  {
+    id: 'signature',
+    name: 'The Signature',
+    tag: '1.5 KM · 1 LINE',
+    color: '#F472B6', fg: '#340057',
+    blurb: 'The longest single cable in the valley: 1.5 km from the far-west tower to the valley hub, flying position under 100 kg, sitting position up to 150 kg.',
+    priceCat: 'zipline', priceRow: 'The Signature',
+    facts: [ZH140, ZW40, { k: 'MAX WEIGHT', v: '100 kg flying · 150 kg sitting' }, { k: 'NOTE', v: 'Weight limit varies with wind direction.' }],
+    stations: ['16', '7'],
+    signature: true,
+    img: '/images/map/zip-signature-valley.webp',
+  },
+  {
     id: 'advenature',
     name: 'Advenature Flight',
     tag: '5.5 KM · 11 LINES · WITH THE SIGNATURE',
     color: '#FF3358', fg: '#FFFFFF',
-    blurb: 'The complete flight: every cable in the network back to back. The western chain down from the Kazmaël slopes, The Signature 1.5 km across the valley, then the Coloured Earth ridge and both waterfalls. Around 3 hours of air time.',
+    blurb: 'The complete flight: every cable in the network. It opens with The Signature 1.5 km across the valley, climbs the northern ridge over the Coloured Earth and both waterfalls, then finishes with the western chain up the Kazmaël slopes and back into the hub. Around 3 hours of air time.',
     priceCat: 'zipline', priceRow: 'Advenature Flight',
     facts: [ZH140, ZW40, ZW120, WIND],
-    stations: ['8', '13', '14', '15', '16', '7', '1', '4', '2', '6', '11', '12', '10', '5', '3'],
+    stations: ['16', '7', '1', '4', '2', '6', '11', '12', '10', '3', '15', '14', '13', '8', '9', '7'],
     signature: true,
     img: '/images/map/zip-signature-valley.webp',
   },
@@ -138,7 +176,7 @@ export const ZIP_ROUTES: MapRoute[] = [
     blurb: 'Seven lines built around The Signature: the 1.5 km flight from the far-west tower to the valley hub, then the northern ridge, the Coloured Earth and both waterfall crossings.',
     priceCat: 'zipline', priceRow: 'Sky Pulse Tour',
     facts: [ZH140, ZW40, ZW120, WIND],
-    stations: ['16', '7', '1', '4', '2', '6', '11', '12', '10', '5'],
+    stations: ['16', '7', '1', '4', '2', '6', '11', '12', '10', '3'],
     signature: true,
     img: '/images/map/zip-coloured-earth-flight.webp',
   },

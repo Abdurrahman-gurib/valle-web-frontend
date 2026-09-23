@@ -18,12 +18,12 @@ interface SelPinModel {
   btnClick: () => void;
 }
 
-export function PinButton({ p, i, on, isMobile, onClick }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void }) {
+export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void; scale?: number }) {
   const [h, bind] = useHover();
   const sub = p.kind === 'sub';
-  const base = isMobile ? (sub ? 17 : 21) : (sub ? 30 : 36);
-  const dim = on ? base + (isMobile ? 4 : 10) : base;
-  const fs = isMobile ? (sub ? 7 : 9.5) : (sub ? 10 : 13);
+  const base = (isMobile ? (sub ? 17 : 21) : (sub ? 30 : 36)) * scale;
+  const dim = on ? base + (isMobile ? 4 : 10) * scale : base;
+  const fs = (isMobile ? (sub ? 7 : 9.5) : (sub ? 10 : 13)) * (scale < 1 ? (1 + scale) / 2 : 1);
   return (
     <button
       {...bind}
