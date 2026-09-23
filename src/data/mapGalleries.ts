@@ -47,6 +47,10 @@ export const ZIP_GALLERY: { src: string; cap: string }[] = [
   { src: M + 'coloured-earth-drone.webp', cap: '23 Coloured Earth from the air' },
   { src: M + 'coloured-earth-drone-2.webp', cap: 'The colour field and the trails' },
   { src: M + 'waterfall-wide-swing.webp', cap: 'Vacoas waterfall' },
+  { src: M + 'bicycle-zipline-pair.webp', cap: 'Bicycle zipline' },
+  { src: M + 'bicycle-zipline-lake.webp', cap: 'Bicycle zipline over the lake' },
+  { src: M + 'nepalese-bridge-span.webp', cap: 'Nepalese bridge' },
+  { src: M + 'nepalese-bridge-close.webp', cap: 'On the Nepalese bridge' },
   { src: '/images/zipline-superman.webp', cap: 'Superman flight' },
   { src: '/images/zipline-tandem.webp', cap: 'Tandem line' },
 ];

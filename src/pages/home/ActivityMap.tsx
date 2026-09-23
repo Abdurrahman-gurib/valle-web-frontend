@@ -7,7 +7,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { PinButton } from './ParkMap';
-import type { MapPin, MapRoute } from '../../data/maps';
+import type { MapLine, MapPin, MapRoute } from '../../data/maps';
 
 const MONO = "'Chivo Mono',monospace";
 const HEAD = "'Barlow',sans-serif";
@@ -16,13 +16,18 @@ export interface ActivityMapProps {
   eyebrow: string;             // e.g. "03 · QUAD & BUGGY · 2 LOOPS"
   title: string;
   intro: string;
-  map: { img: string; width: number; height: number };
+  /** `routeImgs`: optional per-route variant of the map (other trails dimmed), cross-faded on selection. */
+  map: { img: string; width: number; height: number; routeImgs?: Record<string, string> };
   alt: string;
   routes: MapRoute[];
   pins: MapPin[];              // route pins (with `routes`) and landmarks (without)
-  /** Zipline only: draw the selected route as a polyline through its station pins. */
+  /** Zipline only: draw the selected route through its station pins. */
   drawRoutes?: boolean;
+  /** Zipline only: the real cables (station pairs). Consecutive route stations not in this list are walks. */
+  lines?: [string, string][];
   signature?: [string, string];
+  /** Always-visible extra lines in their own colour (bicycle zipline, Nepalese bridge). */
+  extraLines?: MapLine[];
   gallery?: { src: string; cap: string }[];
   footNote: string;
   footTag: string;
@@ -156,7 +161,7 @@ function Lightbox({ shots, idx, onClose, onStep }: { shots: { src: string; cap: 
  * a route selector, tappable numbered pins (photo + restrictions + price) and a
  * photo strip. Same look and feel as the walking-trail sitemap above it.
  */
-export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, signature, gallery, footNote, footTag, hint }: ActivityMapProps) {
+export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, gallery, footNote, footTag, hint }: ActivityMapProps) {
   const goto = useGoto();
   const isMobile = useIsMobile();
   const priceFrom = usePriceFrom();
@@ -179,6 +184,22 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const byCode = useMemo(() => Object.fromEntries(pins.map((p) => [p.n, p])), [pins]);
   const stationIndex = (code: string) => (route.stations ? route.stations.indexOf(code) : -1);
 
+  // Split the selected route into cable segments (flown) and walks (between platforms).
+  const isCable = (a: string, b: string) => !lines || lines.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  const segments = useMemo(() => {
+    const st = route.stations || [];
+    const out: { a: MapPin; b: MapPin; cable: boolean }[] = [];
+    for (let i = 0; i + 1 < st.length; i++) {
+      const a = byCode[st[i]], b = byCode[st[i + 1]];
+      if (a && b) out.push({ a, b, cable: isCable(st[i], st[i + 1]) });
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route, byCode, lines]);
+  const totalLines = segments.filter((s) => s.cable).length;
+  /** Number of cables flown to reach stop `i` of the route. */
+  const linesBefore = (i: number) => segments.slice(0, i).filter((s) => s.cable).length;
+
   const selectRoute = (id: string) => { setRouteId(id); setSel(''); };
 
   const pp = sel ? byCode[sel] : null;
@@ -194,10 +215,11 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
     let badge = 'LANDMARK';
     if (isRoutePin) {
       if (si >= 0) {
-        const total = (route.stations as string[]).length - 1;
-        badge = si === 0 ? `${route.name.toUpperCase()} · START` : si === total ? `${route.name.toUpperCase()} · FINISH` : `${route.name.toUpperCase()} · LINE ${si} OF ${total}`;
+        const last = (route.stations as string[]).length - 1;
+        const n = linesBefore(si);
+        badge = si === 0 ? `${route.name.toUpperCase()} · START` : si === last ? `${route.name.toUpperCase()} · FINISH` : `${route.name.toUpperCase()} · AFTER LINE ${n} OF ${totalLines}`;
       } else badge = route.name.toUpperCase();
-    }
+    } else if (pp.facts) badge = 'SUSPENDED THRILL';
     const facts: Fact[] = [];
     if (isRoutePin) {
       const pr = priceFrom(route.priceCat, route.priceRow);
@@ -207,6 +229,12 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
         if (pr2) facts.push({ k: route.priceLabel2 || 'ALSO', v: pr2 });
       }
       facts.push(...route.facts.filter((f) => f.k !== 'NOTE'));
+    } else {
+      if (pp.priceCat && pp.priceRow) {
+        const pr = priceFrom(pp.priceCat, pp.priceRow);
+        if (pr) facts.push({ k: 'FROM', v: pr });
+      }
+      if (pp.facts) facts.push(...pp.facts);
     }
     popup = {
       name: pp.name, sub: pp.sub, img: pp.img,
@@ -220,9 +248,11 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const popTop = pp ? (isMobile ? '8px' : pp.py + '%') : '0%';
   const popTransform = pp ? (isMobile ? 'translateX(-50%)' : (pp.py < 36 ? 'translate(-50%, 22px)' : 'translate(-50%, calc(-100% - 22px))')) : 'none';
 
-  // Route polyline (zipline) in image-percentage space.
-  const pts = drawRoutes && route.stations ? route.stations.map((c) => byCode[c]).filter(Boolean) : [];
+  // Route geometry (zipline) in image-percentage space.
   const sigPts = drawRoutes && signature && route.signature ? [byCode[signature[0]], byCode[signature[1]]] : null;
+  const seg = (s: { a: MapPin; b: MapPin }) => ({ x1: s.a.px, y1: s.a.py, x2: s.b.px, y2: s.b.py });
+  const mapVariants = map.routeImgs ? Object.entries(map.routeImgs) : [];
+  const activeVariant = map.routeImgs?.[route.id];
   const priceMain = priceFrom(route.priceCat, route.priceRow);
   const price2 = route.priceCat2 && route.priceRow2 ? priceFrom(route.priceCat2, route.priceRow2) : null;
 
@@ -253,19 +283,40 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                   height={map.height}
                   style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: `${map.width} / ${map.height}`, objectFit: 'contain' }}
                 />
-                {drawRoutes && (
+                {mapVariants.map(([id, src]) => (
+                  <Img
+                    key={id}
+                    src={src}
+                    alt=""
+                    aria-hidden
+                    placeholder="transparent"
+                    width={map.width}
+                    height={map.height}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', objectFit: 'contain', opacity: activeVariant === src ? 1 : 0, transition: 'opacity .45s ease', pointerEvents: 'none' }}
+                  />
+                ))}
+                {(drawRoutes || extraLines) && (
                   <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
                     <defs>
                       <filter id="amglow" x="-20%" y="-20%" width="140%" height="140%">
                         <feGaussianBlur stdDeviation="0.6" />
                       </filter>
                     </defs>
-                    {pts.length > 1 && (
-                      <>
-                        <polyline points={pts.map((p) => `${p.px},${p.py}`).join(' ')} fill="none" stroke={route.color} strokeWidth={isMobile ? 1.4 : 0.9} strokeOpacity={0.55} filter="url(#amglow)" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 9 : 11 }} />
-                        <polyline points={pts.map((p) => `${p.px},${p.py}`).join(' ')} fill="none" stroke={route.color} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2.5 : 3.5 }} />
-                      </>
-                    )}
+                    {extraLines?.map((l) => (
+                      <g key={l.label}>
+                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeOpacity={0.35} filter="url(#amglow)" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 7 }} />
+                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeDasharray={l.dashed ? '3 2.5' : undefined} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2 : 2.5 }} />
+                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
+                      </g>
+                    ))}
+                    {drawRoutes && segments.filter((s) => s.cable).map((s, i) => (
+                      <line key={'g' + i} {...seg(s)} stroke={route.color} strokeOpacity={0.55} filter="url(#amglow)" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 9 : 11 }} />
+                    ))}
+                    {drawRoutes && segments.map((s, i) => s.cable ? (
+                      <line key={'c' + i} {...seg(s)} stroke={route.color} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2.5 : 3.5 }} />
+                    ) : (
+                      <line key={'w' + i} {...seg(s)} stroke="#FFFFFF" strokeOpacity={0.85} strokeDasharray="1.2 1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
+                    ))}
                     {sigPts && sigPts[0] && sigPts[1] && (
                       <>
                         <line x1={sigPts[0].px} y1={sigPts[0].py} x2={sigPts[1].px} y2={sigPts[1].py} stroke="#FFFFFF" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
@@ -295,9 +346,11 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
               <span>{hint}</span>
-              <span style={{ display: 'flex', gap: 14 }}>
+              <span style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                 <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#FF3358', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />ROUTE STOP</span>
                 <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#33FF74', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />LANDMARK</span>
+                {drawRoutes && <span><span style={{ display: 'inline-block', width: 14, borderTop: '2px dotted #FFF', marginRight: 5, verticalAlign: 3 }} />WALK BETWEEN PLATFORMS</span>}
+                {extraLines?.map((l) => <span key={l.label}><span style={{ display: 'inline-block', width: 14, borderTop: `2px ${l.dashed ? 'dashed' : 'solid'} ${l.color}`, marginRight: 5, verticalAlign: 3 }} />{l.label}</span>)}
               </span>
             </div>
           </div>
