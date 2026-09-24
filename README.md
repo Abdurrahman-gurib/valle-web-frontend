@@ -54,3 +54,5 @@ automatically from `main` of this repository (GitHub Actions CI runs first, see
 `.github/workflows/ci.yml`). The Railway project itself (both services, the database, variables, healthchecks) is
 defined in the backend repository's .railway/railway.ts, and the runbook lives there too:
 [valle-web-backend/DEPLOYMENT.md](https://github.com/Abdurrahman-gurib/valle-web-backend/blob/main/DEPLOYMENT.md).
+
+<!-- CI deploys to Railway via the RAILWAY_TOKEN secret (added 2026-09-24). -->
