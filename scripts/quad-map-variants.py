@@ -72,14 +72,55 @@ def save(im_arr, name):
     im = Image.fromarray(im_arr.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2))
     im.save(f'public/images/{name}.webp', quality=95, method=6); print(name, im.size)
 
-DIM = 0.55   # how far the other loop fades towards the map purple (0 = untouched)
-base = arr.copy()
-save(np.where((yellow | red)[..., None], arr * (1 - DIM) + dark * DIM, arr), 'quad-map-dim')
-# discovery: red dimmed (shared stretch stays yellow, it is the yellow loop)
-save(np.where((red & ~yellow)[..., None], arr * (1 - DIM) + dark * DIM, arr), 'quad-map-discovery')
-# adventure: yellow dimmed except the shared stretch, which is painted red
-adv = np.where((yellow & ~shared)[..., None], arr * (1 - DIM) + dark * DIM, arr)
-adv = np.where(shared[..., None], red_col, adv)
-save(adv, 'quad-map-adventure')
-
-Image.fromarray(arr.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2)).save('public/images/quad-map.webp', quality=95, method=6); print('base', W, H)
+# ---- erase both printed loops (labels, icons and roads stay), so the drawn strokes are the only trails
+def label_all(mask):
+    lab = np.zeros(mask.shape, np.int32); n = 0
+    ys, xs = np.where(mask)
+    for y0, x0 in zip(ys, xs):
+        if lab[y0, x0]: continue
+        n += 1; st = [(y0, x0)]; lab[y0, x0] = n
+        while st:
+            y, x = st.pop()
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < H and 0 <= nx < W and mask[ny, nx] and not lab[ny, nx]:
+                        lab[ny, nx] = n; st.append((ny, nx))
+    return lab, n
+rawmask = (((r > 200) & (g > 200) & (b < 140)) | ((r > 190) & (g < 130) & (b < 130)))
+# Protect the labelled places (photo pins with their label pills, the reception icons, the quad
+# icon at the base, the Coloured Earth hatch): boxes around the map pins, everything else
+# trail-coloured is erased.
+protect = np.zeros_like(rawmask)
+def box(code, up, down, half):
+    py_, px_ = pin(code); protect[max(0, int(py_) - up):int(py_) + down, max(0, int(px_) - half):int(px_) + half] = True
+for code, up, down, half in [('7', 60, 100, 70), ('6', 60, 95, 48), ('4', 60, 80, 55), ('5', 60, 80, 55), ('A', 50, 70, 90), ('Q', 55, 60, 75), ('AF', 30, 30, 30)]:
+    box(code, up, down, half)
+# small icons: the Kazmaël house pictogram and the parking sign (yellow car on green)
+def rect(x0, y0, x1, y1): protect[y0:y1, x0:x1] = True
+rect(446, 750, 482, 790); rect(985, 720, 1090, 830)
+# the 23 Coloured Earth hatch is red-toned: keep it, but not the printed yellow loop around it
+py3, px3 = pin('3'); b3 = np.zeros_like(rawmask); b3[int(py3) - 50:int(py3) + 50, int(px3) - 115:int(px3) + 115] = True
+protect |= b3 & ~((r > 200) & (g > 200) & (b < 140))
+erase = dil(rawmask & ~protect, 3) & ~protect
+print('protected px', protect.sum())
+img = arr.copy()
+known = ~erase
+for _ in range(60):                      # onion-peel inpaint from the surrounding pixels
+    if known.all(): break
+    grown = dil(known, 1) & ~known
+    acc = np.zeros_like(img); cnt = np.zeros(known.shape, float)
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            if dy == dx == 0: continue
+            sh_k = np.roll(np.roll(known, dy, 0), dx, 1); sh_i = np.roll(np.roll(img, dy, 0), dx, 1)
+            acc += sh_i * sh_k[..., None]; cnt += sh_k
+    fill = grown & (cnt > 0)
+    img[fill] = acc[fill] / cnt[fill][:, None]
+    known |= fill
+# soften the filled area slightly so no stroke ghost remains
+from PIL import ImageFilter as IF
+soft = np.asarray(Image.fromarray(img.astype(np.uint8)).filter(IF.GaussianBlur(1.6))).astype(float)
+img = np.where(dil(erase, 1)[..., None], soft, img)
+Image.fromarray(img.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2)).save('public/images/quad-map.webp', quality=95, method=6)
+print('erased', erase.sum(), 'px')

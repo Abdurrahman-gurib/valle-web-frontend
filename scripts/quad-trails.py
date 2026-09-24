@@ -88,7 +88,7 @@ for name, m in masks.items():
             if len(children.get(end, [])) > 1: stack.append(end)
     # drop tiny leaf spurs (skeleton noise, arrowheads)
     def is_leaf(p): return not children.get(p)
-    chains = [ch for ch in chains if not (is_leaf(ch[-1]) and dist[ch[-1]] - dist[ch[0]] < 30)]
+    chains = [ch for ch in chains if not (is_leaf(ch[-1]) and dist[ch[-1]] - dist[ch[0]] < 45)]
     # ---- timeline: one pen rides the loop. Chains form a tree from the root; the two deepest root
     # branches (A, B) are the two halves of the loop. A is drawn outward; B is drawn from its far end
     # back to the root so the pen comes home. Side spurs light up when the pen passes their junction.

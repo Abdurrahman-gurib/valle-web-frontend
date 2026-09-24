@@ -530,20 +530,29 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         glow under it follows the same path. */}
                     {/* Quad loops: the chosen loop is traced over the original artwork as a glowing stroke
                         in its own colour, one continuous ride from the base (see quadTrails.ts). */}
-                    {trails && trailSets.map((id) => trails[id].map((e, i) => {
-                      const pts = e.pts.map((p) => p.join(',')).join(' ');
-                      const d0 = e.d0 + loopOffset[id];
-                      const anim = (w: number, extra: CSSProperties = {}): CSSProperties => ({
+                    {/* The loops not chosen stay visible as a quiet outline (the base map has no printed trails). */}
+                    {trails && Object.keys(trails).filter((id) => !trailSets.includes(id)).map((id) => (
+                      <g key={'quiet' + id} opacity={0.3}>
+                        {trails[id].map((e, i) => (
+                          <polyline key={i} points={e.pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: isMobile ? 1.1 : 0.9 }} />
+                        ))}
+                      </g>
+                    ))}
+                    {trails && trailSets.map((id) => {
+                      const anim = (e: TrailEdge, w: number): CSSProperties => ({
                         strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
-                        animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${d0 / trailSpeed}s forwards`, ...extra,
+                        animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${(e.d0 + loopOffset[id]) / trailSpeed}s forwards`,
                       });
+                      const pts = (e: TrailEdge) => e.pts.map((p) => p.join(',')).join(' ');
                       return (
-                        <g key={id + i}>
-                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeOpacity={0.45} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 3.2 : 2.6)} />
-                          <polyline points={pts} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(isMobile ? 1.5 : 1.25)} />
+                        <g key={'loop' + id}>
+                          <g opacity={0.45} filter="url(#amglow)">
+                            {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 3.2 : 2.6)} />)}
+                          </g>
+                          {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.5 : 1.25)} />)}
                         </g>
                       );
-                    }))}
+                    })}
                     {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
                     {drawRoutes && cables.map((s, i) => (
                       <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
