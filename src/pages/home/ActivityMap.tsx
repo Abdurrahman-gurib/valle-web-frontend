@@ -136,6 +136,13 @@ function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string;
   );
 }
 
+function WallArrow({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
+  const [h, bind] = useHover();
+  return (
+    <button {...bind} onClick={onClick} aria-label={side === 'left' ? 'Previous photos' : 'Next photos'} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 6, transform: 'translateY(-60%)', width: 44, height: 44, borderRadius: 999, cursor: 'pointer', fontSize: 24, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? '#FFFC33' : GLASS.background, color: h ? '#340057' : '#FFFFFF', zIndex: 3 }}>{side === 'left' ? '‹' : '›'}</button>
+  );
+}
+
 function ZoomBtn({ label, title, onClick }: { label: string; title: string; onClick: () => void }) {
   const [h, bind] = useHover();
   return (
@@ -391,6 +398,10 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
   const mz = useMapZoom();
+  const wall = useRef<HTMLDivElement | null>(null);
+  const [wallPos, setWallPos] = useState<'start' | 'mid' | 'end'>('start');
+  const scrollWall = (d: number) => { const el = wall.current; if (el) el.scrollBy({ left: d * el.clientWidth * 0.8, behavior: 'smooth' }); };
+  const onWallScroll = () => { const el = wall.current; if (!el) return; setWallPos(el.scrollLeft < 8 ? 'start' : el.scrollLeft + el.clientWidth >= el.scrollWidth - 8 ? 'end' : 'mid'); };
 
   const route = routes.find((r) => r.id === routeId) || routes[0];
   const options = bookables(route);
@@ -399,6 +410,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const visible = useMemo(() => {
     const onRoute = (p: MapPin) => {
       if (!p.routes) return true;
+      if (route.extra) return false;
       if (route.stations) return route.stations.includes(p.n);
       return p.routes.includes(route.id);
     };
@@ -518,7 +530,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         <feGaussianBlur stdDeviation="0.6" />
                       </filter>
                     </defs>
-                    {extraLines?.map((l) => (
+                    {extraLines?.filter((l) => l.label !== route.extra).map((l) => (
                       <g key={l.label}>
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeOpacity={0.35} filter="url(#amglow)" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 7 }} />
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeDasharray={l.dashed ? '3 2.5' : undefined} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2 : 2.5 }} />
@@ -553,6 +565,13 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         </g>
                       );
                     })}
+                    {extraLines?.filter((l) => l.label === route.extra).map((l) => (
+                      <g key={'trace' + l.label}>
+                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={{ strokeWidth: isMobile ? 2.4 : 1.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
+                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeLinecap="round" style={{ strokeWidth: isMobile ? 0.7 : 0.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
+                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.8} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 2.6 : 1.9, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.7 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
+                      </g>
+                    ))}
                     {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
                     {drawRoutes && cables.map((s, i) => (
                       <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
@@ -614,8 +633,16 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{gallery.eyebrow}</span>
               <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{gallery.shots.length} PHOTOS · TAP TO OPEN</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
-              {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
+            <div style={{ position: 'relative' }}>
+              <div ref={wall} onScroll={onWallScroll} style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', scrollBehavior: 'smooth' }}>
+                {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
+              </div>
+              {wallPos !== 'start' && <WallArrow side="left" onClick={() => scrollWall(-1)} />}
+              {wallPos !== 'end' && <WallArrow side="right" onClick={() => scrollWall(1)} />}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 2 }}>
+              <GlassBtn small label="‹  Previous" onClick={() => scrollWall(-1)} />
+              <GlassBtn small label="Next photos  ›" onClick={() => scrollWall(1)} />
             </div>
           </div>
         )}

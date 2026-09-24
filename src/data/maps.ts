@@ -44,6 +44,7 @@ export interface MapRoute {
   facts: { k: string; v: string }[];
   stations?: string[];       // zipline: ordered station pin codes (polyline through them)
   signature?: boolean;       // zipline: includes The Signature 1.5 km line
+  extra?: string;            // zipline: this route IS one of ZIP_EXTRA_LINES (by label); traced when picked
   img: string;
 }
 
@@ -114,6 +115,28 @@ const ZW120 = { k: 'MAX WEIGHT', v: '120 kg' };
 const WIND = { k: 'NOTE', v: 'Weight limit varies with wind direction. Includes The Signature 1.5 km (100 kg flying, 150 kg sitting).' };
 
 export const ZIP_ROUTES: MapRoute[] = [
+  {
+    id: 'bicycle',
+    name: 'Bicycle Zipline',
+    tag: '400 M · 1 LINE · SUSPENDED THRILL',
+    color: '#33FF74', fg: '#340057',
+    blurb: 'Pedal a bike along a 400 m cable above the valley floor, feet off the ground the whole way. A guide rides the brake line beside you.',
+    priceCat: 'bicycle', priceRow: 'Bicycle Zipline',
+    facts: [{ k: 'MIN HEIGHT', v: '1 m 40' }, { k: 'MAX WEIGHT', v: '99 kg' }],
+    extra: 'BICYCLE ZIPLINE',
+    img: '/images/map/bicycle-zipline-pair.webp',
+  },
+  {
+    id: 'nepalese',
+    name: 'Nepalese Bridge',
+    tag: '350 M · SUSPENDED FOOTBRIDGE',
+    color: '#FFFC33', fg: '#340057',
+    blurb: 'A 350 m suspended footbridge strung between the two Kazmaël viewpoints, high over the western ravine. Harnessed and clipped in the whole way across.',
+    priceCat: 'nepalese', priceRow: 'Nepalese Bridge',
+    facts: [{ k: 'MIN HEIGHT', v: '1 m 10' }, { k: 'MAX WEIGHT', v: '150 kg' }],
+    extra: 'NEPALESE BRIDGE',
+    img: '/images/map/nepalese-bridge-span.webp',
+  },
   {
     id: 'plunge',
     name: 'The Plunge',
@@ -218,7 +241,7 @@ export const ZIP_LINES: [string, string][] = [
   ['16', '7'],   // The Signature
   ['15', '14'], ['14', '13'], ['13', '8'],
   ['9', '7'], ['7', '1'], ['1', '4'],
-  ['6', '11'], ['2', '10'], ['3', '12'], ['5', '12'],
+  ['6', '11'], ['2', '10'], ['3', '12'],
 ];
 
 /** Static lines for the two suspended thrills that sit inside the zipline network. */

@@ -28,7 +28,7 @@ export function ZiplineMap() {
   const pins = [...ZIP_STATIONS, ...ZIP_LANDMARKS];
   return (
     <ActivityMap
-      eyebrow="04 · ZIPLINES · 8 TOURS"
+      eyebrow="04 · ZIPLINES · 8 TOURS + 2 THRILLS"
       defaultRoute="advenature"
       title="The zipline network"
       intro="Every cable in the valley on the official zipline map, plus the bicycle zipline and the Nepalese bridge. Choose one of the eight tours and watch its lines trace across the valley, numbered from launch to landing. Tap a platform for the view, the height and weight limits and the price."
