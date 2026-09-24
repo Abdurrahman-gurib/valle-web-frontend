@@ -249,7 +249,7 @@ function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big
         boxShadow: h ? '0 18px 40px -18px rgba(0,0,0,.8)' : 'none', transition: 'box-shadow .3s ease',
       }}
     >
-      <Img src={s.src} alt={`${s.tag}: ${s.cap}`} surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
+      <Img src={s.src} alt={`${s.tag}: ${s.cap}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
       <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 9 }}><Pulse n={s.thrill} size={9} /></span>
       <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
@@ -567,7 +567,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{gallery.eyebrow}</span>
               <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{gallery.shots.length} PHOTOS · TAP TO OPEN</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 120 : 150}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? 170 : 214, gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
+            <div style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none' }}>
               {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
             </div>
           </div>
