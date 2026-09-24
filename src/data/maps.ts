@@ -49,13 +49,7 @@ export interface MapRoute {
 
 // ---------------------------------------------------------------- QUAD & BUGGY
 
-export const QUAD_MAP = {
-  img: '/images/quad-map.webp', width: 1621, height: 1493,
-  // Both loops dimmed: the chosen loop is traced on top as a glowing line (see quadTrails.ts).
-  dimImg: '/images/quad-map-dim.webp',
-  // Revealed along the trace: the map with only the chosen loop at full strength.
-  routeImgs: { discovery: '/images/quad-map-discovery.webp', adventure: '/images/quad-map-adventure.webp' } as Record<string, string>,
-};
+export const QUAD_MAP = { img: '/images/quad-map.webp', width: 1621, height: 1493 };
 
 const DRIVER = { k: 'DRIVER', v: '16 yrs + · driving licence' };
 const PASSENGER = { k: 'PASSENGER', v: 'min 1 m 30' };
