@@ -49,7 +49,7 @@ export interface MapRoute {
 
 // ---------------------------------------------------------------- QUAD & BUGGY
 
-export const QUAD_MAP = { img: '/images/quad-map.webp', width: 1621, height: 1493 };
+export const QUAD_MAP = { img: '/images/quad-map-trails-erased.webp', width: 1621, height: 1493 };
 
 const DRIVER = { k: 'DRIVER', v: '16 yrs + · driving licence' };
 const PASSENGER = { k: 'PASSENGER', v: 'min 1 m 30' };

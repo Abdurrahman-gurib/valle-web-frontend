@@ -546,10 +546,10 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       const pts = (e: TrailEdge) => e.pts.map((p) => p.join(',')).join(' ');
                       return (
                         <g key={'loop' + id}>
-                          <g opacity={0.45} filter="url(#amglow)">
-                            {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 3.2 : 2.6)} />)}
+                          <g opacity={0.38} filter="url(#amglow)">
+                            {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 2.8 : 2.3)} />)}
                           </g>
-                          {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.5 : 1.25)} />)}
+                          {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.3 : 1.1)} />)}
                         </g>
                       );
                     })}

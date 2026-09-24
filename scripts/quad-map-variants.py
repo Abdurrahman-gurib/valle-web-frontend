@@ -122,5 +122,5 @@ for _ in range(60):                      # onion-peel inpaint from the surroundi
 from PIL import ImageFilter as IF
 soft = np.asarray(Image.fromarray(img.astype(np.uint8)).filter(IF.GaussianBlur(1.6))).astype(float)
 img = np.where(dil(erase, 1)[..., None], soft, img)
-Image.fromarray(img.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2)).save('public/images/quad-map.webp', quality=95, method=6)
+Image.fromarray(img.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2)).save('public/images/quad-map-trails-erased.webp', quality=95, method=6)
 print('erased', erase.sum(), 'px')
