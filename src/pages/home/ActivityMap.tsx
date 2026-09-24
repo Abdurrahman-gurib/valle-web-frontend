@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { useGoto } from '../../lib/nav';
@@ -91,11 +91,55 @@ function useBookables() {
   };
 }
 
+/** Zoom + drag-to-pan for the map. Pan is clamped so the map always fills the frame. */
+function useMapZoom() {
+  const [zoom, setZoomState] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const frame = useRef<HTMLDivElement | null>(null);
+  const drag = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null);
+  const clamp = (z: number, x: number, y: number) => {
+    const el = frame.current; if (!el) return { x, y };
+    const w = el.clientWidth, h = el.clientHeight;
+    return { x: Math.min(0, Math.max(w - w * z, x)), y: Math.min(0, Math.max(h - h * z, y)) };
+  };
+  const setZoom = (z: number) => {
+    const nz = Math.min(3, Math.max(1, Math.round(z * 4) / 4));
+    const el = frame.current;
+    // keep the frame centre fixed while zooming
+    const cx = el ? el.clientWidth / 2 : 0, cy = el ? el.clientHeight / 2 : 0;
+    setPan((p) => clamp(nz, cx - (cx - p.x) * (nz / zoom), cy - (cy - p.y) * (nz / zoom)));
+    setZoomState(nz);
+  };
+  const reset = () => { setZoomState(1); setPan({ x: 0, y: 0 }); };
+  const onPointerDown = (e: RPointerEvent<HTMLDivElement>) => {
+    if (zoom === 1 || (e.target as HTMLElement).closest('button, aside')) return;
+    drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false };
+    setDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: RPointerEvent<HTMLDivElement>) => {
+    const d = drag.current; if (!d) return;
+    const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true;
+    setPan(clamp(zoom, d.px + dx, d.py + dy));
+  };
+  const onPointerUp = () => { drag.current = null; setDragging(false); };
+  return { zoom, pan, dragging, frame, setZoom, reset, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp } };
+}
+
 function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string; size?: number }) {
   return (
     <span style={{ fontSize: size, letterSpacing: '.18em', color, fontWeight: 700 }} title={PULSE_NAMES[n] + ' pulse'}>
       {'●'.repeat(n)}<span style={{ opacity: 0.35 }}>{'○'.repeat(5 - n)}</span>
     </span>
+  );
+}
+
+function ZoomBtn({ label, title, onClick }: { label: string; title: string; onClick: () => void }) {
+  const [h, bind] = useHover();
+  return (
+    <button {...bind} onClick={onClick} title={title} aria-label={title} style={{ ...GLASS, width: 34, height: 34, borderRadius: 999, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? 'rgba(255,255,255,.22)' : GLASS.background }}>{label}</button>
   );
 }
 
@@ -346,6 +390,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const [routeId, setRouteId] = useState(defaultRoute || routes[0].id);
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
+  const mz = useMapZoom();
 
   const route = routes.find((r) => r.id === routeId) || routes[0];
   const options = bookables(route);
@@ -463,19 +508,11 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
 
         <div data-reveal="1" style={{ marginTop: 16 }}>
           <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
-            <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
-              <div style={{ position: 'relative' }}>
-                <Img
-                  src={map.dimImg || map.img}
-                  alt={alt}
-                  surface="dark"
-                  placeholder="#2E0A4E"
-                  width={map.width}
-                  height={map.height}
-                  style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: `${map.width} / ${map.height}`, objectFit: 'contain' }}
-                />
-                {(drawRoutes || extraLines || trails) && (
-                  <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+            <div ref={mz.frame} {...mz.bind} style={{ position: 'relative', overflow: 'hidden', borderRadius: 12, touchAction: mz.zoom > 1 ? 'none' : 'pan-y', cursor: mz.zoom > 1 ? (mz.dragging ? 'grabbing' : 'grab') : 'default', background: '#2E0A4E' }}>
+              <div style={{ position: 'relative', aspectRatio: `${map.width} / ${map.height}`, transform: `translate(${mz.pan.x}px, ${mz.pan.y}px) scale(${mz.zoom})`, transformOrigin: '0 0', transition: mz.dragging ? 'none' : 'transform .35s ease', willChange: 'transform' }}>
+                {/* The map and every overlay live in ONE svg, so all layers are sampled identically (no double image). */}
+                <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={alt} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', display: 'block' }}>
+                    <image href={map.dimImg || map.img} x="0" y="0" width="100" height="100" preserveAspectRatio="none" />
                     <defs>
                       <filter id="amglow" x="-20%" y="-20%" width="140%" height="140%">
                         <feGaussianBlur stdDeviation="0.6" />
@@ -507,9 +544,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                               ))}
                             </mask>
                           </defs>
-                          {edges.map((e, i) => (
-                            <polyline key={'glow' + i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke={trailColor(e.id)} strokeOpacity={0.3} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 3.4 : 2.8)} />
-                          ))}
                           <image href={map.routeImgs?.[route.id] || map.img} x="0" y="0" width="100" height="100" preserveAspectRatio="none" mask={`url(#${maskId})`} />
                         </>
                       );
@@ -531,7 +565,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       </>
                     )}
                   </svg>
-                )}
                 {visible.map((p) => {
                   const si = stationIndex(p.n);
                   const label = si >= 0 ? String(si + 1) : p.n;
@@ -543,14 +576,19 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       i={0}
                       on={sel === p.n}
                       isMobile={isMobile}
-                      scale={0.72}
+                      scale={0.72 / mz.zoom}
                       onClick={() => setSel((cur) => (cur === p.n ? '' : p.n))}
                     />
                   );
                 })}
+                {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform + ` scale(${1 / mz.zoom})`} onClose={() => setSel('')} />}
               </div>
-              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(115deg, rgba(255,255,255,.1), rgba(255,255,255,0) 46%)', mixBlendMode: 'screen' }} />
-              {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform} onClose={() => setSel('')} />}
+              <div style={{ position: 'absolute', left: 12, top: 12, zIndex: 6, display: 'flex', gap: 6 }}>
+                <ZoomBtn label="+" title="Zoom in" onClick={() => mz.setZoom(mz.zoom + 0.5)} />
+                <ZoomBtn label="−" title="Zoom out" onClick={() => mz.setZoom(mz.zoom - 0.5)} />
+                {mz.zoom > 1 && <ZoomBtn label="⟲" title="Reset view" onClick={mz.reset} />}
+                {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{mz.zoom.toFixed(2).replace(/\.?0+$/, '')}× · DRAG TO PAN</span>}
+              </div>
               {!isMobile && <RouteCard route={route} options={options} overlay />}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>

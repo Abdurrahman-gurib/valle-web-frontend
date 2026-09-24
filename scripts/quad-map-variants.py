@@ -69,8 +69,8 @@ red_col = np.array([np.median(r[red]), np.median(g[red]), np.median(b[red])])
 dark = np.array([58, 30, 120], float)
 
 def save(im_arr, name):
-    im = Image.fromarray(im_arr.astype(np.uint8))
-    im.save(f'public/images/{name}.webp', quality=92, method=6); print(name, im.size)
+    im = Image.fromarray(im_arr.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2))
+    im.save(f'public/images/{name}.webp', quality=95, method=6); print(name, im.size)
 
 DIM = 0.55   # how far the other loop fades towards the map purple (0 = untouched)
 base = arr.copy()
@@ -82,4 +82,4 @@ adv = np.where((yellow & ~shared)[..., None], arr * (1 - DIM) + dark * DIM, arr)
 adv = np.where(shared[..., None], red_col, adv)
 save(adv, 'quad-map-adventure')
 
-Image.fromarray(arr.astype(np.uint8)).save('public/images/quad-map.webp', quality=92, method=6); print('base', W, H)
+Image.fromarray(arr.astype(np.uint8)).filter(ImageFilter.UnsharpMask(radius=1.4, percent=70, threshold=2)).save('public/images/quad-map.webp', quality=95, method=6); print('base', W, H)
