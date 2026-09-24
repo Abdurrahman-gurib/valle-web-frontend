@@ -4,6 +4,13 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund
 COPY . .
+# Sentry is compiled in at build time. Railway passes service variables as build
+# args, so set VITE_SENTRY_DSN (and optionally VITE_SENTRY_ENVIRONMENT) on the web
+# service; unset = monitoring off (compose, local builds).
+ARG VITE_SENTRY_DSN=
+ARG VITE_SENTRY_ENVIRONMENT=
+ARG VITE_SENTRY_RELEASE=
+ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN \n    VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT \n    VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE
 RUN npm run build
 
 # ---- serve ----
