@@ -499,12 +499,12 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                           <defs>
                             <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
                               {edges.map((e, i) => (
-                                <polyline key={i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" style={anim(e, 3)} />
+                                <polyline key={i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 9 : 7.5)} />
                               ))}
                             </mask>
                           </defs>
                           {edges.map((e, i) => (
-                            <polyline key={'glow' + i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke={trailColor(e.id)} strokeOpacity={0.4} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(e, 2.4)} />
+                            <polyline key={'glow' + i} points={e.pts.map((p) => p.join(',')).join(' ')} pathLength={1} fill="none" stroke={trailColor(e.id)} strokeOpacity={0.3} filter="url(#amglow)" strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 3.4 : 2.8)} />
                           ))}
                           <image href={map.routeImgs?.[route.id] || map.img} x="0" y="0" width="100" height="100" preserveAspectRatio="none" mask={`url(#${maskId})`} />
                         </>
