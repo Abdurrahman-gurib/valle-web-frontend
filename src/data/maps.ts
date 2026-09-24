@@ -50,7 +50,7 @@ export interface MapRoute {
 // ---------------------------------------------------------------- QUAD & BUGGY
 
 export const QUAD_MAP = {
-  img: '/images/quad-map.webp', width: 1741, height: 1604,
+  img: '/images/quad-map.webp', width: 1621, height: 1493,
   // Both loops dimmed: the chosen loop is traced on top as a glowing line (see quadTrails.ts).
   dimImg: '/images/quad-map-dim.webp',
   // Revealed along the trace: the map with only the chosen loop at full strength.

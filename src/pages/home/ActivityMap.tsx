@@ -435,8 +435,12 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   // Quad: trail centrelines for the chosen loop(s), traced outward from the base. A route without its
   // own trail (the 2 h Advenature Tour) traces every loop.
   const trailSets = trails ? (trails[route.id] ? [route.id] : Object.keys(trails)) : [];
-  const trailReach = Math.max(1, ...trailSets.flatMap((id) => (trails as Record<string, TrailEdge[]>)[id].map((e) => e.d0 + e.len)));
-  const trailSpeed = trailReach / 3.4;   // px per second: any loop finishes tracing in ~3.4 s
+  // Each loop is one continuous ride (see quadTrails.ts); several loops ride one after the other.
+  const loopReach = (id: string) => Math.max(1, ...(trails as Record<string, TrailEdge[]>)[id].map((e) => e.d0 + e.len));
+  const loopOffset: Record<string, number> = {};
+  let trailReach = 0;
+  for (const id of trailSets) { loopOffset[id] = trailReach; trailReach += loopReach(id); }
+  const trailSpeed = Math.max(1, trailReach) / (trailSets.length > 1 ? 7 : 4.5);   // px per second
   const trailColor = (id: string) => routes.find((r) => r.id === id)?.color || '#FFFFFF';
 
   const ctaLabel = options[0] && app.isSelected(options[0].id, options[0].variant) ? `✓ ${route.name} is in My Day →` : `Add ${route.name} to my day →`;
@@ -488,7 +492,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         map over the dimmed one), so what appears is the printed loop, not a drawn stroke. A faint
                         glow under it follows the same path. */}
                     {trails && trailSets.length > 0 && (() => {
-                      const edges = trailSets.flatMap((id) => trails[id].map((e) => ({ ...e, id })));
+                      const edges = trailSets.flatMap((id) => trails[id].map((e) => ({ ...e, id, d0: e.d0 + loopOffset[id] })));
                       const anim = (e: TrailEdge, w: number, extra: CSSProperties = {}): CSSProperties => ({
                         strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
                         animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${e.d0 / trailSpeed}s forwards`, ...extra,
