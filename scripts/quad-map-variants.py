@@ -87,25 +87,34 @@ def label_all(mask):
                     if 0 <= ny < H and 0 <= nx < W and mask[ny, nx] and not lab[ny, nx]:
                         lab[ny, nx] = n; st.append((ny, nx))
     return lab, n
-rawmask = (((r > 200) & (g > 200) & (b < 140)) | ((r > 190) & (g < 130) & (b < 130)))
+rawmask = (((r > 170) & (g > 150) & (b < 170) & (g > b + 20)) | ((r > 170) & (g < 140) & (b < 140) & (r > g + 60)))
 # Protect the labelled places (photo pins with their label pills, the reception icons, the quad
 # icon at the base, the Coloured Earth hatch): boxes around the map pins, everything else
 # trail-coloured is erased.
 protect = np.zeros_like(rawmask)
+boxes = np.zeros_like(rawmask)
 def box(code, up, down, half):
-    py_, px_ = pin(code); protect[max(0, int(py_) - up):int(py_) + down, max(0, int(px_) - half):int(px_) + half] = True
-for code, up, down, half in [('7', 60, 100, 70), ('6', 60, 95, 48), ('4', 60, 80, 55), ('5', 60, 80, 55), ('A', 50, 70, 90), ('Q', 55, 60, 75), ('AF', 30, 30, 30)]:
+    py_, px_ = pin(code); boxes[max(0, int(py_) - up):int(py_) + down, max(0, int(px_) - half):int(px_) + half] = True
+for code, up, down, half in [('7', 60, 100, 70), ('6', 60, 95, 48), ('4', 60, 80, 55), ('5', 60, 80, 55), ('A', 50, 70, 90), ('AF', 30, 30, 30)]:
     box(code, up, down, half)
-# small icons: the Kazmaël house pictogram and the parking sign (yellow car on green)
+# inside those boxes keep photos, text and the solid label pills, but not a printed loop passing through
+# photos, icons and text inside the boxes stay; the label pill under each photo is a fixed rectangle
+protect |= boxes & ~rawmask
+for code, top, bottom, half in [('7', 44, 104, 74), ('6', 44, 78, 64), ('4', 42, 72, 64), ('5', 42, 72, 64), ('A', 30, 68, 82)]:
+    py_, px_ = pin(code); protect[int(py_) + top:int(py_) + bottom, int(px_) - half:int(px_) + half] = True
+# fully protected: the quad icon at the base, the Kazmaël house pictogram, the parking sign
+qy, qx = pin('Q'); protect[int(qy) - 30:int(qy) + 42, int(qx) - 30:int(qx) + 48] = True
 def rect(x0, y0, x1, y1): protect[y0:y1, x0:x1] = True
 rect(446, 750, 482, 790); rect(985, 720, 1090, 830)
-# the 23 Coloured Earth hatch is red-toned: keep it, but not the printed yellow loop around it
+# the 23 Coloured Earth hatch: only its magenta stripes
 py3, px3 = pin('3'); b3 = np.zeros_like(rawmask); b3[int(py3) - 50:int(py3) + 50, int(px3) - 115:int(px3) + 115] = True
-protect |= b3 & ~((r > 200) & (g > 200) & (b < 140))
+hatch = (r > 140) & (b > 90) & (g < 130) & (r > g + 40)
+protect |= b3 & hatch
 erase = dil(rawmask & ~protect, 3) & ~protect
 print('protected px', protect.sum())
 img = arr.copy()
-known = ~erase
+known = ~erase & ~dil(rawmask, 2)      # never seed the fill from trail-coloured pixels (kept ones stay as they are)
+keep_src = img.copy()
 for _ in range(60):                      # onion-peel inpaint from the surrounding pixels
     if known.all(): break
     grown = dil(known, 1) & ~known
@@ -118,6 +127,7 @@ for _ in range(60):                      # onion-peel inpaint from the surroundi
     fill = grown & (cnt > 0)
     img[fill] = acc[fill] / cnt[fill][:, None]
     known |= fill
+img[~erase] = keep_src[~erase]         # protected pixels keep their own colour
 # soften the filled area slightly so no stroke ghost remains
 from PIL import ImageFilter as IF
 soft = np.asarray(Image.fromarray(img.astype(np.uint8)).filter(IF.GaussianBlur(1.6))).astype(float)

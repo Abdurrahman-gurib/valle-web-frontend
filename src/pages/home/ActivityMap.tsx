@@ -542,14 +542,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                         glow under it follows the same path. */}
                     {/* Quad loops: the chosen loop is traced over the original artwork as a glowing stroke
                         in its own colour, one continuous ride from the base (see quadTrails.ts). */}
-                    {/* The loops not chosen stay visible as a quiet outline (the base map has no printed trails). */}
-                    {trails && Object.keys(trails).filter((id) => !trailSets.includes(id)).map((id) => (
-                      <g key={'quiet' + id} opacity={0.3}>
-                        {trails[id].map((e, i) => (
-                          <polyline key={i} points={e.pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={{ strokeWidth: isMobile ? 1.1 : 0.9 }} />
-                        ))}
-                      </g>
-                    ))}
                     {trails && trailSets.map((id) => {
                       const anim = (e: TrailEdge, w: number): CSSProperties => ({
                         strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
