@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { fileURLToPath } from 'node:url';
 
 const API_TARGET = process.env.VITE_API_PROXY || 'http://localhost:3001';
@@ -15,8 +16,28 @@ const proxy = {
   '/socket.io': { target: API_TARGET, changeOrigin: true, ws: true },
 };
 
+/**
+ * Source maps go to Sentry, never to visitors: when SENTRY_AUTH_TOKEN is present
+ * at build time (Railway build variable) the build emits hidden maps, the plugin
+ * uploads them under the release stamped by CI, then deletes them from dist.
+ */
+const sentryUpload = Boolean(process.env.SENTRY_AUTH_TOKEN);
+const plugins: PluginOption[] = [react()];
+if (sentryUpload) {
+  plugins.push(
+    sentryVitePlugin({
+      org: 'valle-advenature-park',
+      project: 'valle-web',
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: { name: process.env.VITE_SENTRY_RELEASE || undefined, deploy: { env: process.env.VITE_SENTRY_ENVIRONMENT || 'production' } },
+      sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+      telemetry: false,
+    }),
+  );
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins,
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -26,7 +47,7 @@ export default defineConfig({
   preview: { port: 4173, proxy },
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: sentryUpload ? 'hidden' : false,
     chunkSizeWarningLimit: 900,
   },
   test: {
