@@ -1,7 +1,7 @@
 import { ActivityMap } from './ActivityMap';
 import { QUAD_MAP, QUAD_PINS, QUAD_ROUTES, ZIP_EXTRA_LINES, ZIP_LANDMARKS, ZIP_LINES, ZIP_MAP, ZIP_ROUTES, ZIP_SIGNATURE, ZIP_STATIONS } from '../../data/maps';
 import { QUAD_GALLERY, ZIP_GALLERY } from '../../data/mapGalleries';
-import { QUAD_TRAILS } from '../../data/quadTrails';
+import { QUAD_ARROWS, QUAD_TRAILS } from '../../data/quadTrails';
 
 /** "The quad & buggy trails": the official Quad & Buggy route map with the two loops. */
 export function QuadMap() {
@@ -15,6 +15,7 @@ export function QuadMap() {
       routes={QUAD_ROUTES}
       pins={QUAD_PINS}
       trails={QUAD_TRAILS}
+      arrows={QUAD_ARROWS}
       gallery={QUAD_GALLERY}
       hint="PICK A LOOP · TAP A STOP"
       footNote="Drivers must be 16 or over with a driving licence; passengers must be at least 1 m 30. Standard 450cc quads take one or two riders, exclusive 625cc quads are available on every loop, and the 2+1 seater buggy runs the Discovery loop."

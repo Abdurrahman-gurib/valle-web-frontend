@@ -23,6 +23,7 @@ exec(src[src.index('def dilate'):src.index('result = {}')], globals())
 SHARED = r'C:\Users\noorg\AppData\Local\Temp\claude\c--Users-noorg-Desktop-Official-Valle-New-Web\90c32d7f-7f34-44e3-8f91-c3635185eb75\scratchpad\shared.npy'
 NB8 = [(dy, dx, math.hypot(dy, dx)) for dy in (-1, 0, 1) for dx in (-1, 0, 1) if (dy, dx) != (0, 0)]
 result = {}
+arrows_by_loop = {}
 dbg = canvas.copy(); dd = ImageDraw.Draw(dbg)
 masks['adventure'] = masks['adventure'] | np.load(SHARED)
 for name, m in masks.items():
@@ -93,7 +94,44 @@ for name, m in masks.items():
     def closes_loop(ch):
         own = set(ch[-6:]); y, x = ch[-1]
         return any((y + dy, x + dx) in pts and (y + dy, x + dx) not in own for dy in range(-4, 5) for dx in range(-4, 5))
+    spurs = [ch for ch in chains if is_leaf(ch[-1]) and dist[ch[-1]] - dist[ch[0]] < 70 and not closes_loop(ch)]
     chains = [ch for ch in chains if not (is_leaf(ch[-1]) and dist[ch[-1]] - dist[ch[0]] < 70 and not closes_loop(ch))]
+    # ---- arrowheads: the printed map draws chevrons on the loops; after skeletonisation each one is a
+    # short spur (or a pair) leaving the centreline at a junction. Direction of travel = from the spur
+    # tip(s) towards the junction, projected onto the trail's tangent there.
+    main_pts = set(p_ for ch in chains for p_ in ch)
+    def tangent_at(j):
+        near = [q for q in main_pts if abs(q[0] - j[0]) <= 10 and abs(q[1] - j[1]) <= 10]
+        if len(near) < 4: return None
+        ys_ = np.array([q[0] for q in near], float); xs_ = np.array([q[1] for q in near], float)
+        ys_ -= ys_.mean(); xs_ -= xs_.mean()
+        cov = np.array([[ (xs_ * xs_).sum(), (xs_ * ys_).sum()], [(xs_ * ys_).sum(), (ys_ * ys_).sum()]])
+        w, v = np.linalg.eigh(cov); t = v[:, int(np.argmax(w))]   # (dx, dy)
+        return t / (np.hypot(*t) or 1)
+    raw = []
+    for ch in spurs:
+        j = ch[0]; tip = ch[-1]
+        if dist[tip] - dist[j] < 8: continue
+        t = tangent_at(j)
+        if t is None: continue
+        v = np.array([j[1] - tip[1], j[0] - tip[0]], float)      # tip -> junction (dx, dy)
+        sgn = 1.0 if float(v @ t) >= 0 else -1.0
+        raw.append((j[1], j[0], t[0] * sgn, t[1] * sgn))
+    # merge the two halves of one chevron (same junction) and drop near-duplicates
+    arrows = []
+    for x, y, dx, dy in raw:
+        for a in arrows:
+            if abs(a[0] - x) <= 14 and abs(a[1] - y) <= 14:
+                a[2] += dx; a[3] += dy; a[4] += 1; break
+        else:
+            arrows.append([x, y, dx, dy, 1])
+    arrow_out = []
+    for x, y, dx, dy, n in arrows:
+        L_ = np.hypot(dx, dy)
+        if L_ < 0.3: continue
+        arrow_out.append({'x': round(x / W * 100, 2), 'y': round(y / H * 100, 2), 'a': round(float(np.degrees(np.arctan2(dy / L_, dx / L_))), 1)})
+    arrows_by_loop[name] = arrow_out
+    print(name, 'arrowheads', len(arrow_out), 'from', len(spurs), 'spurs')
     # ---- timeline: one pen rides the loop. Chains form a tree from the root; the two deepest root
     # branches (A, B) are the two halves of the loop. A is drawn outward; B is drawn from its far end
     # back to the root so the pen comes home. Side spurs light up when the pen passes their junction.
@@ -155,5 +193,8 @@ dbg.save(S + '/trails_debug.png')
 ts = "// Generated from the official Quad & Buggy map (scratchpad/trails2.py): trail centrelines as a\n// shortest-path tree from the quad base. `pts` are % of the map image, `d0` = trail distance (px)\n// from the base to the chain start, `len` = chain length (px), so each loop traces outward from the base.\n"
 ts += "export interface TrailEdge { d0: number; len: number; pts: [number, number][] }\n"
 ts += "export const QUAD_TRAILS: Record<string, TrailEdge[]> = " + json.dumps(result, separators=(',', ':')) + ";\n"
+ts += "/** Direction arrows recovered from the map's printed chevrons: position in % and angle in degrees (0 = east, clockwise). */\n"
+ts += "export interface TrailArrow { x: number; y: number; a: number }\n"
+ts += "export const QUAD_ARROWS: Record<string, TrailArrow[]> = " + json.dumps(arrows_by_loop, separators=(',', ':')) + ";\n"
 open('src/data/quadTrails.ts', 'w', encoding='utf-8').write(ts)
 print('written', os.path.getsize('src/data/quadTrails.ts') // 1024, 'KB')

@@ -10,7 +10,7 @@ import { Img } from '../../components/Img';
 import { Stripes } from '../../components/Stripes';
 import { PinButton } from './ParkMap';
 import type { MapLine, MapPin, MapRoute } from '../../data/maps';
-import type { TrailEdge } from '../../data/quadTrails';
+import type { TrailArrow, TrailEdge } from '../../data/quadTrails';
 import type { MapGallery, MapShot } from '../../data/mapGalleries';
 
 const MONO = "'Chivo Mono',monospace";
@@ -34,6 +34,8 @@ export interface ActivityMapProps {
   map: { img: string; width: number; height: number; dimImg?: string; routeImgs?: Record<string, string> };
   /** Quad: trail centrelines per route id, traced outward from the base when that route is picked. */
   trails?: Record<string, TrailEdge[]>;
+  /** Quad: direction chevrons per route id, shown once that loop has traced in. */
+  arrows?: Record<string, TrailArrow[]>;
   /** Route selected on first render (defaults to the first). */
   defaultRoute?: string;
   alt: string;
@@ -389,7 +391,7 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
  * glass route tabs, tappable numbered pins (photo + limits + price), a floating route card that
  * books the chosen tour straight into My Day, and a photo wall in the Vallé template.
  */
-export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
+export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, arrows, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
   const goto = useGoto();
   const app = useApp();
   const isMobile = useIsMobile();
@@ -554,6 +556,13 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                             {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 2.8 : 2.3)} />)}
                           </g>
                           {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.3 : 1.1)} />)}
+                          {/* Direction of travel, as printed on the official map: chevrons fade in once this loop is drawn. */}
+                          {arrows?.[id]?.map((a, i) => (
+                            <g key={'a' + i} transform={`translate(${a.x} ${a.y}) rotate(${a.a})`} style={{ opacity: 0, animation: `vfade .4s ease ${(loopOffset[id] + loopReach(id)) / trailSpeed}s forwards` }}>
+                              <path d={isMobile ? 'M -1.6 -1.5 L 0.3 0 L -1.6 1.5' : 'M -1.3 -1.2 L 0.25 0 L -1.3 1.2'} fill="none" stroke="#260040" strokeWidth={isMobile ? 1.1 : 0.9} strokeLinecap="round" strokeLinejoin="round" />
+                              <path d={isMobile ? 'M -1.6 -1.5 L 0.3 0 L -1.6 1.5' : 'M -1.3 -1.2 L 0.25 0 L -1.3 1.2'} fill="none" stroke="#FFFFFF" strokeWidth={isMobile ? 0.55 : 0.42} strokeLinecap="round" strokeLinejoin="round" />
+                            </g>
+                          ))}
                         </g>
                       );
                     })}
