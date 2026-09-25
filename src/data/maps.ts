@@ -153,10 +153,10 @@ export const ZIP_ROUTES: MapRoute[] = [
     name: 'Waterfall Zipline',
     tag: '300 M · 2 LINES',
     color: '#7DD3FC', fg: '#340057',
-    blurb: 'Two lines at the Chamouzé waterfall: 200 m from the summit platform straight over the cascade and the restaurant terrace, then a 100 m hop back up.',
+    blurb: 'Two lines at the Chamouzé waterfall: 200 m from the Coloured Earth overlook straight over the cascade and the restaurant terrace, then a 100 m hop back up.',
     priceCat: 'zipline', priceRow: 'Waterfall Zipline',
     facts: [ZH110, ZW120],
-    stations: ['3', '12', '5'],
+    stations: ['2', '10', '5'],
     img: '/images/map/zip-waterfall-pov-2.webp',
   },
   {
@@ -179,7 +179,7 @@ export const ZIP_ROUTES: MapRoute[] = [
     blurb: 'The complete flight: every cable in the network. It opens with The Signature 1.5 km across the valley, climbs the northern ridge over the Coloured Earth and both waterfalls, then finishes with the western chain up the Kazmaël slopes and back into the hub. Around 3 hours of air time.',
     priceCat: 'zipline', priceRow: 'Advenature Flight',
     facts: [ZH140, ZW40, ZW120, WIND],
-    stations: ['16', '7', '1', '4', '2', '10', '3', '12', '5', '6', '11', '15', '14', '13', '8', '9', '7'],
+    stations: ['16', '7', '1', '4', '2', '10', '5', '3', '12', '6', '11', '15', '14', '13', '8', '9', '7'],
     signature: true,
     img: '/images/map/zip-signature-valley.webp',
   },
@@ -191,7 +191,7 @@ export const ZIP_ROUTES: MapRoute[] = [
     blurb: 'Seven lines built around The Signature: the 1.5 km flight from the far-west tower to the valley hub, then the northern ridge, the Coloured Earth and both waterfall crossings.',
     priceCat: 'zipline', priceRow: 'Sky Pulse Tour',
     facts: [ZH140, ZW40, ZW120, WIND],
-    stations: ['16', '7', '1', '4', '6', '11', '2', '10', '3', '12', '5'],
+    stations: ['16', '7', '1', '4', '6', '11', '2', '10', '5', '3', '12'],
     signature: true,
     img: '/images/map/zip-coloured-earth-flight.webp',
   },
@@ -203,7 +203,7 @@ export const ZIP_ROUTES: MapRoute[] = [
     blurb: 'Ten lines end to end: the western chain from the south ridge up past Kazmaël, into the valley hub, over the Coloured Earth and down to the waterfalls. No Signature, all the rest.',
     priceCat: 'zipline', priceRow: '10 Flight Trail',
     facts: [ZH110, ZW120],
-    stations: ['15', '14', '13', '8', '9', '7', '1', '4', '6', '11', '2', '10', '3', '12', '5'],
+    stations: ['15', '14', '13', '8', '9', '7', '1', '4', '6', '11', '2', '10', '5', '3', '12'],
     img: '/images/map/zip-canopy.webp',
   },
   {
@@ -214,7 +214,7 @@ export const ZIP_ROUTES: MapRoute[] = [
     blurb: 'The classic first zipline: seven short lines from the valley hub near the entrance, over the Coloured Earth ridge and down to the Chamouzé falls.',
     priceCat: 'zipline', priceRow: 'Discovery Tour',
     facts: [ZH110, ZW120],
-    stations: ['9', '7', '1', '4', '6', '11', '2', '10', '3', '12', '5'],
+    stations: ['9', '7', '1', '4', '6', '11', '2', '10', '5', '3', '12'],
     img: '/images/map/zip-waterfall-pov.webp',
   },
   {
@@ -241,7 +241,7 @@ export const ZIP_LINES: [string, string][] = [
   ['16', '7'],   // The Signature
   ['15', '14'], ['14', '13'], ['13', '8'],
   ['9', '7'], ['7', '1'], ['1', '4'],
-  ['6', '11'], ['2', '10'], ['3', '12'],
+  ['6', '11'], ['2', '10'], ['5', '10'], ['3', '12'],
 ];
 
 /** Static lines for the two suspended thrills that sit inside the zipline network. */
@@ -267,10 +267,10 @@ export const ZIP_STATIONS: MapPin[] = [
   zp('4', 70.9, 30.5, 'Coloured Earth Approach', 'The line that brings you over the first stripes of the 23 Coloured Earth.', '/images/map/zip-coloured-earth-flight.webp'),
   zp('2', 83.0, 26.9, 'Coloured Earth Overlook', 'Best view in the network: the full colour field straight below.', '/images/map/zip-coloured-earth-flight-2.webp'),
   zp('6', 76.0, 32.2, 'Coloured Earth South', 'Back across the colour field, heading for the waterfalls.', '/images/map/zip-red-flight.webp'),
-  zp('12', 81.8, 40.4, 'Vacoas Falls Landing', 'Two cables land here, right beside the Vacoas waterfall: one from the Coloured Earth ridge, one from Chamouzé Upper.', '/images/map/zip-valley-pov.webp'),
+  zp('12', 81.8, 40.4, 'Vacoas Falls Landing', 'The long line from the Chamouzé summit lands here, right beside the Vacoas waterfall.', '/images/map/zip-valley-pov.webp'),
   zp('11', 78.1, 40.5, 'Canopy Landing', 'The end of the Coloured Earth South line, a short walk from the Vacoas falls.', '/images/map/zip-waterfall-pov.webp'),
-  zp('10', 85.2, 36.7, 'Chamouzé Landing', 'Where the Coloured Earth Overlook line lands, a few steps from the Chamouzé cascade.', '/images/map/zip-waterfall-pov-2.webp'),
-  zp('5', 84.9, 31.1, 'Chamouzé Upper', 'The short 100 m hop back up from the Vacoas falls, the second line of the Waterfall Zipline.', '/images/map/zip-wave.webp'),
+  zp('10', 85.2, 36.7, 'Chamouzé Landing', 'Where the 200 m line from the Coloured Earth Overlook lands, straight over the Chamouzé cascade.', '/images/map/zip-waterfall-pov-2.webp'),
+  zp('5', 84.9, 31.1, 'Chamouzé Upper', 'The short 100 m hop back up from the Chamouzé landing, the second line of the Waterfall Zipline.', '/images/map/zip-wave.webp'),
   zp('3', 87.7, 27.8, 'Chamouzé Summit', 'Launch of the 200 m waterfall line straight over the Chamouzé cascade down to the Vacoas landing.', '/images/map/zip-summit-line.webp'),
 ];
 
