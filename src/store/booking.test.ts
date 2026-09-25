@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeBooking, priceFor } from './booking';
+import { computeBooking, entryPrices, priceFor } from './booking';
 import type { Activity, Catalog } from '../types';
 import fallback from '../data/fallback.json';
 
@@ -23,15 +23,23 @@ describe('priceFor', () => {
   });
 
   it('falls back to base price for non rate-dependent activities', () => {
-    expect(priceFor(catalog, act('pirate'), 'rr')).toBe(350);
-    expect(priceFor(catalog, act('pirate'), 'nr')).toBe(350);
+    // Kaz Bon Bon is a kiosk with no rate pair; the kids rides now carry RR 200 / NR 300
+    expect(priceFor(catalog, act('kaz'), 'rr')).toBe(0);
+    expect(priceFor(catalog, act('pirate'), 'rr')).toBe(200);
+    expect(priceFor(catalog, act('pirate'), 'nr')).toBe(300);
+  });
+
+  it('prices park entry from the printed admission rows at each rate', () => {
+    expect(entryPrices(catalog, 'rr')).toEqual({ adult: 400, child: 275 });
+    expect(entryPrices(catalog, 'nr')).toEqual({ adult: 550, child: 325 });
+    expect(entryPrices(catalog, null)).toEqual({ adult: 400, child: 275 });
   });
 });
 
 describe('computeBooking', () => {
   it('charges park entry only with empty selection', () => {
     const b = computeBooking(catalog, {}, 2, 1, 'rr');
-    expect(b.total).toBe(2 * 500 + 250);
+    expect(b.total).toBe(2 * 400 + 275);
     expect(b.lines).toHaveLength(1);
     expect(b.lines[0].label).toBe('Park entry · 2 adults · 1 child');
     expect(b.hasDiscount).toBe(false);
@@ -41,14 +49,14 @@ describe('computeBooking', () => {
     // zipline rr 875: 2 adults + 1 kid = 1750 + round(437.5)=438 → 2188
     const b = computeBooking(catalog, { zipline: { a: 2, k: 1 } }, 2, 1, 'rr');
     expect(b.lines[1].label).toBe('Zipline Adventures · 2 adults · 1 child');
-    expect(b.total).toBe(1250 + 2 * 875 + Math.round(875 * 0.5));
+    expect(b.total).toBe(1075 + 2 * 875 + Math.round(875 * 0.5));
   });
 
   it('prices flat-mode activities per unit', () => {
     // buggy rr 6200 × 2 buggies
     const b = computeBooking(catalog, { buggy: { u: 2 } }, 1, 0, 'rr');
     expect(b.lines[1].label).toBe('Buggy · 2 × buggy');
-    expect(b.total).toBe(500 + 2 * 6200);
+    expect(b.total).toBe(400 + 2 * 6200);
   });
 
   it('applies the 15% Explorer Pass on 3+ adventure pp activities', () => {
@@ -57,7 +65,7 @@ describe('computeBooking', () => {
     const advSubtotal = 2 * 875 + 2 * 700 + 2 * 500;
     expect(b.hasDiscount).toBe(true);
     expect(b.discount).toBe(Math.round(advSubtotal * 0.15));
-    expect(b.total).toBe(1000 + advSubtotal - Math.round(advSubtotal * 0.15));
+    expect(b.total).toBe(800 + advSubtotal - Math.round(advSubtotal * 0.15));
   });
 
   it('does not discount with only 2 adventure activities', () => {
@@ -76,6 +84,13 @@ describe('computeBooking', () => {
 
   it('uses non-resident prices when rate is nr', () => {
     const b = computeBooking(catalog, { zipline: { a: 1, k: 0 } }, 1, 0, 'nr');
-    expect(b.total).toBe(500 + 1375);
+    expect(b.total).toBe(550 + 1375);
+  });
+
+  it('prices a chosen option from its price-list row and names it in the line', () => {
+    const b = computeBooking(catalog, { 'zipline::Sky Pulse Tour · 3.1 km, 7 lines': { a: 2, k: 0 } }, 2, 0, 'nr');
+    expect(b.selLines[0].variant).toBe('Sky Pulse Tour · 3.1 km, 7 lines');
+    expect(b.lines[1].label).toBe('Zipline Adventures · Sky Pulse Tour · 3.1 km, 7 lines · 2 adults');
+    expect(b.total).toBe(2 * 550 + 2 * 4975);
   });
 });
