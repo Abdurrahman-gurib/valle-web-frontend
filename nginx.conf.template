@@ -67,6 +67,13 @@ map "${CANONICAL_HOST}=$host" $host_differs {
     default      1;
     "~^(.+)=\1$" 0;
 }
+# Health probes (Railway's checker, the image HEALTHCHECK via localhost) carry no
+# public hostname and must never be answered with a redirect.
+map "$http_user_agent:$host" $is_probe {
+    default                    0;
+    "~^RailwayHealthCheck"     1;
+    "~:(localhost|127\.0\.0\.1|\[::1\])$" 1;
+}
 map "${MAINTENANCE}" $maintenance {
     default 0;
     "1"     1;
@@ -102,9 +109,10 @@ server {
     include /etc/nginx/security-headers.conf;
 
     # Consistent scheme and host: one canonical origin for every URL.
-    if ($needs_https) { return 301 https://$host$request_uri; }
-    set $redirect_host "$canonical_set$host_differs";
-    if ($redirect_host = "11") { return 301 https://${CANONICAL_HOST}$request_uri; }
+    set $redirect_scheme "$needs_https$is_probe";
+    if ($redirect_scheme = "10") { return 301 https://$host$request_uri; }
+    set $redirect_host "$canonical_set$host_differs$is_probe";
+    if ($redirect_host = "110") { return 301 https://${CANONICAL_HOST}$request_uri; }
 
     # Old site paths: 301 to the replacement, 410 when there is none.
     if ($legacy_target = "GONE") { return 410; }

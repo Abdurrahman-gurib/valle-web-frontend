@@ -13,7 +13,7 @@ ARG VITE_SENTRY_RELEASE=
 # Build-time only (this stage is discarded): lets vite.config.ts upload source maps.
 ARG SENTRY_AUTH_TOKEN=
 # Canonical public origin baked into <link rel=canonical>, Open Graph and JSON-LD
-# of the prerendered pages. Set VITE_SITE_URL=https://vallepark.com on the web service.
+# of the prerendered pages. Set VITE_SITE_URL to the public origin on the web service.
 ARG VITE_SITE_URL=
 ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
 ENV VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT
