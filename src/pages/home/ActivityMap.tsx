@@ -562,7 +562,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
         <div data-reveal="1" style={{ marginTop: 16 }}>
           <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
             {/* The printed sheet: same framing as the walking-trail sitemap (purple sheet, yellow title plate, key, compass, Vallé band). */}
-            <div style={{ position: 'relative', background: '#7159A6', borderRadius: 14, overflow: 'hidden', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '230px minmax(0,1fr)', gap: 0 }}>
+            <div style={{ position: 'relative', background: '#7159A6', borderRadius: 14, overflow: 'hidden', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '290px minmax(0,1fr)', gap: 0 }}>
               <div style={{ padding: isMobile ? '14px 16px 4px' : '22px 0 22px 22px', display: 'flex', flexDirection: 'column', gap: 16, zIndex: 2 }}>
                 <div>
                   <div style={{ display: 'inline-block', background: '#FFFC33', color: '#340057', padding: isMobile ? '10px 14px' : '16px 18px', transform: 'rotate(-2deg)', transformOrigin: 'left bottom', boxShadow: '0 8px 18px rgba(0,0,0,.25)' }}>
@@ -572,6 +572,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                   <div style={{ display: 'inline-block', background: '#340057', color: '#FFFC33', fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, padding: '6px 12px', marginTop: 10, textTransform: 'uppercase' }}>Key / Légende</div>
                 </div>
                 <MapKey items={sheet.keyItems} compact={isMobile} />
+                {!isMobile && <RouteCard route={route} options={options} overlay={false} />}
                 {!isMobile && (
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <Compass size={74} />
@@ -688,7 +689,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                 {mz.zoom > 1 && <ZoomBtn label="⟲" title="Reset view" onClick={mz.reset} />}
                 {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{mz.zoom.toFixed(2).replace(/\.?0+$/, '')}× · DRAG TO PAN</span>}
               </div>
-              {!isMobile && <RouteCard route={route} options={options} overlay />}
             </div>
               </div>
               {/* Vallé band along the bottom of the sheet */}
