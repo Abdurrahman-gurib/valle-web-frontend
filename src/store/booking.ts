@@ -9,6 +9,15 @@ export function priceFor(catalog: Catalog, act: Activity, rate: RateKey | null):
   return rate === 'nr' ? rp[1] : rp[0];
 }
 
+/** Park entry per adult / per child at the given rate: the printed admission rows, else the flat settings. */
+export function entryPrices(catalog: Catalog, rate: RateKey | null): { adult: number; child: number } {
+  const rows = catalog.PL.admission || [];
+  const find = (needle: string) => rows.find((r) => r.n.toLowerCase().includes(needle));
+  const a = find('12 years'), c = find('6 to 11');
+  const rk = rate === 'nr' ? 'nr' : 'rr';
+  return { adult: a ? a[rk] : catalog.ENTRY_A, child: c ? c[rk] : catalog.ENTRY_C };
+}
+
 /** Price of one catalog.PL option of an experience at the given rate, or null when unknown. */
 export function variantPrice(catalog: Catalog, id: string, variant: string, rate: RateKey | null): number | null {
   const row = (catalog.PL[id] || []).find((r) => r.n === variant);
@@ -41,7 +50,8 @@ export function computeBooking(
   }
   const selActs = selLines.map((l) => l.act).filter((a, i, arr) => arr.indexOf(a) === i);
   const lines: { label: string; amt: string }[] = [];
-  const entry = catalog.ENTRY_A * adults + catalog.ENTRY_C * kids;
+  const ep = entryPrices(catalog, rate);
+  const entry = ep.adult * adults + ep.child * kids;
   lines.push({ label: 'Park entry · ' + partyLabel(adults, kids), amt: money(entry) });
   let total = entry;
   let advSubtotal = 0;

@@ -36,6 +36,7 @@ export function useCardModel(): (a: Activity) => CardModel {
     const sel = app.isSelected(a.id);
     const hasAdd = a.mode === 'pp' || a.mode === 'flat';
     const price = app.activityPrice(a.id);
+    const options = (catalog.PL[a.id] || []).length;
     let priceLabel = 'WITH ENTRY';
     if (a.mode === 'pp') priceLabel = 'FROM ' + money(price);
     if (a.mode === 'flat') priceLabel = money(price) + ' ' + (a.flatLabel || '');
@@ -52,9 +53,11 @@ export function useCardModel(): (a: Activity) => CardModel {
       priceLabel,
       hasAdd,
       selOn: sel,
-      addLabel: sel ? '✓ Added to My Day' : '+ Add to My Day',
+      addLabel: sel ? (options > 1 ? '✓ In My Day · change options' : '✓ Added to My Day') : (options > 1 ? '+ Choose an option' : '+ Add to My Day'),
       open: () => goto.detail(a.id),
-      add: (e) => { e?.stopPropagation?.(); app.toggleSel(a.id); },
+      // Several priced options (zipline tours, quad tracks, buggies, luge rides): let the visitor
+      // pick; a single-option experience toggles straight into My Day.
+      add: (e) => { e?.stopPropagation?.(); if (options > 1) app.openOptions(a.id); else app.toggleSel(a.id); },
     };
   };
 }

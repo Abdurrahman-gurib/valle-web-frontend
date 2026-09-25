@@ -2,6 +2,7 @@ import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { money } from '../lib/format';
+import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import type { SelLine } from '../types';
@@ -102,7 +103,8 @@ export function MyDayDrawer() {
     cartActs.length === 0
       ? 'PARK ENTRY'
       : cartActs.length + ' EXPERIENCE' + (cartActs.length > 1 ? 'S' : '') + ' + ENTRY';
-  const entryAmt = money(catalog.ENTRY_A * app.adults + catalog.ENTRY_C * app.kids);
+  const ep = entryPrices(catalog, app.rate);
+  const entryAmt = money(ep.adult * app.adults + ep.child * app.kids);
 
   return (
     <>

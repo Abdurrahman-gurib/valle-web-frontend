@@ -58,6 +58,11 @@ interface AppState {
   openDay: () => void;
   closeDay: () => void;
 
+  // "Choose your option" sheet for experiences with several priced options
+  optionsFor: string | null;
+  openOptions: (id: string) => void;
+  closeOptions: () => void;
+
   // pricing
   booking: BookingSummary;
   activityPrice: (id: string, variant?: string) => number;
@@ -111,6 +116,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [customDate, setCustomDate] = useState('');
   const [slot, setSlot] = useState(0);
   const [dayOpen, setDayOpen] = useState(false);
+  const [optionsFor, setOptionsFor] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -221,6 +227,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     openDay: () => setDayOpen(true),
     closeDay: () => setDayOpen(false),
 
+    optionsFor,
+    openOptions: (id: string) => setOptionsFor(id),
+    closeOptions: () => setOptionsFor(null),
+
     booking,
     activityPrice: (id: string, variant?: string) => {
       const act = catalog.ACTS.find((a) => a.id === id);
@@ -228,7 +238,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const vp = variant ? variantPrice(catalog, id, variant, rate) : null;
       return vp ?? priceFor(catalog, act, rate);
     },
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel]);
+  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

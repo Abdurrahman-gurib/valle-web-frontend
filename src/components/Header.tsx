@@ -107,7 +107,8 @@ export function Header() {
   const go = (fn: () => void) => () => { closeAll(); fn(); };
 
   const pkgLinks: [string, string][] = [
-    ['Light & Standard', 'ls'], ['Exclusive tiers', 'ex'], ['VIP Ultimate', 'vip'],
+    ['Light & Standard', 'ls'], ['Exclusive tiers', 'ex'], ['VIP Ultimate', 'vip'], ['Diamond', 'diamond'],
+    ['Resident packages', 'resident'], ['Senior citizens 55+', 'senior'], ['Student offer', 'student'], ['Kids Park pricelist', 'kids'],
     ['Combo packages', 'combo'], ['Cinematic experience', 'cine'], ['Photo pricelist', 'photo'],
     ['Team building', 'team'],
   ];

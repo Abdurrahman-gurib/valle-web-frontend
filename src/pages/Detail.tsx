@@ -154,12 +154,22 @@ export default function DetailPage() {
                   <button onClick={app.openRateGate} title="Change rate" style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
                 </div>
                 <div style={{ marginTop: 10 }}>
-                  {prices.map((pr) => (
-                    <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
-                      <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500 }}>{pr.n}</span>
-                      <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
-                    </div>
-                  ))}
+                  {prices.map((pr) => {
+                    const on = d.hasAdd && app.isSelected(act.id, pr.n);
+                    return (
+                      <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
+                        <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{pr.n}</span>
+                        <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
+                        {d.hasAdd && (
+                          <button
+                            onClick={() => app.toggleSel(act.id, pr.n)}
+                            title={on ? 'Remove from My Day' : 'Add this option to My Day'}
+                            style={{ border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, padding: '6px 10px', borderRadius: 999, whiteSpace: 'nowrap', minWidth: 68 }}
+                          >{on ? '✓ Added' : '+ Add'}</button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE</div>
               </div>
@@ -219,7 +229,7 @@ export default function DetailPage() {
             <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
             {d.hasAdd && (
               <button
-                onClick={() => app.toggleSel(act.id)}
+                onClick={() => d.add()}
                 {...bAdd}
                 style={{
                   width: '100%', border: '1.5px solid rgba(255,255,255,.5)',

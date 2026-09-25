@@ -93,9 +93,10 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          <PriceCol label="SINGLE" value={pk.single} valSize={20} />
-          <PriceCol label="DOUBLE" value={pk.dbl} valSize={20} />
+          {pk.dbl ? <PriceCol label="SINGLE" value={pk.single} valSize={20} /> : <PriceCol label="PER PERSON" value={pk.single} valSize={22} />}
+          {pk.dbl && <PriceCol label="DOUBLE" value={pk.dbl} valSize={20} />}
         </div>
+        {pk.note && <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 8 }}>{pk.note}</div>}
         <button {...bindB} onClick={onOpen} style={{ marginTop: 11, border: '1.5px solid #340057', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#340057' : 'transparent', color: hb ? '#FFFFFF' : '#340057', fontSize: 13.5, fontWeight: 700, padding: '11px 0', borderRadius: 999, width: '100%' }}>View details →</button>
       </div>
     </div>
@@ -103,6 +104,33 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
 }
 
 interface ComboView { name: string; color: string; items: { t: string }[]; single: string; dbl: string; }
+
+function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactNode; badge: string; rows: { n: string; p: string }[]; foot: string; accent: string; image: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 26, alignItems: 'stretch' }}>
+      <div style={{ flex: '1 1 340px', background: '#7333FF', borderRadius: 20, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
+        <div style={{ height: 10, background: `repeating-linear-gradient(-45deg,${accent} 0 12px,#340057 12px 24px)` }} />
+        <div style={{ padding: '18px 22px 20px' }}>
+          <span style={{ background: accent, color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 8, padding: '7px 11px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{badge}</span>
+          <div style={{ marginTop: 14 }}>
+            {rows.map((r) => (
+              <div key={r.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
+                <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500 }}>{r.n}</span>
+                <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{r.p}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{foot}</div>
+        </div>
+      </div>
+      <div style={{ flex: '1 1 280px', minHeight: 260, borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#EBE2FF' }}>
+        <Img src={image} alt="" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
+        <div style={{ position: 'absolute', left: 20, right: 20, bottom: 18, color: '#FFFFFF', ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{title}</div>
+      </div>
+    </div>
+  );
+}
 
 function ComboCard({ cb, rateTag, onBook }: { cb: ComboView; rateTag: string; onBook: () => void }) {
   const [hc, bindC] = useHover();
@@ -369,8 +397,61 @@ export default function PackagesPage() {
           <VipImage onOpen={openVip} />
         </div>
 
+        {/* DIAMOND */}
+        <SectionHead id="diamond" title="Diamond" tag="04 · THE ULTIMATE DAY · NR" marginTop="clamp(48px,7vw,80px)" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
+          {(catalog.PACKS.diamond || []).map((p) => (
+            <LSCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+          ))}
+          <div style={{ background: '#340057', borderRadius: 18, padding: '22px 24px', color: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>Everything,<br /><span style={{ color: '#FFFC33' }}>and then some</span></div>
+            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>The full VIP day plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit. Butler, transfers and a souvenir gift included.</p>
+            <div style={{ flex: 1, minHeight: 14 }} />
+            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6 }}>NON-RESIDENT RATE · ENQUIRE TO RESERVE</div>
+          </div>
+        </div>
+
+        {/* RESIDENT PACKAGES */}
+        <SectionHead id="resident" title="Resident packages" tag="05 · PER PERSON · MAURITIAN ID OR PERMIT" marginTop="clamp(48px,7vw,80px)" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
+          {(catalog.PACKS.resident || []).map((p) => (
+            <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+          ))}
+        </div>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.</div>
+
+        {/* SENIOR CITIZENS */}
+        <SectionHead id="senior" title="Senior citizens" tag="06 · AGES 55 AND ABOVE" marginTop="clamp(48px,7vw,80px)" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
+          {(catalog.PACKS.senior || []).map((p) => (
+            <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+          ))}
+        </div>
+
+        {/* STUDENT OFFER */}
+        <SectionHead id="student" title="Student special offer" tag="07 · PRE-PRIMARY, PRIMARY & SECONDARY" marginTop="clamp(48px,7vw,80px)" />
+        <PriceTable
+          title={<>Every great explorer<br /><span style={{ color: '#FFFC33' }}>starts small</span></>}
+          badge="STUDENT PRICELIST · SCHOOL GROUPS"
+          rows={(catalog.PL.student || []).map((r) => ({ n: r.n, p: money(r.rr) }))}
+          foot="LUNCH: FRIED RICE + SOFT DRINK, OR CRISPY CHICKEN, FRIES, CHEESE PIZZA + SOFT DRINK · VEG OPTION · VAT INCLUSIVE"
+          accent="#33FF74"
+          image="/images/map/zip-selfie-cheer.webp"
+        />
+
+        {/* KIDS PARK PRICELIST */}
+        <SectionHead id="kids" title="Vallé Kids Park" tag="08 · PAY WITH POINTS · 10 POINTS = RS 100" marginTop="clamp(48px,7vw,80px)" />
+        <PriceTable
+          title={<>Little feet<br /><span style={{ color: '#FFFC33' }}>lead the way</span></>}
+          badge={`KIDS PARK PRICELIST · ${rateTag}`}
+          rows={(catalog.PL.kids || []).map((r) => ({ n: r.n, p: money(r[rk]) + ' · 20 pts' }))}
+          foot="TOP-UP CARD RS 50 · OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE"
+          accent="#FFFC33"
+          image="/images/miniquad.avif"
+        />
+
         {/* COMBO PACKAGES */}
-        <SectionHead id="combo" title="Combo packages" tag="04 · QUAD + ZIPLINE, ONE PRICE" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="combo" title="Combo packages" tag="09 · QUAD + ZIPLINE, ONE PRICE" marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {comboPacks.map((cb) => (
             <ComboCard key={cb.name} cb={cb} rateTag={rateTag} onBook={goto.booking} />
@@ -378,7 +459,7 @@ export default function PackagesPage() {
         </div>
 
         {/* CINEMATIC EXPERIENCE */}
-        <SectionHead id="cine" title="Cinematic experience" tag="05 · SAME PRICE FOR EVERYONE" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="cine" title="Cinematic experience" tag="10 · SAME PRICE FOR EVERYONE" marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 26, alignItems: 'stretch' }}>
           <div style={{ flex: '1 1 320px', background: '#FFFC33', borderRadius: 20, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF' }}>
             <div style={{ padding: '18px 22px 20px' }}>
@@ -407,7 +488,7 @@ export default function PackagesPage() {
         </div>
 
         {/* PHOTO PRICELIST */}
-        <SectionHead id="photo" title="Photo pricelist" tag="06 · 1 JULY 2026 TO 30 JUNE 2027" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="photo" title="Photo pricelist" tag="11 · 1 JULY 2026 TO 30 JUNE 2027" marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ display: 'flex', gap: 4, background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 999, padding: 4 }}>
             <button onClick={() => setRate('rr')} style={rateBtn(rk === 'rr')}>Resident</button>
@@ -431,7 +512,7 @@ export default function PackagesPage() {
         </div>
 
         {/* TEAM BUILDING */}
-        <SectionHead id="team" title="Team building" tag="07 · FROM RS 2,850 PER PERSON" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="team" title="Team building" tag="12 · FROM RS 2,850 PER PERSON" marginTop="clamp(48px,7vw,80px)" />
         <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.TEAM.map((tp, i) => (

@@ -78,6 +78,9 @@ export interface PackTier {
 export interface Packs {
   ls: PackTier[];
   ex: PackTier[];
+  diamond: PackTier[];     // NR all-inclusive top tier
+  resident: PackTier[];    // single price per person
+  senior: PackTier[];      // single price per person, 55+
   addons: { t: string; p: string }[];
   vip: PackItem[];
 }

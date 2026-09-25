@@ -81,11 +81,11 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
   if (!pack) return null;
 
   const whatsapp = 'https://api.whatsapp.com/send/?phone=23052928841&text='
-    + encodeURIComponent('Hello Vallé, I would like to book the ' + pack.name + ' package (single ' + pack.single + ' / double ' + pack.dbl + ').');
+    + encodeURIComponent('Hello Vallé, I would like to book the ' + pack.name + ' package ' + (pack.dbl ? '(single ' + pack.single + ' / double ' + pack.dbl + ')' : '(' + pack.single + ' per person)') + '.');
   const mailto = 'mailto:sales@vallepark.com?subject='
     + encodeURIComponent('Package reservation: ' + pack.name)
     + '&body='
-    + encodeURIComponent('Hello Vallé,\n\nI would like to reserve the ' + pack.name + ' package (single ' + pack.single + ' / double ' + pack.dbl + ').\n\nPreferred date:\nNumber of guests:\nName:\nPhone:\n');
+    + encodeURIComponent('Hello Vallé,\n\nI would like to reserve the ' + pack.name + ' package ' + (pack.dbl ? '(single ' + pack.single + ' / double ' + pack.dbl + ')' : '(' + pack.single + ' per person)') + '.\n\nPreferred date:\nNumber of guests:\nName:\nPhone:\n');
 
   return (
     <div

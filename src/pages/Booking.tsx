@@ -7,6 +7,7 @@ import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { money, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
+import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 
@@ -43,7 +44,7 @@ function StepBtn({ onClick, bg, children }: { onClick: () => void; bg: string; c
   );
 }
 
-/* ADULTS / CHILD 3–12 / UNITS stepper group */
+/* ADULTS / CHILD 6–11 / UNITS stepper group */
 function Stepper({ tag, val, inc, dec, boxBg, btnBg }: {
   tag: string; val: number; inc: () => void; dec: () => void; boxBg: string; btnBg: string;
 }) {
@@ -121,7 +122,7 @@ function CartLine({ line }: { line: SelLine }) {
       {!isFlat && (
         <>
           <Stepper tag="ADULTS" val={c.a || 0} inc={() => app.bumpSel(line.key, 'a', 1)} dec={() => app.bumpSel(line.key, 'a', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
-          <Stepper tag="CHILD 3–12" val={c.k || 0} inc={() => app.bumpSel(line.key, 'k', 1)} dec={() => app.bumpSel(line.key, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+          <Stepper tag="CHILD 6–11" val={c.k || 0} inc={() => app.bumpSel(line.key, 'k', 1)} dec={() => app.bumpSel(line.key, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
         </>
       )}
       {isFlat && (
@@ -284,8 +285,9 @@ export default function BookingPage() {
   const cartCountLabel = cartActs.length === 0
     ? 'PARK ENTRY'
     : cartActs.length + ' EXPERIENCE' + (cartActs.length > 1 ? 'S' : '') + ' + ENTRY';
-  const entryNote = money(catalog.ENTRY_A) + ' /ADULT · ' + money(catalog.ENTRY_C) + ' /CHILD';
-  const entryAmt = money(catalog.ENTRY_A * adults + catalog.ENTRY_C * kids);
+  const ep = entryPrices(catalog, rate);
+  const entryNote = money(ep.adult) + ' /ADULT (12+) · ' + money(ep.child) + ' /CHILD (6 TO 11) · UNDER 6 FREE';
+  const entryAmt = money(ep.adult * adults + ep.child * kids);
   const passHint = booking.hasDiscount
     ? '✓ Explorer Pass applied · 15% off your adventures.'
     : 'Tip: pick any 3 adventures and the Explorer Pass takes 15% off them automatically.';
@@ -412,7 +414,7 @@ export default function BookingPage() {
                       <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote} · ALL NATURE TRAILS INCLUDED</div>
                     </div>
                     <Stepper tag="ADULTS" val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
-                    <Stepper tag="CHILD 3–12" val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+                    <Stepper tag="CHILD 6–11" val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
                     <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{entryAmt}</div>
                   </div>
                   {cartActs.map((l) => <CartLine key={l.key} line={l} />)}

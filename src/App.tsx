@@ -8,6 +8,7 @@ import { Footer } from './components/Footer';
 import { MyDayDrawer } from './components/MyDayDrawer';
 import { RateGate } from './components/RateGate';
 import { ChatWidget } from './components/ChatWidget';
+import { OptionPicker } from './components/OptionPicker';
 import { useIsMobile } from './hooks/useIsMobile';
 import HomePage from './pages/Home';
 import ExplorePage from './pages/Explore';
@@ -58,6 +59,7 @@ function PublicShell() {
       <Footer />
       <MyDayDrawer />
       <RateGate />
+      <OptionPicker />
       <ChatWidget />
     </div>
   );
