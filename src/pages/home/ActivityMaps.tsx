@@ -1,5 +1,5 @@
 import { ActivityMap } from './ActivityMap';
-import { QUAD_MAP, QUAD_PINS, QUAD_ROUTES, ZIP_EXTRA_LINES, ZIP_LANDMARKS, ZIP_LINES, ZIP_MAP, ZIP_ROUTES, ZIP_SIGNATURE, ZIP_STATIONS } from '../../data/maps';
+import { QUAD_KEY, QUAD_MAP, QUAD_PINS, QUAD_ROUTES, ZIP_KEY, ZIP_EXTRA_LINES, ZIP_LANDMARKS, ZIP_LINES, ZIP_MAP, ZIP_ROUTES, ZIP_SIGNATURE, ZIP_STATIONS } from '../../data/maps';
 import { QUAD_GALLERY, ZIP_GALLERY } from '../../data/mapGalleries';
 import { QUAD_ARROWS, QUAD_TRAILS } from '../../data/quadTrails';
 
@@ -18,6 +18,7 @@ export function QuadMap() {
       arrows={QUAD_ARROWS}
       gallery={QUAD_GALLERY}
       hint="PICK A LOOP · TAP A STOP"
+      sheet={{ title: 'Quad & Buggy Trails', subtitle: 'OFF-ROAD SITEMAP · 2 LOOPS', keyItems: QUAD_KEY, foot: 'DISCOVERY ≈ 1 H · ADVENTURE ≈ 1 H · ADVENATURE 2 H · VALLEPARK.COM' }}
       footNote="Drivers must be 16 or over with a driving licence; passengers must be at least 1 m 30. Standard 450cc quads take one or two riders, exclusive 625cc quads are available on every loop, and the 2+1 seater buggy runs the Discovery loop."
       footTag="YELLOW DISCOVERY · RED ADVENTURE · 2 H ADVENATURE"
     />
@@ -43,6 +44,7 @@ export function ZiplineMap() {
       extraLines={ZIP_EXTRA_LINES}
       gallery={ZIP_GALLERY}
       hint="PICK A TOUR · TAP A PLATFORM"
+      sheet={{ title: 'Zipline Network', subtitle: 'AERIAL SITEMAP · 11 CABLES · 8 TOURS', keyItems: ZIP_KEY, foot: 'THE SIGNATURE 1.5 KM · ADVENATURE FLIGHT 5.5 KM · VALLEPARK.COM' }}
       footNote="Minimum height 1 m 10 on every tour, 1 m 40 and 40 kg minimum on the tours that include The Signature. Maximum 120 kg, with the limit on The Signature varying with wind direction. Closed shoes, full harness, briefing and guides included."
       footTag="8 TOURS · 1 TO 11 LINES · WEATHER DEPENDENT"
     />

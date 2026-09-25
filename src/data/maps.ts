@@ -52,6 +52,19 @@ export interface MapRoute {
 
 export const QUAD_MAP = { img: '/images/quad-map-trails-erased.webp', width: 1621, height: 1493 };
 
+/** One row of the printed key: the official symbol tile plus its bilingual label. */
+export interface MapKeyItem { icon?: string; swatch?: string; dashed?: boolean; label: string; fr?: string }
+
+export const QUAD_KEY: MapKeyItem[] = [
+  { icon: '/images/map/key/key-quad-adventure.png', label: 'Adventure track (quad)', fr: 'Piste Aventure' },
+  { icon: '/images/map/key/key-quad-discovery.png', label: 'Discovery trail (quad & buggy)', fr: 'Sentier Découverte' },
+  { icon: '/images/map/key/key-animal-farm.png', label: 'Animal farm', fr: 'Ferme animalière' },
+  { icon: '/images/map/key/key-kazmael.png', label: 'Kazmaël viewpoint', fr: 'Vue panoramique' },
+  { icon: '/images/map/key/key-coloured-earth.png', label: '23 Coloured Earth', fr: 'Terres de couleurs' },
+  { swatch: '#FF3358', label: 'Route stop', fr: 'Arrêt du parcours' },
+  { swatch: '#33FF74', label: 'Landmark', fr: 'Point de repère' },
+];
+
 const DRIVER = { k: 'DRIVER', v: '16 yrs + · driving licence' };
 const PASSENGER = { k: 'PASSENGER', v: 'min 1 m 30' };
 
@@ -107,6 +120,15 @@ export const QUAD_PINS: MapPin[] = [
 // ---------------------------------------------------------------- ZIPLINES
 
 export const ZIP_MAP = { img: '/images/zipline-map.webp', width: 1900, height: 1652 };
+
+export const ZIP_KEY: MapKeyItem[] = [
+  { icon: '/images/map/key/key-zipline.png', label: 'Zipline platform', fr: 'Plateforme tyrolienne' },
+  { icon: '/images/map/key/key-kazmael-zip.png', label: 'Kazmaël viewpoint', fr: 'Vue panoramique' },
+  { icon: '/images/map/key/key-coloured-earth-zip.png', label: '23 Coloured Earth', fr: 'Terres de couleurs' },
+  { swatch: '#33FF74', dashed: false, label: 'Bicycle zipline', fr: 'Tyrolienne à vélo' },
+  { swatch: '#FFFC33', dashed: true, label: 'Nepalese bridge', fr: 'Pont népalais' },
+  { swatch: '#FF3358', label: 'Route stop', fr: 'Arrêt du parcours' },
+];
 
 const ZH110 = { k: 'MIN HEIGHT', v: '1 m 10' };
 const ZH140 = { k: 'MIN HEIGHT', v: '1 m 40' };

@@ -9,7 +9,7 @@ import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { Stripes } from '../../components/Stripes';
 import { PinButton } from './ParkMap';
-import type { MapLine, MapPin, MapRoute } from '../../data/maps';
+import type { MapKeyItem, MapLine, MapPin, MapRoute } from '../../data/maps';
 import type { TrailArrow, TrailEdge } from '../../data/quadTrails';
 import type { MapGallery, MapShot } from '../../data/mapGalleries';
 
@@ -52,6 +52,45 @@ export interface ActivityMapProps {
   footNote: string;
   footTag: string;
   hint: string;
+  /** Printed-sheet framing, like the walking-trail sitemap: title plate + key column + compass. */
+  sheet: { title: string; subtitle: string; keyItems: MapKeyItem[]; foot: string };
+}
+
+/** The sheet's key column, laid out like the walking-trail sitemap's "KEY / LÉGENDE". */
+function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: compact ? '6px 14px' : 10 }}>
+      {items.map((k) => (
+        <div key={k.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {k.icon ? (
+            <img src={k.icon} alt="" style={{ width: compact ? 26 : 34, height: compact ? 26 : 34, objectFit: 'contain', flexShrink: 0, borderRadius: 4 }} />
+          ) : k.dashed !== undefined ? (
+            <span style={{ width: compact ? 26 : 34, borderTop: `3px ${k.dashed ? 'dashed' : 'solid'} ${k.swatch}`, flexShrink: 0 }} />
+          ) : (
+            <span style={{ width: 14, height: 14, borderRadius: 999, background: k.swatch, border: '2px solid #FFFFFF', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,.35)' }} />
+          )}
+          <span style={{ fontSize: compact ? 10.5 : 12, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
+            {k.label}{k.fr && <span style={{ opacity: 0.6, fontWeight: 400 }}> | {k.fr}</span>}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Compass({ size }: { size: number }) {
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-label="Compass rose, north up" style={{ display: 'block' }}>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#FFFC33" strokeWidth="2.5" />
+      <path d="M50 8 L58 50 L50 92 L42 50 Z" fill="#FFFC33" />
+      <path d="M8 50 L50 42 L92 50 L50 58 Z" fill="#FFFC33" opacity="0.75" />
+      <path d="M50 8 L58 50 L50 50 Z" fill="#340057" opacity="0.45" />
+      <text x="50" y="6" textAnchor="middle" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">N</text>
+      <text x="50" y="100" textAnchor="middle" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">S</text>
+      <text x="2" y="54" textAnchor="start" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">W</text>
+      <text x="98" y="54" textAnchor="end" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">E</text>
+    </svg>
+  );
 }
 
 interface Fact { k: string; v: string }
@@ -391,7 +430,7 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
  * glass route tabs, tappable numbered pins (photo + limits + price), a floating route card that
  * books the chosen tour straight into My Day, and a photo wall in the Vallé template.
  */
-export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, arrows, gallery, footNote, footTag, hint, defaultRoute }: ActivityMapProps) {
+export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, drawRoutes, lines, signature, extraLines, trails, arrows, gallery, footNote, footTag, hint, defaultRoute, sheet }: ActivityMapProps) {
   const goto = useGoto();
   const app = useApp();
   const isMobile = useIsMobile();
@@ -522,6 +561,25 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
 
         <div data-reveal="1" style={{ marginTop: 16 }}>
           <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
+            {/* The printed sheet: same framing as the walking-trail sitemap (purple sheet, yellow title plate, key, compass, Vallé band). */}
+            <div style={{ position: 'relative', background: '#7159A6', borderRadius: 14, overflow: 'hidden', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '230px minmax(0,1fr)', gap: 0 }}>
+              <div style={{ padding: isMobile ? '14px 16px 4px' : '22px 0 22px 22px', display: 'flex', flexDirection: 'column', gap: 16, zIndex: 2 }}>
+                <div>
+                  <div style={{ display: 'inline-block', background: '#FFFC33', color: '#340057', padding: isMobile ? '10px 14px' : '16px 18px', transform: 'rotate(-2deg)', transformOrigin: 'left bottom', boxShadow: '0 8px 18px rgba(0,0,0,.25)' }}>
+                    <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: isMobile ? 20 : 26, lineHeight: 0.9, textTransform: 'uppercase' }}>{sheet.title}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', marginTop: 6 }}>{sheet.subtitle}</div>
+                  </div>
+                  <div style={{ display: 'inline-block', background: '#340057', color: '#FFFC33', fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, padding: '6px 12px', marginTop: 10, textTransform: 'uppercase' }}>Key / Légende</div>
+                </div>
+                <MapKey items={sheet.keyItems} compact={isMobile} />
+                {!isMobile && (
+                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <Compass size={74} />
+                    <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.7)', lineHeight: 1.5, maxWidth: 190 }}>THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.</div>
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: isMobile ? '8px 10px 14px' : '22px 22px 22px 12px', minWidth: 0 }}>
             <div ref={mz.frame} {...mz.bind} style={{ position: 'relative', overflow: 'hidden', borderRadius: 12, touchAction: mz.zoom > 1 ? 'none' : 'pan-y', cursor: mz.zoom > 1 ? (mz.dragging ? 'grabbing' : 'grab') : 'default', background: '#2E0A4E' }}>
               <div style={{ position: 'relative', aspectRatio: `${map.width} / ${map.height}`, transform: `translate(${mz.pan.x}px, ${mz.pan.y}px) scale(${mz.zoom})`, transformOrigin: '0 0', transition: mz.dragging ? 'none' : 'transform .35s ease', willChange: 'transform' }}>
                 {/* The map and every overlay live in ONE svg, so all layers are sampled identically (no double image). */}
@@ -632,13 +690,17 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               </div>
               {!isMobile && <RouteCard route={route} options={options} overlay />}
             </div>
+              </div>
+              {/* Vallé band along the bottom of the sheet */}
+              <div style={{ gridColumn: '1 / -1', background: '#FFFC33', color: '#340057', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '10px 22px', clipPath: 'polygon(0 22%, 100% 0, 100% 100%, 0 100%)', marginTop: -6 }}>
+                <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', marginTop: 6 }}>{sheet.foot}</span>
+                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 26, letterSpacing: '-0.02em', marginTop: 6 }}>VALLÉ<span style={{ fontSize: 9, fontFamily: MONO, fontStyle: 'normal', fontWeight: 700, letterSpacing: '.08em', marginLeft: 6, verticalAlign: 'middle' }}>ADVENATURE™ PARK</span></span>
+              </div>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
               <span>{hint}</span>
-              <span style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#FF3358', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />ROUTE STOP</span>
-                <span><span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 999, background: '#33FF74', border: '1.5px solid #FFF', marginRight: 5, verticalAlign: -1 }} />LANDMARK</span>
-                {extraLines?.map((l) => <span key={l.label}><span style={{ display: 'inline-block', width: 14, borderTop: `2px ${l.dashed ? 'dashed' : 'solid'} ${l.color}`, marginRight: 5, verticalAlign: 3 }} />{l.label}</span>)}
-              </span>
+              <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park/@-20.457614,57.4826031,17z" target="_blank" rel="noopener" style={{ color: '#FFFC33', fontWeight: 600 }}>GET DIRECTIONS · GOOGLE MAPS ↗</a>
+              <span>{footTag}</span>
             </div>
           </div>
           {isMobile && <RouteCard route={route} options={options} overlay={false} />}
