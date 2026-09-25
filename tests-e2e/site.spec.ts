@@ -8,6 +8,24 @@ function preselectRate(page: Page) {
   });
 }
 
+/** Bookings are confirmed by the API; those tests skip when it is not running (like staff-chat.spec). */
+async function apiUp(page: Page): Promise<boolean> {
+  try {
+    const r = await page.request.get('/api/health', { timeout: 4000 });
+    return r.ok();
+  } catch {
+    return false;
+  }
+}
+
+/** Add one option of a multi-option experience (zipline, quad, luge...) from its detail page. */
+async function addFirstOption(page: Page) {
+  await page.getByRole('button', { name: /Choose an option/i }).first().click();
+  const sheet = page.getByRole('dialog', { name: /Choose your/i });
+  await sheet.getByRole('button', { name: /^\+ Add$/ }).first().click();
+  await sheet.getByRole('button', { name: 'Done' }).click();
+}
+
 async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -39,8 +57,8 @@ test.describe('home', () => {
 
   test('park map pin opens a popup', async ({ page }) => {
     await page.goto('/');
-    // pin "A": Park Entrance & Reception
-    await page.getByRole('button', { name: 'A', exact: true }).click();
+    // pin "A": Park Entrance & Reception (the quad and zipline maps have their own "A" pins)
+    await page.getByRole('button', { name: 'A', exact: true }).and(page.locator('[title="Park Entrance & Reception"]')).first().click();
     await expect(page.getByText('Park Entrance & Reception')).toBeVisible();
   });
 });
@@ -72,14 +90,19 @@ test.describe('experience detail', () => {
     await page.goto('/experience/zipline');
     await expect(page.getByRole('heading', { name: /Zipline Adventures/i }).first()).toBeVisible();
     await expect(page.getByText('The Plunge · 500 m, 1 line')).toBeVisible();
-    await page.getByRole('button', { name: /Add to My Day/i }).first().click();
-    await expect(page.getByRole('button', { name: /Added to My Day/i }).first()).toBeVisible();
+    // Zipline has several tours, so the button opens the option sheet.
+    await addFirstOption(page);
+    await expect(page.getByRole('button', { name: /In My Day/i }).first()).toBeVisible();
     await expectNoHorizontalScroll(page);
   });
 
-  test('unknown id redirects to explore', async ({ page }) => {
+  test('unknown id shows the not-found page with a way back', async ({ page }) => {
+    // /experience/<id> is the old URL: 301 to /activities/<id>, which is a real 404.
     await page.goto('/experience/does-not-exist');
-    await expect(page).toHaveURL(/\/explore/);
+    await expect(page).toHaveURL(/\/activities\/does-not-exist$/);
+    await expect(page.getByRole('heading', { name: /Off the/i })).toBeVisible();
+    await page.getByRole('link', { name: /All 21 experiences/i }).click();
+    await expect(page).toHaveURL(/\/explore$/);
   });
 });
 
@@ -87,8 +110,9 @@ test.describe('booking flow', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
   test('completes a booking end to end', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
     await page.goto('/experience/zipline');
-    await page.getByRole('button', { name: /Add to My Day/i }).first().click();
+    await addFirstOption(page);
     await page.goto('/booking');
     await expect(page.getByRole('heading', { name: /Build your day/i })).toBeVisible();
     await page.getByPlaceholder(/name/i).first().fill('Playwright Guest');
@@ -104,8 +128,9 @@ test.describe('regressions', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
   test('booking again after a confirmation returns to the form', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
     await page.goto('/experience/luge');
-    await page.getByRole('button', { name: /Add to My Day/i }).first().click();
+    await addFirstOption(page);
     await page.goto('/booking');
     await page.getByPlaceholder(/name/i).first().fill('Repeat Guest');
     await page.getByPlaceholder(/email/i).first().fill('repeat@example.com');

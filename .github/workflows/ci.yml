@@ -28,6 +28,10 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      # Crawler-facing checks against the built site (prerendered head tags,
+      # structured data, real 404s, redirects). Needs no API: tests-e2e/seo.spec.ts.
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=seo
 
   docker:
     name: Docker image builds and nginx config renders

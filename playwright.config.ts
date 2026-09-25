@@ -22,18 +22,25 @@ export default defineConfig({
     // each one burning a login against the brute-force limit.
     { name: 'setup', testMatch: /staff\.setup\.ts/ },
 
+    // Crawler-facing checks (head tags, status codes, redirects): viewport-independent
+    // and no staff session needed, so they run without the setup project.
+    { name: 'seo', testMatch: /seo\.spec\.ts/, use: { ...devices['Desktop Chrome'] } },
+
     {
       name: 'desktop',
+      testIgnore: /seo\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
       dependencies: ['setup'],
     },
     {
       name: 'tablet',
+      testIgnore: /seo\.spec\.ts/,
       use: { ...devices['iPad (gen 7)'], browserName: 'chromium' },
       dependencies: ['setup'],
     },
     {
       name: 'mobile',
+      testIgnore: /seo\.spec\.ts/,
       use: { ...devices['iPhone 13'], browserName: 'chromium' },
       dependencies: ['setup'],
     },
