@@ -61,7 +61,7 @@ export const Img = forwardRef<HTMLImageElement, ImgProps>(function Img(
       src={state === 'error' ? undefined : src}
       alt={alt}
       loading={priority ? 'eager' : 'lazy'}
-      fetchPriority={priority ? 'high' : undefined}
+      {...(priority ? ({ fetchpriority: 'high' } as Record<string, string>) : {})}
       decoding="async"
       draggable={draggable ?? false}
       onLoad={(e) => {

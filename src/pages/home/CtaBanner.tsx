@@ -1,4 +1,4 @@
-import { useGoto } from '../../lib/nav';
+import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 
 /** Final CTA banner: "Hold on tight. Are you ready?" (markup: CTA banner section). */
@@ -24,30 +24,32 @@ export function CtaBanner() {
           </div>
           <p style={{ color: 'rgba(255,255,255,.94)', fontSize: 16, margin: '20px auto 0', maxWidth: '44ch', lineHeight: 1.55 }}>Pick a date, build your day, pay when you arrive. No cancellation fee, just show up wild.</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 28 }}>
-            <button
+            <a
+              href={paths.booking()}
               {...bookBind}
               className="press"
-              onClick={() => goto.booking()}
+              onClick={(e) => { e.preventDefault(); goto.booking(); }}
               style={{
-                border: 0, background: '#340057', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'inline-block', textDecoration: 'none', background: '#340057', cursor: 'pointer', fontFamily: 'inherit',
                 fontSize: 16, fontWeight: 700, color: '#FFFFFF', padding: '18px 38px', borderRadius: 999,
                 ...(bookH ? { transform: 'translateY(-2px)', boxShadow: '0 14px 30px rgba(0,0,0,.3)' } : {}),
               }}
             >
               Book your adventure →
-            </button>
-            <button
+            </a>
+            <a
+              href={paths.packages()}
               {...pkgBind}
               className="press"
-              onClick={() => goto.packages()}
+              onClick={(e) => { e.preventDefault(); goto.packages(); }}
               style={{
-                border: '2px solid #FFFFFF', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+                display: 'inline-block', textDecoration: 'none', border: '2px solid #FFFFFF', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
                 fontSize: 16, fontWeight: 700, color: '#FFFFFF', padding: '16px 32px', borderRadius: 999,
                 ...(pkgH ? { background: '#FFFFFF', color: '#FF3358' } : {}),
               }}
             >
               View packages
-            </button>
+            </a>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
-import { useGoto } from '../../lib/nav';
+import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 
@@ -54,11 +54,12 @@ export function Hero() {
           Where nature &amp; adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.
         </p>
         <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button
+          <a
+            href={paths.booking()}
             {...bind1}
-            onClick={() => goto.booking()}
+            onClick={(e) => { e.preventDefault(); goto.booking(); }}
             style={{
-              border: 0, background: '#FF3358', cursor: 'pointer', fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
+              textDecoration: 'none', background: '#FF3358', cursor: 'pointer', fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
               fontSize: 17.5, letterSpacing: '.04em', textTransform: 'uppercase', color: '#FFFFFF', padding: '17px 30px', borderRadius: 14,
               display: 'flex', alignItems: 'center', gap: 12, transform: 'rotate(-2deg)', boxShadow: '0 10px 28px rgba(255,51,88,.45)',
               ...(h1 ? { transform: 'rotate(0deg) translateY(-2px)', background: '#D91E44' } : undefined),
@@ -66,19 +67,20 @@ export function Hero() {
           >
             Start your adventure
             <span style={{ background: '#FFFC33', color: '#340057', width: 28, height: 28, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontStyle: 'normal' }}>→</span>
-          </button>
-          <button
+          </a>
+          <a
+            href={paths.explore('all')}
             {...bind2}
-            onClick={() => goto.explore('all')}
+            onClick={(e) => { e.preventDefault(); goto.explore('all'); }}
             style={{
-              border: '2px solid #FFFC33', background: 'rgba(52,0,87,.35)', backdropFilter: 'blur(6px)', cursor: 'pointer',
+              display: 'inline-block', textDecoration: 'none', border: '2px solid #FFFC33', background: 'rgba(52,0,87,.35)', backdropFilter: 'blur(6px)', cursor: 'pointer',
               fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 17.5, letterSpacing: '.04em',
               textTransform: 'uppercase', color: '#FFFC33', padding: '16px 28px', borderRadius: 14, transform: 'rotate(-2deg)',
               ...(h2 ? { background: '#FFFC33', color: '#340057', transform: 'rotate(0deg) translateY(-2px)' } : undefined),
             }}
           >
             21 experiences
-          </button>
+          </a>
         </div>
       </div>
       <div style={{ position: 'absolute', right: 'clamp(16px,3.5vw,40px)', bottom: 120, display: 'flex', flexDirection: 'column', gap: 8 }}>

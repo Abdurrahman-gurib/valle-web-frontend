@@ -1,4 +1,7 @@
-import { Navigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import NotFoundPage from './NotFound';
+import { abs, breadcrumbs, useSeo } from '../lib/seo';
+import { paths } from '../lib/nav';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useHover } from '../hooks/useHover';
@@ -23,9 +26,20 @@ export default function RestaurantPage() {
   const [backH, backBind] = useHover();
   const [otherH, otherBind] = useHover();
 
-  if (id !== 'chamouze' && id !== 'citronelle') return <Navigate to="/dine/chamouze" replace />;
+  const valid = id === 'chamouze' || id === 'citronelle';
+  const r = valid ? RESTOS[id as string] : undefined;
+  useSeo(r ? {
+    title: `${r.name} · ${r.badge.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())} · VALLÉ Advenature™ Park`,
+    description: r.tag + ' ' + r.cuisine + '. ' + r.hours + '.',
+    canonicalPath: paths.resto(id as string),
+    image: r.img,
+    jsonLd: [
+      breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Dine', path: '/#dine' }, { name: r.name, path: paths.resto(id as string) }]),
+      { '@context': 'https://schema.org', '@type': 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: '+230 660 44 77', address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, hasMenu: abs(r.menuPdf), openingHours: r.hours },
+    ],
+  } : { title: 'Restaurant not found · VALLÉ Advenature™ Park', description: 'That restaurant is not in the valley.', noindex: true });
+  if (!r) return <NotFoundPage what="that restaurant" />;
 
-  const r = RESTOS[id] || RESTOS.chamouze;
   const otherId = id === 'chamouze' ? 'citronelle' : 'chamouze';
   const other = RESTOS[otherId];
   const rGallery = (r.gallery || []).map((src) => ({ src, alt: r.name }));
@@ -34,14 +48,15 @@ export default function RestaurantPage() {
 
   return (
     <main ref={ref} style={{ maxWidth: 1180, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
-      <button
-        onClick={() => goto.dine()}
+      <a
+        href={paths.dine()}
+        onClick={(e) => { e.preventDefault(); goto.dine(); }}
         {...backBind}
         style={{
-          border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit',
+          display: 'inline-block', textDecoration: 'none', cursor: 'pointer', fontFamily: 'inherit',
           fontSize: 14, fontWeight: 700, color: backH ? '#FF3358' : '#7333FF', padding: '8px 0',
         }}
-      >← All dining</button>
+      >← All dining</a>
 
       {/* Hero header */}
       <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(52vh,480px)', minHeight: 300, background: '#EBE2FF', marginTop: 12 }}>
@@ -157,11 +172,12 @@ export default function RestaurantPage() {
             textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
           }}>Also in the valley</h2>
         </div>
-        <div
-          onClick={() => goto.resto(otherId)}
+        <a
+          href={paths.resto(otherId)}
+          onClick={(e) => { e.preventDefault(); goto.resto(otherId); }}
           {...otherBind}
           style={{
-            cursor: 'pointer', display: 'flex', flexWrap: 'wrap', background: '#FFFFFF',
+            cursor: 'pointer', color: 'inherit', textDecoration: 'none', display: 'flex', flexWrap: 'wrap', background: '#FFFFFF',
             borderRadius: 20, overflow: 'hidden',
             boxShadow: otherH ? '0 18px 36px -16px rgba(52,0,87,.4)' : '0 0 0 1.5px #EBE2FF',
             transition: 'transform .25s ease, box-shadow .25s ease',
@@ -176,7 +192,7 @@ export default function RestaurantPage() {
             <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}>{other.tag}</div>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: '#7333FF', marginTop: 12 }}>Visit →</div>
           </div>
-        </div>
+        </a>
       </div>
     </main>
   );

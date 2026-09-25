@@ -1,3 +1,4 @@
+import { breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { BookingRequest, SelLine } from '../types';
@@ -249,6 +250,7 @@ function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) 
 }
 
 export default function BookingPage() {
+  useSeo({ title: 'Book your day · VALLÉ Advenature™ Park', description: 'Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.', canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
   const app = useApp();

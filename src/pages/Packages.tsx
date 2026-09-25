@@ -1,3 +1,4 @@
+import { breadcrumbs, useSeo } from '../lib/seo';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
@@ -215,7 +216,7 @@ function VipImage({ onOpen }: { onOpen: () => void }) {
   const [h, bind] = useHover();
   return (
     <div {...bind} onClick={onOpen} style={{ flex: 1, minWidth: 'min(100%,280px)', minHeight: 300, position: 'relative', cursor: 'zoom-in', overflow: 'hidden' }}>
-      <Img src="/images/frame-1872-1.avif" alt="VIP Ultimate package" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .6s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }} />
+      <Img src="/images/vip-ultimate-buggy-coloured-earth.avif" alt="VIP Ultimate package" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .6s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }} />
       <span style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>VIEW DETAILS ↗</span>
     </div>
   );
@@ -275,6 +276,7 @@ const rateBtn = (on: boolean): CSSProperties => ({
 });
 
 export default function PackagesPage() {
+  useSeo({ title: 'Packages & 2026 pricelist · VALLÉ Advenature™ Park', description: 'Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.', canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
   const catalog = useCatalog();
   const { rate, rateTag, setRate } = useApp();
   const goto = useGoto();
@@ -301,7 +303,7 @@ export default function PackagesPage() {
 
   const vipPack: PackModalData = {
     name: 'VIP Ultimate', badge: 'ALL INCLUSIVE', color: '#33FF74', fg: '#340057',
-    img: '/images/frame-1872-1.avif',
+    img: '/images/vip-ultimate-buggy-coloured-earth.avif',
     hero: 'Advenature Flight, private guide, butler service',
     items: catalog.PACKS.vip, note: 'Add on: full-day cinematic video, Rs 20,000.',
     single: 'Rs 49,225', dbl: 'Rs 75,175',

@@ -1,4 +1,7 @@
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import NotFoundPage from './NotFound';
+import { abs, breadcrumbs, useSeo } from '../lib/seo';
+import { paths } from '../lib/nav';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
@@ -64,7 +67,7 @@ function RelatedCard({ a }: { a: CardModel }) {
         )}
       </div>
       <div style={{ padding: '13px 15px 15px' }}>
-        <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 17, textTransform: 'uppercase' }}>{a.name}</div>
+        <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 17, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: MONO, fontSize: 11, color: 'rgba(52,0,87,.6)' }}>
           <span>{a.dur}</span>
           <span style={{ fontWeight: 700, color: '#340057' }}>{a.priceLabel}</span>
@@ -89,7 +92,24 @@ export default function DetailPage() {
   const [hCta, bCta] = useHover();
 
   const act = catalog.ACTS.find((a) => a.id === id);
-  if (!act) return <Navigate to="/explore" replace />;
+  const catName = act ? catalog.CAT[act.cat].name : '';
+  const rp = act ? catalog.RATEP[act.id] : undefined;
+  useSeo(act ? {
+    title: `${act.name} · ${catName} at VALLÉ Advenature™ Park, Mauritius`,
+    description: act.blurb,
+    canonicalPath: paths.detail(act.id),
+    image: act.img,
+    jsonLd: [
+      breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, { name: catName, path: paths.explore(act.cat) }, { name: act.name, path: paths.detail(act.id) }]),
+      {
+        '@context': 'https://schema.org', '@type': 'TouristAttraction', name: act.name, description: act.blurb,
+        image: abs(act.img), url: abs(paths.detail(act.id)), isAccessibleForFree: act.mode === 'entry',
+        containedInPlace: { '@type': 'TouristAttraction', name: 'VALLÉ Advenature™ Park', address: { '@type': 'PostalAddress', addressLocality: 'Chamouny', addressCountry: 'MU' } },
+        ...(act.mode === 'pp' || act.mode === 'flat' ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'MUR', lowPrice: rp ? rp[0] : act.price, highPrice: rp ? rp[1] : act.price, url: abs(paths.booking()), availability: 'https://schema.org/InStock' } } : {}),
+      },
+    ],
+  } : { title: 'Experience not found · VALLÉ Advenature™ Park', description: 'That experience is not in the valley.', noindex: true });
+  if (!act) return <NotFoundPage what="that experience" />;
 
   const d = card(act);
   const related = catalog.ACTS.filter((a) => a.cat === act.cat && a.id !== act.id).slice(0, 4).map(card);
@@ -304,6 +324,19 @@ export default function DetailPage() {
           </div>
         </div>
       )}
+
+      <nav aria-label="Related pages" style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>SEE ALSO</span>
+        {([
+          [`All ${catName.toLowerCase()} experiences`, paths.explore(act.cat)],
+          ['Packages & 2026 prices', paths.packages()],
+          ['Book your day', paths.booking()],
+          ['Plan your visit', paths.plan()],
+          ['Lunch at Le Chamouzé', paths.resto('chamouze')],
+        ] as [string, string][]).map(([label, href]) => (
+          <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} →</Link>
+        ))}
+      </nav>
 
       <div style={{ marginTop: 'clamp(44px,6vw,72px)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>

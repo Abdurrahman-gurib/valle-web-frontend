@@ -16,7 +16,7 @@ export const sentryEnabled = Boolean(dsn);
 if (dsn) {
   Sentry.init({
     dsn,
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || (location.hostname === 'localhost' ? 'development' : 'production'),
+    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || (typeof location !== 'undefined' && location.hostname === 'localhost' ? 'development' : 'production'),
     release: import.meta.env.VITE_SENTRY_RELEASE || undefined,
     integrations: [
       // Page loads and route changes as transactions, named by route pattern.

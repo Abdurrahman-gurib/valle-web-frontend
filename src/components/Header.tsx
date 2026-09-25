@@ -2,44 +2,50 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
-import { useGoto } from '../lib/nav';
+import { paths, useGoto } from '../lib/nav';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useHover } from '../hooks/useHover';
 import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
 
-function NavBtn({ label, onClick, color, chev }: { label: string; onClick: () => void; color: string; chev?: string }) {
+function NavBtn({ label, onClick, color, chev, href }: { label: string; onClick: () => void; color: string; chev?: string; href?: string }) {
   const [h, bind] = useHover();
+  const style = {
+    border: 0, background: h ? 'rgba(255,51,88,.14)' : 'transparent', cursor: 'pointer', textDecoration: 'none',
+    fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color, padding: '10px 14px',
+    borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+  } as const;
+  // Real links get a real href (crawlable); menu toggles stay buttons.
+  if (href) {
+    return (
+      <a {...bind} href={href} onClick={(e) => { e.preventDefault(); onClick(); }} style={style}>
+        {label}
+      </a>
+    );
+  }
   return (
-    <button
-      {...bind}
-      onClick={onClick}
-      style={{
-        border: 0, background: h ? 'rgba(255,51,88,.14)' : 'transparent', cursor: 'pointer',
-        fontFamily: 'inherit', fontSize: 15, fontWeight: 600, color, padding: '10px 14px',
-        borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
-      }}
-    >
+    <button {...bind} onClick={onClick} aria-expanded={chev === '▲'} style={style}>
       {label}
       {chev && <span style={{ fontSize: 9, opacity: 0.7 }}>{chev}</span>}
     </button>
   );
 }
 
-function MegaLink({ name, onClick, hoverColor = '#FF3358' }: { name: string; onClick: () => void; hoverColor?: string }) {
+function MegaLink({ name, onClick, hoverColor = '#FF3358', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
   const [h, bind] = useHover();
   return (
-    <div
+    <a
       {...bind}
-      onClick={onClick}
+      href={href}
+      onClick={(e) => { e.preventDefault(); onClick(); }}
       style={{
-        cursor: 'pointer', fontSize: 15, fontWeight: 500, color: h ? hoverColor : '#340057',
+        display: 'block', textDecoration: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: h ? hoverColor : '#340057',
         padding: '5.5px 0', transform: h ? 'translateX(3px)' : 'none', transition: 'transform .15s ease',
       }}
     >
       {name}
-    </div>
+    </a>
   );
 }
 
@@ -125,26 +131,28 @@ export function Header() {
           maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', height: 70,
           display: 'flex', alignItems: 'center', gap: 'clamp(12px,2.5vw,32px)',
         }}>
-          <div
-            onClick={go(goto.home)}
+          <a
+            href="/"
+            aria-label="VALLÉ Advenature Park, home"
+            onClick={(e) => { e.preventDefault(); go(goto.home)(); }}
             style={{
-              cursor: 'pointer', display: 'flex', flexDirection: 'column', lineHeight: 1,
+              textDecoration: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', lineHeight: 1,
               userSelect: 'none', transform: 'rotate(-4deg)', flexShrink: 1, minWidth: 0,
             }}
           >
             <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 27, letterSpacing: '-0.01em', color: headerFg }}>VALLÉ</span>
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 8, fontWeight: 600, letterSpacing: '.22em', color: headerFg, opacity: 0.75, marginTop: 2 }}>ADVENATURE™ PARK</span>
-          </div>
+          </a>
 
           {!isMobile && (
             <>
               <nav style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}>
                 <NavBtn label="Explore" chev={megaOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaOpen(!megaOpen); setMegaPkgOpen(false); }} />
                 <NavBtn label="Packages" chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaPkgOpen(!megaPkgOpen); setMegaOpen(false); }} />
-                <NavBtn label="Plan your visit" color={headerFg} onClick={go(goto.plan)} />
-                <NavBtn label="Dine" color={headerFg} onClick={go(goto.dine)} />
-                <NavBtn label="Our story" color={headerFg} onClick={go(goto.story)} />
-                <NavBtn label="Vacancies" color={headerFg} onClick={go(gotoVacancies)} />
+                <NavBtn label="Plan your visit" href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
+                <NavBtn label="Dine" href={paths.dine()} color={headerFg} onClick={go(goto.dine)} />
+                <NavBtn label="Our story" href={paths.story()} color={headerFg} onClick={go(goto.story)} />
+                <NavBtn label="Vacancies" href={paths.vacancies()} color={headerFg} onClick={go(gotoVacancies)} />
               </nav>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <button
@@ -263,7 +271,7 @@ export function Header() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '2px 24px' }}>
                   {pkgLinks.map(([name, key]) => (
-                    <MegaLink key={key} name={name} onClick={go(() => goto.packages(key))} />
+                    <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
                   ))}
                 </div>
               </div>
@@ -287,27 +295,27 @@ export function Header() {
             <StripesSm />
             <div style={{ maxWidth: 1320, margin: '0 auto', padding: '30px clamp(16px,3.5vw,40px) 36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 'clamp(20px,3vw,44px)' }}>
               <div>
-                <div onClick={go(() => goto.explore('adventure'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14 }}>ADVENTURE →</div>
-                {linkList('adventure').map((a) => <MegaLink key={a.id} name={a.name} onClick={go(() => goto.detail(a.id))} />)}
+                <a href={paths.explore('adventure')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('adventure'))(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14}}>ADVENTURE →</a>
+                {linkList('adventure').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} />)}
               </div>
               <div>
                 <div onClick={go(() => goto.explore('nature'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#340057', marginBottom: 14 }}>
                   <span style={{ color: '#33FF74' }}>●</span> NATURE →
                 </div>
-                {linkList('nature').map((a) => <MegaLink key={a.id} name={a.name} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
+                {linkList('nature').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
               </div>
               <div>
                 <div onClick={go(() => goto.explore('kids'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#340057', marginBottom: 14 }}>
                   <span style={{ color: '#FFFC33', textShadow: '0 0 1px rgba(52,0,87,.4)' }}>●</span> KIDS PARK →
                 </div>
-                {linkList('kids').map((a) => <MegaLink key={a.id} name={a.name} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
+                {linkList('kids').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
               </div>
               <div>
-                <div onClick={go(() => goto.explore('tours'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', marginBottom: 14 }}>TOURS &amp; GROUPS →</div>
-                {linkList('tours').map((a) => <MegaLink key={a.id} name={a.name} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
-                <div onClick={go(() => goto.packages())} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '20px 0 0' }}>PACKAGES →</div>
-                <div onClick={go(goto.team)} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0' }}>TEAM BUILDING →</div>
-                <div onClick={go(goto.dine)} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0' }}>DINE →</div>
+                <a href={paths.explore('tours')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('tours'))(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', marginBottom: 14}}>TOURS &amp; GROUPS →</a>
+                {linkList('tours').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
+                <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '20px 0 0'}}>PACKAGES →</a>
+                <a href={paths.team()} onClick={(e) => { e.preventDefault(); go(goto.team)(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0'}}>TEAM BUILDING →</a>
+                <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0'}}>DINE →</a>
               </div>
               <div
                 {...bindZip}
@@ -364,31 +372,32 @@ export function Header() {
               ['Kids Park', 'kids', '#FFFC33', '#340057', 1],
               ['Tours & Groups', 'tours', '#7333FF', '#FFFFFF', -1],
             ] as [string, string, string, string, number][]).map(([label, cat, bg, fg, rot]) => (
-              <div
+              <a
                 key={cat}
-                onClick={go(() => goto.explore(cat))}
+                href={paths.explore(cat)}
+                onClick={(e) => { e.preventDefault(); go(() => goto.explore(cat))(); }}
                 className="press"
                 style={{
-                  cursor: 'pointer', background: bg, color: fg, borderRadius: 12, padding: '13px 14px',
+                  display: 'block', textDecoration: 'none', cursor: 'pointer', background: bg, color: fg, borderRadius: 12, padding: '13px 14px',
                   fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 15,
                   textTransform: 'uppercase', transform: `rotate(${rot}deg)`,
                 }}
               >
                 {label}
-              </div>
+              </a>
             ))}
           </div>
-          <div onClick={go(goto.home)} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.1s' }}>Home<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
-          <div onClick={go(() => goto.explore('all'))} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.14s' }}>All 21 experiences<span style={{ color: '#FFFC33' }}>→</span></div>
-          <div onClick={go(() => goto.packages())} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.16s' }}>Packages &amp; team building<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
+          <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.1s' }}>Home<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
+          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.14s' }}>All 21 experiences<span style={{ color: '#FFFC33' }}>→</span></a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.16s' }}>Packages &amp; team building<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
           <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>
             <span style={{ display: 'flex', gap: 7 }}>Prices shown:<span style={{ color: 'rgba(255,255,255,.72)' }}>{app.rateWord}</span></span>
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>{app.rateTag} ⇄</span>
           </div>
-          <div onClick={go(goto.plan)} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>Plan your visit<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
-          <div onClick={go(goto.dine)} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.22s' }}>Dine<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
-          <div onClick={go(goto.story)} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.26s' }}>Our story<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
-          <div onClick={go(gotoVacancies)} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.28s' }}>Vacancies<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></div>
+          <a href={paths.plan()} onClick={(e) => { e.preventDefault(); go(goto.plan)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>Plan your visit<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
+          <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.22s' }}>Dine<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
+          <a href={paths.story()} onClick={(e) => { e.preventDefault(); go(goto.story)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.26s' }}>Our story<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
+          <a href={paths.vacancies()} onClick={(e) => { e.preventDefault(); go(gotoVacancies)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.28s' }}>Vacancies<span style={{ color: 'rgba(255,252,51,.7)' }}>→</span></a>
           <div onClick={() => { setMobileNavOpen(false); app.openDay(); }} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.3s' }}>
             <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               My Day

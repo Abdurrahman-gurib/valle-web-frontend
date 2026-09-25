@@ -1,3 +1,4 @@
+import { useSeo } from '../../lib/seo';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../store/StaffAuth';
@@ -34,6 +35,7 @@ function Field({ id, type, value, onChange, placeholder, autoComplete, disabled 
 }
 
 export default function StaffLogin() {
+  useSeo({ title: 'Staff sign in · VALLÉ', description: 'Vallé back office.', noindex: true });
   const auth = useStaffAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

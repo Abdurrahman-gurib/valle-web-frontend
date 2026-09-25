@@ -1,4 +1,4 @@
-import { useGoto } from '../../lib/nav';
+import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import type { CatKey } from '../../types';
@@ -49,11 +49,12 @@ function WayCardEl({ w }: { w: WayCard }) {
   const goto = useGoto();
   const [h, bind] = useHover();
   return (
-    <div
+    <a
+      href={paths.explore(w.cat)}
       {...bind}
-      onClick={() => goto.explore(w.cat)}
+      onClick={(e) => { e.preventDefault(); goto.explore(w.cat); }}
       style={{
-        cursor: 'pointer', position: 'relative', borderRadius: 18, overflow: 'hidden', height: 400, background: w.bg,
+        cursor: 'pointer', display: 'block', color: 'inherit', textDecoration: 'none', position: 'relative', borderRadius: 18, overflow: 'hidden', height: 400, background: w.bg,
         transition: 'transform .25s ease, box-shadow .25s ease',
         ...(h ? { transform: 'translateY(-6px) rotate(-1deg)', boxShadow: '0 26px 50px -18px rgba(52,0,87,.5)' } : undefined),
       }}
@@ -66,7 +67,7 @@ function WayCardEl({ w }: { w: WayCard }) {
         <div style={{ fontSize: 13.5, opacity: w.subOpacity, marginTop: 7, lineHeight: 1.45 }}>{w.sub}</div>
         <div style={{ marginTop: 12, fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, letterSpacing: '.08em', borderTop: '1px dashed ' + w.dash, paddingTop: 10, display: 'inline-block' }}>{w.foot}</div>
       </div>
-    </div>
+    </a>
   );
 }
 

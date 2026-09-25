@@ -1,21 +1,22 @@
 import { Stripes } from './Stripes';
-import { useGoto } from '../lib/nav';
+import { paths, useGoto } from '../lib/nav';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 
-function FootLink({ label, onClick, hoverColor }: { label: string; onClick: () => void; hoverColor: string }) {
+function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick: () => void; hoverColor: string; href: string }) {
   const [h, bind] = useHover();
   return (
-    <div
+    <a
       {...bind}
-      onClick={onClick}
+      href={href}
+      onClick={(e) => { e.preventDefault(); onClick(); }}
       style={{
-        cursor: 'pointer', fontSize: 15, fontWeight: 500, padding: '7px 0', opacity: h ? 1 : 0.92,
+        display: 'block', textDecoration: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, padding: '7px 0', opacity: h ? 1 : 0.92,
         color: h ? hoverColor : '#FFFFFF',
       }}
     >
       {label}
-    </div>
+    </a>
   );
 }
 
@@ -65,13 +66,17 @@ export function Footer() {
           <div>
             <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>EXPLORE</div>
             <div style={{ marginTop: 10 }}>
-              <FootLink label="Adventure" onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
-              <FootLink label="Nature" onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
-              <FootLink label="Kids Park" onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />
-              <FootLink label="Tours & Groups" onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
-              <FootLink label="Packages" onClick={() => goto.packages()} hoverColor="#FFFC33" />
-              <FootLink label="Team building" onClick={() => goto.team()} hoverColor="#FFFC33" />
-              <FootLink label="Restaurants" onClick={() => goto.dine()} hoverColor="#FFFC33" />
+              <FootLink label="Adventure" href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
+              <FootLink label="Nature" href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
+              <FootLink label="Kids Park" href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />
+              <FootLink label="Tours & Groups" href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
+              <FootLink label="Packages" href={paths.packages()} onClick={() => goto.packages()} hoverColor="#FFFC33" />
+              <FootLink label="Team building" href={paths.team()} onClick={() => goto.team()} hoverColor="#FFFC33" />
+              <FootLink label="Restaurants" href={paths.dine()} onClick={() => goto.dine()} hoverColor="#FFFC33" />
+              <FootLink label="Le Chamouzé" href={paths.resto('chamouze')} onClick={() => goto.resto('chamouze')} hoverColor="#FFFC33" />
+              <FootLink label="La Citronelle" href={paths.resto('citronelle')} onClick={() => goto.resto('citronelle')} hoverColor="#FFFC33" />
+              <FootLink label="Book your day" href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FF3358" />
+              <FootLink label="Careers" href={paths.vacancies()} onClick={() => goto.vacancies()} hoverColor="#FFFC33" />
             </div>
           </div>
           <div>

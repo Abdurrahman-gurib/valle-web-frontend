@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import NotFoundPage from './pages/NotFound';
 import { CatalogProvider } from './store/CatalogContext';
 import { AppStoreProvider } from './store/AppStore';
 import { StaffAuthProvider } from './store/StaffAuth';
@@ -21,6 +22,12 @@ import VacancyDetailPage from './pages/VacancyDetail';
 import StaffLogin from './pages/staff/Login';
 import StaffDashboard from './pages/staff/Dashboard';
 import HrDashboard from './pages/hr/Dashboard';
+
+/** The first version of this site used /experience/:id; nginx 301s those, this covers client-side links. */
+function LegacyExperienceRedirect() {
+  const { id = '' } = useParams<{ id: string }>();
+  return <Navigate to={'/activities/' + id} replace />;
+}
 
 /** Scrolls to top on route change; scrolls to #hash targets with header offset. */
 function ScrollManager() {
@@ -96,13 +103,14 @@ export default function App() {
           <Route element={<PublicShell />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/experience/:id" element={<DetailPage />} />
+            <Route path="/activities/:id" element={<DetailPage />} />
+            <Route path="/experience/:id" element={<LegacyExperienceRedirect />} />
             <Route path="/packages" element={<PackagesPage />} />
             <Route path="/dine/:id" element={<RestaurantPage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/vacancies" element={<VacanciesPage />} />
             <Route path="/vacancies/:slug" element={<VacancyDetailPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </AppStoreProvider>

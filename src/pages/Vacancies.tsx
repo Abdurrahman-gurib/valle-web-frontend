@@ -1,3 +1,4 @@
+import { breadcrumbs, useSeo } from '../lib/seo';
 import { useCallback, useEffect, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
@@ -135,6 +136,7 @@ function PinkLink({ label, href }: { label: string; href: string }) {
 }
 
 export default function VacanciesPage() {
+  useSeo({ title: 'Careers · Work in the valley · VALLÉ Advenature™ Park', description: 'Open roles at Vallé Advenature Park in Chamouny, Mauritius: guides, hospitality, mechanics and more. Apply online.', canonicalPath: '/vacancies', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }])] });
   const ref = useReveal<HTMLElement>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();

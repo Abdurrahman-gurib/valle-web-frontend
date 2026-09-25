@@ -1,3 +1,4 @@
+import { useSeo } from '../../lib/seo';
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../store/StaffAuth';
@@ -118,6 +119,7 @@ function Shell({ children, right, subtitle, narrow }: {
 }
 
 export default function HrDashboard() {
+  useSeo({ title: 'Careers admin · VALLÉ staff', description: 'Vallé back office.', noindex: true });
   const auth = useStaffAuth();
   const navigate = useNavigate();
   const narrow = useIsMobile(NARROW);

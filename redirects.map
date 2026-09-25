@@ -1,0 +1,85 @@
+# Old vallepark.com (WordPress / WooCommerce) paths -> their replacement on this
+# site. Loaded by nginx as `map $uri $redirect_to` (see nginx.conf.template).
+# Keys are matched without the query string and without a trailing slash.
+# A value of "GONE" answers 410: the page existed and has no equivalent.
+#
+# Regenerate the old list from the Wayback Machine CDX API when in doubt:
+#   https://web.archive.org/cdx/search/cdx?url=vallepark.com&matchType=domain&collapse=urlkey
+
+# experience pages, first version of this site
+~^/experience/([a-z0-9-]+)$                            /activities/$1;
+
+# adventure activities
+/adventure-activities                                  /explore?cat=adventure;
+/adventure-activities/bicycle-zipline                  /activities/bicycle;
+/adventure-activities/buggy                            /activities/buggy;
+/adventure-activities/group-excursion-expedition       /activities/group;
+/adventure-activities/mountain-luge-kart               /activities/luge;
+/adventure-activities/nepalese-bridge                  /activities/nepalese;
+/adventure-activities/private-offroad-expedition       /activities/private;
+/adventure-activities/quad-bike                        /activities/quad;
+/adventure-activities/the-peak-viewpoint-tour          /activities/peak;
+/adventure-activities/zipline                          /activities/zipline;
+
+# nature attractions
+/nature-attractions                                    /explore?cat=nature;
+/nature-attractions/23-coloured-earth                  /activities/coloured;
+/nature-attractions/animals-park                       /activities/animals;
+/nature-attractions/endemic-plants                     /activities/trees;
+/nature-attractions/waterfalls                         /activities/waterfalls;
+/nature-attractions/zen-rock-garden                    /activities/rock;
+
+# WooCommerce products and categories
+/product-category/adventure                            /explore?cat=adventure;
+/product-category/kids-park                            /explore?cat=kids;
+/product-category/nature                               /explore?cat=nature;
+/product-category/restaurants                          /#dine;
+/product/23-coloured-earth                             /activities/coloured;
+/product/animals                                       /activities/animals;
+/product/bicycle-zipline-mauritius                     /activities/bicycle;
+/product/buggy                                         /activities/buggy;
+/product/dream-trip-nature-activities-mauritius        /packages;
+/product/endemic-trees                                 /activities/trees;
+/product/group-expedition-tour-mauritius               /activities/group;
+/product/kids-park                                     /explore?cat=kids;
+/product/la-bigarade                                   /#dine;
+/product/le-chamouze-restaurant-mauritius              /dine/chamouze;
+/product/mauritius-nepalese-bridge                     /activities/nepalese;
+/product/mountain-luge-kart-mauritius                  /activities/luge;
+/product/packages                                      /packages;
+/product/private-expeditions-tour-mauritius            /activities/private;
+/product/quad-adventure-track                          /activities/quad;
+/product/rock-garden                                   /activities/rock;
+/product/team-building-mauritius                       /packages#team;
+/product/waterfalls                                    /activities/waterfalls;
+/product/zipline-adventure-mauritius                   /activities/zipline;
+
+# packages, restaurants, company pages
+/mauritius-activity-packages                           /packages;
+/packages/light-package                                /packages#ls;
+/packages/standard-package                             /packages#ls;
+/packages/bronze-package                               /packages#ex;
+/packages/silver-package                               /packages#ex;
+/packages/gold-package                                 /packages#ex;
+/packages/platinum-package                             /packages#ex;
+/team-building-packages-mauritius                      /packages#team;
+/restaurants/la-citronelle                             /dine/citronelle;
+/restaurants/le-chamouze                               /dine/chamouze;
+/kids-park                                             /explore?cat=kids;
+/about-us                                              /#story;
+/contact                                               /#plan;
+/book-your-adventure                                   /booking;
+/career                                                /vacancies;
+~^/careers(/.*)?$                                      /vacancies;
+
+# WordPress and shop leftovers with no equivalent
+/cart                                                  GONE;
+/my-account                                            GONE;
+/feed                                                  GONE;
+~^/author/                                             GONE;
+~^/job-category/                                       GONE;
+~^/wp-admin                                            GONE;
+~^/wp-content/                                         GONE;
+~^/wp-json                                             GONE;
+~^/cgi-bin                                             GONE;
+~^/\.well-known/(nodeinfo|openid-configuration)$       GONE;

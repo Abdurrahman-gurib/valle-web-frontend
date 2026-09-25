@@ -1,9 +1,10 @@
+import { breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
 import { useCardModel, type CardModel } from '../lib/card';
-import { useGoto } from '../lib/nav';
+import { paths, useGoto } from '../lib/nav';
 import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -107,7 +108,7 @@ function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
           <div style={{
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
             fontSize: 20, textTransform: 'uppercase',
-          }}>{a.name}</div>
+          }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
           <div title="Pulse level" style={{
             fontSize: '10.5px', fontWeight: 700, letterSpacing: '.13em', color: a.pulseColor, whiteSpace: 'nowrap',
           }}>{a.pulseStr}</div>
@@ -158,6 +159,16 @@ export default function ExplorePage() {
   const cat = params.get('cat') || 'all';
   const q = params.get('q') || '';
   const pulseLvl = params.get('pulse') || 'any';
+  const catName = cat !== 'all' && catalog.CAT[cat as keyof typeof catalog.CAT] ? catalog.CAT[cat as keyof typeof catalog.CAT].name : '';
+  useSeo({
+    title: (catName ? `${catName} experiences` : `All ${catalog.ACTS.length} experiences`) + ' · VALLÉ Advenature™ Park',
+    description: catName
+      ? `${catName} at Vallé Advenature Park, Chamouny: every ${catName.toLowerCase()} experience with prices, age limits and thrill level.`
+      : 'Every experience in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.',
+    canonicalPath: catName ? `/explore?cat=${cat}` : '/explore',
+    noindex: Boolean(q) || pulseLvl !== 'any',
+    jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, ...(catName ? [{ name: catName, path: `/explore?cat=${cat}` }] : [])])],
+  });
 
   /** Detail's "← All experiences" reads this to come back to the same filtered list. */
   useEffect(() => {

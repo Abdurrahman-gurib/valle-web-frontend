@@ -1,5 +1,5 @@
 import { useCatalog } from '../../store/CatalogContext';
-import { useGoto } from '../../lib/nav';
+import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 
@@ -16,6 +16,9 @@ export function DineTeasers() {
 
   const cardBase = {
     cursor: 'pointer',
+    display: 'block',
+    color: 'inherit',
+    textDecoration: 'none',
     position: 'relative',
     borderRadius: 20,
     overflow: 'hidden',
@@ -39,9 +42,10 @@ export function DineTeasers() {
         <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>04 · DINE IN THE VALLEY</span>
       </div>
       <div data-reveal-kids="1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16 }}>
-        <div
+        <a
+          href={paths.resto('chamouze')}
           {...chamBind}
-          onClick={() => goto.resto('chamouze')}
+          onClick={(e) => { e.preventDefault(); goto.resto('chamouze'); }}
           style={{ ...cardBase, ...(chamH ? cardHover : {}) }}
         >
           <Img src={cham.img} alt="Le Chamouzé restaurant overlooking the waterfall" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -52,10 +56,11 @@ export function DineTeasers() {
             <div style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5, marginTop: 8, maxWidth: '44ch' }}>Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · menus Rs 700 – 4,250.</div>
             <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: '#FFFC33', marginTop: 10 }}>SEE THE RESTAURANT →</div>
           </div>
-        </div>
-        <div
+        </a>
+        <a
+          href={paths.resto('citronelle')}
           {...citBind}
-          onClick={() => goto.resto('citronelle')}
+          onClick={(e) => { e.preventDefault(); goto.resto('citronelle'); }}
           style={{ ...cardBase, ...(citH ? cardHover : {}) }}
         >
           <Img src={cit.img} alt="La Citronelle riverside restaurant" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -66,7 +71,7 @@ export function DineTeasers() {
             <div style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5, marginTop: 8, maxWidth: '44ch' }}>Refined Indian cuisine in a rustic lakeside setting. 11:30 – 16:30 · à la carte from Rs 600.</div>
             <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: '#FFFC33', marginTop: 10 }}>SEE THE RESTAURANT →</div>
           </div>
-        </div>
+        </a>
       </div>
     </section>
   );

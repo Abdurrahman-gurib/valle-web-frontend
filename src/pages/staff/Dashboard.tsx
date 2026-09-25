@@ -1,3 +1,4 @@
+import { useSeo } from '../../lib/seo';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { StaffStats } from '../../types';
@@ -66,6 +67,7 @@ function SignOutBtn({ onClick, busy }: { onClick: () => void; busy: boolean }) {
 }
 
 export default function StaffDashboard() {
+  useSeo({ title: 'Reservations · VALLÉ staff', description: 'Vallé back office.', noindex: true });
   const auth = useStaffAuth();
   const navigate = useNavigate();
   const narrow = useIsMobile(700);

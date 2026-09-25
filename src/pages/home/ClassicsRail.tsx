@@ -4,6 +4,7 @@ import { useApp } from '../../store/AppStore';
 import { useCardModel, type CardModel } from '../../lib/card';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
+import { paths } from '../../lib/nav';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
@@ -46,7 +47,7 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
       </div>
       <div style={{ padding: '16px 18px 18px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 21, textTransform: 'uppercase' }}>{a.name}</div>
+          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 21, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
           <div title="Pulse level" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: a.pulseColor, whiteSpace: 'nowrap' }}>{a.pulseStr}</div>
         </div>
         <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40 }}>{a.blurb}</div>

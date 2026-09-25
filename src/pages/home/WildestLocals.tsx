@@ -1,4 +1,4 @@
-import { useGoto } from '../../lib/nav';
+import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 
@@ -35,11 +35,12 @@ export function WildestLocals() {
           Century-old giant tortoises, curious deer and tropical birdlife roam the valley floor.
           Say bonzour on your way to the ziplines.
         </p>
-        <button
+        <a
+          href={paths.detail('animals')}
           {...bind}
-          onClick={() => goto.detail('animals')}
+          onClick={(e) => { e.preventDefault(); goto.detail('animals'); }}
           style={{
-            marginTop: 24, border: 0, background: '#33FF74', cursor: 'pointer', fontFamily: 'inherit',
+            display: 'inline-block', textDecoration: 'none', marginTop: 24, background: '#33FF74', cursor: 'pointer', fontFamily: 'inherit',
             fontSize: 15, fontWeight: 700, color: '#340057', padding: '15px 30px', borderRadius: 999,
             transform: h ? 'translateY(-2px)' : 'none',
             boxShadow: h ? '0 14px 30px rgba(0,0,0,.35)' : 'none',
@@ -47,7 +48,7 @@ export function WildestLocals() {
           }}
         >
           Meet the animals →
-        </button>
+        </a>
       </div>
     </section>
   );

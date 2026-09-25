@@ -311,6 +311,7 @@ export interface VacancyCard {
   summary: string;
   salaryRange: string;
   closesOn: string | null;    // ISO date, or null when the role stays open
+  postedOn?: string;          // ISO date the role was published (JobPosting.datePosted)
 }
 
 /** GET /api/vacancies/:slug. `requirements` is plain text, one per line. */

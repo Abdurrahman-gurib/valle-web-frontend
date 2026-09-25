@@ -1,3 +1,4 @@
+import { abs, breadcrumbs, useSeo } from '../lib/seo';
 import {
   useCallback, useEffect, useMemo, useState,
   type CSSProperties, type FormEvent, type ReactNode,
@@ -288,6 +289,22 @@ export default function VacancyDetailPage() {
 
   const [vacancy, setVacancy] = useState<VacancyDetail | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
+  useSeo(vacancy ? {
+    title: `${vacancy.title} · Careers at VALLÉ Advenature™ Park`,
+    description: vacancy.summary || `${vacancy.title}, ${vacancy.employment} in ${vacancy.location}. Apply online.`,
+    canonicalPath: `/vacancies/${slug}`,
+    jsonLd: [
+      breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }, { name: vacancy.title, path: `/vacancies/${slug}` }]),
+      {
+        '@context': 'https://schema.org', '@type': 'JobPosting', title: vacancy.title, description: vacancy.description || vacancy.summary,
+        ...(vacancy.postedOn ? { datePosted: vacancy.postedOn } : {}), ...(vacancy.closesOn ? { validThrough: vacancy.closesOn } : {}),
+        employmentType: { 'full-time': 'FULL_TIME', 'part-time': 'PART_TIME', seasonal: 'TEMPORARY', internship: 'INTERN' }[vacancy.employment] || 'FULL_TIME',
+        hiringOrganization: { '@type': 'Organization', name: 'VALLÉ Advenature™ Park', sameAs: abs('/') },
+        jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' } },
+        directApply: true,
+      },
+    ],
+  } : { title: (state === 'missing' ? 'Role closed' : 'Careers') + ' · VALLÉ Advenature™ Park', description: 'Open roles at Vallé Advenature Park.', noindex: state !== 'loading' });
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
