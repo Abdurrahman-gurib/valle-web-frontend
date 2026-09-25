@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import App from './App';
-import { SeoProvider, headTags, type SeoCollector } from './lib/seo';
+import { ORGANIZATION, SeoProvider, headTags, type SeoCollector } from './lib/seo';
 
 /**
  * Static generation entry (scripts/prerender.mjs). Renders one public route to
@@ -29,4 +29,9 @@ export function render(url: string, origin: string): { html: string; head: strin
     })
     .join('\n    ');
   return { html, head, title: seo.title, noindex: !!seo.noindex };
+}
+
+/** Site-wide Organization / TouristAttraction record, injected once per page by the prerender. */
+export function organizationScript(): string {
+  return `<script type="application/ld+json">${JSON.stringify(ORGANIZATION).replace(/</g, '\u003c')}</script>`;
 }

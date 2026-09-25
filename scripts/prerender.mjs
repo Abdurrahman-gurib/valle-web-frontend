@@ -19,7 +19,7 @@ const ssrDir = join(root, 'dist-ssr');
 const origin = (process.env.VITE_SITE_URL || '').replace(/\/+$/, '');
 
 execSync('npx vite build --ssr src/entry-server.tsx --outDir dist-ssr --emptyOutDir', { cwd: root, stdio: 'inherit' });
-const { render } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
+const { render, organizationScript } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
 const catalog = JSON.parse(readFileSync(join(root, 'src/data/fallback.json'), 'utf8'));
 
 const routes = [
@@ -28,7 +28,7 @@ const routes = [
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
-if (!template.includes('<!--seo-head-->') || !template.includes('<div id="root"></div>')) {
+if (!template.includes('<!--seo-head-->') || !template.includes('<!--seo-organization-->') || !template.includes('<div id="root"></div>')) {
   throw new Error('index.html is missing the <!--seo-head--> marker or the empty #root');
 }
 
@@ -38,6 +38,7 @@ const write = (route, outFile) => {
   const page = template
     .replace(/<title>[^<]*<\/title>/, `<title>${title.replace(/</g, '&lt;')}</title>`)
     .replace('<!--seo-head-->', head)
+    .replace('<!--seo-organization-->', organizationScript())
     .replace('<div id="root"></div>', `<div id="root">${html}</div>`);
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, page);

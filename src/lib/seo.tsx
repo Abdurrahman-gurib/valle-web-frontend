@@ -113,10 +113,10 @@ export function useSeo(seo: SeoInput): void {
 export const ORGANIZATION = {
   '@context': 'https://schema.org',
   '@type': ['Organization', 'TouristAttraction'],
-  '@id': (SITE_URL || 'https://vallepark.com') + '/#organization',
+  '@id': abs('/#organization'),
   name: SITE_NAME,
   alternateName: ['Vallé Advenature Park', 'La Vallée des Couleurs'],
-  url: SITE_URL || 'https://vallepark.com',
+  url: abs('/'),
   logo: abs('/favicon-512.png'),
   image: abs(DEFAULT_IMAGE),
   description: 'Adventure and nature park in Chamouny, Mauritius: ziplines, quad and buggy trails, waterfalls, the 23 Coloured Earth, giant tortoises and a kids park.',
