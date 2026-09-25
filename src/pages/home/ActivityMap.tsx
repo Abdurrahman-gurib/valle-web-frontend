@@ -556,13 +556,29 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                             {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 2.8 : 2.3)} />)}
                           </g>
                           {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.3 : 1.1)} />)}
-                          {/* Direction of travel, as printed on the official map: chevrons fade in once this loop is drawn. */}
-                          {arrows?.[id]?.map((a, i) => (
-                            <g key={'a' + i} transform={`translate(${a.x} ${a.y}) rotate(${a.a})`} style={{ opacity: 0, animation: `vfade .4s ease ${(loopOffset[id] + loopReach(id)) / trailSpeed}s forwards` }}>
-                              <path d={isMobile ? 'M -1.6 -1.5 L 0.3 0 L -1.6 1.5' : 'M -1.3 -1.2 L 0.25 0 L -1.3 1.2'} fill="none" stroke="#260040" strokeWidth={isMobile ? 1.1 : 0.9} strokeLinecap="round" strokeLinejoin="round" />
-                              <path d={isMobile ? 'M -1.6 -1.5 L 0.3 0 L -1.6 1.5' : 'M -1.3 -1.2 L 0.25 0 L -1.3 1.2'} fill="none" stroke="#FFFFFF" strokeWidth={isMobile ? 0.55 : 0.42} strokeLinecap="round" strokeLinejoin="round" />
-                            </g>
-                          ))}
+                          {/* Direction of travel, as printed on the official map. Each chevron pops in the moment the
+                              trace reaches it (time = when the pen passes the nearest trail point), in the loop's colour. */}
+                          {arrows?.[id]?.map((a, i) => {
+                            let best = Infinity, at = 0;
+                            for (const e of trails[id]) {
+                              const n = e.pts.length;
+                              for (let k = 0; k < n; k++) {
+                                const d = (e.pts[k][0] - a.x) ** 2 + (e.pts[k][1] - a.y) ** 2;
+                                if (d < best) { best = d; at = e.d0 + e.len * (n > 1 ? k / (n - 1) : 0); }
+                              }
+                            }
+                            const delay = (loopOffset[id] + at) / trailSpeed;
+                            const d = isMobile ? 'M -1.7 -1.6 L 0.3 0 L -1.7 1.6' : 'M -1.35 -1.25 L 0.25 0 L -1.35 1.25';
+                            return (
+                              <g key={'a' + i} transform={`translate(${a.x} ${a.y}) rotate(${a.a})`}>
+                                {/* the CSS scale lives on an inner group so it never overrides the placement transform above */}
+                                <g style={{ opacity: 0, animation: `vpop .35s cubic-bezier(.2,1.4,.5,1) ${delay}s forwards` }}>
+                                  <path d={d} fill="none" stroke="#260040" strokeWidth={isMobile ? 1.3 : 1.0} strokeLinecap="round" strokeLinejoin="round" />
+                                  <path d={d} fill="none" stroke={trailColor(id)} strokeWidth={isMobile ? 0.7 : 0.5} strokeLinecap="round" strokeLinejoin="round" />
+                                </g>
+                              </g>
+                            );
+                          })}
                         </g>
                       );
                     })}
