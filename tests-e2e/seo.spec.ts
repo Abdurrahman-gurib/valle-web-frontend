@@ -128,7 +128,7 @@ test.describe('status codes and redirects', () => {
 
 test.describe('in the browser', () => {
   test('card links are real anchors that still navigate client-side', async ({ page }) => {
-    await page.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_sel', '{}'); });
+    await page.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_sel', '{}'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await page.goto('/');
     const link = page.locator('a[href="/activities/zipline"]').first();
     await expect(link).toHaveAttribute('href', '/activities/zipline');

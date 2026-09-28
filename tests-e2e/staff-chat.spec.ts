@@ -126,7 +126,7 @@ test.describe('staff dashboard', () => {
     // inherits baseURL. The rate gate is a full-screen overlay that would sit on
     // top of the chat launcher, so pick a rate before the first paint.
     const visitor = await context.newPage();
-    await visitor.addInitScript(() => localStorage.setItem('valle_rate', 'rr'));
+    await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await visitor.goto('/');
     await visitor.getByRole('button', { name: /open chat/i }).click();
     const skip = visitor.getByRole('button', { name: /skip/i });

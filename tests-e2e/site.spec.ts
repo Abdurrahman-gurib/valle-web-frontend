@@ -5,6 +5,7 @@ function preselectRate(page: Page) {
   return page.addInitScript(() => {
     localStorage.setItem('valle_rate', 'rr');
     localStorage.setItem('valle_sel', '{}');
+    localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 }));
   });
 }
 
@@ -40,6 +41,39 @@ test.describe('rate gate', () => {
     await expect(page.getByText('Which rate', { exact: false })).toBeVisible();
     await page.getByText('I live in Mauritius').click();
     await expect(page.getByText('Which rate', { exact: false })).toBeHidden();
+  });
+});
+
+test.describe('cookie consent', () => {
+  test('asks once on the first visit and remembers the answer', async ({ page }) => {
+    // Clear once (init scripts run again on reload, and the reload must keep the saved choice).
+    await page.addInitScript(() => {
+      if (sessionStorage.getItem('pw-fresh')) return;
+      localStorage.clear();
+      localStorage.setItem('valle_rate', 'rr');
+      sessionStorage.setItem('pw-fresh', '1');
+    });
+    await page.goto('/');
+    const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
+    await expect(banner).toBeVisible();
+    await banner.getByTestId('consent-essential').click();
+    await expect(banner).toBeHidden();
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('essential');
+    await page.reload();
+    await expect(page.getByRole('heading', { name: /Feel the/i })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: /Cookies and storage/i })).toHaveCount(0);
+  });
+
+  test('footer link reopens the settings and the toggle saves "all"', async ({ page }) => {
+    await preselectRate(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'COOKIE SETTINGS' }).click();
+    const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
+    await expect(banner).toBeVisible();
+    await banner.getByRole('switch', { name: /Performance monitoring/i }).click();
+    await banner.getByTestId('consent-save').click();
+    await expect(banner).toBeHidden();
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('all');
   });
 });
 

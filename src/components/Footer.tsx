@@ -1,4 +1,5 @@
 import { Stripes } from './Stripes';
+import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
@@ -110,7 +111,10 @@ export function Footer() {
           gap: 14, flexWrap: 'wrap', fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.6,
         }}>
           <span>©2026 VALLÉ ADVENATURE™ PARK · UX RESTRUCTURE CONCEPT</span>
-          <span>PRIVACY POLICY · TERMS OF USE · EN / FR</span>
+          <span>
+            <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>COOKIE SETTINGS</button>
+            {' · PRIVACY POLICY · TERMS OF USE · EN / FR'}
+          </span>
         </div>
       </div>
     </footer>

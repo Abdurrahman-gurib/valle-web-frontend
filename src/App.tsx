@@ -10,6 +10,7 @@ import { MyDayDrawer } from './components/MyDayDrawer';
 import { RateGate } from './components/RateGate';
 import { ChatWidget } from './components/ChatWidget';
 import { OptionPicker } from './components/OptionPicker';
+import { CookieConsent } from './components/CookieConsent';
 import { useIsMobile } from './hooks/useIsMobile';
 import HomePage from './pages/Home';
 import ExplorePage from './pages/Explore';
@@ -68,6 +69,7 @@ function PublicShell() {
       <RateGate />
       <OptionPicker />
       <ChatWidget />
+      <CookieConsent />
     </div>
   );
 }
