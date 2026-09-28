@@ -1,4 +1,5 @@
 import type { BookingRequest, BookingResponse, Catalog, QuoteRequest } from '../types';
+import type { FxTable } from './fx';
 
 const BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -21,6 +22,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function fetchCatalog(): Promise<Catalog> {
   return request<Catalog>('/catalog');
+}
+
+/** Indicative MUR exchange rates (Bank of Mauritius) for the currency picker. */
+export function fetchFx(): Promise<FxTable> {
+  return request<FxTable>('/fx');
+}
+
+export type BusyLevel = 'quiet' | 'busy' | 'very-busy' | 'full';
+export interface SlotLoad { bookings: number; guests: number; level: BusyLevel }
+export interface AvailabilityDay { date: string; morning: SlotLoad; afternoon: SlotLoad }
+
+/** How busy each arrival slot already is, for `days` days from `from` (YYYY-MM-DD). */
+export function fetchAvailability(from: string, days: number): Promise<AvailabilityDay[]> {
+  return request<AvailabilityDay[]>(`/bookings/availability?from=${encodeURIComponent(from)}&days=${days}`);
 }
 
 export function createBooking(body: BookingRequest): Promise<BookingResponse> {

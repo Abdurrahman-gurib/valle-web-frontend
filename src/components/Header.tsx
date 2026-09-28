@@ -8,6 +8,7 @@ import { useHover } from '../hooks/useHover';
 import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
+import { CurrencyPicker } from './CurrencyPicker';
 
 function NavBtn({ label, onClick, color, chev, href }: { label: string; onClick: () => void; color: string; chev?: string; href?: string }) {
   const [h, bind] = useHover();
@@ -169,6 +170,7 @@ export function Header() {
                 >
                   {app.rateTag} ⇄
                 </button>
+                <CurrencyPicker fg={headerFg} />
                 <button
                   {...bindDay}
                   onClick={() => { setMegaOpen(false); setMegaPkgOpen(false); app.openDay(); }}
@@ -219,6 +221,7 @@ export function Header() {
               >
                 {app.rateTag}
               </button>
+              <CurrencyPicker fg={headerFg} compact />
               {app.hasSel && (
                 <button
                   onClick={app.openDay}

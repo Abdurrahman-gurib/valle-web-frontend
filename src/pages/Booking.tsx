@@ -7,7 +7,8 @@ import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
-import { money, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
+import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
+import { fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -144,8 +145,31 @@ function CartLine({ line }: { line: SelLine }) {
   );
 }
 
+/* 3 · WHEN: how busy a slot already is (from /api/bookings/availability) */
+const LEVEL_COLOR: Record<BusyLevel, string> = { quiet: '#33FF74', busy: '#FFFC33', 'very-busy': '#FF9F33', full: '#FF3358' };
+const LEVEL_LABEL: Record<BusyLevel, string> = { quiet: 'QUIET', busy: 'BUSY', 'very-busy': 'VERY BUSY', full: 'FULLY BOOKED' };
+const LEVEL_WORD: Record<BusyLevel, string> = { quiet: 'quiet', busy: 'busy', 'very-busy': 'very busy', full: 'fully booked' };
+
+function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
+  if (!load) return <div style={{ height: '6px', marginTop: '5px' }} />;
+  const dot = (l: BusyLevel): CSSProperties => ({
+    width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block',
+    boxShadow: on ? '0 0 0 1.5px rgba(255,255,255,.7)' : '0 0 0 1px rgba(52,0,87,.15)',
+  });
+  return (
+    <div
+      data-testid="load-dots"
+      title={`Morning: ${LEVEL_WORD[load.morning.level]} · Afternoon: ${LEVEL_WORD[load.afternoon.level]}`}
+      style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '5px', height: '6px', alignItems: 'center' }}
+    >
+      <span style={dot(load.morning.level)} />
+      <span style={dot(load.afternoon.level)} />
+    </div>
+  );
+}
+
 /* 3 · WHEN: date chip */
-function DateChip({ o, on, onClick }: { o: DateOpt; on: boolean; onClick: () => void }) {
+function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: () => void; load?: AvailabilityDay }) {
   const [h, bind] = useHover();
   return (
     <button
@@ -163,12 +187,13 @@ function DateChip({ o, on, onClick }: { o: DateOpt; on: boolean; onClick: () => 
       <div style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 600, letterSpacing: '.08em', opacity: 0.7 }}>{o.dow}</div>
       <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: '22px', marginTop: '2px' }}>{o.dd}</div>
       <div style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 600, opacity: 0.7 }}>{o.mm}</div>
+      <LoadDots load={load} on={on} />
     </button>
   );
 }
 
 /* 3 · WHEN: slot chip */
-function SlotChip({ label, sub, on, onClick }: { label: string; sub: string; on: boolean; onClick: () => void }) {
+function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel }) {
   const [h, bind] = useHover();
   return (
     <button
@@ -185,6 +210,12 @@ function SlotChip({ label, sub, on, onClick }: { label: string; sub: string; on:
     >
       <div style={{ fontWeight: 700, fontSize: '15px' }}>{label}</div>
       <div style={{ fontFamily: MONO, fontSize: '10.5px', opacity: 0.7, marginTop: '2px' }}>{sub}</div>
+      {level && (
+        <div data-testid="slot-level" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.08em', marginTop: '7px', color: on ? '#FFFFFF' : '#340057' }}>
+          <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[level], display: 'inline-block' }} />
+          {LEVEL_LABEL[level]}
+        </div>
+      )}
     </button>
   );
 }
@@ -282,6 +313,28 @@ export default function BookingPage() {
   const dOpts = useMemo(() => dateOpts(14), []);
   const tIso = todayIso();
 
+  // How busy each day already is, keyed by ISO date. Missing = unknown (API away): no dots.
+  const [avail, setAvail] = useState<Record<string, AvailabilityDay>>({});
+  const mergeAvail = (days: AvailabilityDay[]) => setAvail((prev) => {
+    const next = { ...prev };
+    for (const d of days) next[d.date] = d;
+    return next;
+  });
+  useEffect(() => {
+    let dead = false;
+    fetchAvailability(tIso, 14).then((d) => { if (!dead) mergeAvail(d); }).catch(() => { /* picker works without it */ });
+    return () => { dead = true; };
+  }, [tIso]);
+  useEffect(() => {
+    if (!customDate || avail[customDate]) return;
+    let dead = false;
+    fetchAvailability(customDate, 1).then((d) => { if (!dead) mergeAvail(d); }).catch(() => { /* ignore */ });
+    return () => { dead = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customDate]);
+  const selectedIso = customDate || (dOpts[dateIdx] ? dOpts[dateIdx].iso : dOpts[0].iso);
+  const selectedLoad = avail[selectedIso];
+
   const bookCards = catalog.ACTS.filter((a) => a.mode === 'pp' || a.mode === 'flat').map(card);
   const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
@@ -294,10 +347,11 @@ export default function BookingPage() {
     ? '✓ Explorer Pass applied · 15% off your adventures.'
     : 'Tip: pick any 3 adventures and the Explorer Pass takes 15% off them automatically.';
   const passHintBg = booking.hasDiscount ? '#E2FFEB' : '#FFFFE2';
+  const inForeign = app.currency !== 'MUR';
   const sumLine = (cartActs.length === 0 ? 'Park entry only' : cartActs.length + ' experience' + (cartActs.length > 1 ? 's' : '') + ' + entry')
-    + ' · ' + money(booking.total);
+    + ' · ' + mur(booking.total) + (inForeign ? ' (' + money(booking.total) + ')' : '');
   const payModeNote = payMode === 'online' ? 'E-RECEIPT BY EMAIL & SMS, INSTANTLY' : 'FREE · NO CANCELLATION FEE';
-  const confirmLabel = payMode === 'online' ? 'Pay ' + money(booking.total) + ' now →' : 'Confirm and pay on arrival →';
+  const confirmLabel = payMode === 'online' ? 'Pay ' + mur(booking.total) + ' now →' : 'Confirm and pay on arrival →';
 
   let dateSummary = dOpts[dateIdx] ? dOpts[dateIdx].full : '';
   if (customDate) {
@@ -339,15 +393,15 @@ export default function BookingPage() {
     try {
       code = (await createBooking(req)).refCode;
     } catch (e) {
+      // Whether the server refused or never answered, the desk has no record of this
+      // booking, so no reference is shown: a guest turning up with a phantom VAL code
+      // is worse than a retry.
       const status = (e as { status?: number }).status;
-      if (status) {
-        // the server answered and refused, so never hand out a reference it has no record of
-        setApiErr((e as Error).message || 'We could not confirm your booking. Please try again.');
-        setSubmitting(false);
-        return;
-      }
-      // no response at all (offline / API down): keep the flow working with a local reference
-      code = 'VAL-' + (1000 + Math.floor(Math.random() * 9000)) + '-26';
+      setApiErr(status
+        ? ((e as Error).message || 'We could not confirm your booking. Please try again.')
+        : 'We could not reach the booking desk. Check your connection and try again, or WhatsApp us on +230 5292 8841.');
+      setSubmitting(false);
+      return;
     }
     setRefCode(code);
     setSubmitting(false);
@@ -438,6 +492,7 @@ export default function BookingPage() {
                       o={o}
                       on={!customDate && dateIdx === o.i}
                       onClick={() => { setDateIdx(o.i); setCustomDate(''); }}
+                      load={avail[o.iso]}
                     />
                   ))}
                 </div>
@@ -458,9 +513,19 @@ export default function BookingPage() {
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                  <SlotChip label="Morning" sub="ARRIVE 09:00–12:00" on={slot === 0} onClick={() => setSlot(0)} />
-                  <SlotChip label="Afternoon" sub="ARRIVE 12:00–15:30" on={slot === 1} onClick={() => setSlot(1)} />
+                  <SlotChip label="Morning" sub="ARRIVE 09:00–12:00" on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} />
+                  <SlotChip label="Afternoon" sub="ARRIVE 12:00–15:30" on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} />
                 </div>
+                {Object.keys(avail).length > 0 && (
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
+                    <span>DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:</span>
+                    {(['quiet', 'busy', 'very-busy', 'full'] as BusyLevel[]).map((l) => (
+                      <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{LEVEL_LABEL[l]}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -586,8 +651,11 @@ export default function BookingPage() {
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px', marginTop: '6px', borderTop: '1px dashed #D9C9F0', fontWeight: 800, fontSize: '16px' }}>
               <span>{totalRowLabel}</span>
-              <span style={{ fontFamily: MONO }}>{money(booking.total)}</span>
+              <span style={{ fontFamily: MONO }}>{mur(booking.total)}</span>
             </div>
+            {inForeign && (
+              <div style={{ textAlign: 'right', fontFamily: MONO, fontSize: '11px', color: 'rgba(52,0,87,.6)', marginTop: '4px' }}>{money(booking.total)} · indicative</div>
+            )}
           </div>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '22px', flexWrap: 'wrap' }}>
             <a

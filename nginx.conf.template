@@ -120,9 +120,10 @@ server {
 
     # Clean URLs: no trailing slash (except the root), no index.html. Matched on
     # $request_uri (what the client asked for), not $uri, so that the internal
-    # redirect to /404/index.html is not itself bounced to a 301.
-    if ($request_uri ~ "^/(.+)/(\?.*)?$") { return 301 /$1$2; }
-    if ($request_uri ~ "^/(.*)index\.html(\?.*)?$") { return 301 /$1$2; }
+    # redirect to /404/index.html is not itself bounced to a 301. The API and the
+    # websocket handshake (/socket.io/?EIO=4...) are never pages: leave them alone.
+    if ($request_uri ~ "^/(?!api/|socket\.io/)(.+)/(\?.*)?$") { return 301 /$1$2; }
+    if ($request_uri ~ "^/(?!api/|socket\.io/)(.*)index\.html(\?.*)?$") { return 301 /$1$2; }
 
     # Maintenance switch: every page 503s with a Retry-After; assets stay up.
     error_page 502 503 504 /503.html;

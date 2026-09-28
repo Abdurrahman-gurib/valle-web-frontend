@@ -6,6 +6,13 @@ import { defineConfig, devices } from '@playwright/test';
  * The backend API is optional for the public-site tests (the app falls back to
  * bundled content); the staff tests skip themselves when it is not reachable.
  */
+/**
+ * E2E_BASE_URL points the whole suite at a running deployment instead of the
+ * preview server, e.g. the docker compose stack (nginx + api + db):
+ *   E2E_BASE_URL=http://127.0.0.1:18081 npx playwright test
+ */
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:4173';
+
 export default defineConfig({
   testDir: './tests-e2e',
   timeout: 45_000,
@@ -13,7 +20,7 @@ export default defineConfig({
   retries: 1,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: BASE_URL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -45,7 +52,7 @@ export default defineConfig({
       dependencies: ['setup'],
     },
   ],
-  webServer: {
+  webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run preview',
     url: 'http://localhost:4173',
     reuseExistingServer: true,

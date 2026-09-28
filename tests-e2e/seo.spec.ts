@@ -7,7 +7,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
  * it at a deployed site instead, e.g.
  *   SEO_BASE_URL=https://web-production-ff60b.up.railway.app npx playwright test seo
  */
-const BASE = process.env.SEO_BASE_URL || '';
+const BASE = process.env.SEO_BASE_URL || process.env.E2E_BASE_URL || '';
 if (BASE) test.use({ baseURL: BASE });
 
 const PUBLIC_PAGES = ['/', '/explore', '/packages', '/booking', '/vacancies', '/activities/zipline', '/activities/quad', '/dine/chamouze', '/dine/citronelle'];
@@ -103,6 +103,15 @@ test.describe('status codes and redirects', () => {
       expect(res.headers()['location'], from).toMatch(new RegExp(`(^|/)${to.replace(/[?.]/g, '\\$&')}$`));
     }
     for (const gone of ['/cart', '/wp-admin/x']) expect((await request.get(gone, { maxRedirects: 0 })).status(), gone).toBe(410);
+  });
+
+  test('the clean-URL redirects never touch the API or the websocket handshake', async ({ request }) => {
+    // socket.io always requests "/socket.io/?EIO=4&..." (trailing slash before the
+    // query). A 301 here silently downgrades live chat and staff notifications to polling.
+    const ws = await request.get('/socket.io/?EIO=4&transport=polling', { maxRedirects: 0 });
+    expect(ws.status(), 'socket.io handshake').not.toBe(301);
+    const api = await request.get('/api/catalog/', { maxRedirects: 0 });
+    expect(api.status(), 'api path with trailing slash').not.toBe(301);
   });
 
   test('back office is served but never indexed', async ({ request }) => {

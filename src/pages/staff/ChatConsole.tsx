@@ -178,6 +178,12 @@ export default function ChatConsole({ active, onChanged }: {
         setConvos(list.slice().sort(byRecent));
       }),
 
+      // New bookings arrive on the same staff socket; the bookings panel and the
+      // stats strip listen for this on window, so neither needs its own socket.
+      chat.on('booking', (b) => {
+        window.dispatchEvent(new CustomEvent('valle:booking-new', { detail: b }));
+      }),
+
       chat.on('updated', (conv) => {
         setConvos((prev) => {
           const i = prev.findIndex((c) => c.id === conv.id);

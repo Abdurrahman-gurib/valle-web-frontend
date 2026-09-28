@@ -4,7 +4,7 @@ import {
   getBooking, isHttpError, listBookings, updateBooking,
   type BookingAuditEntry, type BookingDetailFull, type BookingPatch,
 } from '../../lib/staffApi';
-import { money, partyLabel } from '../../lib/format';
+import { mur as money, partyLabel } from '../../lib/format';
 import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Stripes } from '../../components/Stripes';
@@ -717,6 +717,22 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const filtered = dq !== '' || status !== 'all' || from !== '' || to !== '';
 
+  // A booking made on the website while this tab is open: straight into the list.
+  const [fresh, setFresh] = useState<BookingRow | null>(null);
+  useEffect(() => {
+    const h = (e: Event) => {
+      const b = (e as CustomEvent<BookingRow>).detail;
+      if (!b?.refCode) return;
+      setFresh(b);
+      if (page === 1 && !filtered) {
+        setRows((prev) => (prev.some((r) => r.id === b.id) ? prev : [b, ...prev]));
+        setTotal((t) => t + 1);
+      }
+    };
+    window.addEventListener('valle:booking-new', h);
+    return () => window.removeEventListener('valle:booking-new', h);
+  }, [page, filtered]);
+
   /** Money on screen, so the page total is readable without opening every row. */
   const pageValue = useMemo(
     () => rows.reduce((sum, r) => sum + (r.status === 'cancelled' ? 0 : r.total), 0),
@@ -725,6 +741,17 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
 
   return (
     <div>
+      {fresh && (
+        <div
+          role="status"
+          data-testid="fresh-booking"
+          style={{ ...card, padding: '12px 16px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: '#E2FFEB', borderColor: '#33FF74' }}
+        >
+          <span style={{ fontWeight: 700 }}>New booking just came in: {fresh.refCode} · {fresh.guestName} · {fresh.visitDate} {fresh.slot}</span>
+          <button onClick={() => { setOpenRef(fresh.refCode); setFresh(null); }} style={{ border: 0, background: '#340057', color: '#FFFFFF', fontFamily: 'inherit', fontWeight: 700, fontSize: 13, padding: '8px 14px', borderRadius: 999, cursor: 'pointer' }}>Open</button>
+          <button onClick={() => setFresh(null)} aria-label="Dismiss" style={{ border: 0, background: 'transparent', cursor: 'pointer', fontSize: 16, color: '#340057', marginLeft: 'auto' }}>×</button>
+        </div>
+      )}
       {/* ---- filter bar ---- */}
       <div style={{ ...card, padding: 14, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
         <input

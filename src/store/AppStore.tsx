@@ -5,6 +5,9 @@ import type { BookingSummary, RateKey, Sel, SelEntry } from '../types';
 import { useCatalog } from './CatalogContext';
 import { computeBooking, priceFor, variantPrice } from './booking';
 import { parseSelKey, selKey } from '../lib/sel';
+import { CURRENCY_STORAGE_KEY, FX_FALLBACK, isCurrency, readStoredCurrency, type FxTable } from '../lib/fx';
+import { fetchFx } from '../lib/api';
+import { setDisplayCurrency } from '../lib/format';
 
 interface AppState {
   // rate
@@ -66,6 +69,11 @@ interface AppState {
   // pricing
   booking: BookingSummary;
   activityPrice: (id: string, variant?: string) => number;
+
+  // display currency (prices are charged in MUR; other currencies are indicative)
+  currency: string;
+  fx: FxTable;
+  setCurrency: (code: string) => void;
 }
 
 const Ctx = createContext<AppState | null>(null);
@@ -122,6 +130,23 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState('');
   const [nat, setNat] = useState('');
   const [payMode, setPayMode] = useState<'gate' | 'online'>('gate');
+  const [currency, setCurrencyState] = useState<string>(readStoredCurrency);
+  const [fx, setFx] = useState<FxTable>(FX_FALLBACK);
+
+  // Live Bank of Mauritius rates; the bundled snapshot stays if the API is away.
+  useEffect(() => {
+    let dead = false;
+    fetchFx().then((t) => { if (!dead && t?.rates?.MUR) setFx(t); }).catch(() => { /* keep the snapshot */ });
+    return () => { dead = true; };
+  }, []);
+  // money() in lib/format reads this; setting it during render keeps every price in step.
+  setDisplayCurrency(isCurrency(currency, fx) ? currency : 'MUR', fx);
+
+  const setCurrency = useCallback((code: string) => {
+    if (!isCurrency(code)) return;
+    try { localStorage.setItem(CURRENCY_STORAGE_KEY, code); } catch { /* ignore */ }
+    setCurrencyState(code);
+  }, []);
 
   useEffect(() => {
     try { localStorage.setItem('valle_sel', JSON.stringify(sel)); } catch { /* ignore */ }
@@ -180,7 +205,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const booking = useMemo(
     () => computeBooking(catalog, sel, adults, kids, rate),
-    [catalog, sel, adults, kids, rate],
+    // currency and fx: the summary lines carry formatted amounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [catalog, sel, adults, kids, rate, currency, fx],
   );
 
   const value = useMemo<AppState>(() => ({
@@ -238,7 +265,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const vp = variant ? variantPrice(catalog, id, variant, rate) : null;
       return vp ?? priceFor(catalog, act, rate);
     },
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel]);
+
+    currency: isCurrency(currency, fx) ? currency : 'MUR',
+    fx,
+    setCurrency,
+  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

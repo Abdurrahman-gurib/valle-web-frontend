@@ -1,4 +1,21 @@
+import { FX_FALLBACK, formatMoney, type FxTable } from './fx';
+
+let displayCurrency = 'MUR';
+let fxTable: FxTable = FX_FALLBACK;
+
+/** Set by AppStoreProvider on every render; the store re-renders every price when it changes. */
+export function setDisplayCurrency(code: string, table: FxTable): void {
+  displayCurrency = code;
+  fxTable = table;
+}
+
+/** A rupee amount in the visitor's display currency ("Rs 4,700", or "≈ € 88.22"). */
 export function money(n: number): string {
+  return formatMoney(n, displayCurrency, fxTable);
+}
+
+/** Always rupees: what is actually charged (pay buttons, receipts, the back office). */
+export function mur(n: number): string {
   return 'Rs ' + n.toLocaleString('en-US');
 }
 

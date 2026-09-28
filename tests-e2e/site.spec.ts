@@ -77,6 +77,82 @@ test.describe('cookie consent', () => {
   });
 });
 
+test.describe('currency', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('picker converts every price, keeps the charged amount in rupees, and remembers the choice', async ({ page }) => {
+    await page.goto('/explore');
+    await expect(page.getByText(/^FROM Rs /).first()).toBeVisible();
+    await page.getByTestId('currency-picker').first().click();
+    await page.getByRole('option', { name: /EUR/ }).click();
+    await expect(page.getByTestId('currency-picker').first()).toHaveText(/EUR/);
+    await expect(page.getByText(/^FROM ≈ € /).first()).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('valle_currency'))).toBe('EUR');
+
+    // the booking bar quotes rupees (what is charged) with the conversion beside it
+    await page.goto('/booking');
+    await expect(page.getByText(/· Rs [\d,]+ \(≈ € [\d,.]+\)/).first()).toBeVisible();
+    await expect(page.getByTestId('currency-picker').first()).toHaveText(/EUR/);
+
+    // and back
+    await page.getByTestId('currency-picker').first().click();
+    await page.getByRole('option', { name: /MUR/ }).click();
+    await expect(page.getByText(/· Rs [\d,]+$/).first()).toBeVisible();
+  });
+
+  test('lists dirham, riyal and Indian rupee among the currencies', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('currency-picker').first().click();
+    for (const name of ['UAE dirham', 'Saudi riyal', 'Indian rupee', 'US dollar', 'Euro', 'British pound', 'South African rand']) {
+      await expect(page.getByRole('option', { name })).toBeVisible();
+    }
+    await expect(page.getByText(/BANK OF MAURITIUS/)).toBeVisible();
+  });
+});
+
+test.describe('date picker shows how busy each slot is', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('dots per day and a level on the chosen slot, fed by the bookings so far', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    // make sure at least one future date has a morning booking
+    const date = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    const res = await page.request.post('/api/bookings', {
+      data: { visitDate: date, slot: 'morning', adults: 2, kids: 0, rate: 'rr', items: [], name: 'Busy Guest', email: 'busy@example.mu', payMode: 'gate' },
+    });
+    expect(res.ok()).toBeTruthy();
+
+    await page.goto('/booking');
+    // every one of the 14 date chips carries its two dots once the API has answered
+    await expect(page.getByTestId('load-dots')).toHaveCount(14, { timeout: 15000 });
+    const dots = page.getByTestId('load-dots').nth(5);
+    await expect(dots).toHaveAttribute('title', /Morning: (quiet|busy|very busy|fully booked) · Afternoon: /);
+    // the slot chips of the selected date say how busy they are
+    await expect(page.getByTestId('slot-level')).toHaveCount(2);
+    await expect(page.getByTestId('slot-level').first()).toHaveText(/QUIET|BUSY|VERY BUSY|FULLY BOOKED/);
+    // the API agrees with what is drawn
+    const api = await (await page.request.get(`/api/bookings/availability?from=${date}&days=1`)).json();
+    expect(api[0].morning.bookings).toBeGreaterThanOrEqual(1);
+    expect(['quiet', 'busy', 'very-busy', 'full']).toContain(api[0].morning.level);
+  });
+});
+
+test.describe('booking desk unreachable', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('shows an error instead of a phantom reference', async ({ page }) => {
+    await page.route('**/api/bookings', (route) => route.abort('connectionrefused'));
+    await page.goto('/experience/luge');
+    await addFirstOption(page);
+    await page.goto('/booking');
+    await page.getByPlaceholder(/name/i).first().fill('Offline Guest');
+    await page.getByPlaceholder(/email/i).first().fill('offline@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
+    await expect(page.getByText(/could not reach the booking desk/i)).toBeVisible();
+    await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
+  });
+});
+
 test.describe('home', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
@@ -197,7 +273,7 @@ test.describe('regressions', () => {
     await page.goto('/explore?cat=kids');
     await expect(page.getByText('Pirate Ship')).toBeVisible();
     await page.getByText('Pirate Ship').first().click();
-    await expect(page).toHaveURL(/\/experience\/pirate/);
+    await expect(page).toHaveURL(/\/activities\/pirate/);
     await page.getByText(/All experiences/i).first().click();
     await expect(page).toHaveURL(/cat=kids/);
     await expect(page.getByText('Zipline Adventures')).toBeHidden();

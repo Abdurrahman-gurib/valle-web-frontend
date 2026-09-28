@@ -1,3 +1,4 @@
+import type { BookingRow } from '../types';
 import { io, type Socket } from 'socket.io-client';
 import type { ChatMessage, ConversationSummary } from '../types';
 import {
@@ -219,6 +220,8 @@ export class VisitorChat extends Emitter<VisitorChatEvents> {
 // ------------------------------------------------------------------ staff ----
 
 export interface StaffChatEvents {
+  /** A guest just booked on the website (staff room fan-out). */
+  booking: BookingRow;
   /** Full conversation list (initial load and every poll refresh). */
   conversations: ConversationSummary[];
   /** One conversation changed (new message, closed, unread reset). */
@@ -279,6 +282,9 @@ export class StaffChat extends Emitter<StaffChatEvents> {
     });
     socket.on('conversation:updated', (p: { conversation: ConversationSummary }) => {
       if (p?.conversation) this.fire('updated', p.conversation);
+    });
+    socket.on('booking:new', (p: { booking: BookingRow }) => {
+      if (p?.booking?.refCode) this.fire('booking', p.booking);
     });
     socket.on('peer:typing', (p: { conversationId: string }) => {
       if (p?.conversationId) this.fire('typing', p);

@@ -42,9 +42,13 @@ test.describe('staff portal is not discoverable from the public site', () => {
     }
   });
 
-  test('robots.txt does not advertise the staff area', async ({ page }) => {
+  test('robots.txt keeps crawlers out of the staff area, and the pages say noindex themselves', async ({ page }) => {
+    // Disallow is a hint, not access control: the real protection is the login
+    // plus the X-Robots-Tag header nginx adds (checked in seo.spec.ts).
     const r = await page.request.get('/robots.txt');
-    expect((await r.text()).toLowerCase()).not.toContain('staff');
+    expect(await r.text()).toMatch(/Disallow: \/staff/);
+    const staff = await page.request.get('/staff', { maxRedirects: 0 });
+    expect(staff.headers()['x-robots-tag'] || '').toMatch(/noindex/);
   });
 
   test('public chrome is absent on the staff routes', async ({ page }) => {
@@ -116,6 +120,33 @@ test.describe('staff dashboard', () => {
     await page.getByText(ref).first().click();
     await expect(page.getByText('E2E Drawer Guest').first()).toBeVisible();
     await expect(page.getByText(/zipline/i).first()).toBeVisible();
+  });
+
+  test('a booking made on the website reaches the open dashboard live, without a reload', async ({ page, context }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    // the staff socket is opened by the chat console; give it a moment to join the staff room
+    await page.waitForTimeout(1500);
+
+    const tag = Math.random().toString(36).slice(2, 8);
+    const visitor = await context.newPage();
+    const res = await visitor.request.post('/api/bookings', {
+      data: {
+        visitDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+        slot: 'afternoon', adults: 3, kids: 0, rate: 'nr',
+        items: [{ id: 'zipline', variant: 'The Signature · 1.5 km, 1 line', adults: 3, kids: 0 }],
+        name: `Live Guest ${tag}`, email: `live-${tag}@example.mu`, payMode: 'gate',
+      },
+    });
+    expect(res.ok()).toBeTruthy();
+    const ref = (await res.json()).refCode as string;
+
+    // toast, banner and the row: none of them needs a reload
+    await expect(page.getByTestId('booking-toast')).toContainText(ref, { timeout: 15000 });
+    await expect(page.getByTestId('fresh-booking')).toContainText(`Live Guest ${tag}`);
+    await expect(page.getByText(ref).first()).toBeVisible();
+    await page.getByTestId('fresh-booking').getByRole('button', { name: 'Open' }).click();
+    await expect(page.getByText(`Live Guest ${tag}`).first()).toBeVisible();
   });
 
   test('chat console shows a visitor conversation and replies reach the visitor', async ({ page, context }) => {

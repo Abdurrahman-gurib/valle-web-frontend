@@ -5,7 +5,7 @@ import type { StaffStats } from '../../types';
 import { useStaffAuth } from '../../store/StaffAuth';
 import { getStats } from '../../lib/staffApi';
 import { canAccessHr, canAccessReservations, roleLabel } from '../../lib/hrApi';
-import { money } from '../../lib/format';
+import { mur as money } from '../../lib/format';
 import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Stripes } from '../../components/Stripes';
@@ -93,6 +93,22 @@ export default function StaffDashboard() {
   useEffect(() => {
     if (auth.user) reloadStats(true);
   }, [auth.user, reloadStats]);
+
+  // A booking made on the website: refresh the figures and say so, whichever tab is open.
+  const [toast, setToast] = useState('');
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const h = (e: Event) => {
+      const b = (e as CustomEvent<{ refCode: string; guestName: string; visitDate: string; slot: string }>).detail;
+      if (!b?.refCode) return;
+      reloadStats(true);
+      setToast(`New booking ${b.refCode} · ${b.guestName} · ${b.visitDate} ${b.slot}`);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setToast(''), 9000);
+    };
+    window.addEventListener('valle:booking-new', h);
+    return () => { window.removeEventListener('valle:booking-new', h); if (timer) clearTimeout(timer); };
+  }, [reloadStats]);
 
   const signOut = async () => {
     setSigningOut(true);
@@ -231,6 +247,15 @@ export default function StaffDashboard() {
           <TabBtn on={tab === 'bookings'} onClick={() => setTab('bookings')}>Bookings</TabBtn>
           <TabBtn on={tab === 'chat'} onClick={() => setTab('chat')}>Chat</TabBtn>
         </div>
+
+        {toast && (
+          <div role="status" data-testid="booking-toast" style={{
+            position: 'fixed', right: 16, bottom: 16, zIndex: 90, background: '#340057', color: '#FFFFFF', borderRadius: 14,
+            padding: '12px 16px', boxShadow: '0 18px 40px -12px rgba(38,0,64,.6)', fontWeight: 700, fontSize: 14, maxWidth: 'min(420px, calc(100vw - 32px))',
+          }}>
+            <span style={{ color: '#33FF74', marginRight: 8 }}>●</span>{toast}
+          </div>
+        )}
 
         {/* Both panels stay mounted so the chat socket survives a tab switch. */}
         <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
