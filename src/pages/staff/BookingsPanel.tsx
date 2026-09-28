@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { BookingRow, BookingStatus, PayMode, RateKey, SlotKey } from '../../types';
 import {
-  getBooking, isHttpError, listBookings, updateBooking,
-  type BookingAuditEntry, type BookingDetailFull, type BookingPatch,
+  exportUrl, getBooking, isHttpError, listBookings, updateBooking,
+  type BookingAuditEntry, type BookingDetailFull, type BookingPatch, type BookingSort,
 } from '../../lib/staffApi';
+import { NATC } from '../../lib/format';
+import NewBookingDrawer from './NewBookingDrawer';
+import { ExportLink } from './reportUi';
 import { mur as money, partyLabel } from '../../lib/format';
 import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -671,6 +674,12 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
   const [status, setStatus] = useState('all');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [slot, setSlot] = useState('all');
+  const [payMode, setPayMode] = useState('all');
+  const [rate, setRate] = useState('all');
+  const [nationality, setNationality] = useState('all');
+  const [sort, setSort] = useState<BookingSort>('newest');
+  const [creating, setCreating] = useState(false);
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [total, setTotal] = useState(0);
@@ -685,7 +694,7 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
   }, [q]);
 
   // Any filter change restarts at page 1.
-  useEffect(() => { setPage(1); }, [dq, status, from, to]);
+  useEffect(() => { setPage(1); }, [dq, status, from, to, slot, payMode, rate, nationality, sort]);
 
   useEffect(() => {
     let dead = false;
@@ -694,6 +703,11 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
       status: status === 'all' ? undefined : status,
       from: from || undefined,
       to: to || undefined,
+      slot: slot === 'all' ? undefined : slot,
+      payMode: payMode === 'all' ? undefined : payMode,
+      rate: rate === 'all' ? undefined : rate,
+      nationality: nationality === 'all' ? undefined : nationality,
+      sort,
       q: dq || undefined,
       page,
       pageSize: PAGE_SIZE,
@@ -707,7 +721,7 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
       .catch(() => { if (!dead) setErr('Could not load bookings.'); })
       .finally(() => { if (!dead) setLoading(false); });
     return () => { dead = true; };
-  }, [status, from, to, dq, page]);
+  }, [status, from, to, slot, payMode, rate, nationality, sort, dq, page]);
 
   const onPatched = useCallback((row: BookingRow) => {
     setRows((prev) => prev.map((r) => (r.refCode === row.refCode ? { ...r, ...row } : r)));
@@ -715,7 +729,7 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
   }, [onChanged]);
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const filtered = dq !== '' || status !== 'all' || from !== '' || to !== '';
+  const filtered = dq !== '' || status !== 'all' || from !== '' || to !== '' || slot !== 'all' || payMode !== 'all' || rate !== 'all' || nationality !== 'all';
 
   // A booking made on the website while this tab is open: straight into the list.
   const [fresh, setFresh] = useState<BookingRow | null>(null);
@@ -774,15 +788,59 @@ export default function BookingsPanel({ onChanged }: { onChanged: (force?: boole
           <span style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>TO</span>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" style={{ ...inputStyle, width: 'auto', flex: 1 }} />
         </div>
+        <Select value={slot} onChange={setSlot} width={isMobile ? '100%' : 130} ariaLabel="Filter by slot">
+          <option value="all">Any slot</option>
+          <option value="morning">Morning</option>
+          <option value="afternoon">Afternoon</option>
+        </Select>
+        <Select value={payMode} onChange={setPayMode} width={isMobile ? '100%' : 130} ariaLabel="Filter by payment">
+          <option value="all">Any payment</option>
+          <option value="gate">At gate</option>
+          <option value="online">Online</option>
+        </Select>
+        <Select value={rate} onChange={setRate} width={isMobile ? '100%' : 130} ariaLabel="Filter by rate">
+          <option value="all">Any rate</option>
+          <option value="rr">Resident</option>
+          <option value="nr">Visitor</option>
+        </Select>
+        <Select value={nationality} onChange={setNationality} width={isMobile ? '100%' : 170} ariaLabel="Filter by nationality">
+          <option value="all">Any nationality</option>
+          {Object.keys(NATC).map((n) => <option key={n} value={n}>{n}</option>)}
+        </Select>
+        <Select value={sort} onChange={(v) => setSort(v as BookingSort)} width={isMobile ? '100%' : 170} ariaLabel="Sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="visit_asc">Visit date, soonest</option>
+          <option value="visit_desc">Visit date, latest</option>
+          <option value="total_desc">Highest total</option>
+          <option value="total_asc">Lowest total</option>
+          <option value="guest">Guest A to Z</option>
+        </Select>
         {filtered && (
           <Btn
             variant="ghost"
-            onClick={() => { setQ(''); setStatus('all'); setFrom(''); setTo(''); }}
+            onClick={() => { setQ(''); setStatus('all'); setFrom(''); setTo(''); setSlot('all'); setPayMode('all'); setRate('all'); setNationality('all'); }}
           >
             Clear
           </Btn>
         )}
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <ExportLink href={exportUrl('bookings', from || undefined, to || undefined)} label={from || to ? 'Export range' : 'Export month'} />
+          <Btn onClick={() => setCreating(true)}>+ New booking</Btn>
+        </div>
       </div>
+      {creating && (
+        <NewBookingDrawer
+          onClose={() => setCreating(false)}
+          onCreated={(b) => {
+            setCreating(false);
+            setRows((prev) => (prev.some((r) => r.id === b.id) ? prev : [b, ...prev]));
+            setTotal((t) => t + 1);
+            onChanged(true);
+            setOpenRef(b.refCode);
+          }}
+        />
+      )}
 
       {/* ---- table ---- */}
       <div style={{ ...card, overflow: 'hidden' }}>

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import {
-  APPLICATION_STATUSES, errorText, listApplications, listVacancies, safeCvHref, updateApplication,
+  APPLICATION_STATUSES, applicationsExportUrl, errorText, listApplications, listVacancies, safeCvHref, updateApplication,
   type ApplicationStatus, type HrApplication, type HrVacancy,
 } from '../../lib/hrApi';
 import { color, radius } from '../../styles/theme';
 import { useHover } from '../../hooks/useHover';
 import { Btn, EmptyState, Spinner, mono, relTime, shortDate } from '../staff/ui';
+import { ExportLink } from '../staff/reportUi';
 import {
   CopyButton, DetailLine, Drawer, FilterSelect, MetaPill, Notice, Pill, SectionTitle, TextArea,
   fieldStyle,
@@ -356,6 +357,9 @@ export default function ApplicantsPanel({ narrow, onChanged }: {
           width={narrow ? '100%' : 170}
         />
         {filtered && <Btn variant="ghost" onClick={clear} style={narrow ? { width: '100%' } : undefined}>Clear</Btn>}
+        <div style={{ marginLeft: narrow ? 0 : 'auto', width: narrow ? '100%' : 'auto' }}>
+          <ExportLink href={applicationsExportUrl({ vacancyId: vacancyId === 'all' ? undefined : vacancyId, status: status === 'all' ? undefined : status, q: dq || undefined })} label="Export applicants CSV" />
+        </div>
       </div>
 
       {err && <div style={{ marginBottom: 12 }}><Notice>{err}</Notice></div>}

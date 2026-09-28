@@ -149,6 +149,105 @@ test.describe('staff dashboard', () => {
     await expect(page.getByText(`Live Guest ${tag}`).first()).toBeVisible();
   });
 
+  test('reports, reconciliation and forecast tabs show figures and export CSV', async ({ page }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+
+    await page.getByRole('button', { name: /sales & reports/i }).click();
+    const reports = page.getByTestId('reports-panel');
+    await expect(reports.getByText('REVENUE', { exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(reports.getByText('WHERE GUESTS COME FROM')).toBeVisible();
+    await expect(reports.getByText('WHAT SELLS')).toBeVisible();
+    await reports.getByRole('button', { name: '90 days' }).click();
+    await expect(reports.getByText(/VISITS \d{4}-\d{2}-\d{2} → \d{4}-\d{2}-\d{2}/)).toBeVisible();
+    // the CSV links answer with a real spreadsheet
+    const href = await reports.getByTestId('export-csv').first().getAttribute('href');
+    const csv = await page.request.get(href!);
+    expect(csv.status()).toBe(200);
+    expect(csv.headers()['content-type']).toContain('text/csv');
+    expect(csv.headers()['content-disposition']).toContain('.csv');
+    expect(await csv.text()).toContain('Date,Bookings,Guests');
+
+    await page.getByRole('button', { name: /reconciliation/i }).click();
+    const rec = page.getByTestId('reconciliation-panel');
+    await expect(rec.getByText('EXPECTED AT GATE')).toBeVisible({ timeout: 15000 });
+    await expect(rec.getByText('COLLECTED AT GATE')).toBeVisible();
+    await expect(rec.getByText(/BOOKINGS FOR \d{4}-\d{2}-\d{2}/)).toBeVisible();
+
+    await page.getByRole('button', { name: /forecast/i }).click();
+    const fc = page.getByTestId('forecast-panel');
+    await expect(fc.getByText('GUESTS BOOKED', { exact: true }).first()).toBeVisible({ timeout: 15000 });
+    await fc.getByRole('button', { name: '60 days' }).click();
+    await expect(fc.locator('tbody tr')).toHaveCount(60, { timeout: 15000 });
+  });
+
+  test('an operator takes a phone booking from the dashboard', async ({ page }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /new booking/i }).click();
+    const drawer = page.getByTestId('new-booking');
+    await expect(drawer).toBeVisible();
+    const tag = Math.random().toString(36).slice(2, 8);
+    await drawer.getByLabel('FULL NAME').fill(`Phone Guest ${tag}`);
+    await drawer.getByLabel('PHONE').fill('+230 5000 0000');
+    await drawer.getByLabel('NATIONALITY').selectOption('Mauritius');
+    await drawer.getByLabel('Experience').selectOption('luge');
+    await drawer.getByLabel('Option').selectOption({ index: 1 });
+    await drawer.getByRole('button', { name: 'Add', exact: true }).click();
+    const total = await drawer.getByTestId('new-booking-total').textContent();
+    expect(total).toMatch(/Rs [\d,]+/);
+    await drawer.getByRole('button', { name: /confirm booking/i }).click();
+    // the detail drawer opens on the new reference, with the "taken by" note and audit entry
+    await expect(page.getByText(`Phone Guest ${tag}`).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Taken by .* \(phone\)/).first()).toBeVisible({ timeout: 15000 });
+  });
+
+  test('photos, documents and voice notes travel both ways in chat', async ({ page, context }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+
+    const visitor = await context.newPage();
+    await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
+    await visitor.goto('/');
+    await visitor.getByRole('button', { name: /open chat/i }).click();
+    const skip = visitor.getByRole('button', { name: /skip/i });
+    if (await skip.isVisible().catch(() => false)) await skip.click();
+
+    const tag = Math.random().toString(36).slice(2, 8);
+    await visitor.getByLabel('Message').fill(`Photo ${tag} https://vallepark.com/menu`);
+    // a 1x1 PNG straight from memory
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    await visitor.getByTestId('chat-file-input').setInputFiles({ name: `photo-${tag}.png`, mimeType: 'image/png', buffer: png });
+    const shot = visitor.locator(`img[alt="photo-${tag}.png"]`);
+    await expect(shot).toBeVisible({ timeout: 15000 });
+    // the caption's link is clickable
+    await expect(visitor.getByRole('link', { name: 'https://vallepark.com/menu' })).toBeVisible();
+
+    // the operator sees the photo, served through the staff attachment route
+    await page.getByRole('button', { name: /^chat/i }).first().click();
+    await expect(page.getByText(`Photo ${tag}`).first()).toBeVisible({ timeout: 20000 });
+    await page.getByText(`Photo ${tag}`).first().click();
+    const staffShot = page.locator(`img[alt="photo-${tag}.png"]`);
+    await expect(staffShot).toBeVisible({ timeout: 15000 });
+    const src = await staffShot.getAttribute('src');
+    expect(src).toContain('/api/staff/chat/attachments/');
+    const bytes = await page.request.get(src!);
+    expect(bytes.status()).toBe(200);
+    expect(bytes.headers()['content-type']).toBe('image/png');
+
+    // the operator answers with a PDF and a voice note; the visitor gets both
+    await page.getByLabel('Reply').fill(`Menu ${tag}`);
+    await page.getByTestId('chat-file-input').setInputFiles({ name: `menu-${tag}.pdf`, mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%fake\n') });
+    await expect(visitor.getByText(`menu-${tag}.pdf`)).toBeVisible({ timeout: 20000 });
+    await page.getByTestId('chat-file-input').setInputFiles({ name: 'voice-note.webm', mimeType: 'audio/webm', buffer: Buffer.from('\x1aE\xdf\xa3fake-webm', 'binary') });
+    await expect(visitor.locator('audio')).toHaveCount(1, { timeout: 20000 });
+
+    // an executable is refused with a clear message
+    await page.getByTestId('chat-file-input').setInputFiles({ name: 'virus.exe', mimeType: 'application/x-msdownload', buffer: Buffer.from('MZ') });
+    await expect(page.getByRole('alert')).toContainText(/cannot be sent/i, { timeout: 15000 });
+    await visitor.close();
+  });
+
   test('chat console shows a visitor conversation and replies reach the visitor', async ({ page, context }) => {
     await page.goto('/staff');
     await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });

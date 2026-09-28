@@ -6,16 +6,17 @@ import { StaffChat, type ChatStatus } from '../../lib/chatClient';
 import { useStaffAuth } from '../../store/StaffAuth';
 import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { postStaffMessage } from '../../lib/staffApi';
+import { postStaffMessage, uploadStaffAttachment } from '../../lib/staffApi';
 import { Stripes } from '../../components/Stripes';
 import { color, motion, radius } from '../../styles/theme';
 import {
   Btn, EmptyState, Spinner, StatusDot, TypingDots, card, clockTime, display, inputStyle, mono,
   relTime, usePrefersReducedMotion,
 } from './ui';
+import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from '../../components/chatParts';
 
 /** A thread row: server messages plus the optimistic ones still in flight. */
-type Row = ChatMessage & { pending?: boolean; failed?: boolean };
+type Row = ChatMessage & { pending?: boolean; failed?: boolean; localUrl?: string };
 
 type Filter = ConversationStatus;
 
@@ -108,8 +109,11 @@ function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: 9, animation: enter }}>
       <div style={{ maxWidth: 'min(74%,460px)', minWidth: 0, opacity: m.pending ? 0.65 : 1 }}>
-        <div style={{ ...skin, borderRadius: 15, padding: '10px 13px', fontSize: 14, lineHeight: 1.45, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-          {m.body}
+        <div style={{ ...skin, borderRadius: 15, padding: '10px 13px', fontSize: 14, lineHeight: 1.45, whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'grid', gap: 8 }}>
+          {m.attachments?.map((a) => (
+            <AttachmentView key={a.id} a={a} mine={mine} url={m.localUrl || attachmentUrl(a, { staff: true })} />
+          ))}
+          {m.body && <div>{linkify(m.body, mine ? '#FFFC33' : color.violet)}</div>}
         </div>
         <div style={{
           ...mono, fontSize: 9, letterSpacing: '.08em', marginTop: 3,
@@ -272,6 +276,7 @@ export default function ChatConsole({ active, onChanged }: {
     setDraft('');
 
     const sent = chatRef.current?.send(activeId, text) ?? false;
+    void sent;
     if (!sent) {
       // Socket is down, so send over REST instead and a blip never blocks a reply.
       // The server still broadcasts it, so a connected visitor sees it at once.
@@ -288,6 +293,38 @@ export default function ChatConsole({ active, onChanged }: {
           );
         });
     }
+  };
+
+  const [fileErr, setFileErr] = useState('');
+  /** Files always travel over REST; the server fans them out to the visitor's socket. */
+  const sendFile = (file: File) => {
+    if (!activeId) return;
+    if (file.size > MAX_BYTES) { setFileErr('That file is over 8 MB.'); return; }
+    setFileErr('');
+    const caption = draft.trim();
+    const localUrl = URL.createObjectURL(file);
+    const temp: Row = {
+      id: 'tmp-' + Math.random().toString(36).slice(2),
+      conversationId: activeId,
+      sender: 'staff',
+      staffName: auth.user?.name,
+      body: caption,
+      createdAt: new Date().toISOString(),
+      pending: true,
+      localUrl,
+      attachments: [{ id: 'tmp', kind: kindOf(file), name: file.name, mime: file.type, size: file.size }],
+    };
+    setMsgs((prev) => [...prev, temp]);
+    setDraft('');
+    uploadStaffAttachment(activeId, file, caption)
+      .then(({ message }) => {
+        setMsgs((prev) => prev.map((m) => (m.id === temp.id ? { ...message, localUrl } : m)));
+        onChangedRef.current();
+      })
+      .catch((e: Error) => {
+        setFileErr(e.message || 'Could not send the file.');
+        setMsgs((prev) => prev.map((m) => (m.id === temp.id ? { ...m, pending: false, failed: true } : m)));
+      });
   };
 
   const onDraft = (v: string) => {
@@ -423,10 +460,16 @@ export default function ChatConsole({ active, onChanged }: {
                 )}
               </div>
 
+              {fileErr && (
+                <div role="alert" style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: '#D91E44', background: '#FFE2E7', padding: '7px 14px', flexShrink: 0 }}>
+                  {fileErr.toUpperCase()}
+                </div>
+              )}
               <form
                 onSubmit={submit}
-                style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1.5px solid #EBE2FF', background: '#FFFFFF', flexShrink: 0 }}
+                style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1.5px solid #EBE2FF', background: '#FFFFFF', flexShrink: 0, position: 'relative', alignItems: 'center' }}
               >
+                <ComposerTools onFile={sendFile} onEmoji={(e) => setDraft((d) => d + e)} />
                 <input
                   value={draft}
                   onChange={(e) => onDraft(e.target.value)}

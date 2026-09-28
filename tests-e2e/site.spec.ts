@@ -137,6 +137,25 @@ test.describe('date picker shows how busy each slot is', () => {
   });
 });
 
+test.describe('chat composer', () => {
+  test('emoji picker inserts into the message and the attach and voice buttons are there', async ({ page }) => {
+    await preselectRate(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: /open chat/i }).click();
+    const skip = page.getByRole('button', { name: /skip/i });
+    if (await skip.isVisible().catch(() => false)) await skip.click();
+    await expect(page.getByLabel('Message')).toBeVisible();
+    await page.getByLabel('Message').fill('See you Sunday ');
+    await page.getByRole('button', { name: /insert an emoji/i }).click();
+    await expect(page.getByTestId('emoji-picker')).toBeVisible();
+    await page.getByRole('button', { name: 'Insert 🎉' }).click();
+    await expect(page.getByLabel('Message')).toHaveValue('See you Sunday 🎉');
+    await expect(page.getByTestId('emoji-picker')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /attach a photo/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /record a voice note/i })).toBeVisible();
+  });
+});
+
 test.describe('booking desk unreachable', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 

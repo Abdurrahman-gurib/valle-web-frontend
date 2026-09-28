@@ -7,6 +7,7 @@ import { useHover } from '../hooks/useHover';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { Stripes } from './Stripes';
 import { color, display, font, motion, radius, shadow } from '../styles/theme';
+import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from './chatParts';
 
 /**
  * Public floating chat launcher (visitors only, never rendered on /staff*).
@@ -26,7 +27,7 @@ const INTRO_KEY = 'valle_chat_intro';
 /** Panel geometry, kept in one place because the launcher shares the offsets. */
 const PANEL_W = 360;
 
-type Row = ChatMessage & { pending?: boolean; failed?: boolean };
+type Row = ChatMessage & { pending?: boolean; failed?: boolean; localUrl?: string };
 
 const monoText: CSSProperties = { fontFamily: font.mono };
 const displayText: CSSProperties = { ...display };
@@ -188,7 +189,7 @@ function TypingDots({ reduced }: { reduced: boolean }) {
 }
 
 /** Bodies render as text nodes: visitor and staff input is never treated as HTML. */
-function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
+function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; visitorKey: string }) {
   const mine = m.sender === 'visitor';
   const enter = reduced ? 'vfade .2s ease both' : 'vrise .32s cubic-bezier(.2,.7,.2,1) both';
 
@@ -229,9 +230,12 @@ function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
         )}
         <div style={{
           ...skin, borderRadius: 15, padding: '10px 13px', fontSize: 14, lineHeight: 1.45,
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'grid', gap: 8,
         }}>
-          {m.body}
+          {m.attachments?.map((a) => (
+            <AttachmentView key={a.id} a={a} mine={mine} url={m.localUrl || attachmentUrl(a, { visitorKey })} />
+          ))}
+          {m.body && <div>{linkify(m.body, mine ? '#FFFC33' : color.violet)}</div>}
         </div>
         {m.failed && (
           <div style={{
@@ -259,6 +263,7 @@ export function ChatWidget() {
   const [draft, setDraft] = useState('');
   const [unread, setUnread] = useState(0);
   const [staffTyping, setStaffTyping] = useState(false);
+  const [fileErr, setFileErr] = useState('');
 
   const chatRef = useRef<VisitorChat | null>(null);
   const openRef = useRef(open);
@@ -364,6 +369,34 @@ export function ChatWidget() {
       lastTypingSent.current = now;
       chatRef.current?.typing();
     }
+  };
+
+  /** A photo, GIF, voice note or document: optimistic bubble first, then the upload. */
+  const sendFile = (file: File) => {
+    const chat = chatRef.current;
+    if (!chat) return;
+    if (file.size > MAX_BYTES) { setFileErr('That file is over 8 MB. Try a smaller one.'); return; }
+    setFileErr('');
+    const caption = draft.trim();
+    const localUrl = URL.createObjectURL(file);
+    const temp: Row = {
+      id: 'tmp-' + Math.random().toString(36).slice(2),
+      conversationId: chat.id || '',
+      sender: 'visitor',
+      body: caption,
+      createdAt: new Date().toISOString(),
+      pending: true,
+      localUrl,
+      attachments: [{ id: 'tmp', kind: kindOf(file), name: file.name, mime: file.type, size: file.size }],
+    };
+    setMsgs((prev) => [...prev, temp]);
+    setDraft('');
+    chat.sendFile(file, caption)
+      .then((m) => setMsgs((prev) => prev.map((x) => (x.id === temp.id ? { ...m, localUrl } : x))))
+      .catch((e: Error) => {
+        setFileErr(e.message || 'Could not send the file.');
+        setMsgs((prev) => prev.map((x) => (x.id === temp.id ? { ...x, pending: false, failed: true } : x)));
+      });
   };
 
   const bottom = isMobile ? 92 : 24;
@@ -531,7 +564,7 @@ export function ChatWidget() {
                 SAY HELLO · WE ARE LISTENING
               </div>
             )}
-            {msgs.map((m) => <Bubble key={m.id} m={m} reduced={reduced} />)}
+            {msgs.map((m) => <Bubble key={m.id} m={m} reduced={reduced} visitorKey={chatRef.current?.visitorKey || getVisitorKey()} />)}
 
             {staffTyping && (
               <div
@@ -560,20 +593,26 @@ export function ChatWidget() {
           )}
 
           {/* -------------------------------------------------------- composer -- */}
+          {fileErr && (
+            <div role="alert" style={{ ...monoText, fontSize: 9.5, letterSpacing: '.08em', color: color.pinkDark, background: '#FFE2E7', padding: '7px 14px', flexShrink: 0 }}>
+              {fileErr.toUpperCase()}
+            </div>
+          )}
           <form
             onSubmit={submit}
             style={{
               display: 'flex', gap: 8, padding: 11, borderTop: '1.5px solid ' + color.border,
-              background: color.white, flexShrink: 0,
+              background: color.white, flexShrink: 0, position: 'relative', alignItems: 'center',
             }}
           >
+            <ComposerTools onFile={sendFile} onEmoji={(e) => setDraft((d) => d + e)} />
             <input
               value={draft}
               onChange={(e) => onDraft(e.target.value)}
               maxLength={2000}
               placeholder="Type a message…"
               aria-label="Message"
-              style={{ ...inputStyle, flex: 1 }}
+              style={{ ...inputStyle, flex: 1, minWidth: 0 }}
             />
             <button
               type="submit"

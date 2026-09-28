@@ -3,7 +3,7 @@ import { io, type Socket } from 'socket.io-client';
 import type { ChatMessage, ConversationSummary } from '../types';
 import {
   fetchVisitorMessages, listConversationMessages, listConversations,
-  openVisitorSession, postVisitorMessage,
+  openVisitorSession, postVisitorMessage, uploadVisitorAttachment,
 } from './staffApi';
 
 /**
@@ -153,6 +153,17 @@ export class VisitorChat extends Emitter<VisitorChatEvents> {
     const res = await postVisitorMessage(id, this.key, text);
     this.ingest(res.message);
   }
+
+  /** Files always go over REST; the server fans the message out to the socket room. */
+  async sendFile(file: File, caption = ''): Promise<ChatMessage> {
+    const id = await this.ensureSession();
+    const res = await uploadVisitorAttachment(id, this.key, file, caption);
+    this.ingest(res.message);
+    return res.message;
+  }
+
+  /** The visitor's own key, needed to fetch attachment bytes. */
+  get visitorKey(): string { return this.key; }
 
   typing(): void {
     if (this.socket?.connected && this.conversationId) {

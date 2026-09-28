@@ -53,6 +53,21 @@ async function request<T>(path: string, init?: RequestInit, opts?: Opts): Promis
   return res.json() as Promise<T>;
 }
 
+/** Multipart upload: the browser sets the boundary, so no Content-Type header here. */
+async function upload<T>(path: string, form: FormData, opts?: Opts): Promise<T> {
+  const res = await fetch(BASE + path, { method: 'POST', credentials: 'include', body: form });
+  if (!res.ok) {
+    if (res.status === 401 && !opts?.allow401) onUnauthorized();
+    let msg = res.statusText;
+    try {
+      const body = await res.json();
+      if (body && body.message) msg = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+    } catch { /* keep statusText */ }
+    throw Object.assign(new Error(msg || 'Upload failed'), { status: res.status });
+  }
+  return res.json() as Promise<T>;
+}
+
 function qs(params: Record<string, string | number | undefined>): string {
   const p = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -82,14 +97,83 @@ export function staffMe(): Promise<StaffUser> {
 
 // ---- bookings ----
 
+export type BookingSort = 'newest' | 'oldest' | 'visit_asc' | 'visit_desc' | 'total_desc' | 'total_asc' | 'guest';
+
 export interface BookingQuery {
   status?: string;
   from?: string;
   to?: string;
+  slot?: string;
+  payMode?: string;
+  rate?: string;
+  nationality?: string;
+  sort?: BookingSort;
   q?: string;
   page?: number;
   pageSize?: number;
 }
+
+export type BookingChannel = 'phone' | 'desk' | 'email' | 'whatsapp' | 'agency' | 'other';
+
+/** POST /api/staff/bookings: the public booking payload plus how it came in. */
+export interface StaffBookingInput {
+  visitDate: string;
+  slot: SlotKey;
+  adults: number;
+  kids: number;
+  rate: RateKey;
+  items: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[];
+  name: string;
+  phone?: string;
+  email?: string;
+  nationality?: string;
+  payMode: PayMode;
+  channel: BookingChannel;
+  note?: string;
+}
+
+export function createStaffBooking(body: StaffBookingInput): Promise<BookingDetailFull> {
+  return request<BookingDetailFull>('/staff/bookings', { method: 'POST', body: JSON.stringify(body) });
+}
+
+// ---- reports ----
+
+export interface Breakdown { key: string; bookings: number; guests: number; revenue: number }
+export interface DailyPoint { date: string; bookings: number; guests: number; revenue: number }
+export interface SalesSummary {
+  from: string; to: string;
+  totals: {
+    bookings: number; cancelled: number; guests: number; adults: number; kids: number; revenue: number;
+    entryRevenue: number; experienceRevenue: number; discounts: number; avgTicket: number; onlineRevenue: number; gateRevenue: number;
+  };
+  byStatus: Breakdown[]; byPayMode: Breakdown[]; byRate: Breakdown[]; bySlot: Breakdown[]; daily: DailyPoint[];
+}
+export interface NationalityRow { nationality: string; bookings: number; guests: number; revenue: number; share: number }
+export interface ExperienceRow { experienceId: string; label: string; bookings: number; adults: number; kids: number; units: number; revenue: number }
+export interface ReconciliationRow {
+  refCode: string; guestName: string; slot: string; payMode: string; status: string; adults: number; kids: number; total: number;
+  nationality: string; phone: string; email: string;
+}
+export interface Reconciliation {
+  date: string; rows: ReconciliationRow[];
+  totals: {
+    bookings: number; guestsExpected: number; guestsArrived: number; gateExpected: number; gateCollected: number; gateOutstanding: number;
+    onlinePaid: number; cancelled: number; cancelledAmount: number; noShows: number; noShowAmount: number;
+  };
+}
+export interface ForecastDay {
+  date: string; dow: string; bookings: number; morningGuests: number; afternoonGuests: number; guests: number; revenue: number;
+  typicalGuests: number; pace: number | null;
+}
+export type ExportType = 'bookings' | 'daily' | 'nationalities' | 'experiences';
+
+export const getSalesSummary = (from: string, to: string) => request<SalesSummary>('/staff/reports/summary' + qs({ from, to }));
+export const getNationalities = (from: string, to: string) => request<NationalityRow[]>('/staff/reports/nationalities' + qs({ from, to }));
+export const getExperienceSales = (from: string, to: string) => request<ExperienceRow[]>('/staff/reports/experiences' + qs({ from, to }));
+export const getReconciliation = (date: string) => request<Reconciliation>('/staff/reports/reconciliation' + qs({ date }));
+export const getForecast = (days: number) => request<ForecastDay[]>('/staff/reports/forecast' + qs({ days }));
+/** Same-origin link; the session cookie travels with it, so a plain <a download> works. */
+export const exportUrl = (type: ExportType, from?: string, to?: string) => BASE + '/staff/reports/export.csv' + qs({ type, from, to });
 
 export function listBookings(query: BookingQuery = {}): Promise<Paged<BookingRow>> {
   return request<Paged<BookingRow>>('/staff/bookings' + qs({ ...query }));
@@ -198,6 +282,14 @@ export function postStaffMessage(conversationId: string, body: string): Promise<
   );
 }
 
+/** A photo, GIF, voice note or document to the visitor (always REST: files do not travel over the socket). */
+export function uploadStaffAttachment(conversationId: string, file: File, caption = ''): Promise<{ message: ChatMessage }> {
+  const form = new FormData();
+  form.append('file', file, file.name);
+  if (caption) form.append('caption', caption);
+  return upload<{ message: ChatMessage }>(`/staff/chat/conversations/${encodeURIComponent(conversationId)}/attachments`, form);
+}
+
 export function closeConversation(conversationId: string): Promise<{ ok: true }> {
   return request<{ ok: true }>(
     `/staff/chat/conversations/${encodeURIComponent(conversationId)}/close`,
@@ -225,6 +317,14 @@ export function fetchVisitorMessages(conversationId: string, visitorKey: string)
     undefined,
     { allow401: true },
   );
+}
+
+export function uploadVisitorAttachment(conversationId: string, visitorKey: string, file: File, caption = ''): Promise<{ message: ChatMessage }> {
+  const form = new FormData();
+  form.append('file', file, file.name);
+  form.append('visitorKey', visitorKey);
+  if (caption) form.append('caption', caption);
+  return upload<{ message: ChatMessage }>('/chat/session/' + encodeURIComponent(conversationId) + '/attachments', form, { allow401: true });
 }
 
 export function postVisitorMessage(conversationId: string, visitorKey: string, body: string): Promise<{ message: ChatMessage }> {

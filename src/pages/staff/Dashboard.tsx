@@ -12,8 +12,11 @@ import { Stripes } from '../../components/Stripes';
 import { Spinner, card, display, mono } from './ui';
 import BookingsPanel from './BookingsPanel';
 import ChatConsole from './ChatConsole';
+import ReportsPanel from './ReportsPanel';
+import ReconciliationPanel from './ReconciliationPanel';
+import ForecastPanel from './ForecastPanel';
 
-type Tab = 'bookings' | 'chat';
+type Tab = 'bookings' | 'reports' | 'reconciliation' | 'forecast' | 'chat';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -241,10 +244,13 @@ export default function StaffDashboard() {
 
         {/* ---- tabs ---- */}
         <div style={{
-          display: 'inline-flex', gap: 4, padding: 4, marginBottom: 14,
-          background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 999,
+          display: 'inline-flex', gap: 4, padding: 4, marginBottom: 14, flexWrap: 'wrap',
+          background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 24,
         }}>
           <TabBtn on={tab === 'bookings'} onClick={() => setTab('bookings')}>Bookings</TabBtn>
+          <TabBtn on={tab === 'reports'} onClick={() => setTab('reports')}>Sales & reports</TabBtn>
+          <TabBtn on={tab === 'reconciliation'} onClick={() => setTab('reconciliation')}>Reconciliation</TabBtn>
+          <TabBtn on={tab === 'forecast'} onClick={() => setTab('forecast')}>Forecast</TabBtn>
           <TabBtn on={tab === 'chat'} onClick={() => setTab('chat')}>Chat</TabBtn>
         </div>
 
@@ -261,6 +267,9 @@ export default function StaffDashboard() {
         <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
           <BookingsPanel onChanged={reloadStats} />
         </div>
+        {tab === 'reports' && <ReportsPanel />}
+        {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
+        {tab === 'forecast' && <ForecastPanel />}
         <div style={{ display: tab === 'chat' ? 'block' : 'none' }}>
           <ChatConsole active={tab === 'chat'} onChanged={reloadStats} />
         </div>

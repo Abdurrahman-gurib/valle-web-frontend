@@ -242,6 +242,11 @@ export function listApplications(query: ApplicationQuery = {}): Promise<Paged<Hr
   return request<Paged<HrApplication>>('/hr/applications' + qs({ ...query }));
 }
 
+/** CSV of the applications matching the filters (same-origin link, cookie travels with it). */
+export function applicationsExportUrl(query: ApplicationQuery = {}): string {
+  return BASE + '/hr/applications/export.csv' + qs({ ...query, page: undefined, pageSize: undefined });
+}
+
 export interface ApplicationPatch {
   status?: ApplicationStatus;
   hrNote?: string;

@@ -270,6 +270,17 @@ export interface QuoteRow {
 
 export type ChatSender = 'visitor' | 'staff' | 'system';
 
+export type ChatAttachmentKind = 'image' | 'gif' | 'audio' | 'file';
+
+/** A file on a message; the bytes come from the attachment routes (see chatParts.attachmentUrl). */
+export interface ChatAttachmentMeta {
+  id: string;
+  kind: ChatAttachmentKind;
+  name: string;
+  mime: string;
+  size: number;
+}
+
 export interface ChatMessage {
   id: string;
   conversationId: string;
@@ -277,6 +288,7 @@ export interface ChatMessage {
   staffName?: string;
   body: string;
   createdAt: string;
+  attachments?: ChatAttachmentMeta[];
 }
 
 export type ConversationStatus = 'open' | 'closed';
