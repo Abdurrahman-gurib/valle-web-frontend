@@ -80,3 +80,10 @@ img { max-width: 100%; }
    and the quad map's chosen loop sweeps into view from the base. */
 @keyframes vtrace { to { stroke-dashoffset: 0; } }
 @keyframes vspark { 0% { opacity: 0; r: 0.4; } 35% { opacity: 1; r: 1.6; } 100% { opacity: 0; r: 2.6; } }
+
+/* Back office print: the reconciliation day sheet for the gate. */
+@media print {
+  [data-print-hide] { display: none !important; }
+  body { background: #FFFFFF !important; }
+  a[href]::after { content: none !important; }
+}

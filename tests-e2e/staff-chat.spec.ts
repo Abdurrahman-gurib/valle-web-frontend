@@ -181,6 +181,68 @@ test.describe('staff dashboard', () => {
     await expect(fc.locator('tbody tr')).toHaveCount(60, { timeout: 15000 });
   });
 
+  test('bookings show when they came in to the second, and the drawer offers WhatsApp, call, e-mail and copy', async ({ page }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    const cell = page.getByTestId('booked-at').first();
+    await expect(cell).toBeVisible({ timeout: 15000 });
+    await expect(cell).toContainText(/\d{2}:\d{2}:\d{2}/);
+    await page.locator('tbody tr').first().click();
+    await expect(page.getByTestId('drawer-booked-at')).toContainText(/BOOKED .* · \d{2}:\d{2}:\d{2}/, { timeout: 15000 });
+    const actions = page.getByTestId('contact-actions');
+    await expect(actions.getByRole('button', { name: /copy confirmation/i })).toBeVisible();
+    // at least one of the contact links, depending on what the guest left
+    expect(await actions.getByRole('link').count()).toBeGreaterThanOrEqual(1);
+    // the stat strip carries the new counters
+    await expect(page.getByText('REVENUE TODAY')).toBeVisible();
+    await expect(page.getByText('CHATS TO ANSWER')).toBeVisible();
+  });
+
+  test('quote requests from the packages page land in the Quotes tab with reply links', async ({ page }) => {
+    const tag = Math.random().toString(36).slice(2, 8);
+    const res = await page.request.post('/api/quotes', {
+      data: { name: `Quote Guest ${tag}`, company: `Acme ${tag}`, email: `quote-${tag}@example.mu`, phone: '+230 5111 2222', groupSize: '25', preferredDate: '2026-11-12', message: 'Team day with ziplines and lunch.' },
+    });
+    expect(res.ok()).toBeTruthy();
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /^quotes$/i }).click();
+    const panel = page.getByTestId('quotes-panel');
+    await expect(panel.getByText(`Quote Guest ${tag}`)).toBeVisible({ timeout: 15000 });
+    const row = panel.locator('tr', { hasText: `Acme ${tag}` });
+    await expect(row.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', /wa\.me\/23051112222/);
+    await expect(row.getByRole('link', { name: 'E-mail' })).toHaveAttribute('href', /^mailto:quote-/);
+  });
+
+  test('chat search finds a conversation by a word inside a message, and quick replies fill the box', async ({ page, context }) => {
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    const tag = Math.random().toString(36).slice(2, 8);
+    const visitor = await context.newPage();
+    await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
+    await visitor.goto('/');
+    await visitor.getByRole('button', { name: /open chat/i }).click();
+    const skip = visitor.getByRole('button', { name: /skip/i });
+    if (await skip.isVisible().catch(() => false)) await skip.click();
+    await visitor.getByLabel('Message').fill(`Do you have lockers? needle-${tag}`);
+    await visitor.getByLabel('Message').press('Enter');
+    await expect(visitor.getByText(`needle-${tag}`)).toBeVisible({ timeout: 15000 });
+
+    await page.getByRole('button', { name: /^chat/i }).first().click();
+    await page.getByLabel('Search conversations').fill(`needle-${tag}`);
+    const list = page.locator('button', { hasText: `needle-${tag}` });
+    await expect(list.first()).toBeVisible({ timeout: 15000 });
+    await page.getByLabel('Search conversations').fill('zzz-no-such-thing-zzz');
+    await expect(page.getByText('No match')).toBeVisible({ timeout: 15000 });
+    await page.getByLabel('Search conversations').fill(`needle-${tag}`);
+    await list.first().click();
+    await expect(page.getByLabel('Reply')).toBeVisible();
+    await page.getByRole('button', { name: /quick replies/i }).click();
+    await page.getByTestId('quick-replies').getByRole('menuitem', { name: /opening hours/i }).click();
+    await expect(page.getByLabel('Reply')).toHaveValue(/open every day from 09:00 to 17:30/);
+    await visitor.close();
+  });
+
   test('an operator takes a phone booking from the dashboard', async ({ page }) => {
     await page.goto('/staff');
     await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });

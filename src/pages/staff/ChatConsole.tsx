@@ -6,7 +6,7 @@ import { StaffChat, type ChatStatus } from '../../lib/chatClient';
 import { useStaffAuth } from '../../store/StaffAuth';
 import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { postStaffMessage, uploadStaffAttachment } from '../../lib/staffApi';
+import { listConversations, postStaffMessage, uploadStaffAttachment } from '../../lib/staffApi';
 import { Stripes } from '../../components/Stripes';
 import { color, motion, radius } from '../../styles/theme';
 import {
@@ -14,6 +14,18 @@ import {
   relTime, usePrefersReducedMotion,
 } from './ui';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from '../../components/chatParts';
+
+/** Answers the desk types many times a day; one click drops them into the reply box. */
+const QUICK_REPLIES: { label: string; text: string }[] = [
+  { label: 'Opening hours', text: 'We are open every day from 09:00 to 17:30, last entry 15:30. Morning arrivals 09:00–12:00, afternoon arrivals 12:00–15:30.' },
+  { label: 'How to book', text: 'You can book on vallepark.com/booking: pick your experiences, choose a date and arrival slot, and pay on arrival or online. Booking is free with no cancellation fee.' },
+  { label: 'Prices', text: 'Park entry is Rs 550 (12+) and Rs 325 (6 to 11) at the visitor rate, under 6 free; residents pay less with an ID. Every experience is priced on its own page and the Explorer Pass takes 15% off any 3 adventures.' },
+  { label: 'Directions', text: 'We are at B102, Mare Anguilles, Chamouny, in the south of Mauritius. Search "Vallé Advenature Park" on Google Maps or Waze. Free parking at the gate.' },
+  { label: 'What to bring', text: 'Closed shoes, light clothes you can move in, sunscreen, a hat and water. Lockers are available at reception. Zipline and quad have age, height and weight limits listed on each page.' },
+  { label: 'Rain', text: 'The park stays open in light rain and the trails are all the more beautiful for it. Ziplines and quads pause only during storms, and we reschedule at no cost.' },
+  { label: 'Groups & team building', text: 'For groups of 10 or more and team-building days, send us the date, group size and what you have in mind on the Packages page, and we will come back with a quote within a day.' },
+  { label: 'Contact', text: 'Call or WhatsApp us on +230 660 44 77, or write to sales@vallepark.com.' },
+];
 
 /** A thread row: server messages plus the optimistic ones still in flight. */
 type Row = ChatMessage & { pending?: boolean; failed?: boolean; localUrl?: string };
@@ -155,6 +167,9 @@ export default function ChatConsole({ active, onChanged }: {
 
   const [convos, setConvos] = useState<ConversationSummary[]>([]);
   const [filter, setFilter] = useState<Filter>('open');
+  const [search, setSearch] = useState('');
+  const [found, setFound] = useState<ConversationSummary[] | null>(null);
+  const [quick, setQuick] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [msgs, setMsgs] = useState<Row[]>([]);
   const [loadingThread, setLoadingThread] = useState(false);
@@ -343,7 +358,21 @@ export default function ChatConsole({ active, onChanged }: {
     onChangedRef.current();
   };
 
-  const shown = convos.filter((c) => c.status === filter);
+  // Search asks the server (it looks inside message bodies too) and shows that
+  // list instead of the live one until the box is cleared.
+  useEffect(() => {
+    const term = search.trim();
+    if (!term) { setFound(null); return; }
+    let dead = false;
+    const t = setTimeout(() => {
+      listConversations(undefined, term)
+        .then((r) => { if (!dead) setFound(r.items || []); })
+        .catch(() => { if (!dead) setFound([]); });
+    }, 280);
+    return () => { dead = true; clearTimeout(t); };
+  }, [search]);
+
+  const shown = (found ?? convos).filter((c) => c.status === filter);
   const current = convos.find((c) => c.id === activeId) || null;
   const connected = status === 'connected';
 
@@ -369,6 +398,14 @@ export default function ChatConsole({ active, onChanged }: {
               <span style={{ ...display, fontSize: 19, flex: 1 }}>Conversations</span>
               <StatusDot connected={connected} />
             </div>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search name, e-mail or message…"
+              aria-label="Search conversations"
+              style={{ ...inputStyle, marginBottom: 8 }}
+            />
             <div style={{ display: 'flex', gap: 4, background: '#F7F3FF', borderRadius: 999, padding: 3 }}>
               <FilterTab on={filter === 'open'} onClick={() => setFilter('open')}>OPEN</FilterTab>
               <FilterTab on={filter === 'closed'} onClick={() => setFilter('closed')}>CLOSED</FilterTab>
@@ -378,10 +415,12 @@ export default function ChatConsole({ active, onChanged }: {
           <div className="no-scrollbar" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
             {shown.length === 0 ? (
               <EmptyState
-                title={filter === 'open' ? 'All clear' : 'Nothing closed'}
-                note={filter === 'open'
-                  ? 'No open conversations right now. New visitor messages appear here instantly.'
-                  : 'Conversations you close will be filed here.'}
+                title={found ? 'No match' : filter === 'open' ? 'All clear' : 'Nothing closed'}
+                note={found
+                  ? 'Nothing in this tab matches your search. Try the other tab or another word.'
+                  : filter === 'open'
+                    ? 'No open conversations right now. New visitor messages appear here instantly.'
+                    : 'Conversations you close will be filed here.'}
               />
             ) : (
               shown.map((c) => (
@@ -470,6 +509,19 @@ export default function ChatConsole({ active, onChanged }: {
                 style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1.5px solid #EBE2FF', background: '#FFFFFF', flexShrink: 0, position: 'relative', alignItems: 'center' }}
               >
                 <ComposerTools onFile={sendFile} onEmoji={(e) => setDraft((d) => d + e)} />
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button type="button" onClick={() => setQuick((v) => !v)} aria-label="Quick replies" title="Quick replies" style={{ border: '1.5px solid ' + (quick ? '#FF3358' : '#EBE2FF'), background: quick ? '#FFE2E7' : '#FFFFFF', color: '#340057', width: 36, height: 36, borderRadius: 999, cursor: 'pointer', fontSize: 15 }}>⚡</button>
+                  {quick && (
+                    <div role="menu" data-testid="quick-replies" style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, zIndex: 5, width: 'min(360px, calc(100vw - 40px))', background: '#FFFFFF', borderRadius: 14, boxShadow: '0 20px 50px -18px rgba(31,0,51,.6), 0 0 0 1.5px #EBE2FF', padding: 6, maxHeight: 260, overflowY: 'auto' }}>
+                      {QUICK_REPLIES.map((r) => (
+                        <button key={r.label} type="button" role="menuitem" onClick={() => { setDraft((d) => (d ? d + ' ' : '') + r.text); setQuick(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', border: 0, background: 'transparent', cursor: 'pointer', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', color: '#340057' }}>
+                          <div style={{ fontWeight: 700, fontSize: 12.5 }}>{r.label}</div>
+                          <div style={{ fontSize: 12, color: 'rgba(52,0,87,.65)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.text}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <input
                   value={draft}
                   onChange={(e) => onDraft(e.target.value)}

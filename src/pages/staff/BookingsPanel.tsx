@@ -14,12 +14,12 @@ import { Stripes } from '../../components/Stripes';
 import { color, radius } from '../../styles/theme';
 import {
   Btn, EmptyState, Field, RatePill, SectionLabel, Spinner, StatusChip, TotalTag,
-  card, display, inputStyle, mono, shortDate, textareaStyle, usePrefersReducedMotion,
+  card, clockTimeSec, dateTimeSec, display, inputStyle, mono, shortDate, textareaStyle, usePrefersReducedMotion,
 } from './ui';
 
 const PAGE_SIZE = 20;
 
-const COLS = ['Ref', 'Date', 'Slot', 'Guest', 'Party', 'Rate', 'Pay', 'Total', 'Status'];
+const COLS = ['Ref', 'Booked at', 'Date', 'Slot', 'Guest', 'Party', 'Rate', 'Pay', 'Total', 'Status'];
 
 const th: CSSProperties = {
   ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', textTransform: 'uppercase',
@@ -70,6 +70,10 @@ function TableRow({ row, onOpen }: { row: BookingRow; onOpen: (ref: string) => v
       style={{ cursor: 'pointer', background: h ? '#F7F3FF' : '#FFFFFF', transition: 'background .12s ease' }}
     >
       <td style={{ ...td, ...mono, fontWeight: 700, fontSize: 12.5 }}>{row.refCode}</td>
+      <td style={td} data-testid="booked-at">
+        <div style={{ fontSize: 12.5 }}>{shortDate(row.createdAt)}</div>
+        <div style={{ ...mono, fontSize: 11, color: '#7333FF', fontWeight: 700 }}>{clockTimeSec(row.createdAt)}</div>
+      </td>
       <td style={td}>{shortDate(row.visitDate)}</td>
       <td style={td}>{slotLabel(row.slot)}</td>
       <td style={{ ...td, fontWeight: 600 }}>{row.guestName}</td>
@@ -79,6 +83,41 @@ function TableRow({ row, onOpen }: { row: BookingRow; onOpen: (ref: string) => v
       <td style={{ ...td, ...display, fontSize: 17, letterSpacing: '-0.01em' }}>{money(row.total)}</td>
       <td style={td}><StatusChip status={row.status} /></td>
     </tr>
+  );
+}
+
+/** Phone number as a wa.me target: digits only, no leading zeros or plus. */
+const waDigits = (phone: string | null | undefined): string => (phone || '').replace(/\D/g, '').replace(/^0+/, '');
+
+/** A confirmation the desk can paste into WhatsApp, an e-mail or an SMS. */
+function confirmationText(d: BookingDetailFull): string {
+  const lines = (d.lines || []).map((l) => `• ${l.label}: ${money(l.amount)}`).join('\n');
+  return [
+    `VALLÉ Advenature™ Park · booking ${d.refCode}`,
+    `Guest: ${d.guestName} · ${partyLabel(d.adults, d.kids)} · ${rateLabel(d.rate)}`,
+    `Visit: ${shortDate(d.visitDate)}, ${slotLabel(d.slot).toLowerCase()} arrival (${d.slot === 'morning' ? '09:00–12:00' : '12:00–15:30'})`,
+    lines,
+    `Total: ${money(d.total)} · ${d.payMode === 'online' ? 'paid online' : 'to pay on arrival'}`,
+    'Show this reference at the gate. B102, Mare Anguilles, Chamouny · +230 660 44 77',
+  ].filter(Boolean).join('\n');
+}
+
+/** WhatsApp / call / e-mail the guest, or copy the confirmation to paste anywhere. */
+function ContactActions({ data }: { data: BookingDetailFull }) {
+  const [copied, setCopied] = useState(false);
+  const wa = waDigits(data.phone);
+  const text = confirmationText(data);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked */ }
+  };
+  const a: CSSProperties = { border: '1.5px solid #340057', color: '#340057', borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', background: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit' };
+  return (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }} data-testid="contact-actions">
+      {wa && <a href={`https://wa.me/${wa}?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" style={a}>WhatsApp</a>}
+      {data.phone && <a href={`tel:${data.phone.replace(/\s+/g, '')}`} style={a}>Call</a>}
+      {data.email && <a href={`mailto:${data.email}?subject=${encodeURIComponent('Your VALLÉ booking ' + data.refCode)}&body=${encodeURIComponent(text)}`} style={a}>E-mail</a>}
+      <button type="button" onClick={() => { void copy(); }} style={{ ...a, background: copied ? '#E2FFEB' : '#FFFFFF' }}>{copied ? 'Copied ✓' : 'Copy confirmation'}</button>
+    </div>
   );
 }
 
@@ -429,10 +468,11 @@ function Drawer({ refCode, onClose, onPatched }: {
               <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 16, flexWrap: 'wrap' }}>
                 <StatusChip status={data.status} />
                 <RatePill rate={data.rate} />
-                <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)' }}>
-                  BOOKED {shortDate(data.createdAt)}
+                <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)' }} data-testid="drawer-booked-at">
+                  BOOKED {dateTimeSec(data.createdAt).toUpperCase()}
                 </span>
               </div>
+              {!editing && <ContactActions data={data} />}
 
               {editing && form ? (
                 /* ------------------------------------------------------ edit -- */

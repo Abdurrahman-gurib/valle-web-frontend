@@ -266,8 +266,8 @@ export function getStats(): Promise<StaffStats> {
 
 // ---- chat (staff side; used for first paint and as the socket fallback) ----
 
-export function listConversations(status?: ConversationStatus): Promise<{ items: ConversationSummary[] }> {
-  return request<{ items: ConversationSummary[] }>('/staff/chat/conversations' + qs({ status }));
+export function listConversations(status?: ConversationStatus, q?: string): Promise<{ items: ConversationSummary[] }> {
+  return request<{ items: ConversationSummary[] }>('/staff/chat/conversations' + qs({ status, q }));
 }
 
 /**

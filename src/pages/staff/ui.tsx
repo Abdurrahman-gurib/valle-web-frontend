@@ -263,6 +263,21 @@ export function clockTime(iso: string): string {
   return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
 
+/** "14:03:21", park time. Bookings are stamped to the second so the desk can order them. */
+export function clockTimeSec(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleTimeString('en-GB', { timeZone: 'Indian/Mauritius', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+/** "28 Sep 2026 · 14:03:21", park time. */
+export function dateTimeSec(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const day = d.toLocaleDateString('en-GB', { timeZone: 'Indian/Mauritius', day: 'numeric', month: 'short', year: 'numeric' });
+  return day + ' · ' + clockTimeSec(iso);
+}
+
 /** "just now" · "8 min" · "3 h" · "yesterday" · "6 Aug" */
 export function relTime(iso: string): string {
   const t = new Date(iso).getTime();

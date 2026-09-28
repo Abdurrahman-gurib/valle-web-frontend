@@ -46,12 +46,15 @@ export default function ReconciliationPanel({ onChanged }: { onChanged: (force?:
 
   return (
     <div data-testid="reconciliation-panel">
-      <div style={{ ...card, padding: 12, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <div data-print-hide="" style={{ ...card, padding: 12, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <Btn variant="ghost" onClick={() => setDate(addDays(date, -1))}>‹</Btn>
         <input type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} aria-label="Reconciliation date" style={{ ...inputStyle, width: 'auto' }} />
         <Btn variant="ghost" onClick={() => setDate(addDays(date, 1))}>›</Btn>
         <Btn variant="ghost" onClick={() => setDate(todayIsoPark())}>Today</Btn>
-        <div style={{ marginLeft: 'auto' }}><ExportLink href={exportUrl('bookings', date, date)} label="Day's bookings CSV" /></div>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Btn variant="ghost" onClick={() => window.print()}>Print arrivals sheet</Btn>
+          <ExportLink href={exportUrl('bookings', date, date)} label="Day's bookings CSV" />
+        </div>
       </div>
 
       {err && <div style={{ ...card, padding: 14, marginBottom: 14, color: '#D91E44', fontWeight: 600 }}>{err}</div>}

@@ -250,6 +250,9 @@ export interface StaffStats {
   bookingsToday: number;
   arrivalsToday: number;
   openChats: number;
+  unansweredChats: number;
+  guestsToday: number;
+  revenueToday: number;
   revenueMonth: number;
 }
 

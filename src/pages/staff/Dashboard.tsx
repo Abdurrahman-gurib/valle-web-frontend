@@ -15,8 +15,9 @@ import ChatConsole from './ChatConsole';
 import ReportsPanel from './ReportsPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
+import QuotesPanel from './QuotesPanel';
 
-type Tab = 'bookings' | 'reports' | 'reconciliation' | 'forecast' | 'chat';
+type Tab = 'bookings' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -138,7 +139,7 @@ export default function StaffDashboard() {
       fontFamily: "'Work Sans',sans-serif",
     }}>
       {/* ---- slim top bar ---- */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40 }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 40 }} data-print-hide="">
         <div style={{
           ...barSide, background: '#340057', color: '#FFFFFF', height: 60,
           display: 'flex', alignItems: 'center', gap: 14,
@@ -232,18 +233,19 @@ export default function StaffDashboard() {
       ) : (
       <div style={{ padding: 'clamp(16px,3vw,26px) clamp(14px,3vw,28px) 40px', maxWidth: 1440, margin: '0 auto' }}>
         {/* ---- stat strip ---- */}
-        <div style={{
+        <div data-print-hide="" style={{
           display: 'grid', gap: 12, marginBottom: 18,
           gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
         }}>
           <StatCard tag="BOOKINGS TODAY" value={stats ? String(stats.bookingsToday) : '…'} />
-          <StatCard tag="ARRIVALS TODAY" value={stats ? String(stats.arrivalsToday) : '…'} />
-          <StatCard tag="OPEN CHATS" value={stats ? String(stats.openChats) : '…'} />
+          <StatCard tag="ARRIVALS TODAY" value={stats ? `${stats.arrivalsToday} · ${stats.guestsToday ?? 0} guests` : '…'} />
+          <StatCard tag="REVENUE TODAY" value={stats ? money(stats.revenueToday ?? 0) : '…'} />
+          <StatCard tag="CHATS TO ANSWER" value={stats ? `${stats.unansweredChats ?? 0} of ${stats.openChats} open` : '…'} />
           <StatCard tag="REVENUE THIS MONTH" value={stats ? money(stats.revenueMonth) : '…'} />
         </div>
 
         {/* ---- tabs ---- */}
-        <div style={{
+        <div data-print-hide="" style={{
           display: 'inline-flex', gap: 4, padding: 4, marginBottom: 14, flexWrap: 'wrap',
           background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 24,
         }}>
@@ -251,6 +253,7 @@ export default function StaffDashboard() {
           <TabBtn on={tab === 'reports'} onClick={() => setTab('reports')}>Sales & reports</TabBtn>
           <TabBtn on={tab === 'reconciliation'} onClick={() => setTab('reconciliation')}>Reconciliation</TabBtn>
           <TabBtn on={tab === 'forecast'} onClick={() => setTab('forecast')}>Forecast</TabBtn>
+          <TabBtn on={tab === 'quotes'} onClick={() => setTab('quotes')}>Quotes</TabBtn>
           <TabBtn on={tab === 'chat'} onClick={() => setTab('chat')}>Chat</TabBtn>
         </div>
 
@@ -270,6 +273,7 @@ export default function StaffDashboard() {
         {tab === 'reports' && <ReportsPanel />}
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}
+        {tab === 'quotes' && <QuotesPanel />}
         <div style={{ display: tab === 'chat' ? 'block' : 'none' }}>
           <ChatConsole active={tab === 'chat'} onChanged={reloadStats} />
         </div>
