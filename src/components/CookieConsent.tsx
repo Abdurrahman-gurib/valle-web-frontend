@@ -76,6 +76,7 @@ export function CookieConsent() {
       <div style={{
         pointerEvents: 'auto', margin: '0 auto', width: 'min(920px,100%)', background: '#FFFFFF', color: '#340057', borderRadius: 20,
         boxShadow: '0 30px 70px -20px rgba(31,0,51,.6), 0 0 0 1.5px #EBE2FF', padding: 'clamp(16px,2.6vw,24px)', animation: 'vfadeup .35s ease both',
+        maxHeight: 'min(80vh, 640px)', overflowY: 'auto',
         fontFamily: "'Work Sans',sans-serif",
       }}>
         <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
