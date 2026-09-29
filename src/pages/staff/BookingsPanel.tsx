@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { BookingRow, BookingStatus, PayMode, RateKey, SlotKey } from '../../types';
 import {
-  exportUrl, getBooking, isHttpError, listBookings, resendTicket, updateBooking,
+  exportUrl, getBooking, getGateView, isHttpError, listBookings, resendTicket, updateBooking,
   type BookingAuditEntry, type BookingDetailFull, type BookingPatch, type BookingSort,
 } from '../../lib/staffApi';
 import { NATC } from '../../lib/format';
@@ -107,6 +107,14 @@ function confirmationText(d: BookingDetailFull): string {
 function ContactActions({ data }: { data: BookingDetailFull }) {
   const [copied, setCopied] = useState(false);
   const [resent, setResent] = useState('');
+  const [waivers, setWaivers] = useState<{ signed: number; required: number; url: string } | null>(null);
+  useEffect(() => {
+    let dead = false;
+    getGateView(data.refCode)
+      .then((g) => { if (!dead) setWaivers({ signed: g.signedCount, required: g.required, url: g.waiverUrl }); })
+      .catch(() => { /* older API: no waivers */ });
+    return () => { dead = true; };
+  }, [data.refCode]);
   const resend = async () => {
     setResent('…');
     try {
@@ -131,6 +139,11 @@ function ContactActions({ data }: { data: BookingDetailFull }) {
       <button type="button" onClick={() => { void copy(); }} style={{ ...a, background: copied ? '#E2FFEB' : '#FFFFFF' }}>{copied ? 'Copied ✓' : 'Copy confirmation'}</button>
       {data.ticketUrl && <a href={data.ticketUrl} target="_blank" rel="noopener noreferrer" style={a}>Ticket</a>}
       <button type="button" onClick={() => { void resend(); }} disabled={resent === '…'} data-testid="resend-ticket" style={{ ...a, background: resent && resent !== '…' ? '#E2FFEB' : '#FFFFFF' }}>{resent || 'Resend ticket'}</button>
+      {waivers && (
+        <a href={waivers.url} target="_blank" rel="noopener noreferrer" data-testid="drawer-waivers" title="Waiver form for this booking (send it to the guest)" style={{ ...a, borderColor: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44', color: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44' }}>
+          Waivers {Math.min(waivers.signed, waivers.required)}/{waivers.required}
+        </a>
+      )}
       {data.ticketSentAt && <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', alignSelf: 'center' }}>TICKET SENT {dateTimeSec(data.ticketSentAt).toUpperCase()}</span>}
     </div>
   );

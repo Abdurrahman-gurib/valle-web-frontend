@@ -194,8 +194,8 @@ server {
     # Vacancies are published from the HR back office at any time, so their pages are
     # rendered by the app from the API; an unknown slug renders the not-found page
     # (noindex) client-side.
-    # Guest tickets: rendered by the app from the API (token in the query), never indexed.
-    location ~ ^(/(fr|de|it|ar))?/ticket/[A-Za-z0-9-]+$ {
+    # Guest tickets and waivers: rendered by the app from the API (token in the query), never indexed.
+    location ~ ^(/(fr|de|it|ar))?/(ticket|waiver)/[A-Za-z0-9-]+$ {
         if ($maintenance) { return 503; }
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "no-store" always;

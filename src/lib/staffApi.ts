@@ -339,3 +339,24 @@ export function postVisitorMessage(conversationId: string, visitorKey: string, b
     { allow401: true },
   );
 }
+
+// ---------------------------------------------------------------- gate / waivers
+
+export interface GateFlag { level: 'stop' | 'check'; activity: string; message: string }
+export interface GateWaiver {
+  id: string; participantName: string; age: number; birthDate: string; heightCm: number; weightKg: number;
+  isMinor: boolean; guardianName: string; emergencyName: string; emergencyPhone: string; medicalNotes: string;
+  photoConsent: boolean; signedBy: string; signature: string; lang: string; signedAt: string; flags: GateFlag[];
+}
+export interface GateView {
+  refCode: string; guestName: string; phone: string; visitDate: string; slot: SlotKey; adults: number; kids: number;
+  status: BookingStatus; payMode: PayMode; total: number; isToday: boolean; lines: { label: string; amount: number }[];
+  activities: { id: string; name: string; limits: Record<string, number> }[];
+  required: number; signedCount: number; missing: number; stops: number; waivers: GateWaiver[]; waiverUrl: string;
+}
+export interface GateDayRow { refCode: string; guestName: string; slot: SlotKey; party: number; status: BookingStatus; signed: number }
+
+export const getGateDay = (date?: string) => request<GateDayRow[]>('/staff/gate' + qs({ date }));
+export const getGateView = (refCode: string) => request<GateView>(`/staff/gate/${encodeURIComponent(refCode)}`);
+export const gateCheckIn = (refCode: string, override = false, reason?: string) =>
+  request<GateView>(`/staff/gate/${encodeURIComponent(refCode)}/check-in`, { method: 'POST', body: JSON.stringify({ override, reason }) });

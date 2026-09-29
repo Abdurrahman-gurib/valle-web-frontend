@@ -12,12 +12,13 @@ import { Stripes } from '../../components/Stripes';
 import { Spinner, card, display, mono } from './ui';
 import BookingsPanel from './BookingsPanel';
 import ChatConsole from './ChatConsole';
+import GatePanel from './GatePanel';
 import ReportsPanel from './ReportsPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
 
-type Tab = 'bookings' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
+type Tab = 'bookings' | 'gate' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -250,6 +251,7 @@ export default function StaffDashboard() {
           background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 24,
         }}>
           <TabBtn on={tab === 'bookings'} onClick={() => setTab('bookings')}>Bookings</TabBtn>
+          <TabBtn on={tab === 'gate'} onClick={() => setTab('gate')}>Gate & waivers</TabBtn>
           <TabBtn on={tab === 'reports'} onClick={() => setTab('reports')}>Sales & reports</TabBtn>
           <TabBtn on={tab === 'reconciliation'} onClick={() => setTab('reconciliation')}>Reconciliation</TabBtn>
           <TabBtn on={tab === 'forecast'} onClick={() => setTab('forecast')}>Forecast</TabBtn>
@@ -270,6 +272,7 @@ export default function StaffDashboard() {
         <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
           <BookingsPanel onChanged={reloadStats} />
         </div>
+        {tab === 'gate' && <GatePanel onChanged={reloadStats} />}
         {tab === 'reports' && <ReportsPanel />}
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}

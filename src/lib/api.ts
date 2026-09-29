@@ -42,9 +42,32 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
 export interface TicketView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
   rate: string; payMode: string; status: string; total: number; lines: { label: string; amount: number }[]; ticketUrl: string; qrUrl: string;
+  /** Older API versions may not send these. */
+  waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
 }
 export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
+}
+
+/** GET/POST /api/tickets/:ref/waivers?t= : the party's digital waivers. */
+export interface WaiverActivity { name: string; minAge?: number; maxAge?: number; driveMinAge?: number; minWeightKg?: number; maxWeightKg?: number; minHeightCm?: number; maxHeightCm?: number }
+export interface WaiverView {
+  refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon';
+  required: number; signed: { participantName: string; isMinor: boolean; signedAt: string }[];
+  open: boolean; termsVersion: string; activities: WaiverActivity[];
+}
+export interface WaiverRequest {
+  participantName: string; birthDate: string; heightCm: number; weightKg: number; guardianName?: string;
+  emergencyName: string; emergencyPhone: string; medicalNotes?: string;
+  declarations: { risks: boolean; health: boolean; sober: boolean; rules: boolean; data: boolean };
+  photoConsent?: boolean; signature: string; lang?: string;
+}
+const waiverPath = (refCode: string, token: string) => `/tickets/${encodeURIComponent(refCode)}/waivers?t=${encodeURIComponent(token)}`;
+export function fetchWaivers(refCode: string, token: string): Promise<WaiverView> {
+  return request<WaiverView>(waiverPath(refCode, token));
+}
+export function signWaiver(refCode: string, token: string, body: WaiverRequest): Promise<WaiverView> {
+  return request<WaiverView>(waiverPath(refCode, token), { method: 'POST', body: JSON.stringify(body) });
 }
 
 export function createBooking(body: BookingRequest): Promise<BookingResponse> {

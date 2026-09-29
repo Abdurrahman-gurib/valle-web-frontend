@@ -12,7 +12,17 @@ import { fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
-import { tr, useT, _t } from '../i18n';
+import { localizePath, tr, useT, _t } from '../i18n';
+
+/** The waiver form sits next to the ticket: same reference, same token, in the page's language. */
+function waiverHref(ticketUrl: string): string {
+  try {
+    const u = new URL(ticketUrl, window.location.origin);
+    return localizePath(u.pathname.replace('/ticket/', '/waiver/') + u.search);
+  } catch {
+    return ticketUrl.replace('/ticket/', '/waiver/');
+  }
+}
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -664,6 +674,7 @@ export default function BookingPage() {
             {ticket.ticketUrl && (
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
                 <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Open my ticket')}</a>
+                <a href={waiverHref(ticket.ticketUrl)} target="_blank" rel="noopener noreferrer" data-testid="receipt-waiver" style={{ background: '#340057', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Sign the waivers')}</a>
                 <a href={`https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot}', { ref: refCode, date: dateSummary, slot: slotName }) + '\n' + ticket.ticketUrl)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Send to my WhatsApp')}</a>
               </div>
             )}

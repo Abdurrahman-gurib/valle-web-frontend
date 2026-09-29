@@ -5,7 +5,7 @@ import { paths } from '../lib/nav';
 import { mur, partyLabel, fullDateFromIso } from '../lib/format';
 import { fetchTicket, type TicketView } from '../lib/api';
 import { Stripes } from '../components/Stripes';
-import { tr, useT, _t } from '../i18n';
+import { localizePath, tr, useLang, useT, _t } from '../i18n';
 
 /** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
 const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
@@ -19,6 +19,7 @@ const BARLOW = "'Barlow',sans-serif";
  */
 export default function TicketPage() {
   const t = useT();
+  const lang = useLang();
   const { ref = '' } = useParams();
   const [params] = useSearchParams();
   const token = params.get('t') || '';
@@ -62,6 +63,9 @@ export default function TicketPage() {
               <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
               <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
+            {tk.waiversRequired !== undefined && tk.status !== 'cancelled' && (
+              <WaiverBlock signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
+            )}
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
             {tk.lines.map((l, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left' }}>
@@ -85,6 +89,22 @@ export default function TicketPage() {
         </article>
       )}
     </main>
+  );
+}
+
+/** Waiver progress on the ticket, with the way to the form while anyone still has to sign. */
+function WaiverBlock({ signed, required, href }: { signed: number; required: number; href: string }) {
+  const t = useT();
+  const all = signed >= required;
+  return (
+    <div data-testid="ticket-waivers" data-print-hide="" style={{ marginTop: 20, textAlign: 'start', background: all ? '#E6FFEE' : '#FFFDE0', border: `1.5px solid ${all ? '#33FF74' : '#FFE94D'}`, borderRadius: 14, padding: '14px 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>{all ? t('Waivers signed') : t('Skip the queue: sign your waivers')}</div>
+        <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13 }}>{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
+      </div>
+      {!all && <p style={{ margin: '6px 0 10px', fontSize: 13.5, lineHeight: 1.5 }}>{t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
+      <a href={href} style={{ ...btn(all ? '#FFFFFF' : '#340057', all ? '#340057' : '#FFFFFF', all), padding: '9px 16px', fontSize: 13, marginTop: all ? 8 : 0 }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
+    </div>
   );
 }
 

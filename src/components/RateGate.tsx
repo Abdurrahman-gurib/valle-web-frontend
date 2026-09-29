@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { Stripes } from './Stripes';
 import { useHover } from '../hooks/useHover';
@@ -30,7 +31,11 @@ export function RateGate() {
   const app = useApp();
   const t = useT();
   const [hKeep, bindKeep] = useHover();
+  const { pathname } = useLocation();
   if (!app.rateGateOpen) return null;
+  // A guest opening their ticket or waiver from the e-mail has already booked:
+  // the first-visit rate question would only stand between them and the form.
+  if (!app.rateGateDismissable && /^(\/(fr|de|it|ar))?\/(ticket|waiver)\//.test(pathname)) return null;
 
   return (
     <div style={{

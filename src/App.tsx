@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import NotFoundPage from './pages/NotFound';
 import TicketPage from './pages/Ticket';
+import WaiverPage from './pages/Waiver';
 import { CatalogProvider } from './store/CatalogContext';
 import { LANGS, LangProvider } from './i18n';
 import { paths } from './lib/nav';
@@ -99,6 +100,7 @@ function publicRoutes(prefix: string) {
     <Route key={prefix + 'vac'} path={prefix + '/vacancies'} element={<VacanciesPage />} />,
     <Route key={prefix + 'vacd'} path={prefix + '/vacancies/:slug'} element={<VacancyDetailPage />} />,
     <Route key={prefix + 'tk'} path={prefix + '/ticket/:ref'} element={<TicketPage />} />,
+    <Route key={prefix + 'wv'} path={prefix + '/waiver/:ref'} element={<WaiverPage />} />,
   ];
 }
 
