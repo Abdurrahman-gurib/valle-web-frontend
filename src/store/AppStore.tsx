@@ -133,11 +133,17 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<string>(readStoredCurrency);
   const [fx, setFx] = useState<FxTable>(FX_FALLBACK);
 
-  // Live Bank of Mauritius rates; the bundled snapshot stays if the API is away.
+  // Live Bank of Mauritius rates (a new table every working morning); the bundled
+  // snapshot stays if the API is away. Re-read every 30 minutes and whenever the
+  // tab comes back into view, so a browser left open overnight shows today's rates.
   useEffect(() => {
     let dead = false;
-    fetchFx().then((t) => { if (!dead && t?.rates?.MUR) setFx(t); }).catch(() => { /* keep the snapshot */ });
-    return () => { dead = true; };
+    const load = () => { fetchFx().then((t) => { if (!dead && t?.rates?.MUR) setFx(t); }).catch(() => { /* keep the snapshot */ }); };
+    load();
+    const timer = setInterval(load, 30 * 60 * 1000);
+    const onShow = () => { if (document.visibilityState === 'visible') load(); };
+    document.addEventListener('visibilitychange', onShow);
+    return () => { dead = true; clearInterval(timer); document.removeEventListener('visibilitychange', onShow); };
   }, []);
   // money() in lib/format reads this; setting it during render keeps every price in step.
   setDisplayCurrency(isCurrency(currency, fx) ? currency : 'MUR', fx);
