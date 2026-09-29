@@ -22,11 +22,14 @@ execSync('npx vite build --ssr src/entry-server.tsx --outDir dist-ssr --emptyOut
 const { render, organizationScript } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
 const catalog = JSON.parse(readFileSync(join(root, 'src/data/fallback.json'), 'utf8'));
 
-const routes = [
+const baseRoutes = [
   '/', '/explore', '/packages', '/booking', '/vacancies',
   ...catalog.ACTS.map((a) => `/activities/${a.id}`),
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];
+// Every page in every language: /explore, /fr/explore, /de/explore, /it/explore.
+const LANG_PREFIXES = ['', '/fr', '/de', '/it'];
+const routes = LANG_PREFIXES.flatMap((p) => baseRoutes.map((r) => (r === '/' ? (p || '/') : p + r)));
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 if (!template.includes('<!--seo-head-->') || !template.includes('<!--seo-organization-->') || !template.includes('<div id="root"></div>')) {
   throw new Error('index.html is missing the <!--seo-head--> marker or the empty #root');
@@ -34,8 +37,9 @@ if (!template.includes('<!--seo-head-->') || !template.includes('<!--seo-organiz
 
 let count = 0;
 const write = (route, outFile) => {
-  const { html, head, title } = render(route, origin);
+  const { html, head, title, lang } = render(route, origin);
   const page = template
+    .replace('<html lang="en">', `<html lang="${lang}">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${title.replace(/</g, '&lt;')}</title>`)
     .replace('<!--seo-head-->', head)
     .replace('<!--seo-organization-->', organizationScript())

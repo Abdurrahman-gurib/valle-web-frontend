@@ -172,13 +172,20 @@ server {
     }
     # Prerendered at build time: a page exists only when the build produced it, so an
     # unknown activity id or restaurant is a real 404 (add an activity -> rebuild).
-    location ~ ^/(explore|packages|booking|vacancies)$ {
+    # Language homes: /fr, /de, /it (prerendered like the English root).
+    location ~ ^/(fr|de|it)$ {
         if ($maintenance) { return 503; }
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "no-cache, must-revalidate" always;
         try_files $uri/index.html =404;
     }
-    location ~ ^/(activities|dine)/[a-z0-9-]+$ {
+    location ~ ^(/(fr|de|it))?/(explore|packages|booking|vacancies)$ {
+        if ($maintenance) { return 503; }
+        include /etc/nginx/security-headers.conf;
+        add_header Cache-Control "no-cache, must-revalidate" always;
+        try_files $uri/index.html =404;
+    }
+    location ~ ^(/(fr|de|it))?/(activities|dine)/[a-z0-9-]+$ {
         if ($maintenance) { return 503; }
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "no-cache, must-revalidate" always;
@@ -188,14 +195,14 @@ server {
     # rendered by the app from the API; an unknown slug renders the not-found page
     # (noindex) client-side.
     # Guest tickets: rendered by the app from the API (token in the query), never indexed.
-    location ~ ^/ticket/[A-Za-z0-9-]+$ {
+    location ~ ^(/(fr|de|it))?/ticket/[A-Za-z0-9-]+$ {
         if ($maintenance) { return 503; }
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "no-store" always;
         add_header X-Robots-Tag "noindex, nofollow" always;
         try_files /index.html =404;
     }
-    location ~ ^/vacancies/[a-z0-9-]+$ {
+    location ~ ^(/(fr|de|it))?/vacancies/[a-z0-9-]+$ {
         if ($maintenance) { return 503; }
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "no-cache, must-revalidate" always;

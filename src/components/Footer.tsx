@@ -1,8 +1,25 @@
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
+import { LANGS, LANG_META, localizePath, stripLang, useLang } from '../i18n';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
+
+/** EN / FR / DE / IT as real links to the same page in each language (crawlable, hreflang'd). */
+function FooterLangs() {
+  const lang = useLang();
+  const here = typeof window !== 'undefined' ? stripLang(window.location.pathname) : '/';
+  return (
+    <>
+      {LANGS.map((l, i) => (
+        <span key={l}>
+          {i > 0 && ' / '}
+          <a href={localizePath(here, l)} hrefLang={l} lang={l} aria-current={l === lang ? 'true' : undefined} style={{ color: 'inherit', textDecoration: l === lang ? 'underline' : 'none' }}>{LANG_META[l].short}</a>
+        </span>
+      ))}
+    </>
+  );
+}
 
 function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick: () => void; hoverColor: string; href: string }) {
   const [h, bind] = useHover();
@@ -113,7 +130,8 @@ export function Footer() {
           <span>©2026 VALLÉ ADVENATURE™ PARK · UX RESTRUCTURE CONCEPT</span>
           <span>
             <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>COOKIE SETTINGS</button>
-            {' · PRIVACY POLICY · TERMS OF USE · EN / FR'}
+            {' · PRIVACY POLICY · TERMS OF USE · '}
+            <FooterLangs />
           </span>
         </div>
       </div>

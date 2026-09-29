@@ -1,24 +1,27 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { LANGS, LANG_META, currentLang, localizePath, stripLang, tr, type Lang } from '../i18n';
 
 /**
  * Per-page head management without a library. Pages call useSeo() during render;
  * in the browser the effect writes the tags into document.head, and during static
  * generation (entry-server.tsx) the same call records them in a collector that the
  * prerender script injects into the HTML, so crawlers get the real title, meta,
- * canonical, Open Graph and JSON-LD without executing JavaScript.
+ * canonical, Open Graph, hreflang and JSON-LD without executing JavaScript.
+ *
+ * Every public page exists in each language (/explore, /fr/explore, /de/explore,
+ * /it/explore): the canonical is the page's own language, and hreflang lists all
+ * of them with English as x-default.
  */
 
 /** Public origin for canonical / Open Graph URLs. Set VITE_SITE_URL to the canonical domain at build time. */
 export const SITE_URL: string = (import.meta.env.VITE_SITE_URL || '').replace(/\/+$/, '');
 export const SITE_NAME = 'VALLÉ Advenature™ Park';
 export const DEFAULT_IMAGE = '/images/valle-zipline-adventure-mauritius.avif';
-/** Optional French mirror of the site (same paths). Unset until a French version exists. */
-const FR_SITE_URL: string = (import.meta.env.VITE_FR_SITE_URL || '').replace(/\/+$/, '');
 
 export interface SeoInput {
   title: string;
   description: string;
-  /** Path of the canonical URL for this page, e.g. "/activities/zipline". Defaults to the current path. */
+  /** Language-neutral path of this page, e.g. "/activities/zipline". Defaults to the current path. */
   canonicalPath?: string;
   /** Absolute or site-relative image for social sharing. */
   image?: string;
@@ -29,7 +32,7 @@ export interface SeoInput {
   type?: 'website' | 'article';
 }
 
-export interface SeoCollector { current: (SeoInput & { path: string }) | null }
+export interface SeoCollector { current: (SeoInput & { path: string; lang: Lang }) | null; url?: string }
 const Ctx = createContext<SeoCollector | null>(null);
 
 /** Wraps the tree during static generation so useSeo() can report what it rendered. */
@@ -46,11 +49,13 @@ export const abs = (pathOrUrl: string, origin?: string): string => {
 };
 
 /** Every head tag for a page, as [tagName, attributes]. Shared by the browser and the prerender. */
-export function headTags(seo: SeoInput & { path: string }, origin?: string): { tag: string; attrs: Record<string, string>; text?: string }[] {
+export function headTags(seo: SeoInput & { path: string; lang?: Lang }, origin?: string): { tag: string; attrs: Record<string, string>; text?: string }[] {
   // Without a known origin (a prerender built without VITE_SITE_URL) the URL-bearing tags are
   // left out rather than emitted relative; the browser fills them in from its own origin.
   const hasOrigin = Boolean(originOf(origin));
-  const canonical = abs(seo.canonicalPath || seo.path, origin);
+  const lang = seo.lang ?? currentLang();
+  const neutral = stripLang(seo.canonicalPath || seo.path);
+  const canonical = abs(localizePath(neutral, lang), origin);
   const image = abs(seo.image || DEFAULT_IMAGE, origin);
   const tags: { tag: string; attrs: Record<string, string>; text?: string }[] = [
     { tag: 'meta', attrs: { name: 'description', content: seo.description } },
@@ -59,7 +64,8 @@ export function headTags(seo: SeoInput & { path: string }, origin?: string): { t
     { tag: 'meta', attrs: { property: 'og:type', content: seo.type || 'website' } },
     { tag: 'meta', attrs: { property: 'og:title', content: seo.title } },
     { tag: 'meta', attrs: { property: 'og:description', content: seo.description } },
-    { tag: 'meta', attrs: { property: 'og:locale', content: 'en_MU' } },
+    { tag: 'meta', attrs: { property: 'og:locale', content: LANG_META[lang].og } },
+    ...LANGS.filter((l) => l !== lang).map((l) => ({ tag: 'meta', attrs: { property: 'og:locale:alternate', content: LANG_META[l].og } })),
     { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
     { tag: 'meta', attrs: { name: 'twitter:title', content: seo.title } },
     { tag: 'meta', attrs: { name: 'twitter:description', content: seo.description } },
@@ -73,9 +79,8 @@ export function headTags(seo: SeoInput & { path: string }, origin?: string): { t
     );
   }
   if (!seo.noindex && hasOrigin) {
-    tags.push({ tag: 'link', attrs: { rel: 'alternate', hreflang: 'en', href: canonical } });
-    if (FR_SITE_URL) tags.push({ tag: 'link', attrs: { rel: 'alternate', hreflang: 'fr', href: FR_SITE_URL + (seo.canonicalPath || seo.path) } });
-    tags.push({ tag: 'link', attrs: { rel: 'alternate', hreflang: 'x-default', href: canonical } });
+    for (const l of LANGS) tags.push({ tag: 'link', attrs: { rel: 'alternate', hreflang: l, href: abs(localizePath(neutral, l), origin) } });
+    tags.push({ tag: 'link', attrs: { rel: 'alternate', hreflang: 'x-default', href: abs(localizePath(neutral, 'en'), origin) } });
   }
   for (const ld of seo.jsonLd || []) {
     tags.push({ tag: 'script', attrs: { type: 'application/ld+json' }, text: JSON.stringify(ld) });
@@ -85,7 +90,7 @@ export function headTags(seo: SeoInput & { path: string }, origin?: string): { t
 
 const MARK = 'data-seo';
 
-function applyToDocument(seo: SeoInput & { path: string }) {
+function applyToDocument(seo: SeoInput & { path: string; lang: Lang }) {
   document.title = seo.title;
   document.head.querySelectorAll(`[${MARK}]`).forEach((n) => n.remove());
   for (const t of headTags(seo)) {
@@ -100,11 +105,12 @@ function applyToDocument(seo: SeoInput & { path: string }) {
 /** Declare this page's title, description, canonical, robots directive, social tags and structured data. */
 export function useSeo(seo: SeoInput): void {
   const collector = useContext(Ctx);
-  const path = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
-  if (collector) collector.current = { ...seo, path: seo.canonicalPath || path };
-  const key = JSON.stringify(seo);
+  const lang = currentLang();
+  const path = typeof window !== 'undefined' ? window.location.pathname + window.location.search : (collector?.url ?? '');
+  if (collector) collector.current = { ...seo, path: seo.canonicalPath || stripLang(path), lang };
+  const key = JSON.stringify(seo) + lang;
   useEffect(() => {
-    applyToDocument({ ...seo, path: window.location.pathname + window.location.search });
+    applyToDocument({ ...seo, path: stripLang(window.location.pathname + window.location.search), lang });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 }
@@ -128,12 +134,14 @@ export const ORGANIZATION = {
   sameAs: ['https://www.instagram.com/valleadvenaturepark/', 'https://www.facebook.com/share/1ADvErZgRi/', 'https://www.youtube.com/channel/UCfHmy2KfmQk32tiT0zcxbTQ'],
   isAccessibleForFree: false,
   touristType: ['families', 'adventure travellers', 'nature lovers'],
+  availableLanguage: ['English', 'French', 'German', 'Italian'],
 };
 
+/** Breadcrumb names are translated and item URLs point at the current language. */
 export function breadcrumbs(items: { name: string; path: string }[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, item: abs(it.path) })),
+    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: tr(it.name), item: abs(localizePath(it.path)) })),
   };
 }

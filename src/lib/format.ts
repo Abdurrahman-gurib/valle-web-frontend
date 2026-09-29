@@ -1,4 +1,5 @@
 import { FX_FALLBACK, formatMoney, type FxTable } from './fx';
+import { LANG_META, currentLang, tr } from '../i18n';
 
 let displayCurrency = 'MUR';
 let fxTable: FxTable = FX_FALLBACK;
@@ -23,13 +24,15 @@ export function plural(n: number, word: string, pluralWord?: string): string {
   return n + ' ' + (n === 1 ? word : (pluralWord || word + 's'));
 }
 
-/** "2 adults · 1 child" party label */
+/** "2 adults · 1 child" party label, in the page's language. */
 export function partyLabel(adults: number, kids: number): string {
-  return (
-    adults + ' adult' + (adults > 1 ? 's' : '') +
-    (kids > 0 ? ' · ' + kids + ' child' + (kids > 1 ? 'ren' : '') : '')
-  );
+  const a = adults === 1 ? tr('1 adult') : tr('{n} adults', { n: adults });
+  const k = kids > 0 ? ' · ' + (kids === 1 ? tr('1 child') : tr('{n} children', { n: kids })) : '';
+  return a + k;
 }
+
+const intl = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(LANG_META[currentLang()].locale, opts);
+const clean = (s: string) => s.replace(/\.$/, '').replace(/\.(?=\s|$)/g, '');
 
 const DOWS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -47,8 +50,22 @@ export interface DateOpt {
 export function dateOpts(days = 14): DateOpt[] {
   const out: DateOpt[] = [];
   const now = new Date();
+  const lang = currentLang();
   for (let i = 0; i < days; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    if (lang !== 'en') {
+      const dow = clean(intl({ weekday: 'short' }).format(d));
+      out.push({
+        i,
+        dow: i === 0 ? tr('TODAY') : dow.toUpperCase(),
+        dd: String(d.getDate()),
+        mm: clean(intl({ month: 'short' }).format(d)).toUpperCase(),
+        label: (i === 0 ? tr('Today') : dow) + ', ' + intl({ day: 'numeric', month: 'short' }).format(d),
+        full: fullDateFromIso(toIso(d)),
+        iso: toIso(d),
+      });
+      continue;
+    }
     out.push({
       i,
       dow: i === 0 ? 'TODAY' : DOWS[d.getDay()].toUpperCase(),
@@ -74,6 +91,7 @@ export function todayIso(): string {
 export function fullDateFromIso(iso: string): string {
   const d = new Date(iso + 'T12:00:00');
   if (isNaN(d.getTime())) return '';
+  if (currentLang() !== 'en') return intl({ weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(d);
   return DOWS[d.getDay()] + ' ' + d.getDate() + ' ' + MONS[d.getMonth()] + ' ' + d.getFullYear();
 }
 

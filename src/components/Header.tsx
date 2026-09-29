@@ -9,6 +9,7 @@ import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
 import { CurrencyPicker } from './CurrencyPicker';
+import { LanguagePicker } from './LanguagePicker';
 
 function NavBtn({ label, onClick, color, chev, href }: { label: string; onClick: () => void; color: string; chev?: string; href?: string }) {
   const [h, bind] = useHover();
@@ -170,6 +171,7 @@ export function Header() {
                 >
                   {app.rateTag} ⇄
                 </button>
+                <LanguagePicker fg={headerFg} />
                 <CurrencyPicker fg={headerFg} />
                 <button
                   {...bindDay}
@@ -221,6 +223,7 @@ export function Header() {
               >
                 {app.rateTag}
               </button>
+              <LanguagePicker fg={headerFg} compact />
               <CurrencyPicker fg={headerFg} compact />
               {app.hasSel && (
                 <button

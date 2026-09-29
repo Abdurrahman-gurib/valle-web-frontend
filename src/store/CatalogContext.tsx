@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { localizeData, useLang } from '../i18n';
 import type { Catalog } from '../types';
 import { fetchCatalog } from '../lib/api';
 import fallbackJson from '../data/fallback.json';
@@ -27,8 +28,11 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={state}>{children}</Ctx.Provider>;
 }
 
+/** The catalog with every descriptive string in the page's language (ids, option keys and images untouched). */
 export function useCatalog(): Catalog {
-  return useContext(Ctx).catalog;
+  const raw = useContext(Ctx).catalog;
+  const lang = useLang();
+  return useMemo(() => localizeData(raw, lang), [raw, lang]);
 }
 
 export function useCatalogLive(): boolean {

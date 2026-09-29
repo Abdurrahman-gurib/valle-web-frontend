@@ -3,6 +3,9 @@ import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-r
 import NotFoundPage from './pages/NotFound';
 import TicketPage from './pages/Ticket';
 import { CatalogProvider } from './store/CatalogContext';
+import { LANGS, LangProvider } from './i18n';
+import { paths } from './lib/nav';
+import { LanguageSuggest } from './components/LanguagePicker';
 import { AppStoreProvider } from './store/AppStore';
 import { StaffAuthProvider } from './store/StaffAuth';
 import { Header } from './components/Header';
@@ -28,7 +31,7 @@ import HrDashboard from './pages/hr/Dashboard';
 /** The first version of this site used /experience/:id; nginx 301s those, this covers client-side links. */
 function LegacyExperienceRedirect() {
   const { id = '' } = useParams<{ id: string }>();
-  return <Navigate to={'/activities/' + id} replace />;
+  return <Navigate to={paths.detail(id)} replace />;
 }
 
 /** Scrolls to top on route change; scrolls to #hash targets with header offset. */
@@ -63,6 +66,7 @@ function PublicShell() {
       minHeight: '100vh', background: '#FFFFFF', color: '#340057',
       fontFamily: "'Work Sans',sans-serif", paddingBottom: isMobile ? 84 : 0,
     }}>
+      <LanguageSuggest />
       <Header />
       <Outlet />
       <Footer />
@@ -84,8 +88,25 @@ function StaffShell() {
   );
 }
 
+/** The public pages; mounted once per language prefix ('' for English, '/fr', '/de', '/it'). */
+function publicRoutes(prefix: string) {
+  return [
+    <Route key={prefix + '/'} path={prefix || '/'} element={<HomePage />} />,
+    <Route key={prefix + 'explore'} path={prefix + '/explore'} element={<ExplorePage />} />,
+    <Route key={prefix + 'act'} path={prefix + '/activities/:id'} element={<DetailPage />} />,
+    <Route key={prefix + 'exp'} path={prefix + '/experience/:id'} element={<LegacyExperienceRedirect />} />,
+    <Route key={prefix + 'pk'} path={prefix + '/packages'} element={<PackagesPage />} />,
+    <Route key={prefix + 'dine'} path={prefix + '/dine/:id'} element={<RestaurantPage />} />,
+    <Route key={prefix + 'book'} path={prefix + '/booking'} element={<BookingPage />} />,
+    <Route key={prefix + 'vac'} path={prefix + '/vacancies'} element={<VacanciesPage />} />,
+    <Route key={prefix + 'vacd'} path={prefix + '/vacancies/:slug'} element={<VacancyDetailPage />} />,
+    <Route key={prefix + 'tk'} path={prefix + '/ticket/:ref'} element={<TicketPage />} />,
+  ];
+}
+
 export default function App() {
   return (
+    <LangProvider>
     <CatalogProvider>
       <AppStoreProvider>
         <ScrollManager />
@@ -104,20 +125,12 @@ export default function App() {
 
           {/* Public site. */}
           <Route element={<PublicShell />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/activities/:id" element={<DetailPage />} />
-            <Route path="/experience/:id" element={<LegacyExperienceRedirect />} />
-            <Route path="/packages" element={<PackagesPage />} />
-            <Route path="/dine/:id" element={<RestaurantPage />} />
-            <Route path="/booking" element={<BookingPage />} />
-            <Route path="/vacancies" element={<VacanciesPage />} />
-            <Route path="/vacancies/:slug" element={<VacancyDetailPage />} />
-            <Route path="/ticket/:ref" element={<TicketPage />} />
+            {LANGS.flatMap((l) => publicRoutes(l === 'en' ? '' : '/' + l))}
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </AppStoreProvider>
     </CatalogProvider>
+    </LangProvider>
   );
 }

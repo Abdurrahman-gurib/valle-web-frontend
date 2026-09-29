@@ -44,11 +44,11 @@ export function nginxLikeRoutes(): Plugin {
 
         if (/\.[a-z0-9]+$/i.test(path)) return next(); // assets: sirv
         if (/^\/(staff|hr)(\/.*)?$/.test(path)) return html(res, 200, shell(), { 'X-Robots-Tag': 'noindex, nofollow' });
-        if (/^\/vacancies\/[a-z0-9-]+$/.test(path)) return html(res, 200, shell());
-        if (/^\/ticket\/[A-Za-z0-9-]+$/.test(path)) return html(res, 200, shell(), { 'X-Robots-Tag': 'noindex, nofollow' });
+        if (/^(\/(fr|de|it))?\/vacancies\/[a-z0-9-]+$/.test(path)) return html(res, 200, shell());
+        if (/^(\/(fr|de|it))?\/ticket\/[A-Za-z0-9-]+$/.test(path)) return html(res, 200, shell(), { 'X-Robots-Tag': 'noindex, nofollow' });
 
         const file = path === '/' ? join(dist, 'index.html') : join(dist, path.slice(1), 'index.html');
-        if (path === '/' || /^\/[a-z0-9-]+(\/[a-z0-9-]+)?$/.test(path)) {
+        if (path === '/' || /^\/[a-z0-9-]+(\/[a-z0-9-]+){0,2}$/.test(path)) {
           if (existsSync(file)) return html(res, 200, readFileSync(file));
         }
         return html(res, 404, readFileSync(join(dist, '404', 'index.html')), { 'X-Robots-Tag': 'noindex' });
