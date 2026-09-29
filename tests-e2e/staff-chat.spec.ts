@@ -259,7 +259,7 @@ test.describe('staff dashboard', () => {
     // a real QR image, served by the API for this booking only
     const qr = guest.getByTestId('receipt-qr');
     await expect(qr).toBeVisible();
-    expect(await qr.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+    await expect.poll(() => qr.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 15000 }).toBeGreaterThan(100);
     const ticketHref = await guest.getByRole('link', { name: /open my ticket/i }).getAttribute('href');
     expect(ticketHref).toMatch(new RegExp(`/ticket/${ref}\\?t=[A-Za-z0-9_-]{24}$`));
     await expect(guest.getByRole('link', { name: /send to my whatsapp/i })).toHaveAttribute('href', /wa\.me\/\?text=/);
@@ -268,7 +268,7 @@ test.describe('staff dashboard', () => {
     await guest.goto(ticketHref!.replace(/^https?:\/\/[^/]+/, ''));
     await expect(guest.getByTestId('ticket')).toBeVisible({ timeout: 15000 });
     await expect(guest.getByText(`Ticket Guest ${tag}`)).toBeVisible();
-    expect(await guest.getByTestId('ticket-qr').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+    await expect.poll(() => guest.getByTestId('ticket-qr').evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 15000 }).toBeGreaterThan(100);
     await guest.goto(`/ticket/${ref}?t=AAAAAAAAAAAAAAAAAAAAAAAA`);
     await expect(guest.getByText(/not valid/i)).toBeVisible({ timeout: 15000 });
     const bad = await guest.request.get(`/api/tickets/${ref}/qr.png?t=AAAAAAAAAAAAAAAAAAAAAAAA`);
