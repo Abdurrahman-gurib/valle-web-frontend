@@ -8,6 +8,7 @@ import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
+import { useT } from '../i18n';
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -19,6 +20,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 export default function RestaurantPage() {
+  const t = useT();
   const ref = useReveal<HTMLElement>();
   const goto = useGoto();
   const { RESTOS } = useCatalog();
@@ -29,7 +31,7 @@ export default function RestaurantPage() {
   const valid = id === 'chamouze' || id === 'citronelle';
   const r = valid ? RESTOS[id as string] : undefined;
   useSeo(r ? {
-    title: `${r.name} · ${r.badge.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())} · VALLÉ Advenature™ Park`,
+    title: t('{name} · {badge} · VALLÉ Advenature™ Park', { name: r.name, badge: r.badge.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) }),
     description: r.tag + ' ' + r.cuisine + '. ' + r.hours + '.',
     canonicalPath: paths.resto(id as string),
     image: r.img,
@@ -37,8 +39,8 @@ export default function RestaurantPage() {
       breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Dine', path: '/#dine' }, { name: r.name, path: paths.resto(id as string) }]),
       { '@context': 'https://schema.org', '@type': 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: '+230 660 44 77', address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, hasMenu: abs(r.menuPdf), openingHours: r.hours },
     ],
-  } : { title: 'Restaurant not found · VALLÉ Advenature™ Park', description: 'That restaurant is not in the valley.', noindex: true });
-  if (!r) return <NotFoundPage what="that restaurant" />;
+  } : { title: t('Restaurant not found · VALLÉ Advenature™ Park'), description: t('That restaurant is not in the valley.'), noindex: true });
+  if (!r) return <NotFoundPage what={t('that restaurant')} />;
 
   const otherId = id === 'chamouze' ? 'citronelle' : 'chamouze';
   const other = RESTOS[otherId];
@@ -56,7 +58,7 @@ export default function RestaurantPage() {
           display: 'inline-block', textDecoration: 'none', cursor: 'pointer', fontFamily: 'inherit',
           fontSize: 14, fontWeight: 700, color: backH ? '#FF3358' : '#7333FF', padding: '8px 0',
         }}
-      >← All dining</a>
+      >{t('← All dining')}</a>
 
       {/* Hero header */}
       <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(52vh,480px)', minHeight: 300, background: '#EBE2FF', marginTop: 12 }}>
@@ -89,10 +91,10 @@ export default function RestaurantPage() {
           <StripesSm />
           <div style={{ padding: '22px 26px 0' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: "'Chivo Mono',monospace" }}>
-              <Fact label="CUISINE" value={r.cuisine} />
-              <Fact label="HOURS" value={r.hours} />
-              <Fact label="PRICES" value={r.price} />
-              <Fact label="SETTING" value={r.setting} />
+              <Fact label={t('CUISINE')} value={r.cuisine} />
+              <Fact label={t('HOURS')} value={r.hours} />
+              <Fact label={t('PRICES')} value={r.price} />
+              <Fact label={t('SETTING')} value={r.setting} />
             </div>
             <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
             <a
@@ -102,15 +104,15 @@ export default function RestaurantPage() {
                 fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999,
                 boxShadow: '0 8px 20px rgba(255,51,88,.35)',
               }}
-            >Reserve on WhatsApp →</a>
+            >{t('Reserve on WhatsApp →')}</a>
             <a
               href="tel:+2306604477"
               style={{
                 display: 'block', textAlign: 'center', border: '1.5px solid rgba(255,255,255,.5)',
                 color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, marginTop: 10,
               }}
-            >Call +230 660 44 77</a>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, opacity: 0.6, textAlign: 'center', marginTop: 12 }}>WALK-INS WELCOME · GROUPS SHOULD RESERVE</div>
+            >{t('Call')} +230 660 44 77</a>
+            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, opacity: 0.6, textAlign: 'center', marginTop: 12 }}>{t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
           </div>
         </div>
       </div>
@@ -122,8 +124,8 @@ export default function RestaurantPage() {
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
             fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
             textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>Inside the restaurant</h2>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>PHOTOS</span>
+          }}>{t('Inside the restaurant')}</h2>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('PHOTOS')}</span>
         </div>
         <div id="vgal" className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '18px 2px 14px', scrollbarWidth: 'none' }}>
           {rGallery.map((g) => (
@@ -139,9 +141,9 @@ export default function RestaurantPage() {
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
             fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
             textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>Menu &amp; prices</h2>
+          }}>{t('Menu & prices')}</h2>
           {rMenuPdf !== '' && (
-            <a href={rMenuPdf} target="_blank" style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em' }}>FULL MENU (PDF) ↗</a>
+            <a href={rMenuPdf} target="_blank" style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em' }}>{t('FULL MENU (PDF) ↗')}</a>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(295px,1fr))', gap: 14, alignItems: 'start' }}>
@@ -160,7 +162,7 @@ export default function RestaurantPage() {
             </div>
           ))}
         </div>
-        <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.55)', marginTop: 14 }}>PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON</div>
+        <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.55)', marginTop: 14 }}>{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
       </div>
 
       {/* Also in the valley */}
@@ -170,7 +172,7 @@ export default function RestaurantPage() {
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
             fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
             textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>Also in the valley</h2>
+          }}>{t('Also in the valley')}</h2>
         </div>
         <a
           href={paths.resto(otherId)}
@@ -190,7 +192,7 @@ export default function RestaurantPage() {
           <div style={{ flex: 1.6, minWidth: 260, padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 26, textTransform: 'uppercase' }}>{other.name}</div>
             <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}>{other.tag}</div>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#7333FF', marginTop: 12 }}>Visit →</div>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#7333FF', marginTop: 12 }}>{t('Visit →')}</div>
           </div>
         </a>
       </div>

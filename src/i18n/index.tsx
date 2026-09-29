@@ -107,7 +107,7 @@ export function useT(): (s: string, vars?: Record<string, string | number>) => s
 }
 
 /** Keys that identify things rather than describe them: never translated in catalog data. */
-const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf']);
+const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind']);
 
 /** Deep copy of a catalog-like object with every descriptive string translated. */
 export function localizeData<T>(data: T, lang: Lang): T {

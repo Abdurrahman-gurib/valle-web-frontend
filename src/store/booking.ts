@@ -1,6 +1,7 @@
 import type { Activity, BookingSummary, Catalog, RateKey, Sel, SelLine } from '../types';
 import { money, partyLabel } from '../lib/format';
 import { parseSelKey } from '../lib/sel';
+import { tr } from '../i18n';
 
 /** Rate-aware "from" price for an activity. Defaults to resident (rr) until a rate is chosen. */
 export function priceFor(catalog: Catalog, act: Activity, rate: RateKey | null): number {
@@ -52,7 +53,7 @@ export function computeBooking(
   const lines: { label: string; amt: string }[] = [];
   const ep = entryPrices(catalog, rate);
   const entry = ep.adult * adults + ep.child * kids;
-  lines.push({ label: 'Park entry · ' + partyLabel(adults, kids), amt: money(entry) });
+  lines.push({ label: tr('Park entry · {party}', { party: partyLabel(adults, kids) }), amt: money(entry) });
   let total = entry;
   let advSubtotal = 0;
   const advIds = new Set<string>();
@@ -65,7 +66,7 @@ export function computeBooking(
     let q = '';
     if (a.mode === 'flat') {
       amt = price * (c.u || 0);
-      q = (c.u || 0) + ' × ' + (a.flatLabel ? a.flatLabel.replace('/', '').trim() : 'unit');
+      q = (c.u || 0) + ' × ' + (a.flatLabel ? tr(a.flatLabel).replace('/', '').trim() : tr('unit'));
     } else {
       amt = price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
       q = partyLabel(c.a || 0, c.k || 0);
@@ -75,7 +76,7 @@ export function computeBooking(
       advSubtotal += amt;
       advIds.add(a.id);
     }
-    lines.push({ label: a.name + (l.variant ? ' · ' + l.variant : '') + ' · ' + q, amt: money(amt) });
+    lines.push({ label: a.name + (l.variant ? ' · ' + tr(l.variant) : '') + ' · ' + q, amt: money(amt) });
   }
   const advCount = advIds.size;
 

@@ -10,15 +10,16 @@ import { listVacancies } from '../lib/careersApi';
 import { fullDateFromIso } from '../lib/format';
 import type { EmploymentType, VacancyCard } from '../types';
 import { color, display, font, mono, motion, radius, shadow } from '../styles/theme';
+import { tr, useT, _t } from '../i18n';
 
 /** Where a speculative application goes when nothing is open (or nothing fits). */
 export const CAREERS_EMAIL = 'sales@vallepark.com';
 
 const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {
-  'full-time': 'FULL TIME',
-  'part-time': 'PART TIME',
-  seasonal: 'SEASONAL',
-  internship: 'INTERNSHIP',
+  'full-time': _t('FULL TIME'),
+  'part-time': _t('PART TIME'),
+  seasonal: _t('SEASONAL'),
+  internship: _t('INTERNSHIP'),
 };
 
 const EMPLOYMENT_COLOR: Record<EmploymentType, { bg: string; fg: string }> = {
@@ -38,14 +39,15 @@ function employmentPill(employment: EmploymentType): CSSProperties {
 
 /** "Closes Thu 30 Sep 2026", or an evergreen line when the role has no end date. */
 function closesLabel(closesOn: string | null): string {
-  if (!closesOn) return 'OPEN UNTIL FILLED';
+  if (!closesOn) return tr('OPEN UNTIL FILLED');
   const full = fullDateFromIso(closesOn.slice(0, 10));
-  return full ? 'CLOSES ' + full.toUpperCase() : 'OPEN UNTIL FILLED';
+  return full ? tr('CLOSES {date}', { date: full.toUpperCase() }) : tr('OPEN UNTIL FILLED');
 }
 
 const eyebrow: CSSProperties = { ...mono, color: color.yellow };
 
 function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   const keyOpen = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); }
@@ -57,7 +59,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
       onKeyDown={keyOpen}
       role="link"
       tabIndex={0}
-      aria-label={'Open role: ' + v.title}
+      aria-label={t('Open role: {title}', { title: v.title })}
       style={{
         cursor: 'pointer', background: color.white, borderRadius: radius.lg, padding: '20px 22px 18px',
         display: 'flex', flexDirection: 'column', gap: 10, outlineOffset: 3,
@@ -67,14 +69,14 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between' }}>
-        <span style={{ ...mono, color: color.violet }}>{(v.department || 'VALLÉ PARK').toUpperCase()}</span>
-        <span style={employmentPill(v.employment)}>{EMPLOYMENT_LABEL[v.employment] || 'ROLE'}</span>
+        <span style={{ ...mono, color: color.violet }}>{(v.department || t('VALLÉ PARK')).toUpperCase()}</span>
+        <span style={employmentPill(v.employment)}>{EMPLOYMENT_LABEL[v.employment] ? t(EMPLOYMENT_LABEL[v.employment]) : t('ROLE')}</span>
       </div>
 
       <div style={{ ...display, fontSize: 'clamp(21px,2.2vw,26px)', color: color.purple }}>{v.title}</div>
 
       <div style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.6)', letterSpacing: '.08em' }}>
-        {(v.location || 'CHAMOUNY, MAURITIUS').toUpperCase()}
+        {(v.location || t('CHAMOUNY, MAURITIUS')).toUpperCase()}
       </div>
 
       {v.summary && (
@@ -88,7 +90,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
         <span style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.55)', letterSpacing: '.08em' }}>
           {v.salaryRange ? v.salaryRange : closesLabel(v.closesOn)}
         </span>
-        <span style={{ ...mono, color: h ? color.pink : color.purple }}>VIEW ROLE →</span>
+        <span style={{ ...mono, color: h ? color.pink : color.purple }}>{t('VIEW ROLE →')}</span>
       </div>
     </div>
   );
@@ -136,7 +138,8 @@ function PinkLink({ label, href }: { label: string; href: string }) {
 }
 
 export default function VacanciesPage() {
-  useSeo({ title: 'Careers · Work in the valley · VALLÉ Advenature™ Park', description: 'Open roles at Vallé Advenature Park in Chamouny, Mauritius: guides, hospitality, mechanics and more. Apply online.', canonicalPath: '/vacancies', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }])] });
+  const t = useT();
+  useSeo({ title: t('Careers · Work in the valley · VALLÉ Advenature™ Park'), description: t('Open roles at Vallé Advenature Park in Chamouny, Mauritius: guides, hospitality, mechanics and more. Apply online.'), canonicalPath: '/vacancies', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }])] });
   const ref = useReveal<HTMLElement>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -162,8 +165,8 @@ export default function VacanciesPage() {
   const openRole = (slug: string) => navigate('/vacancies/' + encodeURIComponent(slug));
 
   const countLabel = state === 'ready'
-    ? (items.length === 0 ? 'NO ROLES OPEN RIGHT NOW' : items.length + (items.length === 1 ? ' ROLE OPEN' : ' ROLES OPEN'))
-    : 'LOADING ROLES…';
+    ? (items.length === 0 ? t('NO ROLES OPEN RIGHT NOW') : (items.length === 1 ? t('{n} ROLE OPEN', { n: items.length }) : t('{n} ROLES OPEN', { n: items.length })))
+    : t('LOADING ROLES…');
 
   return (
     <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
@@ -178,33 +181,32 @@ export default function VacanciesPage() {
           gap: isMobile ? 0 : 'clamp(20px,3vw,44px)', alignItems: 'stretch',
         }}>
           <div style={{ padding: 'clamp(24px,3.4vw,44px)' }}>
-            <div style={eyebrow}>WE ARE HIRING · CHAMOUNY, MAURITIUS</div>
+            <div style={eyebrow}>{t('WE ARE HIRING · CHAMOUNY, MAURITIUS')}</div>
             <h1 style={{
               ...display, fontSize: 'clamp(40px,6.2vw,86px)', color: color.white, margin: '14px 0 0',
               transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
             }}>
-              Work in<br />the valley
+              {t('Work in')}<br />{t('the valley')}
             </h1>
             <p style={{
               fontSize: 'clamp(15px,1.3vw,17px)', lineHeight: 1.6, color: 'rgba(255,255,255,.78)',
               margin: '24px 0 0', maxWidth: 520,
             }}>
-              Guides, riders, cooks, gardeners, hosts: every day at Vallé Advenature™ Park is run by
-              people who love this valley. If you want an office with ziplines over it, start here.
+              {t('Guides, riders, cooks, gardeners, hosts: every day at Vallé Advenature™ Park is run by people who love this valley. If you want an office with ziplines over it, start here.')}
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 26 }}>
-              {['21 EXPERIENCES', 'OPEN DAILY · 09:00–17:30', 'ONE TEAM'].map((t) => (
-                <span key={t} style={{
+              {[t('21 EXPERIENCES'), t('OPEN DAILY · 09:00–17:30'), t('ONE TEAM')].map((chip) => (
+                <span key={chip} style={{
                   ...mono, fontWeight: 400, letterSpacing: '.12em', color: 'rgba(255,255,255,.85)',
                   background: 'rgba(255,255,255,.1)', borderRadius: radius.sm, padding: '9px 12px',
-                }}>{t}</span>
+                }}>{chip}</span>
               ))}
             </div>
           </div>
           <div style={{ position: 'relative', minHeight: isMobile ? 220 : 340 }}>
             <Img
               src="/images/expedition-guide-guests.webp"
-              alt="A Vallé guide walking guests through the valley"
+              alt={t('A Vallé guide walking guests through the valley')}
               priority
               surface="dark"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
@@ -223,12 +225,12 @@ export default function VacanciesPage() {
       <section id="roles" style={{ marginTop: 'clamp(36px,4.5vw,60px)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <div style={{ ...mono, color: color.pink }}>OPEN ROLES</div>
+            <div style={{ ...mono, color: color.pink }}>{t('OPEN ROLES')}</div>
             <h2 style={{
               ...display, fontSize: 'clamp(30px,4vw,54px)', color: color.purple, margin: '10px 0 0',
               transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
             }}>
-              Come and join us
+              {t('Come and join us')}
             </h2>
           </div>
           <span style={{ ...mono, fontWeight: 400, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{countLabel}</span>
@@ -247,9 +249,9 @@ export default function VacanciesPage() {
             background: color.errFill, border: `1.5px solid ${color.border}`, borderRadius: radius.lg,
             padding: 'clamp(22px,3vw,32px)', textAlign: 'center',
           }}>
-            <div style={{ ...display, fontSize: 26, color: color.purple }}>We could not load the roles</div>
+            <div style={{ ...display, fontSize: 26, color: color.purple }}>{t('We could not load the roles')}</div>
             <p style={{ fontSize: 15, color: 'rgba(52,0,87,.7)', margin: '8px 0 0', lineHeight: 1.55 }}>
-              Something went wrong between here and the park. Try again, or write to us directly.
+              {t('Something went wrong between here and the park. Try again, or write to us directly.')}
             </p>
             <button
               onClick={load}
@@ -260,7 +262,7 @@ export default function VacanciesPage() {
                 padding: '12px 24px', borderRadius: radius.pill,
               }}
             >
-              Try again
+              {t('Try again')}
             </button>
           </div>
         )}
@@ -286,21 +288,20 @@ export default function VacanciesPage() {
             background: color.tint, border: `1.5px solid ${color.border}`, borderRadius: radius.xl,
             padding: 'clamp(28px,4vw,48px)', textAlign: 'center',
           }}>
-            <div style={{ ...mono, color: color.violet }}>NOTHING OPEN TODAY</div>
+            <div style={{ ...mono, color: color.violet }}>{t('NOTHING OPEN TODAY')}</div>
             <div style={{
               ...display, fontSize: 'clamp(26px,3.4vw,40px)', color: color.purple, margin: '12px 0 0',
               transform: 'rotate(-2deg)',
             }}>
-              Every role is filled, for now
+              {t('Every role is filled, for now')}
             </div>
             <p style={{
               fontSize: 15.5, lineHeight: 1.6, color: 'rgba(52,0,87,.72)', margin: '18px auto 0', maxWidth: 520,
             }}>
-              The valley grows all year, so this page changes often. Send us a speculative application
-              with your CV and the work you would love to do, and we will keep it on file for the next opening.
+              {t('The valley grows all year, so this page changes often. Send us a speculative application with your CV and the work you would love to do, and we will keep it on file for the next opening.')}
             </p>
             <div style={{ marginTop: 22 }}>
-              <PinkLink label={'Write to ' + CAREERS_EMAIL} href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
+              <PinkLink label={t('Write to {email}', { email: CAREERS_EMAIL })} href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
             </div>
           </div>
         )}
@@ -320,16 +321,15 @@ export default function VacanciesPage() {
           gap: 'clamp(16px,2.5vw,32px)', flexWrap: 'wrap',
         }}>
           <div style={{ flex: 1, minWidth: 260 }}>
-            <div style={eyebrow}>OPEN APPLICATION</div>
+            <div style={eyebrow}>{t('OPEN APPLICATION')}</div>
             <div style={{ ...display, fontSize: 'clamp(24px,2.8vw,34px)', color: color.white, marginTop: 8 }}>
-              None of these fit you?
+              {t('None of these fit you?')}
             </div>
             <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.75)', margin: '8px 0 0', maxWidth: 560 }}>
-              Tell us what you do best. We read every message, and we come back to good people
-              when the right role opens up.
+              {t('Tell us what you do best. We read every message, and we come back to good people when the right role opens up.')}
             </p>
           </div>
-          <PinkLink label="Send an open application" href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
+          <PinkLink label={t('Send an open application')} href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
         </div>
       </section>
 

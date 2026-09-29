@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getConsent, onConsentOpen, setConsent, type ConsentLevel } from '../lib/consent';
 import { useHover } from '../hooks/useHover';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -52,6 +53,7 @@ export function CookieConsent() {
   const [open, setOpen] = useState(false);
   const [details, setDetails] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     if (!getConsent()) setOpen(true);
@@ -65,7 +67,7 @@ export function CookieConsent() {
   return (
     <div
       role="dialog"
-      aria-label="Cookies and storage"
+      aria-label={t('Cookies and storage')}
       aria-live="polite"
       data-nosnippet=""
       style={{
@@ -81,48 +83,45 @@ export function CookieConsent() {
       }}>
         <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 360px', minWidth: 0 }}>
-            <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>COOKIES &amp; STORAGE</div>
+            <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{t('COOKIES & STORAGE')}</div>
             <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(22px,3vw,28px)', textTransform: 'uppercase', lineHeight: 0.95, marginTop: 6, transform: 'rotate(-2deg)', transformOrigin: 'left bottom' }}>
-              A small trail of crumbs
+              {t('A small trail of crumbs')}
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(52,0,87,.75)', margin: '10px 0 0' }}>
-              We store your rate and your My Day picks in this browser so the site works. With your OK we also run anonymous
-              performance monitoring to catch slow pages and errors. No advertising cookies, nothing sold on.{' '}
+              {t('We store your rate and your My Day picks in this browser so the site works. With your OK we also run anonymous performance monitoring to catch slow pages and errors. No advertising cookies, nothing sold on.')}{' '}
               <button onClick={() => setDetails((d) => !d)} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: '#7333FF', textDecoration: 'underline' }}>
-                {details ? 'Hide details' : 'Choose what to allow'}
+                {details ? t('Hide details') : t('Choose what to allow')}
               </button>
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: '0 0 auto', marginLeft: 'auto' }}>
-            <Btn label="Essential only" onClick={() => choose('essential')} testId="consent-essential" />
-            <Btn label="Accept all" primary onClick={() => choose('all')} testId="consent-accept" />
+            <Btn label={t('Essential only')} onClick={() => choose('essential')} testId="consent-essential" />
+            <Btn label={t('Accept all')} primary onClick={() => choose('all')} testId="consent-accept" />
           </div>
         </div>
 
         {details && (
           <div style={{ marginTop: 16, borderTop: '1px dashed #D9CCF2', paddingTop: 14, display: 'grid', gap: 12 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              <Toggle on locked label="Essential storage (always on)" />
+              <Toggle on locked label={t('Essential storage (always on)')} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Essential · always on</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{t('Essential · always on')}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.5, color: 'rgba(52,0,87,.7)', marginTop: 3 }}>
-                  Your rate (resident or visitor), the experiences in My Day, your Explore filters, and a random key that keeps your live-chat
-                  conversation together. Stored in this browser only, never sent to advertisers.
+                  {t('Your rate (resident or visitor), the experiences in My Day, your Explore filters, and a random key that keeps your live-chat conversation together. Stored in this browser only, never sent to advertisers.')}
                 </div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              <Toggle on={analytics} onChange={setAnalytics} label="Performance monitoring" />
+              <Toggle on={analytics} onChange={setAnalytics} label={t('Performance monitoring')} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>Performance monitoring</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{t('Performance monitoring')}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.5, color: 'rgba(52,0,87,.7)', marginTop: 3 }}>
-                  Page-speed measurements and, only when something breaks, a short masked recording of the screen so we can fix it.
-                  Provided by Sentry. Text and images are masked; names and contact details are never included.
+                  {t('Page-speed measurements and, only when something breaks, a short masked recording of the screen so we can fix it. Provided by Sentry. Text and images are masked; names and contact details are never included.')}
                 </div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-              <Btn label="Save my choices" primary onClick={() => choose(analytics ? 'all' : 'essential')} testId="consent-save" />
+              <Btn label={t('Save my choices')} primary onClick={() => choose(analytics ? 'all' : 'essential')} testId="consent-save" />
             </div>
           </div>
         )}

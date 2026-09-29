@@ -1,13 +1,14 @@
 import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useT } from '../i18n';
 
 /** Sticky bottom action bar, mobile only. */
 export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
   const app = useApp();
   const goto = useGoto();
   const isMobile = useIsMobile();
-
+  const t = useT();
   if (!isMobile || mobileNavOpen || app.dayOpen) return null;
 
   return (
@@ -23,7 +24,7 @@ export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
           fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 12,
         }}
       >
-        Explore
+        {t('Explore')}
       </button>
       <button
         onClick={goto.booking}
@@ -33,7 +34,7 @@ export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
           fontSize: 14.5, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 12,
         }}
       >
-        {app.selCount > 0 ? 'Book · ' + app.selCount + ' picked' : 'Book now'}
+        {app.selCount > 0 ? t('Book · {n} picked', { n: app.selCount }) : t('Book now')}
       </button>
     </div>
   );

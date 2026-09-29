@@ -6,6 +6,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import type { Pin } from '../../types';
+import { useT } from '../../i18n';
 
 interface SelPinModel {
   name: string;
@@ -49,6 +50,7 @@ export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pin; 
 function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; left: string; top: string; transform: string; onClose: () => void }) {
   const [hBtn, bindBtn] = useHover();
   const [hX, bindX] = useHover();
+  const t = useT();
   return (
     <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 6, width: 'min(320px,94%)' }}>
       <div style={{ pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', background: '#FFFFFF', borderRadius: 14, overflow: 'hidden', boxShadow: '0 18px 44px -10px rgba(31,0,51,.65)', animation: 'vfadeup .22s ease both' }}>
@@ -70,7 +72,7 @@ function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; le
         <button
           {...bindX}
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('Close')}
           style={{
             position: 'absolute', top: 8, right: 8, border: '1px solid ' + (hX ? '#FF3358' : '#EBE2FF'), background: '#FFFFFF',
             color: hX ? '#FF3358' : 'rgba(52,0,87,.6)', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
@@ -90,6 +92,7 @@ export function ParkMap() {
   const card = useCardModel();
   const isMobile = useIsMobile();
   const [selectedPin, setSelectedPin] = useState(-1);
+  const t = useT();
 
   let selPin: SelPinModel | null = null;
   const pp = selectedPin >= 0 ? PINS[selectedPin] : null;
@@ -101,14 +104,14 @@ export function ParkMap() {
         selPin = {
           name: pp.name, sub: pp.sub || a.blurb, img: pp.img || a.img,
           catBadge: a.catBadge, catColor: a.catColor, catFg: a.catFg,
-          btnLabel: 'View details →',
+          btnLabel: t('View details →'),
           btnClick: () => goto.detail(pp.act as string),
         };
       }
     } else {
       selPin = {
         name: pp.name, sub: pp.sub || '', img: pp.img,
-        catBadge: pp.go === 'kids' ? 'KIDS PARK' : (pp.go === 'plan' ? 'SERVICES' : 'DINE'),
+        catBadge: pp.go === 'kids' ? t('KIDS PARK') : (pp.go === 'plan' ? t('SERVICES') : t('DINE')),
         catColor: pp.go === 'kids' ? '#FFFC33' : '#EBE2FF',
         catFg: '#340057',
         btnLabel: (pp.btnLabel || '') + ' →',
@@ -131,11 +134,11 @@ export function ParkMap() {
       <div style={{ position: 'absolute', left: '50%', top: '30%', width: 1400, height: 1400, marginLeft: -700, borderRadius: 999, background: 'radial-gradient(circle, rgba(115,51,255,.22), rgba(31,0,51,0) 55%)', pointerEvents: 'none' }} />
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid rgba(255,255,255,.25)', paddingBottom: 28 }}>
-          <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, color: '#FFFFFF', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>The walking trail</h2>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(255,255,255,.6)' }}>02 · SITEMAP · ≈1.8 KM LOOP</span>
+          <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, color: '#FFFFFF', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('The walking trail')}</h2>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(255,255,255,.6)' }}>{t('02 · SITEMAP · ≈1.8 KM LOOP')}</span>
         </div>
         <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 15.5, lineHeight: 1.55, maxWidth: '56ch', margin: '18px 0 0' }}>
-          The official park sitemap, live. Ten lettered stops loop 1.8 km through the valley, plus the Green Zone wildlife and the Chamouzé falls. Tap any pin to preview a stop.
+          {t('The official park sitemap, live. Ten lettered stops loop 1.8 km through the valley, plus the Green Zone wildlife and the Chamouzé falls. Tap any pin to preview a stop.')}
         </p>
         <div data-reveal="1" style={{ marginTop: 38 }}>
           <div>
@@ -145,7 +148,7 @@ export function ParkMap() {
                   <div style={{ position: 'relative' }}>
                     <Img
                       src="/images/park-sitemap.webp"
-                      alt="Vallé official walking trail sitemap: ten lettered stops on a 1.8 km loop"
+                      alt={t('Vallé official walking trail sitemap: ten lettered stops on a 1.8 km loop')}
                       surface="dark"
                       placeholder="#2E0A4E"
                       width={1879}
@@ -170,25 +173,25 @@ export function ParkMap() {
                 )}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
-                <span>TAP A PIN TO PREVIEW A STOP</span>
+                <span>{t('TAP A PIN TO PREVIEW A STOP')}</span>
                 <a
                   href="https://www.google.comimapsiplaceiVall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)i@-20.457614,57.4826031,17z"
                   target="_blank"
                   rel="noopener"
                   style={{ color: '#FFFC33', fontWeight: 600 }}
                 >
-                  GET DIRECTIONS · GOOGLE MAPS ↗
+                  {t('GET DIRECTIONS · GOOGLE MAPS ↗')}
                 </a>
-                <span>A→J ≈1.8 KM · VALLEPARK.COM</span>
+                <span>{t('A→J ≈1.8 KM · VALLEPARK.COM')}</span>
               </div>
             </div>
           </div>
         </div>
         <div style={{ border: '1.5px dashed rgba(255,255,255,.35)', borderRadius: 16, padding: '16px 22px', color: 'rgba(255,255,255,.8)', marginTop: 18, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <div style={{ fontSize: 13.5, lineHeight: 1.55, flex: 1, minWidth: 260 }}>
-            From the entrance the trail climbs past the Kids Park, La Citronelle and the Green Zone's tortoises and albino deer to the Luge Kart zone, then loops back along the 23 Coloured Earth, both waterfalls and La Tour viewpoint.
+            {t("From the entrance the trail climbs past the Kids Park, La Citronelle and the Green Zone's tortoises and albino deer to the Luge Kart zone, then loops back along the 23 Coloured Earth, both waterfalls and La Tour viewpoint.")}
           </div>
-          <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.8 }}>A ENTRANCE · F 23 COLOURED EARTH · GZ WILDLIFE</div>
+          <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.8 }}>{t('A ENTRANCE · F 23 COLOURED EARTH · GZ WILDLIFE')}</div>
         </div>
       </div>
     </section>

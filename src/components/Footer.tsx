@@ -1,7 +1,7 @@
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
-import { LANGS, LANG_META, localizePath, stripLang, useLang } from '../i18n';
+import { LANGS, LANG_META, localizePath, stripLang, useLang, useT } from '../i18n';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 
@@ -40,6 +40,7 @@ function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick
 
 export function Footer() {
   const goto = useGoto();
+  const t = useT();
   return (
     <footer style={{ marginTop: 'clamp(64px,9vw,120px)' }}>
       <Stripes />
@@ -51,7 +52,7 @@ export function Footer() {
             color: 'rgba(255,255,255,.08)', textTransform: 'uppercase', whiteSpace: 'nowrap',
             overflow: 'hidden', transform: 'rotate(-4deg)', transformOrigin: 'left center',
           }}>
-            LIVE THE PULSE
+            {t('LIVE THE PULSE')}
           </div>
         </div>
         <div style={{
@@ -64,7 +65,7 @@ export function Footer() {
               <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, fontWeight: 600, letterSpacing: '.22em', opacity: 0.7, marginTop: 3 }}>ADVENATURE™ PARK</div>
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.6, opacity: 0.75, margin: '16px 0 0', maxWidth: '32ch' }}>
-              Where nature &amp; adventure collide. Formerly La Vallée des Couleurs, Chamouny, Mauritius.
+              {t('Where nature & adventure collide. Formerly La Vallée des Couleurs, Chamouny, Mauritius.')}
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
               {[
@@ -82,25 +83,25 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>EXPLORE</div>
+            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>{t('EXPLORE')}</div>
             <div style={{ marginTop: 10 }}>
-              <FootLink label="Adventure" href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
-              <FootLink label="Nature" href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
-              <FootLink label="Kids Park" href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />
-              <FootLink label="Tours & Groups" href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
-              <FootLink label="Packages" href={paths.packages()} onClick={() => goto.packages()} hoverColor="#FFFC33" />
-              <FootLink label="Team building" href={paths.team()} onClick={() => goto.team()} hoverColor="#FFFC33" />
-              <FootLink label="Restaurants" href={paths.dine()} onClick={() => goto.dine()} hoverColor="#FFFC33" />
+              <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
+              <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
+              <FootLink label={t('Kids Park')} href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />
+              <FootLink label={t('Tours & Groups')} href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
+              <FootLink label={t('Packages')} href={paths.packages()} onClick={() => goto.packages()} hoverColor="#FFFC33" />
+              <FootLink label={t('Team building')} href={paths.team()} onClick={() => goto.team()} hoverColor="#FFFC33" />
+              <FootLink label={t('Restaurants')} href={paths.dine()} onClick={() => goto.dine()} hoverColor="#FFFC33" />
               <FootLink label="Le Chamouzé" href={paths.resto('chamouze')} onClick={() => goto.resto('chamouze')} hoverColor="#FFFC33" />
               <FootLink label="La Citronelle" href={paths.resto('citronelle')} onClick={() => goto.resto('citronelle')} hoverColor="#FFFC33" />
-              <FootLink label="Book your day" href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FF3358" />
-              <FootLink label="Careers" href={paths.vacancies()} onClick={() => goto.vacancies()} hoverColor="#FFFC33" />
+              <FootLink label={t('Book your day')} href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FF3358" />
+              <FootLink label={t('Careers')} href={paths.vacancies()} onClick={() => goto.vacancies()} hoverColor="#FFFC33" />
             </div>
           </div>
           <div>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>VISIT</div>
+            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>{t('VISIT')}</div>
             <div style={{ fontSize: 14.5, lineHeight: 1.7, opacity: 0.88, marginTop: 12 }}>
-              Open daily 09:00 – 17:30<br />B102, Mare Anguilles<br />Chamouny, Mauritius
+              {t('Open daily 09:00 – 17:30')}<br />B102, Mare Anguilles<br />{t('Chamouny, Mauritius')}
             </div>
             <div style={{ fontSize: 14.5, lineHeight: 1.7, marginTop: 12 }}>
               <a href="tel:+2306604477" style={{ color: '#FFFC33' }}>+230 660 44 77</a><br />
@@ -108,10 +109,10 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>RECOGNISED BY</div>
+            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>{t('RECOGNISED BY')}</div>
             <Img
               src="/images/wlta-logo-1.png"
-              alt="World Luxury Travel Awards 2026 winner"
+              alt={t('World Luxury Travel Awards 2026 winner')}
               surface="dark"
               placeholder="transparent"
               width={614}
@@ -127,10 +128,10 @@ export function Footer() {
           borderTop: '1px solid rgba(255,255,255,.16)', display: 'flex', justifyContent: 'space-between',
           gap: 14, flexWrap: 'wrap', fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.6,
         }}>
-          <span>©2026 VALLÉ ADVENATURE™ PARK · UX RESTRUCTURE CONCEPT</span>
+          <span>©2026 VALLÉ ADVENATURE™ PARK · {t('UX RESTRUCTURE CONCEPT')}</span>
           <span>
-            <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>COOKIE SETTINGS</button>
-            {' · PRIVACY POLICY · TERMS OF USE · '}
+            <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>{t('COOKIE SETTINGS')}</button>
+            {' · ' + t('PRIVACY POLICY') + ' · ' + t('TERMS OF USE') + ' · '}
             <FooterLangs />
           </span>
         </div>

@@ -12,6 +12,11 @@ import { PinButton } from './ParkMap';
 import type { MapKeyItem, MapLine, MapPin, MapRoute } from '../../data/maps';
 import type { TrailArrow, TrailEdge } from '../../data/quadTrails';
 import type { MapGallery, MapShot } from '../../data/mapGalleries';
+import { _t, useT } from '../../i18n';
+
+/** Price-option labels built from data at runtime (priceCat.toUpperCase()); registered so the dictionaries cover them. */
+const DYNAMIC_OPTION_LABELS = [_t('QUAD'), _t('ZIPLINE'), _t('BUGGY')];
+void DYNAMIC_OPTION_LABELS;
 
 const MONO = "'Chivo Mono',monospace";
 const HEAD = "'Barlow',sans-serif";
@@ -58,6 +63,7 @@ export interface ActivityMapProps {
 
 /** The sheet's key column, laid out like the walking-trail sitemap's "KEY / LÉGENDE". */
 function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
+  const t = useT();
   return (
     <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: compact ? '6px 14px' : 10 }}>
       {items.map((k) => (
@@ -70,7 +76,7 @@ function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
             <span style={{ width: 14, height: 14, borderRadius: 999, background: k.swatch, border: '2px solid #FFFFFF', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,.35)' }} />
           )}
           <span style={{ fontSize: compact ? 10.5 : 12, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
-            {k.label}{k.fr && <span style={{ opacity: 0.6, fontWeight: 400 }}> | {k.fr}</span>}
+            {t(k.label)}{k.fr && <span style={{ opacity: 0.6, fontWeight: 400 }}> | {k.fr}</span>}
           </span>
         </div>
       ))}
@@ -79,8 +85,9 @@ function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
 }
 
 function Compass({ size }: { size: number }) {
+  const t = useT();
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-label="Compass rose, north up" style={{ display: 'block' }}>
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-label={t('Compass rose, north up')} style={{ display: 'block' }}>
       <circle cx="50" cy="50" r="46" fill="none" stroke="#FFFC33" strokeWidth="2.5" />
       <path d="M50 8 L58 50 L50 92 L42 50 Z" fill="#FFFC33" />
       <path d="M8 50 L50 42 L92 50 L50 58 Z" fill="#FFFC33" opacity="0.75" />
@@ -122,7 +129,7 @@ function useBookables() {
   };
   return (r: MapRoute): Bookable[] => {
     const out: Bookable[] = [];
-    const a = find(r.priceCat, r.priceRow, r.priceCat === 'zipline' ? 'ZIPLINE' : r.priceCat.toUpperCase());
+    const a = find(r.priceCat, r.priceRow, r.priceCat === 'zipline' ? _t('ZIPLINE') : r.priceCat.toUpperCase());
     if (a) out.push(a);
     if (r.priceCat2 && r.priceRow2) {
       const b = find(r.priceCat2, r.priceRow2, r.priceLabel2 || r.priceCat2.toUpperCase());
@@ -170,8 +177,9 @@ function useMapZoom() {
 }
 
 function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string; size?: number }) {
+  const t = useT();
   return (
-    <span style={{ fontSize: size, letterSpacing: '.18em', color, fontWeight: 700 }} title={PULSE_NAMES[n] + ' pulse'}>
+    <span style={{ fontSize: size, letterSpacing: '.18em', color, fontWeight: 700 }} title={t('{name} pulse', { name: t(PULSE_NAMES[n]) })}>
       {'●'.repeat(n)}<span style={{ opacity: 0.35 }}>{'○'.repeat(5 - n)}</span>
     </span>
   );
@@ -179,8 +187,9 @@ function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string;
 
 function WallArrow({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
-    <button {...bind} onClick={onClick} aria-label={side === 'left' ? 'Previous photos' : 'Next photos'} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 6, transform: 'translateY(-60%)', width: 44, height: 44, borderRadius: 999, cursor: 'pointer', fontSize: 24, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? '#FFFC33' : GLASS.background, color: h ? '#340057' : '#FFFFFF', zIndex: 3 }}>{side === 'left' ? '‹' : '›'}</button>
+    <button {...bind} onClick={onClick} aria-label={side === 'left' ? t('Previous photos') : t('Next photos')} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 6, transform: 'translateY(-60%)', width: 44, height: 44, borderRadius: 999, cursor: 'pointer', fontSize: 24, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? '#FFFC33' : GLASS.background, color: h ? '#340057' : '#FFFFFF', zIndex: 3 }}>{side === 'left' ? '‹' : '›'}</button>
   );
 }
 
@@ -193,6 +202,7 @@ function ZoomBtn({ label, title, onClick }: { label: string; title: string; onCl
 
 function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () => void }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <button
       {...bind}
@@ -210,8 +220,8 @@ function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () =>
     >
       <span style={{ width: 12, height: 12, borderRadius: 999, background: r.color, border: '2px solid ' + (on ? r.fg : '#FFFFFF'), flexShrink: 0, boxShadow: on ? 'none' : `0 0 10px ${r.color}` }} />
       <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
-        <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13.5, textTransform: 'uppercase' }}>{r.name}</span>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{r.tag}</span>
+        <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13.5, textTransform: 'uppercase' }}>{t(r.name)}</span>
+        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{t(r.tag)}</span>
       </span>
     </button>
   );
@@ -238,6 +248,7 @@ function GlassBtn({ label, onClick, primary, on, small, style }: { label: string
 
 function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string; top: string; transform: string; onClose: () => void }) {
   const [hX, bindX] = useHover();
+  const t = useT();
   return (
     <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 7, width: 'min(360px,94%)' }}>
       <div style={{ ...GLASS, pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', borderRadius: 16, overflow: 'hidden', animation: 'vfadeup .22s ease both' }}>
@@ -260,7 +271,7 @@ function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string
         <button
           {...bindX}
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('Close')}
           style={{
             position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? '#FF3358' : 'rgba(255,255,255,.12)',
             color: '#FFFFFF', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
@@ -278,6 +289,7 @@ function RouteCard({ route, options, overlay }: { route: MapRoute; options: Book
   const app = useApp();
   const goto = useGoto();
   const [hImg, bindImg] = useHover();
+  const t = useT();
   const added = options.map((o) => app.isSelected(o.id, o.variant));
   const anyAdded = added.some(Boolean);
   const bookNow = () => {
@@ -293,22 +305,22 @@ function RouteCard({ route, options, overlay }: { route: MapRoute; options: Book
       }}
     >
       <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
-        <Img src={route.img} alt={route.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
+        <Img src={route.img} alt={t(route.name)} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
-        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{route.tag}</span>
-        <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{route.name}</div>
+        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
+        <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>
       </div>
       <div style={{ padding: '12px 15px 15px' }}>
-        <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,.8)', margin: 0, display: '-webkit-box', WebkitLineClamp: overlay ? 3 : 6, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{route.blurb}</p>
+        <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,.8)', margin: 0, display: '-webkit-box', WebkitLineClamp: overlay ? 3 : 6, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t(route.blurb)}</p>
         <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,.25)', paddingTop: 9, display: 'grid', gap: 4, fontFamily: MONO, fontSize: 10.5 }}>
           {options.map((o) => (
-            <div key={o.variant} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.65 }}>{options.length > 1 ? o.label : 'FROM'}</span><b style={{ color: '#FFFC33' }}>{o.price}</b></div>
+            <div key={o.variant} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.65 }}>{options.length > 1 ? t(o.label) : t('FROM')}</span><b style={{ color: '#FFFC33' }}>{o.price}</b></div>
           ))}
           {route.facts.filter((f) => f.k !== 'NOTE').map((f) => (
-            <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.65, textAlign: 'left', flexShrink: 0 }}>{f.k}</span><b>{f.v}</b></div>
+            <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.65, textAlign: 'left', flexShrink: 0 }}>{t(f.k)}</span><b>{t(f.v)}</b></div>
           ))}
           {route.facts.filter((f) => f.k === 'NOTE').map((f) => (
-            <div key={f.k} style={{ fontSize: 9.5, opacity: 0.7, lineHeight: 1.4 }}>{f.v}</div>
+            <div key={f.k} style={{ fontSize: 9.5, opacity: 0.7, lineHeight: 1.4 }}>{t(f.v)}</div>
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
@@ -317,12 +329,12 @@ function RouteCard({ route, options, overlay }: { route: MapRoute; options: Book
               key={o.variant}
               small
               on={added[i]}
-              label={added[i] ? '✓ ' + (options.length > 1 ? o.label : 'Added') : '+ ' + (options.length > 1 ? o.label : 'Add to My Day')}
+              label={added[i] ? '✓ ' + (options.length > 1 ? t(o.label) : t('Added')) : '+ ' + (options.length > 1 ? t(o.label) : t('Add to My Day'))}
               onClick={() => app.toggleSel(o.id, o.variant)}
               style={{ flex: 1, minWidth: 0 }}
             />
           ))}
-          <GlassBtn primary small label={anyAdded ? 'Book →' : 'Book now →'} onClick={bookNow} style={{ flex: 1 }} />
+          <GlassBtn primary small label={anyAdded ? t('Book →') : t('Book now →')} onClick={bookNow} style={{ flex: 1 }} />
         </div>
       </div>
     </aside>
@@ -331,6 +343,7 @@ function RouteCard({ route, options, overlay }: { route: MapRoute; options: Book
 
 function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big?: boolean }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <button
       {...bind}
@@ -341,12 +354,12 @@ function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big
         boxShadow: h ? '0 18px 40px -18px rgba(0,0,0,.8)' : 'none', transition: 'box-shadow .3s ease',
       }}
     >
-      <Img src={s.src} alt={`${s.tag}: ${s.cap}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
+      <Img src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
       <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 9 }}><Pulse n={s.thrill} size={9} /></span>
       <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{s.tag}</span>
-        {big && <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 16, color: '#FFFFFF', textTransform: 'uppercase', lineHeight: 1.05, display: 'block', marginTop: 4 }}>{s.cap}</span>}
+        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{t(s.tag)}</span>
+        {big && <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 16, color: '#FFFFFF', textTransform: 'uppercase', lineHeight: 1.05, display: 'block', marginTop: 4 }}>{t(s.cap)}</span>}
       </span>
     </button>
   );
@@ -357,6 +370,7 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
   const s = g.shots[idx];
   const isMobile = useIsMobile();
   const [hLead, bindLead] = useHover();
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -369,7 +383,7 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [onClose, onStep]);
   const navBtn = (d: number, side: 'left' | 'right') => (
-    <button onClick={(e) => { e.stopPropagation(); onStep(d); }} aria-label={d < 0 ? 'Previous photo' : 'Next photo'} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 14, transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 999, fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{d < 0 ? '‹' : '›'}</button>
+    <button onClick={(e) => { e.stopPropagation(); onStep(d); }} aria-label={d < 0 ? t('Previous photo') : t('Next photo')} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 14, transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 999, fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{d < 0 ? '‹' : '›'}</button>
   );
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,0,40,.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', overflowY: 'auto', padding: 'clamp(10px,3vw,40px)', animation: 'vfade .2s ease both' }}>
@@ -378,28 +392,28 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
         <div style={{ padding: 'clamp(18px,3vw,34px)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 320px' }}>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{g.eyebrow}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{t(g.eyebrow)}</span>
               <div style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom', marginTop: 12 }}>
                 <h2 style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.4vw,58px)', lineHeight: 0.84, margin: 0, textTransform: 'uppercase', color: '#FFFFFF' }}>
-                  {g.t1}<br /><span style={{ color: '#FFFC33' }}>{g.t2}</span>
+                  {t(g.t1)}<br /><span style={{ color: '#FFFC33' }}>{t(g.t2)}</span>
                 </h2>
               </div>
             </div>
             <div style={{ flex: '1 1 300px', maxWidth: 460 }}>
-              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0 }}>{g.copy}</p>
+              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0 }}>{t(g.copy)}</p>
               <div style={{ ...GLASS, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '8px 16px 8px 14px', marginTop: 14 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.14em', opacity: 0.8 }}>THRILL WITH VALLÉ</span>
+                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.14em', opacity: 0.8 }}>{t('THRILL WITH VALLÉ')}</span>
                 <Pulse n={s.thrill} />
-                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, color: '#FFFC33', textTransform: 'uppercase' }}>{PULSE_NAMES[s.thrill]}</span>
+                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, color: '#FFFC33', textTransform: 'uppercase' }}>{t(PULSE_NAMES[s.thrill])}</span>
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: 20, position: 'relative', height: isMobile ? 'min(62vh,420px)' : 'min(58vh,560px)', borderRadius: 18, overflow: 'hidden', background: '#260040' }}>
-            <Img key={s.src} src={s.src} alt={`${s.tag}: ${s.cap}`} priority surface="dark" {...bindLead} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .7s ease', transform: hLead ? 'scale(1.03)' : 'scale(1)', animation: 'vfade .35s ease both' }} />
+            <Img key={s.src} src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} priority surface="dark" {...bindLead} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .7s ease', transform: hLead ? 'scale(1.03)' : 'scale(1)', animation: 'vfade .35s ease both' }} />
             <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '18px 20px', background: 'linear-gradient(to top,rgba(31,0,51,.88),transparent)' }}>
-              <span style={{ background: '#FF3358', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{s.tag}</span>
-              <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{s.cap}</div>
+              <span style={{ background: '#FF3358', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{t(s.tag)}</span>
+              <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{t(s.cap)}</div>
             </div>
             <span style={{ ...GLASS, position: 'absolute', top: 12, right: 12, borderRadius: 999, padding: '6px 12px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.1em' }}>{idx + 1} / {g.shots.length}</span>
             {navBtn(-1, 'left')}
@@ -407,19 +421,19 @@ function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: Map
           </div>
 
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12, padding: '2px 0 6px', scrollbarWidth: 'none' }}>
-            {g.shots.map((t, i) => (
-              <button key={t.src} onClick={() => onPick(i)} aria-label={t.tag} style={{ flexShrink: 0, width: 92, height: 62, borderRadius: 10, overflow: 'hidden', padding: 0, cursor: 'pointer', border: '2px solid ' + (i === idx ? '#FFFC33' : 'rgba(255,255,255,.12)'), opacity: i === idx ? 1 : 0.65, transition: 'all .2s', background: '#260040' }}>
-                <Img src={t.src} alt="" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            {g.shots.map((sh, i) => (
+              <button key={sh.src} onClick={() => onPick(i)} aria-label={t(sh.tag)} style={{ flexShrink: 0, width: 92, height: 62, borderRadius: 10, overflow: 'hidden', padding: 0, cursor: 'pointer', border: '2px solid ' + (i === idx ? '#FFFC33' : 'rgba(255,255,255,.12)'), opacity: i === idx ? 1 : 0.65, transition: 'all .2s', background: '#260040' }}>
+                <Img src={sh.src} alt="" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
             ))}
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
-            <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>{g.foot}</span>
+            <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>{t(g.foot)}</span>
             <GlassBtn primary label={cta} onClick={onCta} style={{ marginLeft: 'auto', padding: '14px 26px', fontSize: 14.5 }} />
           </div>
         </div>
-        <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 22, right: 18, width: 38, height: 38, borderRadius: 999, border: 0, background: '#FFFC33', color: '#340057', fontWeight: 800, cursor: 'pointer', fontSize: 18, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>×</button>
+        <button onClick={onClose} aria-label={t('Close')} style={{ position: 'absolute', top: 22, right: 18, width: 38, height: 38, borderRadius: 999, border: 0, background: '#FFFC33', color: '#340057', fontWeight: 800, cursor: 'pointer', fontSize: 18, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>×</button>
       </div>
     </div>
   );
@@ -435,6 +449,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const app = useApp();
   const isMobile = useIsMobile();
   const bookables = useBookables();
+  const t = useT();
   const [routeId, setRouteId] = useState(defaultRoute || routes[0].id);
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
@@ -489,31 +504,31 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
       else if (pp.go === 'plan') goto.plan();
       else goto.detail(pp.goArg || 'zipline');
     };
-    let badge = 'LANDMARK';
+    let badge = t('LANDMARK');
     if (isRoutePin) {
       if (si >= 0) {
         const last = (route.stations as string[]).length - 1;
         const n = linesBefore(si);
-        badge = si === 0 ? `${route.name.toUpperCase()} · START` : si === last ? `${route.name.toUpperCase()} · FINISH` : `${route.name.toUpperCase()} · AFTER LINE ${n} OF ${totalLines}`;
-      } else badge = route.name.toUpperCase();
-    } else if (pp.facts) badge = 'SUSPENDED THRILL';
+        badge = si === 0 ? t('{name} · START', { name: t(route.name).toUpperCase() }) : si === last ? t('{name} · FINISH', { name: t(route.name).toUpperCase() }) : t('{name} · AFTER LINE {n} OF {total}', { name: t(route.name).toUpperCase(), n, total: totalLines });
+      } else badge = t(route.name).toUpperCase();
+    } else if (pp.facts) badge = t('SUSPENDED THRILL');
     const facts: Fact[] = [];
     if (isRoutePin) {
-      if (options[0]) facts.push({ k: 'FROM', v: options[0].price });
-      if (options[1]) facts.push({ k: options[1].label, v: options[1].price });
-      facts.push(...route.facts.filter((f) => f.k !== 'NOTE'));
+      if (options[0]) facts.push({ k: t('FROM'), v: options[0].price });
+      if (options[1]) facts.push({ k: t(options[1].label), v: options[1].price });
+      facts.push(...route.facts.filter((f) => f.k !== 'NOTE').map((f) => ({ k: t(f.k), v: t(f.v) })));
     } else {
       if (pp.priceCat && pp.priceRow) {
         const o = bookables({ ...route, priceCat: pp.priceCat, priceRow: pp.priceRow, priceCat2: undefined, priceRow2: undefined })[0];
-        if (o) facts.push({ k: 'FROM', v: o.price });
+        if (o) facts.push({ k: t('FROM'), v: o.price });
       }
-      if (pp.facts) facts.push(...pp.facts);
+      if (pp.facts) facts.push(...pp.facts.map((f) => ({ k: t(f.k), v: t(f.v) })));
     }
     popup = {
-      name: pp.name, sub: pp.sub, img: pp.img,
+      name: t(pp.name), sub: t(pp.sub), img: pp.img,
       badge, badgeColor: isRoutePin ? route.color : '#EBE2FF', badgeFg: isRoutePin ? route.fg : '#340057',
       facts,
-      btnLabel: (pp.btnLabel || 'View details') + ' →',
+      btnLabel: (pp.btnLabel ? t(pp.btnLabel) : t('View details')) + ' →',
       btnClick: nav,
     };
   }
@@ -541,7 +556,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const trailSpeed = Math.max(1, trailReach) / (trailSets.length > 1 ? 7 : 4.5);   // px per second
   const trailColor = (id: string) => routes.find((r) => r.id === id)?.color || '#FFFFFF';
 
-  const ctaLabel = options[0] && app.isSelected(options[0].id, options[0].variant) ? `✓ ${route.name} is in My Day →` : `Add ${route.name} to my day →`;
+  const ctaLabel = options[0] && app.isSelected(options[0].id, options[0].variant) ? t('✓ {name} is in My Day →', { name: t(route.name) }) : t('Add {name} to my day →', { name: t(route.name) });
   const onCta = () => { if (options[0] && !app.isSelected(options[0].id, options[0].variant)) app.toggleSel(options[0].id, options[0].variant); setShot(-1); app.openDay(); };
 
   return (
@@ -569,14 +584,14 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                     <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: isMobile ? 20 : 26, lineHeight: 0.9, textTransform: 'uppercase' }}>{sheet.title}</div>
                     <div style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', marginTop: 6 }}>{sheet.subtitle}</div>
                   </div>
-                  <div style={{ display: 'inline-block', background: '#340057', color: '#FFFC33', fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, padding: '6px 12px', marginTop: 10, textTransform: 'uppercase' }}>Key / Légende</div>
+                  <div style={{ display: 'inline-block', background: '#340057', color: '#FFFC33', fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, padding: '6px 12px', marginTop: 10, textTransform: 'uppercase' }}>{t('Key / Légende')}</div>
                 </div>
                 <MapKey items={sheet.keyItems} compact={isMobile} />
                 {!isMobile && <RouteCard route={route} options={options} overlay={false} />}
                 {!isMobile && (
                   <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <Compass size={74} />
-                    <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.7)', lineHeight: 1.5, maxWidth: 190 }}>THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.</div>
+                    <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.7)', lineHeight: 1.5, maxWidth: 190 }}>{t('THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.')}</div>
                   </div>
                 )}
               </div>
@@ -595,7 +610,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       <g key={l.label}>
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeOpacity={0.35} filter="url(#amglow)" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 7 }} />
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeDasharray={l.dashed ? '3 2.5' : undefined} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2 : 2.5 }} />
-                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
+                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{t(l.label)}</text>
                       </g>
                     ))}
                     {/* Quad trails: the trace is a mask that uncovers the designer's own trail artwork (the full-colour
@@ -645,7 +660,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                       <g key={'trace' + l.label}>
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={{ strokeWidth: isMobile ? 2.4 : 1.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
                         <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeLinecap="round" style={{ strokeWidth: isMobile ? 0.7 : 0.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
-                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.8} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 2.6 : 1.9, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.7 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{l.label}</text>
+                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.8} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 2.6 : 1.9, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.7 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{t(l.label)}</text>
                       </g>
                     ))}
                     {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
@@ -661,14 +676,14 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                     {sigPts && sigPts[0] && sigPts[1] && (
                       <>
                         <line x1={sigPts[0].px} y1={sigPts[0].py} x2={sigPts[1].px} y2={sigPts[1].py} stroke="#FFFFFF" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
-                        <text x={(sigPts[0].px + sigPts[1].px) / 2} y={(sigPts[0].py + sigPts[1].py) / 2 - 2.2} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 3.2 : 2.3, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.8 }} transform={`rotate(${Math.atan2(sigPts[1].py - sigPts[0].py, sigPts[1].px - sigPts[0].px) * 180 / Math.PI} ${(sigPts[0].px + sigPts[1].px) / 2} ${(sigPts[0].py + sigPts[1].py) / 2})`}>THE SIGNATURE · 1.5 KM</text>
+                        <text x={(sigPts[0].px + sigPts[1].px) / 2} y={(sigPts[0].py + sigPts[1].py) / 2 - 2.2} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 3.2 : 2.3, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.8 }} transform={`rotate(${Math.atan2(sigPts[1].py - sigPts[0].py, sigPts[1].px - sigPts[0].px) * 180 / Math.PI} ${(sigPts[0].px + sigPts[1].px) / 2} ${(sigPts[0].py + sigPts[1].py) / 2})`}>{t('THE SIGNATURE · 1.5 KM')}</text>
                       </>
                     )}
                   </svg>
                 {visible.map((p) => {
                   const si = stationIndex(p.n);
                   const label = si >= 0 ? String(si + 1) : p.n;
-                  const pin = { ...p, n: label, sub: p.sub as string | null, act: null } as unknown as Parameters<typeof PinButton>[0]['p'];
+                  const pin = { ...p, n: label, name: t(p.name), sub: p.sub as string | null, act: null } as unknown as Parameters<typeof PinButton>[0]['p'];
                   return (
                     <PinButton
                       key={route.id + ':' + p.n}
@@ -684,10 +699,10 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                 {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform + ` scale(${1 / mz.zoom})`} onClose={() => setSel('')} />}
               </div>
               <div style={{ position: 'absolute', left: 12, top: 12, zIndex: 6, display: 'flex', gap: 6 }}>
-                <ZoomBtn label="+" title="Zoom in" onClick={() => mz.setZoom(mz.zoom + 0.5)} />
-                <ZoomBtn label="−" title="Zoom out" onClick={() => mz.setZoom(mz.zoom - 0.5)} />
-                {mz.zoom > 1 && <ZoomBtn label="⟲" title="Reset view" onClick={mz.reset} />}
-                {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{mz.zoom.toFixed(2).replace(/\.?0+$/, '')}× · DRAG TO PAN</span>}
+                <ZoomBtn label="+" title={t('Zoom in')} onClick={() => mz.setZoom(mz.zoom + 0.5)} />
+                <ZoomBtn label="−" title={t('Zoom out')} onClick={() => mz.setZoom(mz.zoom - 0.5)} />
+                {mz.zoom > 1 && <ZoomBtn label="⟲" title={t('Reset view')} onClick={mz.reset} />}
+                {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{t('{z}× · DRAG TO PAN', { z: mz.zoom.toFixed(2).replace(/\.?0+$/, '') })}</span>}
               </div>
             </div>
               </div>
@@ -699,7 +714,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
               <span>{hint}</span>
-              <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park/@-20.457614,57.4826031,17z" target="_blank" rel="noopener" style={{ color: '#FFFC33', fontWeight: 600 }}>GET DIRECTIONS · GOOGLE MAPS ↗</a>
+              <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park/@-20.457614,57.4826031,17z" target="_blank" rel="noopener" style={{ color: '#FFFC33', fontWeight: 600 }}>{t('GET DIRECTIONS · GOOGLE MAPS ↗')}</a>
               <span>{footTag}</span>
             </div>
           </div>
@@ -709,8 +724,8 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
         {gallery && gallery.shots.length > 0 && (
           <div style={{ marginTop: 22 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{gallery.eyebrow}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{gallery.shots.length} PHOTOS · TAP TO OPEN</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{t(gallery.eyebrow)}</span>
+              <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{t('{n} PHOTOS · TAP TO OPEN', { n: gallery.shots.length })}</span>
             </div>
             <div style={{ position: 'relative' }}>
               <div ref={wall} onScroll={onWallScroll} style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', scrollBehavior: 'smooth' }}>
@@ -720,8 +735,8 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               {wallPos !== 'end' && <WallArrow side="right" onClick={() => scrollWall(1)} />}
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 2 }}>
-              <GlassBtn small label="‹  Previous" onClick={() => scrollWall(-1)} />
-              <GlassBtn small label="Next photos  ›" onClick={() => scrollWall(1)} />
+              <GlassBtn small label={t('‹  Previous')} onClick={() => scrollWall(-1)} />
+              <GlassBtn small label={t('Next photos  ›')} onClick={() => scrollWall(1)} />
             </div>
           </div>
         )}

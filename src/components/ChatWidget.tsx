@@ -8,6 +8,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { Stripes } from './Stripes';
 import { color, display, font, motion, radius, shadow } from '../styles/theme';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from './chatParts';
+import { useT } from '../i18n';
 
 /**
  * Public floating chat launcher (visitors only, never rendered on /staff*).
@@ -83,6 +84,7 @@ function ChatGlyph() {
 
 /** The tilted VALLÉ lockup from the site header, sized for the panel bar. */
 function Lockup() {
+  const t = useT();
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', lineHeight: 1, userSelect: 'none',
@@ -93,7 +95,7 @@ function Lockup() {
         ...monoText, fontSize: 8.5, fontWeight: 700, letterSpacing: '.24em',
         color: color.green, marginTop: 3,
       }}>
-        LIVE CHAT
+        {t('LIVE CHAT')}
       </span>
     </div>
   );
@@ -112,11 +114,12 @@ function Launcher({ onClick, unread, bottom, right, reduced }: {
   onClick: () => void; unread: number; bottom: number; right: number; reduced: boolean;
 }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <button
       {...bind}
       onClick={onClick}
-      aria-label={unread > 0 ? 'Open chat, ' + unread + ' new message' + (unread === 1 ? '' : 's') : 'Open chat'}
+      aria-label={unread > 0 ? (unread === 1 ? t('Open chat, {n} new message', { n: unread }) : t('Open chat, {n} new messages', { n: unread })) : t('Open chat')}
       className="press"
       style={{
         position: 'fixed', bottom, right, zIndex: 85,
@@ -191,6 +194,7 @@ function TypingDots({ reduced }: { reduced: boolean }) {
 /** Bodies render as text nodes: visitor and staff input is never treated as HTML. */
 function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; visitorKey: string }) {
   const mine = m.sender === 'visitor';
+  const t = useT();
   const enter = reduced ? 'vfade .2s ease both' : 'vrise .32s cubic-bezier(.2,.7,.2,1) both';
 
   if (m.sender === 'system') {
@@ -242,7 +246,7 @@ function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; visitorK
             ...monoText, fontSize: 9, letterSpacing: '.08em', color: color.pinkDark,
             marginTop: 4, textAlign: 'right',
           }}>
-            NOT SENT · CHECK YOUR CONNECTION
+            {t('NOT SENT · CHECK YOUR CONNECTION')}
           </div>
         )}
       </div>
@@ -264,6 +268,7 @@ export function ChatWidget() {
   const [unread, setUnread] = useState(0);
   const [staffTyping, setStaffTyping] = useState(false);
   const [fileErr, setFileErr] = useState('');
+  const t = useT();
 
   const chatRef = useRef<VisitorChat | null>(null);
   const openRef = useRef(open);
@@ -375,7 +380,7 @@ export function ChatWidget() {
   const sendFile = (file: File) => {
     const chat = chatRef.current;
     if (!chat) return;
-    if (file.size > MAX_BYTES) { setFileErr('That file is over 8 MB. Try a smaller one.'); return; }
+    if (file.size > MAX_BYTES) { setFileErr(t('That file is over 8 MB. Try a smaller one.')); return; }
     setFileErr('');
     const caption = draft.trim();
     const localUrl = URL.createObjectURL(file);
@@ -394,7 +399,7 @@ export function ChatWidget() {
     chat.sendFile(file, caption)
       .then((m) => setMsgs((prev) => prev.map((x) => (x.id === temp.id ? { ...m, localUrl } : x))))
       .catch((e: Error) => {
-        setFileErr(e.message || 'Could not send the file.');
+        setFileErr(e.message || t('Could not send the file.'));
         setMsgs((prev) => prev.map((x) => (x.id === temp.id ? { ...x, pending: false, failed: true } : x)));
       });
   };
@@ -406,10 +411,10 @@ export function ChatWidget() {
   // step a first-time visitor has not opened a socket yet, so the first state
   // reads as connecting rather than implying something dropped.
   const statusLabel = connected
-    ? 'WE USUALLY REPLY IN MINUTES'
+    ? t('WE USUALLY REPLY IN MINUTES')
     : status === 'connecting'
-      ? 'CONNECTING…'
-      : 'RECONNECTING…';
+      ? t('CONNECTING…')
+      : t('RECONNECTING…');
 
   if (!open) {
     return <Launcher onClick={openPanel} unread={unread} bottom={bottom} right={right} reduced={reduced} />;
@@ -431,7 +436,7 @@ export function ChatWidget() {
   return (
     <div
       role="dialog"
-      aria-label="Chat with VALLÉ"
+      aria-label={t('Chat with VALLÉ')}
       style={{
         position: 'fixed', zIndex: 86, bottom, right,
         left: isMobile ? 12 : 'auto', width: isMobile ? 'auto' : PANEL_W,
@@ -477,7 +482,7 @@ export function ChatWidget() {
         </div>
         <button
           onClick={closePanel}
-          aria-label="Close chat"
+          aria-label={t('Close chat')}
           className="press"
           style={{
             position: 'relative',
@@ -501,21 +506,20 @@ export function ChatWidget() {
             animation: reduced ? 'vfade .2s ease both' : 'vrise .34s cubic-bezier(.2,.7,.2,1) both',
           }}
         >
-          <div style={{ ...displayText, fontSize: 30, lineHeight: 1 }}>Hi there</div>
+          <div style={{ ...displayText, fontSize: 30, lineHeight: 1 }}>{t('Hi there')}</div>
           <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'rgba(52,0,87,.68)', margin: '10px 0 18px' }}>
-            Ask us anything about activities, packages or planning your day. Leave your details
-            if you would like us to follow up; both are optional.
+            {t('Ask us anything about activities, packages or planning your day. Leave your details if you would like us to follow up; both are optional.')}
           </p>
 
           <label htmlFor="vw-name" style={{ ...monoText, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>
-            NAME
+            {t('NAME')}
           </label>
           <div style={{ marginTop: 5, marginBottom: 12 }}>
-            <input id="vw-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" style={inputStyle} />
+            <input id="vw-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Your name')} style={inputStyle} />
           </div>
 
           <label htmlFor="vw-email" style={{ ...monoText, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>
-            EMAIL
+            {t('EMAIL')}
           </label>
           <div style={{ marginTop: 5, marginBottom: 18 }}>
             <input id="vw-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
@@ -532,7 +536,7 @@ export function ChatWidget() {
                 transition: 'background ' + motion.fast,
               }}
             >
-              Skip
+              {t('Skip')}
             </button>
             <button
               onClick={beginChat}
@@ -543,7 +547,7 @@ export function ChatWidget() {
                 borderRadius: radius.pill, boxShadow: shadow.pink,
               }}
             >
-              Start chat →
+              {t('Start chat')} →
             </button>
           </div>
         </div>
@@ -561,7 +565,7 @@ export function ChatWidget() {
                 textAlign: 'center', paddingTop: 18,
                 animation: reduced ? 'vfade .2s ease both' : 'vrise .34s cubic-bezier(.2,.7,.2,1) both',
               }}>
-                SAY HELLO · WE ARE LISTENING
+                {t('SAY HELLO · WE ARE LISTENING')}
               </div>
             )}
             {msgs.map((m) => <Bubble key={m.id} m={m} reduced={reduced} visitorKey={chatRef.current?.visitorKey || getVisitorKey()} />)}
@@ -577,7 +581,7 @@ export function ChatWidget() {
               >
                 <TypingDots reduced={reduced} />
                 <span style={{ ...monoText, fontSize: 9, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>
-                  VALLÉ IS TYPING
+                  {t('VALLÉ IS TYPING')}
                 </span>
               </div>
             )}
@@ -588,7 +592,7 @@ export function ChatWidget() {
               ...monoText, fontSize: 9.5, letterSpacing: '.1em', color: '#8A6A00',
               background: 'rgba(255,176,32,.16)', padding: '7px 14px', flexShrink: 0,
             }}>
-              {status === 'connecting' ? 'CONNECTING…' : 'RECONNECTING…'} YOUR MESSAGES WILL STILL GO THROUGH
+              {status === 'connecting' ? t('CONNECTING…') : t('RECONNECTING…')} {t('YOUR MESSAGES WILL STILL GO THROUGH')}
             </div>
           )}
 
@@ -610,8 +614,8 @@ export function ChatWidget() {
               value={draft}
               onChange={(e) => onDraft(e.target.value)}
               maxLength={2000}
-              placeholder="Type a message…"
-              aria-label="Message"
+              placeholder={t('Type a message…')}
+              aria-label={t('Message')}
               style={{ ...inputStyle, flex: 1, minWidth: 0 }}
             />
             <button
@@ -626,7 +630,7 @@ export function ChatWidget() {
                 transition: 'opacity ' + motion.fast + ', box-shadow ' + motion.fast,
               }}
             >
-              Send
+              {t('Send')}
             </button>
           </form>
         </>

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Lists every English source string the public site translates:
  *   - literals passed to t('...'), tr('...') and _t('...') in src/ (the back
@@ -16,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(root, 'src');
 const SKIP_DIRS = new Set(['staff', 'hr', 'i18n']);
-const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf']);
+const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind']);
 
 function files(dir) {
   const out = [];
@@ -58,6 +57,8 @@ export function collectKeys() {
 
   // 3. price-list option labels: kept English as keys, displayed through t(row.n)
   for (const rows of Object.values(cat.PL || {})) for (const r of rows) add(r.n, 'catalog:PL');
+  // per-unit labels ("/ buggy") stay English in data (logic reads them) and are displayed through t()
+  for (const a of cat.ACTS || []) if (a.flatLabel) add(a.flatLabel, 'catalog:flatLabel');
 
   return { keys: [...keys.keys()].sort((a, b) => a.localeCompare(b)), where: Object.fromEntries(keys), dynamic };
 }

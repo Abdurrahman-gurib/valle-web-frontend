@@ -3,6 +3,7 @@ import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from './nav';
 import { money } from './format';
+import { tr, _t } from '../i18n';
 
 export interface CardModel extends Activity {
   catName: string;
@@ -20,7 +21,7 @@ export interface CardModel extends Activity {
   add: (e?: { stopPropagation?: () => void }) => void;
 }
 
-export const PULSE_NAMES = ['', 'SERENE', 'GENTLE', 'MODERATE', 'WILD', 'EXTREME'];
+export const PULSE_NAMES = ['', _t('SERENE'), _t('GENTLE'), _t('MODERATE'), _t('WILD'), _t('EXTREME')];
 
 /**
  * Decorates activities exactly like the original template's card factory:
@@ -37,10 +38,10 @@ export function useCardModel(): (a: Activity) => CardModel {
     const hasAdd = a.mode === 'pp' || a.mode === 'flat';
     const price = app.activityPrice(a.id);
     const options = (catalog.PL[a.id] || []).length;
-    let priceLabel = 'WITH ENTRY';
-    if (a.mode === 'pp') priceLabel = 'FROM ' + money(price);
-    if (a.mode === 'flat') priceLabel = money(price) + ' ' + (a.flatLabel || '');
-    if (a.mode === 'kiosk') priceLabel = 'AT THE KIOSK';
+    let priceLabel = tr('WITH ENTRY');
+    if (a.mode === 'pp') priceLabel = tr('FROM {price}', { price: money(price) });
+    if (a.mode === 'flat') priceLabel = money(price) + ' ' + tr(a.flatLabel || '');
+    if (a.mode === 'kiosk') priceLabel = tr('AT THE KIOSK');
     return {
       ...a,
       catName: c.name,
@@ -49,11 +50,11 @@ export function useCardModel(): (a: Activity) => CardModel {
       catFg: c.fg,
       pulseColor: c.pulse,
       pulseStr: '●'.repeat(a.thrill) + '○'.repeat(5 - a.thrill),
-      pulseName: PULSE_NAMES[a.thrill],
+      pulseName: PULSE_NAMES[a.thrill] ? tr(PULSE_NAMES[a.thrill]) : PULSE_NAMES[a.thrill],
       priceLabel,
       hasAdd,
       selOn: sel,
-      addLabel: sel ? (options > 1 ? '✓ In My Day · change options' : '✓ Added to My Day') : (options > 1 ? '+ Choose an option' : '+ Add to My Day'),
+      addLabel: sel ? (options > 1 ? tr('✓ In My Day · change options') : tr('✓ Added to My Day')) : (options > 1 ? tr('+ Choose an option') : tr('+ Add to My Day')),
       open: () => goto.detail(a.id),
       // Several priced options (zipline tours, quad tracks, buggies, luge rides): let the visitor
       // pick; a single-option experience toggles straight into My Day.

@@ -13,14 +13,15 @@ import { applyToVacancy, getVacancy, isHttpError } from '../lib/careersApi';
 import { fullDateFromIso } from '../lib/format';
 import type { ApplicationRequest, EmploymentType, VacancyDetail } from '../types';
 import { color, display, font, mono, motion, radius, shadow } from '../styles/theme';
+import { useT, _t } from '../i18n';
 
 const CAREERS_EMAIL = 'sales@vallepark.com';
 
 const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {
-  'full-time': 'FULL TIME',
-  'part-time': 'PART TIME',
-  seasonal: 'SEASONAL',
-  internship: 'INTERNSHIP',
+  'full-time': _t('FULL TIME'),
+  'part-time': _t('PART TIME'),
+  seasonal: _t('SEASONAL'),
+  internship: _t('INTERNSHIP'),
 };
 
 const EMPLOYMENT_COLOR: Record<EmploymentType, { bg: string; fg: string }> = {
@@ -70,29 +71,29 @@ function validate(f: FormState): Errors {
   const e: Errors = {};
 
   const name = f.fullName.trim();
-  if (!name) e.fullName = 'Please tell us your name.';
-  else if (name.length < 2) e.fullName = 'That looks a little short.';
-  else if (name.length > 120) e.fullName = 'Please keep this under 120 characters.';
+  if (!name) e.fullName = _t('Please tell us your name.');
+  else if (name.length < 2) e.fullName = _t('That looks a little short.');
+  else if (name.length > 120) e.fullName = _t('Please keep this under 120 characters.');
 
   const email = f.email.trim();
-  if (!email) e.email = 'We need an email address to reply to.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) e.email = 'That email address does not look right.';
+  if (!email) e.email = _t('We need an email address to reply to.');
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) e.email = _t('That email address does not look right.');
 
-  if (f.phone.trim().length > 40) e.phone = 'Please keep this under 40 characters.';
+  if (f.phone.trim().length > 40) e.phone = _t('Please keep this under 40 characters.');
 
   const cv = f.cvUrl.trim();
   if (cv) {
-    if (cv.length > 500) e.cvUrl = 'That link is too long (500 characters max).';
-    else if (!/^https?:\/\/\S+$/i.test(cv)) e.cvUrl = 'Use a full link starting with http:// or https://';
+    if (cv.length > 500) e.cvUrl = _t('That link is too long (500 characters max).');
+    else if (!/^https?:\/\/\S+$/i.test(cv)) e.cvUrl = _t('Use a full link starting with http:// or https://');
   }
 
   const years = f.years.trim();
   if (years) {
-    if (!/^\d{1,3}$/.test(years)) e.years = 'Whole numbers only, please.';
-    else if (Number(years) > 60) e.years = 'Please enter 60 or fewer.';
+    if (!/^\d{1,3}$/.test(years)) e.years = _t('Whole numbers only, please.');
+    else if (Number(years) > 60) e.years = _t('Please enter 60 or fewer.');
   }
 
-  if (f.coverLetter.length > COVER_MAX) e.coverLetter = 'Please keep this under 4000 characters.';
+  if (f.coverLetter.length > COVER_MAX) e.coverLetter = _t('Please keep this under 4000 characters.');
 
   return e;
 }
@@ -117,9 +118,10 @@ function fieldStyle(invalid: boolean, focused: boolean): CSSProperties {
 }
 
 function ErrorNote({ id, text }: { id: string; text: string }) {
+  const t = useT();
   return (
     <div id={id} role="alert" style={{ ...mono, fontWeight: 400, color: color.pinkDark, marginTop: 6, letterSpacing: '.06em' }}>
-      {text}
+      {t(text)}
     </div>
   );
 }
@@ -141,13 +143,14 @@ interface FieldProps {
 }
 
 function TextField(p: FieldProps) {
+  const t = useT();
   const [focused, setFocused] = useState(false);
   const invalid = Boolean(p.error);
   return (
     <div>
       <label htmlFor={p.id} style={labelStyle}>
         {p.label.toUpperCase()}
-        {!p.required && <span style={{ opacity: 0.55 }}> · OPTIONAL</span>}
+        {!p.required && <span style={{ opacity: 0.55 }}> · {t('OPTIONAL')}</span>}
       </label>
       <input
         id={p.id}
@@ -187,13 +190,14 @@ interface AreaProps {
 }
 
 function TextArea(p: AreaProps) {
+  const t = useT();
   const [focused, setFocused] = useState(false);
   const invalid = Boolean(p.error);
   const left = p.max - p.value.length;
   return (
     <div>
       <label htmlFor={p.id} style={labelStyle}>
-        {p.label.toUpperCase()}<span style={{ opacity: 0.55 }}> · OPTIONAL</span>
+        {p.label.toUpperCase()}<span style={{ opacity: 0.55 }}> · {t('OPTIONAL')}</span>
       </label>
       <textarea
         id={p.id}
@@ -212,7 +216,7 @@ function TextArea(p: AreaProps) {
         ? <ErrorNote id={p.id + '-err'} text={p.error || ''} />
         : (
           <div id={p.id + '-count'} style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.5)', marginTop: 6, textAlign: 'right' }}>
-            {left} CHARACTERS LEFT
+            {t('{n} CHARACTERS LEFT', { n: left })}
           </div>
         )}
     </div>
@@ -228,6 +232,7 @@ function Pill({ children, bg, fg }: { children: ReactNode; bg: string; fg: strin
 }
 
 function SubmitButton({ busy, disabled, onClick }: { busy: boolean; disabled: boolean; onClick?: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   const off = busy || disabled;
   return (
@@ -256,7 +261,7 @@ function SubmitButton({ busy, disabled, onClick }: { busy: boolean; disabled: bo
           display: 'inline-block', animation: 'vbeat .9s ease-in-out infinite',
         }} />
       )}
-      {busy ? 'Sending…' : 'Send my application'}
+      {busy ? t('Sending…') : t('Send my application')}
     </button>
   );
 }
@@ -282,6 +287,7 @@ function GhostButton({ label, onClick }: { label: string; onClick: () => void })
 // ---------------------------------------------------------------- page
 
 export default function VacancyDetailPage() {
+  const t = useT();
   const ref = useReveal<HTMLElement>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -290,8 +296,8 @@ export default function VacancyDetailPage() {
   const [vacancy, setVacancy] = useState<VacancyDetail | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   useSeo(vacancy ? {
-    title: `${vacancy.title} · Careers at VALLÉ Advenature™ Park`,
-    description: vacancy.summary || `${vacancy.title}, ${vacancy.employment} in ${vacancy.location}. Apply online.`,
+    title: t('{title} · Careers at VALLÉ Advenature™ Park', { title: vacancy.title }),
+    description: vacancy.summary || t('{title}, {employment} in {location}. Apply online.', { title: vacancy.title, employment: vacancy.employment, location: vacancy.location }),
     canonicalPath: `/vacancies/${slug}`,
     jsonLd: [
       breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }, { name: vacancy.title, path: `/vacancies/${slug}` }]),
@@ -304,7 +310,7 @@ export default function VacancyDetailPage() {
         directApply: true,
       },
     ],
-  } : { title: (state === 'missing' ? 'Role closed' : 'Careers') + ' · VALLÉ Advenature™ Park', description: 'Open roles at Vallé Advenature Park.', noindex: state !== 'loading' });
+  } : { title: state === 'missing' ? t('Role closed · VALLÉ Advenature™ Park') : t('Careers · VALLÉ Advenature™ Park'), description: t('Open roles at Vallé Advenature Park.'), noindex: state !== 'loading' });
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
@@ -369,14 +375,14 @@ export default function VacancyDetailPage() {
     } catch (err: unknown) {
       if (isHttpError(err)) {
         if (err.status === 429) {
-          setApiErr('You have sent several applications already. Please try again in about ten minutes.');
+          setApiErr(t('You have sent several applications already. Please try again in about ten minutes.'));
         } else if (err.status === 404 || err.status === 409 || err.status === 410) {
-          setApiErr('This role has just closed. Please look at the other open roles, or write to us directly.');
+          setApiErr(t('This role has just closed. Please look at the other open roles, or write to us directly.'));
         } else {
-          setApiErr(err.message || 'We could not send your application. Please try again.');
+          setApiErr(err.message || t('We could not send your application. Please try again.'));
         }
       } else {
-        setApiErr('We could not reach the park. Check your connection and try again, or email ' + CAREERS_EMAIL + '.');
+        setApiErr(t('We could not reach the park. Check your connection and try again, or email {email}.', { email: CAREERS_EMAIL }));
       }
     } finally {
       setBusy(false);
@@ -395,7 +401,7 @@ export default function VacancyDetailPage() {
   if (state === 'loading') {
     return shell(
       <div style={{ padding: 'clamp(40px,8vw,120px) 0', textAlign: 'center' }}>
-        <div style={{ ...mono, color: color.violet }}>LOADING THE ROLE…</div>
+        <div style={{ ...mono, color: color.violet }}>{t('LOADING THE ROLE…')}</div>
         <div style={{
           margin: '22px auto 0', width: 'min(520px,100%)', height: 10, borderRadius: radius.pill,
           background: color.tint, overflow: 'hidden',
@@ -413,17 +419,17 @@ export default function VacancyDetailPage() {
         background: missing ? color.tint : color.errFill, border: `1.5px solid ${color.border}`,
         borderRadius: radius.xl, padding: 'clamp(28px,4vw,56px)', textAlign: 'center',
       }}>
-        <div style={{ ...mono, color: color.violet }}>{missing ? 'ROLE CLOSED' : 'SOMETHING WENT WRONG'}</div>
+        <div style={{ ...mono, color: color.violet }}>{missing ? t('ROLE CLOSED') : t('SOMETHING WENT WRONG')}</div>
         <h1 style={{ ...display, fontSize: 'clamp(28px,4vw,48px)', color: color.purple, margin: '12px 0 0', transform: 'rotate(-2deg)' }}>
-          {missing ? 'This role is no longer open' : 'We could not load this role'}
+          {missing ? t('This role is no longer open') : t('We could not load this role')}
         </h1>
         <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'rgba(52,0,87,.72)', margin: '16px auto 0', maxWidth: 520 }}>
           {missing
-            ? 'It may have been filled or taken down. Have a look at what is open today, or send us an open application.'
-            : 'Please try again in a moment. If it keeps happening, write to us at ' + CAREERS_EMAIL + '.'}
+            ? t('It may have been filled or taken down. Have a look at what is open today, or send us an open application.')
+            : t('Please try again in a moment. If it keeps happening, write to us at {email}.', { email: CAREERS_EMAIL })}
         </p>
         <div style={{ marginTop: 22, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <GhostButton label="← All open roles" onClick={() => navigate('/vacancies')} />
+          <GhostButton label={t('← All open roles')} onClick={() => navigate('/vacancies')} />
         </div>
       </div>,
     );
@@ -434,7 +440,7 @@ export default function VacancyDetailPage() {
   // ---- the role ----
 
   const emp = EMPLOYMENT_COLOR[vacancy.employment] || { bg: color.tint, fg: color.purple };
-  const empLabel = EMPLOYMENT_LABEL[vacancy.employment] || 'ROLE';
+  const empLabel = EMPLOYMENT_LABEL[vacancy.employment] ? t(EMPLOYMENT_LABEL[vacancy.employment]) : t('ROLE');
   const closes = vacancy.closesOn ? fullDateFromIso(vacancy.closesOn.slice(0, 10)) : '';
   const reqs = lines(vacancy.requirements);
   const perks = lines(vacancy.benefits);
@@ -454,12 +460,12 @@ export default function VacancyDetailPage() {
           ...mono, color: color.violet, marginBottom: 18,
         }}
       >
-        ← ALL OPEN ROLES
+        {t('← ALL OPEN ROLES')}
       </button>
 
       {/* ---- role header ---- */}
       <header data-reveal>
-        <div style={{ ...mono, color: color.pink }}>{(vacancy.department || 'VALLÉ PARK').toUpperCase()}</div>
+        <div style={{ ...mono, color: color.pink }}>{(vacancy.department || t('VALLÉ PARK')).toUpperCase()}</div>
         <h1 style={{
           ...display, fontSize: 'clamp(38px,6vw,82px)', color: color.purple, margin: '12px 0 0',
           transform: 'rotate(-3deg)', transformOrigin: 'left bottom', maxWidth: 900,
@@ -468,9 +474,9 @@ export default function VacancyDetailPage() {
         </h1>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 22 }}>
           <Pill bg={emp.bg} fg={emp.fg}>{empLabel}</Pill>
-          <Pill bg={color.tint} fg={color.purple}>{(vacancy.location || 'CHAMOUNY, MAURITIUS').toUpperCase()}</Pill>
+          <Pill bg={color.tint} fg={color.purple}>{(vacancy.location || t('CHAMOUNY, MAURITIUS')).toUpperCase()}</Pill>
           {vacancy.salaryRange && <Pill bg={color.purple} fg={color.yellow}>{vacancy.salaryRange.toUpperCase()}</Pill>}
-          <Pill bg={color.tint} fg={color.purple}>{closes ? 'CLOSES ' + closes.toUpperCase() : 'OPEN UNTIL FILLED'}</Pill>
+          <Pill bg={color.tint} fg={color.purple}>{closes ? t('CLOSES {date}', { date: closes.toUpperCase() }) : t('OPEN UNTIL FILLED')}</Pill>
         </div>
         {isMobile && !sent && (
           <button
@@ -486,7 +492,7 @@ export default function VacancyDetailPage() {
               padding: '14px 0', borderRadius: radius.pill, boxShadow: shadow.pink,
             }}
           >
-            Apply for this role ↓
+            {t('Apply for this role ↓')}
           </button>
         )}
         <Stripes height={8} style={{ borderRadius: radius.pill, margin: '26px 0 0' }} />
@@ -512,7 +518,7 @@ export default function VacancyDetailPage() {
 
           {about.length > 0 && (
             <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>About the role</h2>
+              <h2 style={sectionTitle}>{t('About the role')}</h2>
               {about.map((p, i) => (
                 <p key={i} style={{ fontSize: 15.5, lineHeight: 1.7, color: 'rgba(52,0,87,.78)', margin: '14px 0 0' }}>{p}</p>
               ))}
@@ -521,7 +527,7 @@ export default function VacancyDetailPage() {
 
           {reqs.length > 0 && (
             <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>What we are looking for</h2>
+              <h2 style={sectionTitle}>{t('What we are looking for')}</h2>
               <ul style={{ listStyle: 'none', margin: '16px 0 0', padding: 0, display: 'grid', gap: 10 }}>
                 {reqs.map((r, i) => (
                   <li key={i} style={{
@@ -540,7 +546,7 @@ export default function VacancyDetailPage() {
 
           {perks.length > 0 && (
             <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>What you get</h2>
+              <h2 style={sectionTitle}>{t('What you get')}</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}>
                 {perks.map((b, i) => (
                   <span key={i} style={{
@@ -557,22 +563,22 @@ export default function VacancyDetailPage() {
           )}
 
           <section data-reveal style={{ marginTop: 'clamp(28px,3.5vw,44px)' }}>
-            <h2 style={sectionTitle}>Where you would work</h2>
+            <h2 style={sectionTitle}>{t('Where you would work')}</h2>
             <div style={{
               position: 'relative', marginTop: 16, borderRadius: radius.xl, overflow: 'hidden',
               minHeight: isMobile ? 200 : 260, background: color.purple, boxShadow: shadow.card,
             }}>
               <Img
                 src="/images/trail-reception.webp"
-                alt="The reception trail at Vallé Advenature Park"
+                alt={t('The reception trail at Vallé Advenature Park')}
                 surface="dark"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(38,0,64,.88), rgba(38,0,64,0) 62%)' }} />
               <div style={{ position: 'absolute', left: 20, right: 20, bottom: 18, color: color.white }}>
-                <div style={{ ...mono, color: color.yellow }}>CHAMOUNY, SOUTH MAURITIUS</div>
+                <div style={{ ...mono, color: color.yellow }}>{t('CHAMOUNY, SOUTH MAURITIUS')}</div>
                 <div style={{ ...display, fontSize: 'clamp(20px,2.4vw,28px)', marginTop: 6 }}>
-                  200 hectares of valley, open daily
+                  {t('200 hectares of valley, open daily')}
                 </div>
               </div>
             </div>
@@ -589,9 +595,9 @@ export default function VacancyDetailPage() {
             boxShadow: `0 0 0 1.5px ${color.border}, ${shadow.card}`,
           }}>
             <div style={{ background: color.purple, padding: '18px 22px' }}>
-              <div style={{ ...mono, color: color.yellow }}>{sent ? 'APPLICATION SENT' : 'APPLY NOW'}</div>
+              <div style={{ ...mono, color: color.yellow }}>{sent ? t('APPLICATION SENT') : t('APPLY NOW')}</div>
               <div style={{ ...display, fontSize: 24, color: color.white, marginTop: 6 }}>
-                {sent ? 'Thank you' : 'Tell us about you'}
+                {sent ? t('Thank you') : t('Tell us about you')}
               </div>
             </div>
             <Stripes height={8} />
@@ -602,62 +608,62 @@ export default function VacancyDetailPage() {
                   background: color.okFill, border: `1.5px solid ${color.green}`, borderRadius: radius.lg,
                   padding: '18px 20px',
                 }}>
-                  <div style={{ ...display, fontSize: 22, color: color.purple }}>Application received</div>
+                  <div style={{ ...display, fontSize: 22, color: color.purple }}>{t('Application received')}</div>
                   <div style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.65)', marginTop: 8 }}>
-                    {doneRef ? 'REFERENCE ' + doneRef + ' · ' : ''}{vacancy.title.toUpperCase()}
+                    {doneRef ? t('REFERENCE {ref}', { ref: doneRef }) + ' · ' : ''}{vacancy.title.toUpperCase()}
                   </div>
                 </div>
-                <div style={{ ...mono, color: color.violet, marginTop: 20 }}>WHAT HAPPENS NEXT</div>
+                <div style={{ ...mono, color: color.violet, marginTop: 20 }}>{t('WHAT HAPPENS NEXT')}</div>
                 <ol style={{ margin: '12px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 12 }}>
                   {[
-                    'Our HR team reads every application, usually within five working days.',
-                    'If your profile fits the role, we email you to arrange a chat, on site or by phone.',
-                    'Keep an eye on your spam folder: our reply comes from a vallepark.com address.',
-                  ].map((t, i) => (
+                    t('Our HR team reads every application, usually within five working days.'),
+                    t('If your profile fits the role, we email you to arrange a chat, on site or by phone.'),
+                    t('Keep an eye on your spam folder: our reply comes from a vallepark.com address.'),
+                  ].map((step, i) => (
                     <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                       <span aria-hidden style={{
                         ...mono, background: color.tint, color: color.violet, borderRadius: radius.pill,
                         width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                       }}>{i + 1}</span>
-                      <span style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(52,0,87,.78)' }}>{t}</span>
+                      <span style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(52,0,87,.78)' }}>{step}</span>
                     </li>
                   ))}
                 </ol>
                 <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <GhostButton label="Browse other roles" onClick={() => navigate('/vacancies')} />
+                  <GhostButton label={t('Browse other roles')} onClick={() => navigate('/vacancies')} />
                 </div>
               </div>
             ) : (
               <form onSubmit={onSubmit} noValidate style={{ padding: 'clamp(20px,2.4vw,26px)', display: 'grid', gap: 16 }}>
                 <TextField
-                  id="fullName" label="Full name" required autoComplete="name" maxLength={120}
+                  id="fullName" label={t('Full name')} required autoComplete="name" maxLength={120}
                   placeholder="Jean-Marc Lafleur"
                   value={form.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={errorFor('fullName')}
                 />
                 <TextField
-                  id="email" label="Email" required type="email" inputMode="email" autoComplete="email" maxLength={180}
+                  id="email" label={t('Email')} required type="email" inputMode="email" autoComplete="email" maxLength={180}
                   placeholder="you@example.com"
                   value={form.email} onChange={set('email')} onBlur={blur('email')} error={errorFor('email')}
                 />
                 <TextField
-                  id="phone" label="Phone" type="tel" inputMode="tel" autoComplete="tel" maxLength={40}
+                  id="phone" label={t('Phone')} type="tel" inputMode="tel" autoComplete="tel" maxLength={40}
                   placeholder="+230 5xxx xxxx"
                   value={form.phone} onChange={set('phone')} onBlur={blur('phone')} error={errorFor('phone')}
                 />
                 <TextField
-                  id="cvUrl" label="Link to your CV" type="url" inputMode="url" maxLength={500}
+                  id="cvUrl" label={t('Link to your CV')} type="url" inputMode="url" maxLength={500}
                   placeholder="https://drive.google.com/..."
-                  hint="A public link (Drive, Dropbox, LinkedIn). We do not accept file uploads."
+                  hint={t('A public link (Drive, Dropbox, LinkedIn). We do not accept file uploads.')}
                   value={form.cvUrl} onChange={set('cvUrl')} onBlur={blur('cvUrl')} error={errorFor('cvUrl')}
                 />
                 <TextField
-                  id="years" label="Years of experience" inputMode="numeric" maxLength={3}
+                  id="years" label={t('Years of experience')} inputMode="numeric" maxLength={3}
                   placeholder="3"
                   value={form.years} onChange={set('years')} onBlur={blur('years')} error={errorFor('years')}
                 />
                 <TextArea
-                  id="coverLetter" label="Why you" max={COVER_MAX}
-                  placeholder="Tell us what you would bring to the valley."
+                  id="coverLetter" label={t('Why you')} max={COVER_MAX}
+                  placeholder={t('Tell us what you would bring to the valley.')}
                   value={form.coverLetter} onChange={set('coverLetter')} onBlur={blur('coverLetter')} error={errorFor('coverLetter')}
                 />
 
@@ -675,14 +681,14 @@ export default function VacancyDetailPage() {
                     background: color.warnFill, border: `1.5px solid ${color.border}`, borderRadius: radius.md,
                     padding: '13px 16px', fontSize: 14, lineHeight: 1.5, color: color.purple,
                   }}>
-                    Please check the highlighted fields before sending.
+                    {t('Please check the highlighted fields before sending.')}
                   </div>
                 )}
 
                 <SubmitButton busy={busy} disabled={tried && hasErrors} />
 
                 <div style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.55)' }}>
-                  We use your details only to consider you for this role. Prefer email? Write to{' '}
+                  {t('We use your details only to consider you for this role. Prefer email? Write to')}{' '}
                   <a href={'mailto:' + CAREERS_EMAIL} style={{ color: color.violet }}>{CAREERS_EMAIL}</a>.
                 </div>
               </form>

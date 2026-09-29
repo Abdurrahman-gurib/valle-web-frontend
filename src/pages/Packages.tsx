@@ -10,6 +10,7 @@ import { createQuote } from '../lib/api';
 import { PackageModal, type PackModalData } from '../components/PackageModal';
 import { Img } from '../components/Img';
 import type { PackTier, PhotoTier, RateKey, TeamPack } from '../types';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
@@ -39,15 +40,16 @@ function PriceCol({ label, value, valSize }: { label: string; value: string; val
 }
 
 function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
+  const t = useT();
   const [hc, bindC] = useHover();
   const [hi, bindI] = useHover();
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
       <div {...bindI} onClick={onOpen} style={{ position: 'relative', height: 215, background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
-        <Img src={pk.img} alt={pk.name + ' package'} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
+        <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
         <span style={{ position: 'absolute', top: 12, left: 12, background: pk.color, color: pk.fg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)' }}>{pk.badge}</span>
-        <span style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>VIEW DETAILS ↗</span>
+        <span style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>{t('VIEW DETAILS ↗')}</span>
       </div>
       <div style={{ padding: '18px 22px 22px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ ...BARLOW, fontSize: 26, textTransform: 'uppercase' }}>{pk.name}</div>
@@ -60,24 +62,25 @@ function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
         </div>
         <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 8 }}>{pk.note}</div>
         <div style={{ display: 'flex', gap: 14, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 14 }}>
-          <PriceCol label="SINGLE" value={pk.single} valSize={23} />
-          <PriceCol label="DOUBLE" value={pk.dbl} valSize={23} />
+          <PriceCol label={t('SINGLE')} value={pk.single} valSize={23} />
+          <PriceCol label={t('DOUBLE')} value={pk.dbl} valSize={23} />
         </div>
-        <button {...bindB} onClick={onOpen} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>See what is included →</button>
+        <button {...bindB} onClick={onOpen} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('See what is included →')}</button>
       </div>
     </div>
   );
 }
 
 function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
+  const t = useT();
   const [hc, bindC] = useHover();
   const [hi, bindI] = useHover();
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
       <div {...bindI} onClick={onOpen} style={{ position: 'relative', height: 135, background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
-        <Img src={pk.img} alt={pk.name + ' package'} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
-        <span style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px' }}>VIEW DETAILS ↗</span>
+        <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
+        <span style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px' }}>{t('VIEW DETAILS ↗')}</span>
       </div>
       <div style={{ height: 7, background: pk.color }} />
       <div style={{ padding: '18px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -94,11 +97,11 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          {pk.dbl ? <PriceCol label="SINGLE" value={pk.single} valSize={20} /> : <PriceCol label="PER PERSON" value={pk.single} valSize={22} />}
-          {pk.dbl && <PriceCol label="DOUBLE" value={pk.dbl} valSize={20} />}
+          {pk.dbl ? <PriceCol label={t('SINGLE')} value={pk.single} valSize={20} /> : <PriceCol label={t('PER PERSON')} value={pk.single} valSize={22} />}
+          {pk.dbl && <PriceCol label={t('DOUBLE')} value={pk.dbl} valSize={20} />}
         </div>
         {pk.note && <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 8 }}>{pk.note}</div>}
-        <button {...bindB} onClick={onOpen} style={{ marginTop: 11, border: '1.5px solid #340057', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#340057' : 'transparent', color: hb ? '#FFFFFF' : '#340057', fontSize: 13.5, fontWeight: 700, padding: '11px 0', borderRadius: 999, width: '100%' }}>View details →</button>
+        <button {...bindB} onClick={onOpen} style={{ marginTop: 11, border: '1.5px solid #340057', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#340057' : 'transparent', color: hb ? '#FFFFFF' : '#340057', fontSize: 13.5, fontWeight: 700, padding: '11px 0', borderRadius: 999, width: '100%' }}>{t('View details →')}</button>
       </div>
     </div>
   );
@@ -107,6 +110,7 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
 interface ComboView { name: string; color: string; items: { t: string }[]; single: string; dbl: string; }
 
 function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactNode; badge: string; rows: { n: string; p: string }[]; foot: string; accent: string; image: string }) {
+  const t = useT();
   return (
     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 26, alignItems: 'stretch' }}>
       <div style={{ flex: '1 1 340px', background: '#7333FF', borderRadius: 20, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
@@ -116,7 +120,7 @@ function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactN
           <div style={{ marginTop: 14 }}>
             {rows.map((r) => (
               <div key={r.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
-                <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500 }}>{r.n}</span>
+                <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500 }}>{t(r.n)}</span>
                 <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{r.p}</span>
               </div>
             ))}
@@ -134,6 +138,7 @@ function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactN
 }
 
 function ComboCard({ cb, rateTag, onBook }: { cb: ComboView; rateTag: string; onBook: () => void }) {
+  const t = useT();
   const [hc, bindC] = useHover();
   const [hb, bindB] = useHover();
   return (
@@ -149,16 +154,17 @@ function ComboCard({ cb, rateTag, onBook }: { cb: ComboView; rateTag: string; on
           ))}
         </div>
         <div style={{ display: 'flex', gap: 14, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 14 }}>
-          <PriceCol label={'SINGLE · ' + rateTag} value={cb.single} valSize={23} />
-          <PriceCol label={'DOUBLE · ' + rateTag} value={cb.dbl} valSize={23} />
+          <PriceCol label={t('SINGLE · {rate}', { rate: rateTag })} value={cb.single} valSize={23} />
+          <PriceCol label={t('DOUBLE · {rate}', { rate: rateTag })} value={cb.dbl} valSize={23} />
         </div>
-        <button {...bindB} onClick={onBook} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>Book this combo →</button>
+        <button {...bindB} onClick={onBook} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('Book this combo →')}</button>
       </div>
     </div>
   );
 }
 
 function PhotoCard({ ph }: { ph: PhotoTier }) {
+  const t = useT();
   const [hc, bindC] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
@@ -169,13 +175,13 @@ function PhotoCard({ ph }: { ph: PhotoTier }) {
       <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ background: '#FF3358', color: '#FFFFFF', borderRadius: 10, padding: '11px 14px', textAlign: 'center' }}>
           <div style={{ ...BARLOW, fontWeight: 800, fontSize: 15, textTransform: 'uppercase' }}>{ph.act}</div>
-          <div style={{ fontSize: 12.5, opacity: 0.9 }}>All captured photos</div>
+          <div style={{ fontSize: 12.5, opacity: 0.9 }}>{t('All captured photos')}</div>
         </div>
-        <div style={{ background: '#FFE2E7', color: '#340057', borderRadius: 10, padding: '9px 14px', textAlign: 'center', marginTop: 8, ...BARLOW, fontWeight: 800, fontSize: 14, textTransform: 'uppercase' }}>1 print included</div>
+        <div style={{ background: '#FFE2E7', color: '#340057', borderRadius: 10, padding: '9px 14px', textAlign: 'center', marginTop: 8, ...BARLOW, fontWeight: 800, fontSize: 14, textTransform: 'uppercase' }}>{t('1 print included')}</div>
         <div style={{ flex: 1 }} />
         <div style={{ display: 'flex', gap: 12, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          <PriceCol label="SINGLE" value={ph.single} valSize={21} />
-          <PriceCol label="DOUBLE" value={ph.dbl} valSize={21} />
+          <PriceCol label={t('SINGLE')} value={ph.single} valSize={21} />
+          <PriceCol label={t('DOUBLE')} value={ph.dbl} valSize={21} />
         </div>
       </div>
     </div>
@@ -183,15 +189,16 @@ function PhotoCard({ ph }: { ph: PhotoTier }) {
 }
 
 function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
+  const t = useT();
   const [hc, bindC] = useHover();
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
       <div style={{ height: 190, background: '#EBE2FF' }}>
-        <Img src={tp.img} alt="Team building day at Vallé Advenature™ Park" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img src={tp.img} alt={t('Team building day at Vallé Advenature™ Park')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>YOU WILL GET</div>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('YOU WILL GET')}</div>
         <div style={{ marginTop: 8, flex: 1 }}>
           {tp.items.map((pi) => (
             <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '4px 0', fontSize: 14, color: 'rgba(52,0,87,.82)' }}>
@@ -199,33 +206,36 @@ function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
             </div>
           ))}
         </div>
-        <button {...bindB} onClick={onQuote} style={{ marginTop: 12, border: 0, background: hb ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 999, width: '100%' }}>Request a quote</button>
+        <button {...bindB} onClick={onQuote} style={{ marginTop: 12, border: 0, background: hb ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('Request a quote')}</button>
       </div>
     </div>
   );
 }
 
 function VipButton({ onOpen }: { onOpen: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onOpen} style={{ marginLeft: 'auto', alignSelf: 'center', border: 0, cursor: 'pointer', fontFamily: 'inherit', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 28px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.4)' }}>See the full VIP day →</button>
+    <button {...bind} onClick={onOpen} style={{ marginLeft: 'auto', alignSelf: 'center', border: 0, cursor: 'pointer', fontFamily: 'inherit', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 28px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.4)' }}>{t('See the full VIP day →')}</button>
   );
 }
 
 function VipImage({ onOpen }: { onOpen: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   return (
     <div {...bind} onClick={onOpen} style={{ flex: 1, minWidth: 'min(100%,280px)', minHeight: 300, position: 'relative', cursor: 'zoom-in', overflow: 'hidden' }}>
-      <Img src="/images/vip-ultimate-buggy-coloured-earth.avif" alt="VIP Ultimate package" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .6s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }} />
-      <span style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>VIEW DETAILS ↗</span>
+      <Img src="/images/vip-ultimate-buggy-coloured-earth.avif" alt={t('VIP Ultimate package')} surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .6s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }} />
+      <span style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>{t('VIEW DETAILS ↗')}</span>
     </div>
   );
 }
 
 function CineBookLink() {
+  const t = useT();
   const [h, bind] = useHover();
   return (
-    <a {...bind} href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={{ marginTop: 16, textAlign: 'center', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999, display: 'block' }}>Book a shooter for my day →</a>
+    <a {...bind} href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={{ marginTop: 16, textAlign: 'center', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999, display: 'block' }}>{t('Book a shooter for my day →')}</a>
   );
 }
 
@@ -253,16 +263,18 @@ function QInput({ value, onChange, placeholder, type, min, title, style }: {
 }
 
 function QuoteSubmitBtn({ onClick }: { onClick: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} style={{ border: 0, background: h ? '#D91E44' : '#FF3358', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 30px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)', transform: h ? 'translateY(-1px)' : undefined }}>Request a quote →</button>
+    <button {...bind} onClick={onClick} style={{ border: 0, background: h ? '#D91E44' : '#FF3358', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 30px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)', transform: h ? 'translateY(-1px)' : undefined }}>{t('Request a quote →')}</button>
   );
 }
 
 function QuoteAgainBtn({ onClick }: { onClick: () => void }) {
+  const t = useT();
   const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} style={{ marginTop: 18, border: '1.5px solid #340057', background: h ? '#340057' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: h ? '#FFFFFF' : '#340057', padding: '12px 24px', borderRadius: 999 }}>Send another request</button>
+    <button {...bind} onClick={onClick} style={{ marginTop: 18, border: '1.5px solid #340057', background: h ? '#340057' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: h ? '#FFFFFF' : '#340057', padding: '12px 24px', borderRadius: 999 }}>{t('Send another request')}</button>
   );
 }
 
@@ -276,7 +288,8 @@ const rateBtn = (on: boolean): CSSProperties => ({
 });
 
 export default function PackagesPage() {
-  useSeo({ title: 'Packages & 2026 pricelist · VALLÉ Advenature™ Park', description: 'Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.', canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
+  const t = useT();
+  useSeo({ title: t('Packages & 2026 pricelist · VALLÉ Advenature™ Park'), description: t('Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.'), canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
   const catalog = useCatalog();
   const { rate, rateTag, setRate } = useApp();
   const goto = useGoto();
@@ -302,10 +315,10 @@ export default function PackagesPage() {
   };
 
   const vipPack: PackModalData = {
-    name: 'VIP Ultimate', badge: 'ALL INCLUSIVE', color: '#33FF74', fg: '#340057',
+    name: 'VIP Ultimate', badge: t('ALL INCLUSIVE'), color: '#33FF74', fg: '#340057',
     img: '/images/vip-ultimate-buggy-coloured-earth.avif',
-    hero: 'Advenature Flight, private guide, butler service',
-    items: catalog.PACKS.vip, note: 'Add on: full-day cinematic video, Rs 20,000.',
+    hero: t('Advenature Flight, private guide, butler service'),
+    items: catalog.PACKS.vip, note: t('Add on: full-day cinematic video, Rs 20,000.'),
     single: 'Rs 49,225', dbl: 'Rs 75,175',
   };
   const openVip = () => setPk(vipPack);
@@ -316,7 +329,7 @@ export default function PackagesPage() {
   const cinePacks = catalog.CINE.map((c) => ({ n: c.n, p: money(c.p) }));
   const photoTiers = catalog.PHOTO[rk].tiers;
   const photoAddons = catalog.PHOTO[rk].addons;
-  const photoRateLabel = rk === 'rr' ? 'RESIDENT RATE (RR)' : 'NON-RESIDENT RATE (NR)';
+  const photoRateLabel = rk === 'rr' ? t('RESIDENT RATE (RR)') : t('NON-RESIDENT RATE (NR)');
 
   const quoteSubmit = () => {
     if (!qName.trim() || !qEmail.trim()) { setQErr(true); return; }
@@ -334,19 +347,19 @@ export default function PackagesPage() {
       .finally(() => setQSent(true));
   };
   const quoteAgain = () => setQSent(false);
-  const qReplyTo = qEmail.trim() || qPhone.trim() || 'your inbox';
+  const qReplyTo = qEmail.trim() || qPhone.trim() || t('your inbox');
 
   return (
     <>
       <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <h1 style={{ ...BARLOW, fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>Packages</h1>
-          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>ALL PRICES VAT INCLUSIVE</span>
+          <h1 style={{ ...BARLOW, fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Packages')}</h1>
+          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('ALL PRICES VAT INCLUSIVE')}</span>
         </div>
-        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.</p>
+        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{t('Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.')}</p>
 
         {/* LIGHT & STANDARD */}
-        <SectionHead id="ls" title={<>Light &amp; Standard</>} tag="01 · START HERE" marginTop="clamp(40px,6vw,64px)" />
+        <SectionHead id="ls" title={t('Light & Standard')} tag={t('01 · START HERE')} marginTop="clamp(40px,6vw,64px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.PACKS.ls.map((p) => (
             <LSCard key={p.name} pk={p} onOpen={() => setPk(p)} />
@@ -354,14 +367,14 @@ export default function PackagesPage() {
         </div>
 
         {/* EXCLUSIVE */}
-        <SectionHead id="ex" title="Exclusive" tag="02 · BRONZE TO PLATINUM" marginTop="clamp(44px,6vw,72px)" />
+        <SectionHead id="ex" title={t('Exclusive')} tag={t('02 · BRONZE TO PLATINUM')} marginTop="clamp(44px,6vw,72px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {catalog.PACKS.ex.map((p) => (
             <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
-          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>ADD-ONS</span>
+          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('ADD-ONS')}</span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
             {catalog.PACKS.addons.map((ad) => (
               <span key={ad.t} style={addonPill}>{ad.t} <span style={{ fontFamily: MONO, fontWeight: 700, color: '#7333FF' }}>{ad.p}</span></span>
@@ -372,9 +385,9 @@ export default function PackagesPage() {
         {/* VIP */}
         <div id="vip" style={{ marginTop: 'clamp(44px,6vw,72px)', background: '#340057', borderRadius: 22, overflow: 'hidden', display: 'flex', flexWrap: 'wrap' }}>
           <div style={{ flex: 1.5, minWidth: 'min(100%,340px)', padding: 'clamp(26px,4vw,44px)', color: '#FFFFFF' }}>
-            <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>SOUVENIR GIFT OFFERED</span>
+            <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{t('SOUVENIR GIFT OFFERED')}</span>
             <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom', marginTop: 18 }}>
-              <h2 style={{ ...BARLOW, fontSize: 'clamp(30px,4.4vw,52px)', lineHeight: 0.85, margin: 0, textTransform: 'uppercase' }}>VIP Ultimate<br /><span style={{ color: '#FFFC33' }}>All Inclusive</span></h2>
+              <h2 style={{ ...BARLOW, fontSize: 'clamp(30px,4.4vw,52px)', lineHeight: 0.85, margin: 0, textTransform: 'uppercase' }}>{t('VIP Ultimate')}<br /><span style={{ color: '#FFFC33' }}>{t('All Inclusive')}</span></h2>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '4px 24px', marginTop: 20 }}>
               {catalog.PACKS.vip.map((pi) => (
@@ -385,45 +398,45 @@ export default function PackagesPage() {
             </div>
             <div style={{ display: 'flex', gap: 26, marginTop: 20, borderTop: '1px solid rgba(255,255,255,.2)', paddingTop: 18, flexWrap: 'wrap' }}>
               <div>
-                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', opacity: 0.65 }}>SINGLE</div>
+                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', opacity: 0.65 }}>{t('SINGLE')}</div>
                 <div style={{ ...BARLOW, fontSize: 30, marginTop: 2 }}>Rs 49,225</div>
               </div>
               <div>
-                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', opacity: 0.65 }}>DOUBLE</div>
+                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', opacity: 0.65 }}>{t('DOUBLE')}</div>
                 <div style={{ ...BARLOW, fontSize: 30, marginTop: 2 }}>Rs 75,175</div>
               </div>
               <VipButton onOpen={openVip} />
             </div>
-            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6, marginTop: 12 }}>ADD ON: FULL-DAY CINEMATIC VIDEO · RS 20,000</div>
+            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6, marginTop: 12 }}>{t('ADD ON: FULL-DAY CINEMATIC VIDEO · RS 20,000')}</div>
           </div>
           <VipImage onOpen={openVip} />
         </div>
 
         {/* DIAMOND */}
-        <SectionHead id="diamond" title="Diamond" tag="04 · THE ULTIMATE DAY · NR" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="diamond" title={t('Diamond')} tag={t('04 · THE ULTIMATE DAY · NR')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {(catalog.PACKS.diamond || []).map((p) => (
             <LSCard key={p.name} pk={p} onOpen={() => setPk(p)} />
           ))}
           <div style={{ background: '#340057', borderRadius: 18, padding: '22px 24px', color: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>Everything,<br /><span style={{ color: '#FFFC33' }}>and then some</span></div>
-            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>The full VIP day plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit. Butler, transfers and a souvenir gift included.</p>
+            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{t('Everything,')}<br /><span style={{ color: '#FFFC33' }}>{t('and then some')}</span></div>
+            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>{t('The full VIP day plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit. Butler, transfers and a souvenir gift included.')}</p>
             <div style={{ flex: 1, minHeight: 14 }} />
-            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6 }}>NON-RESIDENT RATE · ENQUIRE TO RESERVE</div>
+            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6 }}>{t('NON-RESIDENT RATE · ENQUIRE TO RESERVE')}</div>
           </div>
         </div>
 
         {/* RESIDENT PACKAGES */}
-        <SectionHead id="resident" title="Resident packages" tag="05 · PER PERSON · MAURITIAN ID OR PERMIT" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="resident" title={t('Resident packages')} tag={t('05 · PER PERSON · MAURITIAN ID OR PERMIT')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.resident || []).map((p) => (
             <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
           ))}
         </div>
-        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.</div>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
 
         {/* SENIOR CITIZENS */}
-        <SectionHead id="senior" title="Senior citizens" tag="06 · AGES 55 AND ABOVE" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="senior" title={t('Senior citizens')} tag={t('06 · AGES 55 AND ABOVE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.senior || []).map((p) => (
             <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
@@ -431,29 +444,29 @@ export default function PackagesPage() {
         </div>
 
         {/* STUDENT OFFER */}
-        <SectionHead id="student" title="Student special offer" tag="07 · PRE-PRIMARY, PRIMARY & SECONDARY" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="student" title={t('Student special offer')} tag={t('07 · PRE-PRIMARY, PRIMARY & SECONDARY')} marginTop="clamp(48px,7vw,80px)" />
         <PriceTable
-          title={<>Every great explorer<br /><span style={{ color: '#FFFC33' }}>starts small</span></>}
-          badge="STUDENT PRICELIST · SCHOOL GROUPS"
+          title={<>{t('Every great explorer')}<br /><span style={{ color: '#FFFC33' }}>{t('starts small')}</span></>}
+          badge={t('STUDENT PRICELIST · SCHOOL GROUPS')}
           rows={(catalog.PL.student || []).map((r) => ({ n: r.n, p: money(r.rr) }))}
-          foot="LUNCH: FRIED RICE + SOFT DRINK, OR CRISPY CHICKEN, FRIES, CHEESE PIZZA + SOFT DRINK · VEG OPTION · VAT INCLUSIVE"
+          foot={t('LUNCH: FRIED RICE + SOFT DRINK, OR CRISPY CHICKEN, FRIES, CHEESE PIZZA + SOFT DRINK · VEG OPTION · VAT INCLUSIVE')}
           accent="#33FF74"
           image="/images/map/zip-selfie-cheer.webp"
         />
 
         {/* KIDS PARK PRICELIST */}
-        <SectionHead id="kids" title="Vallé Kids Park" tag="08 · PAY WITH POINTS · 10 POINTS = RS 100" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="kids" title={t('Vallé Kids Park')} tag={t('08 · PAY WITH POINTS · 10 POINTS = RS 100')} marginTop="clamp(48px,7vw,80px)" />
         <PriceTable
-          title={<>Little feet<br /><span style={{ color: '#FFFC33' }}>lead the way</span></>}
-          badge={`KIDS PARK PRICELIST · ${rateTag}`}
-          rows={(catalog.PL.kids || []).map((r) => ({ n: r.n, p: money(r[rk]) + ' · 20 pts' }))}
-          foot="TOP-UP CARD RS 50 · OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE"
+          title={<>{t('Little feet')}<br /><span style={{ color: '#FFFC33' }}>{t('lead the way')}</span></>}
+          badge={t('KIDS PARK PRICELIST · {rate}', { rate: rateTag })}
+          rows={(catalog.PL.kids || []).map((r) => ({ n: r.n, p: t('{price} · 20 pts', { price: money(r[rk]) }) }))}
+          foot={t('TOP-UP CARD RS 50 · OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE')}
           accent="#FFFC33"
           image="/images/miniquad.avif"
         />
 
         {/* COMBO PACKAGES */}
-        <SectionHead id="combo" title="Combo packages" tag="09 · QUAD + ZIPLINE, ONE PRICE" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="combo" title={t('Combo packages')} tag={t('09 · QUAD + ZIPLINE, ONE PRICE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {comboPacks.map((cb) => (
             <ComboCard key={cb.name} cb={cb} rateTag={rateTag} onBook={goto.booking} />
@@ -461,15 +474,15 @@ export default function PackagesPage() {
         </div>
 
         {/* CINEMATIC EXPERIENCE */}
-        <SectionHead id="cine" title="Cinematic experience" tag="10 · SAME PRICE FOR EVERYONE" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="cine" title={t('Cinematic experience')} tag={t('10 · SAME PRICE FOR EVERYONE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 26, alignItems: 'stretch' }}>
           <div style={{ flex: '1 1 320px', background: '#FFFC33', borderRadius: 20, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF' }}>
             <div style={{ padding: '18px 22px 20px' }}>
-              <span style={{ background: '#340057', color: '#FFFC33', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 8, padding: '7px 11px', display: 'inline-block', transform: 'rotate(-3deg)' }}>CINEMATIC EXPERIENCE</span>
+              <span style={{ background: '#340057', color: '#FFFC33', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 8, padding: '7px 11px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{t('CINEMATIC EXPERIENCE')}</span>
               <div style={{ marginTop: 16 }}>
                 {cinePacks.map((cn) => (
                   <div key={cn.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14, padding: '9px 0', borderBottom: '1px dashed rgba(52,0,87,.25)' }}>
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: '#340057' }}>{cn.n}</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: '#340057' }}>{t(cn.n)}</span>
                     <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13.5, color: '#D91E44', whiteSpace: 'nowrap' }}>{cn.p}</span>
                   </div>
                 ))}
@@ -477,12 +490,12 @@ export default function PackagesPage() {
             </div>
           </div>
           <div style={{ flex: '1 1 300px', background: '#340057', borderRadius: 20, padding: '22px 24px', color: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>Leave with<br /><span style={{ color: '#33FF74' }}>the film</span></div>
-            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>A dedicated shooter follows your day: the koi pond, the swing over the valley, the ziplines. You get an edited cinematic reel and the stills, ready to post before you leave the park.</p>
+            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{t('Leave with')}<br /><span style={{ color: '#33FF74' }}>{t('the film')}</span></div>
+            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>{t('A dedicated shooter follows your day: the koi pond, the swing over the valley, the ziplines. You get an edited cinematic reel and the stills, ready to post before you leave the park.')}</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>EDITED REEL</span>
-              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>ALL STILLS</span>
-              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>DRESS AVAILABLE</span>
+              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>{t('EDITED REEL')}</span>
+              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>{t('ALL STILLS')}</span>
+              <span style={{ border: '1.5px solid rgba(255,255,255,.3)', borderRadius: 999, padding: '7px 13px', fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>{t('DRESS AVAILABLE')}</span>
             </div>
             <div style={{ flex: 1, minHeight: 14 }} />
             <CineBookLink />
@@ -490,11 +503,11 @@ export default function PackagesPage() {
         </div>
 
         {/* PHOTO PRICELIST */}
-        <SectionHead id="photo" title="Photo pricelist" tag="11 · 1 JULY 2026 TO 30 JUNE 2027" marginTop="clamp(48px,7vw,80px)" />
+        <SectionHead id="photo" title={t('Photo pricelist')} tag={t('11 · 1 JULY 2026 TO 30 JUNE 2027')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ display: 'flex', gap: 4, background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 999, padding: 4 }}>
-            <button onClick={() => setRate('rr')} style={rateBtn(rk === 'rr')}>Resident</button>
-            <button onClick={() => setRate('nr')} style={rateBtn(rk === 'nr')}>Non-resident</button>
+            <button onClick={() => setRate('rr')} style={rateBtn(rk === 'rr')}>{t('Resident')}</button>
+            <button onClick={() => setRate('nr')} style={rateBtn(rk === 'nr')}>{t('Non-resident')}</button>
           </div>
           <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: '#7333FF' }}>{photoRateLabel}</span>
         </div>
@@ -504,29 +517,29 @@ export default function PackagesPage() {
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
-          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>PHOTO ADD-ONS</span>
+          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('PHOTO ADD-ONS')}</span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
             {photoAddons.map((ad) => (
               <span key={ad.t} style={addonPill}>{ad.t} <span style={{ fontFamily: MONO, fontWeight: 700, color: '#7333FF' }}>{ad.p}</span></span>
             ))}
           </div>
-          <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>ALL PRICES VAT INCLUSIVE · PHOTOS ARE NON REFUNDABLE · T&amp;C APPLY</div>
+          <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('ALL PRICES VAT INCLUSIVE · PHOTOS ARE NON REFUNDABLE · T&C APPLY')}</div>
         </div>
 
         {/* TEAM BUILDING */}
-        <SectionHead id="team" title="Team building" tag="12 · FROM RS 2,850 PER PERSON" marginTop="clamp(48px,7vw,80px)" />
-        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.</p>
+        <SectionHead id="team" title={t('Team building')} tag={t('12 · FROM RS 2,850 PER PERSON')} marginTop="clamp(48px,7vw,80px)" />
+        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.TEAM.map((tp, i) => (
             <TeamCard key={i} tp={tp} onQuote={quoteGo} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-          <span style={teamPill}>HRDC REFUNDABLE*</span>
-          <span style={teamPill}>10 TO 300+ PEOPLE</span>
-          <span style={teamPill}>CERTIFIED FACILITATORS</span>
-          <span style={teamPill}>INDOOR BACKUP IF IT RAINS</span>
-          <span style={teamPill}>TAILORED MENUS &amp; LOGISTICS</span>
+          <span style={teamPill}>{t('HRDC REFUNDABLE*')}</span>
+          <span style={teamPill}>{t('10 TO 300+ PEOPLE')}</span>
+          <span style={teamPill}>{t('CERTIFIED FACILITATORS')}</span>
+          <span style={teamPill}>{t('INDOOR BACKUP IF IT RAINS')}</span>
+          <span style={teamPill}>{t('TAILORED MENUS & LOGISTICS')}</span>
         </div>
 
         {/* QUOTE FORM */}
@@ -534,41 +547,41 @@ export default function PackagesPage() {
           <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
           {!qSent && (
             <div style={{ padding: '26px clamp(20px,3vw,34px) 30px' }}>
-              <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom' }}>Ready to strengthen your team?</div>
-              <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 8 }}>Tell us about your group and we will send a tailored quote.</div>
+              <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom' }}>{t('Ready to strengthen your team?')}</div>
+              <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 8 }}>{t('Tell us about your group and we will send a tailored quote.')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginTop: 18 }}>
-                <QInput value={qName} onChange={(v) => { setQName(v); setQErr(false); }} placeholder="Name *" />
-                <QInput value={qCompany} onChange={setQCompany} placeholder="Company" />
-                <QInput value={qEmail} onChange={(v) => { setQEmail(v); setQErr(false); }} placeholder="Email *" />
-                <QInput value={qPhone} onChange={setQPhone} placeholder="Phone" />
-                <QInput value={qSize} onChange={setQSize} placeholder="Group size (e.g. 40)" />
-                <QInput type="date" min={todayIso()} value={qDate} onChange={setQDate} title="Preferred date" style={{ padding: '12px 16px' }} />
+                <QInput value={qName} onChange={(v) => { setQName(v); setQErr(false); }} placeholder={t('Name *')} />
+                <QInput value={qCompany} onChange={setQCompany} placeholder={t('Company')} />
+                <QInput value={qEmail} onChange={(v) => { setQEmail(v); setQErr(false); }} placeholder={t('Email *')} />
+                <QInput value={qPhone} onChange={setQPhone} placeholder={t('Phone')} />
+                <QInput value={qSize} onChange={setQSize} placeholder={t('Group size (e.g. 40)')} />
+                <QInput type="date" min={todayIso()} value={qDate} onChange={setQDate} title={t('Preferred date')} style={{ padding: '12px 16px' }} />
               </div>
-              <QInput value={qMsg} onChange={setQMsg} placeholder="Anything else? Objectives, timing, dietary needs…" style={{ width: '100%', marginTop: 10 }} />
+              <QInput value={qMsg} onChange={setQMsg} placeholder={t('Anything else? Objectives, timing, dietary needs…')} style={{ width: '100%', marginTop: 10 }} />
               {qErr && (
-                <div style={{ marginTop: 10, background: '#FFE2E7', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, fontWeight: 600, color: '#D91E44' }}>Please add your name and an email so we can reply.</div>
+                <div style={{ marginTop: 10, background: '#FFE2E7', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, fontWeight: 600, color: '#D91E44' }}>{t('Please add your name and an email so we can reply.')}</div>
               )}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' }}>
                 <QuoteSubmitBtn onClick={quoteSubmit} />
-                <span style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)' }}>*HRDC REFUND CONDITIONS APPLY · REPLY WITHIN 1 WORKING DAY</span>
+                <span style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)' }}>{t('*HRDC REFUND CONDITIONS APPLY · REPLY WITHIN 1 WORKING DAY')}</span>
               </div>
             </div>
           )}
           {qSent && (
             <div style={{ padding: '34px clamp(20px,3vw,34px) 38px', textAlign: 'center' }}>
               <div style={{ width: 62, height: 62, borderRadius: 999, background: '#33FF74', color: '#340057', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 800, margin: '0 auto' }}>✓</div>
-              <div style={{ ...BARLOW, fontSize: 28, textTransform: 'uppercase', marginTop: 14 }}>Request sent</div>
-              <div style={{ fontSize: 15, color: 'rgba(52,0,87,.72)', marginTop: 8, lineHeight: 1.6 }}>Thanks {qName}, the events team will reply to {qReplyTo} within one working day with a tailored quote.</div>
+              <div style={{ ...BARLOW, fontSize: 28, textTransform: 'uppercase', marginTop: 14 }}>{t('Request sent')}</div>
+              <div style={{ fontSize: 15, color: 'rgba(52,0,87,.72)', marginTop: 8, lineHeight: 1.6 }}>{t('Thanks {name}, the events team will reply to {to} within one working day with a tailored quote.', { name: qName, to: qReplyTo })}</div>
               <QuoteAgainBtn onClick={quoteAgain} />
             </div>
           )}
         </div>
 
         <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>TALK TO A PARK HOST:</span>
-          <a href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={contactPill}>Chat · +230 5292 8841</a>
-          <a href="mailto:sales@vallepark.com" style={contactPill}>Email · sales@vallepark.com</a>
-          <a href="tel:+2306604477" style={contactPill}>Call · +230 660 4477</a>
+          <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('TALK TO A PARK HOST:')}</span>
+          <a href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={contactPill}>{t('Chat')} · +230 5292 8841</a>
+          <a href="mailto:sales@vallepark.com" style={contactPill}>{t('Email')} · sales@vallepark.com</a>
+          <a href="tel:+2306604477" style={contactPill}>{t('Call')} · +230 660 4477</a>
         </div>
       </main>
 

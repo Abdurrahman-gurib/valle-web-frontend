@@ -6,12 +6,14 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { StripesSm } from './Stripes';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
 
 function RowBtn({ on, onClick }: { on: boolean; onClick: () => void }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <button
       {...bind}
@@ -21,7 +23,7 @@ function RowBtn({ on, onClick }: { on: boolean; onClick: () => void }) {
         background: on ? '#33FF74' : (h ? '#340057' : 'transparent'), color: on ? '#340057' : (h ? '#FFFFFF' : '#340057'),
         padding: '9px 14px', borderRadius: 999, transition: 'all .15s', flexShrink: 0,
       }}
-    >{on ? '✓ Added' : '+ Add'}</button>
+    >{on ? t('✓ Added') : t('+ Add')}</button>
   );
 }
 
@@ -35,6 +37,7 @@ export function OptionPicker() {
   const app = useApp();
   const catalog = useCatalog();
   const goto = useGoto();
+  const t = useT();
   const id = app.optionsFor;
   const act = id ? catalog.ACTS.find((a) => a.id === id) : undefined;
   const rows = id ? catalog.PL[id] || [] : [];
@@ -54,21 +57,21 @@ export function OptionPicker() {
   if (!id || !act) return null;
   const chosen = rows.filter((r) => app.isSelected(act.id, r.n)).length;
   const isFlat = act.mode === 'flat';
-  const unit = isFlat ? (act.flatLabel || '').replace('/', '').trim() : 'person';
+  const unit = isFlat ? t(act.flatLabel || '').replace('/', '').trim() : t('person');
 
   return (
     <div onClick={app.closeOptions} style={{ position: 'fixed', inset: 0, zIndex: 97, background: 'rgba(31,0,51,.62)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(10px,3vw,32px)', animation: 'vfade .18s ease both' }}>
-      <div onClick={(e) => e.stopPropagation()} role="dialog" aria-label={`Choose your ${act.name} option`} style={{ width: 'min(560px,100%)', maxHeight: '92vh', display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 22, overflow: 'hidden', boxShadow: '0 40px 90px -30px rgba(31,0,51,.8)', animation: 'vfadeup .25s ease both' }}>
+      <div onClick={(e) => e.stopPropagation()} role="dialog" aria-label={t('Choose your {name} option', { name: act.name })} style={{ width: 'min(560px,100%)', maxHeight: '92vh', display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 22, overflow: 'hidden', boxShadow: '0 40px 90px -30px rgba(31,0,51,.8)', animation: 'vfadeup .25s ease both' }}>
         <StripesSm height={8} />
         <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '16px 20px 12px' }}>
           <div style={{ width: 62, height: 62, borderRadius: 14, overflow: 'hidden', background: '#EBE2FF', flexShrink: 0 }}>
             <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>CHOOSE YOUR OPTION · {app.rateTag} RATE</div>
+            <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{t('CHOOSE YOUR OPTION · {rate} RATE', { rate: app.rateTag })}</div>
             <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 24, textTransform: 'uppercase', lineHeight: 0.95, color: '#340057', marginTop: 4 }}>{act.name}</div>
           </div>
-          <button onClick={app.closeOptions} aria-label="Close" style={{ border: '1.5px solid #EBE2FF', background: '#FFFFFF', color: 'rgba(52,0,87,.6)', width: 32, height: 32, borderRadius: 999, cursor: 'pointer', fontSize: 15, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+          <button onClick={app.closeOptions} aria-label={t('Close')} style={{ border: '1.5px solid #EBE2FF', background: '#FFFFFF', color: 'rgba(52,0,87,.6)', width: 32, height: 32, borderRadius: 999, cursor: 'pointer', fontSize: 15, lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
         </div>
         <div style={{ overflowY: 'auto', padding: '0 20px' }}>
           {rows.map((r) => {
@@ -77,9 +80,9 @@ export function OptionPicker() {
             return (
               <div key={r.n} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderTop: '1px dashed #EBE2FF' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14.5, color: '#340057' }}>{r.n}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14.5, color: '#340057' }}>{t(r.n)}</div>
                   <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.6)', marginTop: 3 }}>
-                    {price ? money(price) + ' / ' + unit : 'FREE'}{!isFlat && price ? ' · ' + money(Math.round(price * 0.5)) + ' / child' : ''}
+                    {price ? money(price) + ' / ' + unit : t('FREE')}{!isFlat && price ? ' · ' + money(Math.round(price * 0.5)) + ' / ' + t('child') : ''}
                   </div>
                 </div>
                 <RowBtn on={on} onClick={() => app.toggleSel(act.id, r.n)} />
@@ -89,10 +92,10 @@ export function OptionPicker() {
         </div>
         <div style={{ padding: '14px 20px 18px', borderTop: '1.5px solid #EBE2FF', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)', flex: 1 }}>
-            {chosen === 0 ? 'NOTHING ADDED YET' : chosen + ' OPTION' + (chosen > 1 ? 'S' : '') + ' IN MY DAY'}
+            {chosen === 0 ? t('NOTHING ADDED YET') : chosen > 1 ? t('{n} OPTIONS IN MY DAY', { n: chosen }) : t('{n} OPTION IN MY DAY', { n: chosen })}
           </span>
-          <button {...bindDone} onClick={app.closeOptions} style={{ border: '1.5px solid #340057', background: hDone ? '#340057' : 'transparent', color: hDone ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999 }}>Done</button>
-          <button {...bindBook} onClick={() => { app.closeOptions(); goto.booking(); }} style={{ border: 0, background: hBook ? '#D91E44' : '#FF3358', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)' }}>Book now →</button>
+          <button {...bindDone} onClick={app.closeOptions} style={{ border: '1.5px solid #340057', background: hDone ? '#340057' : 'transparent', color: hDone ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999 }}>{t('Done')}</button>
+          <button {...bindBook} onClick={() => { app.closeOptions(); goto.booking(); }} style={{ border: 0, background: hBook ? '#D91E44' : '#FF3358', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)' }}>{t('Book now')} →</button>
         </div>
       </div>
     </div>

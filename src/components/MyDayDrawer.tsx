@@ -5,6 +5,7 @@ import { money } from '../lib/format';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
+import { useT } from '../i18n';
 import type { SelLine } from '../types';
 
 const qtyBtn: React.CSSProperties = {
@@ -33,6 +34,7 @@ function Qty({ tag, val, dec, inc }: { tag: string; val: number; dec: () => void
 function CartRow({ line }: { line: SelLine }) {
   const app = useApp();
   const goto = useGoto();
+  const t = useT();
   const [hRem, bindRem] = useHover();
   const a = line.act;
   const c = line.qty;
@@ -42,9 +44,9 @@ function CartRow({ line }: { line: SelLine }) {
     ? price * (c.u || 0)
     : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
   const unitName =
-    ({ buggy: 'BUGGIES', group: 'GROUPS' } as Record<string, string>)[
+    ({ buggy: t('BUGGIES'), group: t('GROUPS') } as Record<string, string>)[
       a.flatLabel ? a.flatLabel.replace('/', '').trim().toLowerCase() : ''
-    ] || 'UNITS';
+    ] || t('UNITS');
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0', borderBottom: '1px dashed #EBE2FF' }}>
@@ -56,12 +58,12 @@ function CartRow({ line }: { line: SelLine }) {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-        {line.variant && <div style={{ fontSize: 10.5, color: '#7333FF', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{line.variant}</div>}
+        {line.variant && <div style={{ fontSize: 10.5, color: '#7333FF', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t(line.variant)}</div>}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, flexWrap: 'wrap' }}>
           {!isFlat && (
             <>
-              <Qty tag="AD" val={c.a || 0} dec={() => app.bumpSel(line.key, 'a', -1)} inc={() => app.bumpSel(line.key, 'a', 1)} />
-              <Qty tag="CH" val={c.k || 0} dec={() => app.bumpSel(line.key, 'k', -1)} inc={() => app.bumpSel(line.key, 'k', 1)} />
+              <Qty tag={t('AD')} val={c.a || 0} dec={() => app.bumpSel(line.key, 'a', -1)} inc={() => app.bumpSel(line.key, 'a', 1)} />
+              <Qty tag={t('CH')} val={c.k || 0} dec={() => app.bumpSel(line.key, 'k', -1)} inc={() => app.bumpSel(line.key, 'k', 1)} />
             </>
           )}
           {isFlat && (
@@ -74,7 +76,7 @@ function CartRow({ line }: { line: SelLine }) {
         <button
           {...bindRem}
           onClick={() => app.toggleSel(a.id, line.variant)}
-          title="Remove"
+          title={t('Remove')}
           style={{
             border: `1px solid ${hRem ? '#FF3358' : '#EBE2FF'}`, background: 'transparent',
             color: hRem ? '#FF3358' : 'rgba(52,0,87,.5)', width: 22, height: 22, borderRadius: 999,
@@ -92,6 +94,7 @@ export function MyDayDrawer() {
   const app = useApp();
   const catalog = useCatalog();
   const goto = useGoto();
+  const t = useT();
   const [hClose, bindClose] = useHover();
   const [hCheckout, bindCheckout] = useHover();
   const [hBrowse, bindBrowse] = useHover();
@@ -101,8 +104,10 @@ export function MyDayDrawer() {
   const cartActs = app.booking.selLines;
   const cartCountLabel =
     cartActs.length === 0
-      ? 'PARK ENTRY'
-      : cartActs.length + ' EXPERIENCE' + (cartActs.length > 1 ? 'S' : '') + ' + ENTRY';
+      ? t('PARK ENTRY')
+      : cartActs.length > 1
+        ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length })
+        : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length });
   const ep = entryPrices(catalog, app.rate);
   const entryAmt = money(ep.adult * app.adults + ep.child * app.kids);
 
@@ -117,12 +122,12 @@ export function MyDayDrawer() {
         background: '#FFFFFF', boxShadow: '-24px 0 60px rgba(31,0,51,.4)', display: 'flex', flexDirection: 'column',
       }}>
         <div style={{ padding: '16px 20px', background: '#340057', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', flex: 1, transform: 'rotate(-2deg)' }}>My Day</div>
+          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', flex: 1, transform: 'rotate(-2deg)' }}>{t('My Day')}</div>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>{cartCountLabel}</span>
           <button
             {...bindClose}
             onClick={app.closeDay}
-            aria-label="Close"
+            aria-label={t('Close')}
             style={{
               border: '1.5px solid rgba(255,255,255,.4)', background: hClose ? 'rgba(255,255,255,.15)' : 'transparent',
               color: '#FFFFFF', width: 32, height: 32, borderRadius: 999, cursor: 'pointer', fontSize: 15, lineHeight: 1, padding: 0,
@@ -134,18 +139,18 @@ export function MyDayDrawer() {
         <div style={{ flex: 1, overflowY: 'auto', padding: '6px 18px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', borderBottom: '1px dashed #EBE2FF', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 110 }}>
-              <div style={{ fontWeight: 700, fontSize: 13.5 }}>Park entry</div>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, color: 'rgba(52,0,87,.6)', marginTop: 2 }}>TRAILS INCLUDED</div>
+              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{t('Park entry')}</div>
+              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, color: 'rgba(52,0,87,.6)', marginTop: 2 }}>{t('TRAILS INCLUDED')}</div>
             </div>
-            <Qty tag="AD" val={app.adults} dec={() => app.setAdults(app.adults - 1)} inc={() => app.setAdults(app.adults + 1)} />
-            <Qty tag="CH" val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />
+            <Qty tag={t('AD')} val={app.adults} dec={() => app.setAdults(app.adults - 1)} inc={() => app.setAdults(app.adults + 1)} />
+            <Qty tag={t('CH')} val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 11.5, minWidth: 64, textAlign: 'right' }}>{entryAmt}</span>
           </div>
           {cartActs.map((l) => <CartRow key={l.key} line={l} />)}
           {cartActs.length === 0 && (
             <div style={{ textAlign: 'center', padding: '28px 10px' }}>
-              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 19, textTransform: 'uppercase' }}>Nothing here yet</div>
-              <div style={{ fontSize: 13, color: 'rgba(52,0,87,.6)', marginTop: 6, lineHeight: 1.5 }}>Tap + on any experience card to build your day.</div>
+              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 19, textTransform: 'uppercase' }}>{t('Nothing here yet')}</div>
+              <div style={{ fontSize: 13, color: 'rgba(52,0,87,.6)', marginTop: 6, lineHeight: 1.5 }}>{t('Tap + on any experience card to build your day.')}</div>
               <button
                 {...bindBrowse}
                 onClick={() => { app.closeDay(); goto.explore('all'); }}
@@ -155,14 +160,14 @@ export function MyDayDrawer() {
                   color: hBrowse ? '#FFFFFF' : '#340057', padding: '11px 22px', borderRadius: 999,
                 }}
               >
-                Explore experiences →
+                {t('Explore experiences')} →
               </button>
             </div>
           )}
         </div>
         <div style={{ padding: '14px 18px 16px', borderTop: '1.5px solid #EBE2FF', flexShrink: 0, background: '#FFFFFF' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>Total</span>
+            <span style={{ fontWeight: 700, fontSize: 14 }}>{t('Total')}</span>
             <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 26 }}>{money(app.booking.total)}</span>
           </div>
           <button
@@ -174,10 +179,10 @@ export function MyDayDrawer() {
               padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
             }}
           >
-            Check out →
+            {t('Check out')} →
           </button>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', textAlign: 'center', marginTop: 9 }}>
-            FREE TO BOOK · PAY ONLINE OR AT THE GATE
+            {t('FREE TO BOOK · PAY ONLINE OR AT THE GATE')}
           </div>
         </div>
       </div>

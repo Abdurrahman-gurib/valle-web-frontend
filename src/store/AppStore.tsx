@@ -8,6 +8,7 @@ import { parseSelKey, selKey } from '../lib/sel';
 import { CURRENCY_STORAGE_KEY, FX_FALLBACK, isCurrency, readStoredCurrency, type FxTable } from '../lib/fx';
 import { fetchFx } from '../lib/api';
 import { setDisplayCurrency } from '../lib/format';
+import { tr, useLang } from '../i18n';
 
 interface AppState {
   // rate
@@ -209,17 +210,18 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const clearSel = useCallback(() => setSel({}), []);
 
+  const lang = useLang();
   const booking = useMemo(
     () => computeBooking(catalog, sel, adults, kids, rate),
     // currency and fx: the summary lines carry formatted amounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [catalog, sel, adults, kids, rate, currency, fx],
+    [catalog, sel, adults, kids, rate, currency, fx, lang],
   );
 
   const value = useMemo<AppState>(() => ({
     rate,
     rateTag: rate === 'nr' ? 'NR' : 'RR',
-    rateWord: rate === 'nr' ? 'Visitor' : 'Resident',
+    rateWord: rate === 'nr' ? tr('Visitor') : tr('Resident'),
     rateGateOpen: !rate || rateGate,
     rateGateDismissable: !!rate,
     setRate,
@@ -275,7 +277,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     currency: isCurrency(currency, fx) ? currency : 'MUR',
     fx,
     setCurrency,
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency]);
+  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { ChatAttachmentMeta } from '../types';
+import { useT } from '../i18n';
 
 /**
  * Pieces shared by the visitor widget and the staff console: links in text,
@@ -70,6 +71,7 @@ const FILE_ICON: Record<string, string> = { pdf: '📄', doc: '📝', docx: '�
 
 /** One attachment inside a bubble. `url` is where to fetch it (or a local object URL while sending). */
 export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: string; mine: boolean }) {
+  const t = useT();
   if (a.kind === 'image' || a.kind === 'gif') {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', maxWidth: 260 }} title={a.name}>
@@ -82,7 +84,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
     return (
       <div style={{ display: 'grid', gap: 4 }}>
         <audio controls preload="metadata" src={url} style={{ width: 240, maxWidth: '100%', height: 36, filter: mine ? 'invert(1) hue-rotate(180deg)' : 'none' }} />
-        <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '.1em', opacity: 0.7 }}>VOICE NOTE · {fmtSize(a.size)}</span>
+        <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '.1em', opacity: 0.7 }}>{t('VOICE NOTE')} · {fmtSize(a.size)}</span>
       </div>
     );
   }
@@ -101,7 +103,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
       <span style={{ fontSize: 22 }}>{FILE_ICON[ext] || '📎'}</span>
       <span style={{ minWidth: 0 }}>
         <span style={{ display: 'block', fontWeight: 700, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
-        <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', opacity: 0.75 }}>{ext.toUpperCase() || 'FILE'} · {fmtSize(a.size)} · DOWNLOAD</span>
+        <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', opacity: 0.75 }}>{ext.toUpperCase() || t('FILE')} · {fmtSize(a.size)} · {t('DOWNLOAD')}</span>
       </span>
     </a>
   );
@@ -109,6 +111,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
 
 export function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose: () => void }) {
   const box = useRef<HTMLDivElement>(null);
+  const t = useT();
   useEffect(() => {
     const close = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) onClose(); };
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -120,7 +123,7 @@ export function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; 
     <div
       ref={box}
       role="dialog"
-      aria-label="Emoji"
+      aria-label={t('Emoji')}
       data-testid="emoji-picker"
       style={{
         position: 'absolute', bottom: 'calc(100% + 8px)', left: 8, zIndex: 5, width: 'min(300px, calc(100vw - 40px))',
@@ -129,7 +132,7 @@ export function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; 
       }}
     >
       {EMOJIS.map((e) => (
-        <button key={e} type="button" onClick={() => onPick(e)} aria-label={`Insert ${e}`} style={{ border: 0, background: 'transparent', fontSize: 20, lineHeight: 1.3, cursor: 'pointer', borderRadius: 6, padding: 2 }}>
+        <button key={e} type="button" onClick={() => onPick(e)} aria-label={t('Insert {emoji}', { emoji: e })} style={{ border: 0, background: 'transparent', fontSize: 20, lineHeight: 1.3, cursor: 'pointer', borderRadius: 6, padding: 2 }}>
           {e}
         </button>
       ))}
@@ -150,6 +153,7 @@ const toolBtn = (active?: boolean): CSSProperties => ({
  */
 export function ComposerTools({ onFile, onEmoji, disabled }: { onFile: (f: File) => void; onEmoji: (e: string) => void; disabled?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
+  const t = useT();
   const [emoji, setEmoji] = useState(false);
   const [rec, setRec] = useState<MediaRecorder | null>(null);
   const [secs, setSecs] = useState(0);
@@ -158,8 +162,8 @@ export function ComposerTools({ onFile, onEmoji, disabled }: { onFile: (f: File)
 
   useEffect(() => {
     if (!rec) return;
-    const t = setInterval(() => setSecs((s) => s + 1), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => clearInterval(timer);
   }, [rec]);
 
   const pick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +181,7 @@ export function ComposerTools({ onFile, onEmoji, disabled }: { onFile: (f: File)
       chunks.current = [];
       r.ondataavailable = (ev) => { if (ev.data.size) chunks.current.push(ev.data); };
       r.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((tr) => tr.stop());
         const type = (r.mimeType || 'audio/webm').split(';')[0];
         const blob = new Blob(chunks.current, { type });
         setRec(null);
@@ -195,18 +199,18 @@ export function ComposerTools({ onFile, onEmoji, disabled }: { onFile: (f: File)
   return (
     <div style={{ display: 'flex', gap: 6, alignItems: 'center', position: 'relative', flexShrink: 0 }}>
       <input ref={input} type="file" accept={ACCEPT} onChange={pick} hidden data-testid="chat-file-input" />
-      <button type="button" onClick={() => input.current?.click()} disabled={disabled} aria-label="Attach a photo, GIF or document" title="Attach a photo, GIF or document" style={toolBtn()}>📎</button>
+      <button type="button" onClick={() => input.current?.click()} disabled={disabled} aria-label={t('Attach a photo, GIF or document')} title={t('Attach a photo, GIF or document')} style={toolBtn()}>📎</button>
       <button
         type="button"
         onClick={() => { void toggleRecord(); }}
         disabled={disabled || !canRecord}
-        aria-label={rec ? 'Stop recording and send' : 'Record a voice note'}
-        title={canRecord ? (rec ? 'Stop and send' : 'Record a voice note') : 'Voice notes are not supported in this browser'}
+        aria-label={rec ? t('Stop recording and send') : t('Record a voice note')}
+        title={canRecord ? (rec ? t('Stop and send') : t('Record a voice note')) : t('Voice notes are not supported in this browser')}
         style={{ ...toolBtn(!!rec), width: rec ? 'auto' : 36, padding: rec ? '0 10px' : 0, gap: 6 }}
       >
         {rec ? <><span style={{ width: 8, height: 8, borderRadius: 999, background: '#FF3358', animation: 'vfade 1s ease-in-out infinite alternate' }} /><span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700 }}>{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span></> : '🎤'}
       </button>
-      <button type="button" onClick={() => setEmoji((v) => !v)} disabled={disabled} aria-label="Insert an emoji" title="Emoji" style={toolBtn(emoji)}>😊</button>
+      <button type="button" onClick={() => setEmoji((v) => !v)} disabled={disabled} aria-label={t('Insert an emoji')} title={t('Emoji')} style={toolBtn(emoji)}>😊</button>
       {emoji && <EmojiPicker onPick={(e) => { onEmoji(e); setEmoji(false); }} onClose={() => setEmoji(false)} />}
     </div>
   );

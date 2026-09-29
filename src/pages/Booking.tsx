@@ -12,9 +12,14 @@ import { fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
+import { tr, useT, _t } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
+
+// Nationality values (NATC keys) are stored and sent in English; listed here so the extractor sees them.
+const NATIONALITY_KEYS = [_t('Mauritius'), _t('Réunion / France'), _t('United Kingdom'), _t('Germany'), _t('Italy'), _t('India'), _t('China'), _t('South Africa'), _t('UAE'), _t('Australia'), _t('USA')];
+void NATIONALITY_KEYS;
 
 const stepLabel: CSSProperties = {
   fontFamily: MONO, fontSize: '11.5px', fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)',
@@ -95,6 +100,7 @@ function BookCard({ m }: { m: CardModel }) {
 
 /* 2 · YOUR DAY: one cart line */
 function CartLine({ line }: { line: SelLine }) {
+  const t = useT();
   const app = useApp();
   const goto = useGoto();
   const [hx, bindX] = useHover();
@@ -104,10 +110,10 @@ function CartLine({ line }: { line: SelLine }) {
   const isFlat = a.mode === 'flat';
   const amt = isFlat ? price * (c.u || 0) : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
   const each = isFlat
-    ? money(price) + ' ' + (a.flatLabel || '').toUpperCase()
-    : money(price) + ' /ADULT · ' + money(Math.round(price * 0.5)) + ' /CHILD';
+    ? money(price) + ' ' + tr(a.flatLabel || '').toUpperCase()
+    : t('{adult} /ADULT · {child} /CHILD', { adult: money(price), child: money(Math.round(price * 0.5)) });
   const key = a.flatLabel ? a.flatLabel.replace('/', '').trim().toLowerCase() : '';
-  const unitName = key === 'buggy' ? 'BUGGIES' : key === 'group' ? 'GROUPS' : 'UNITS';
+  const unitName = key === 'buggy' ? t('BUGGIES') : key === 'group' ? t('GROUPS') : t('UNITS');
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 18px', flexWrap: 'wrap', borderTop: '1px dashed #EBE2FF' }}>
       <div
@@ -118,13 +124,13 @@ function CartLine({ line }: { line: SelLine }) {
       </div>
       <div style={{ flex: 1, minWidth: '130px' }}>
         <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{a.name}</div>
-        {line.variant && <div style={{ fontSize: '11.5px', color: '#7333FF', fontWeight: 600, marginTop: '2px' }}>{line.variant}</div>}
+        {line.variant && <div style={{ fontSize: '11.5px', color: '#7333FF', fontWeight: 600, marginTop: '2px' }}>{t(line.variant)}</div>}
         <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{each}</div>
       </div>
       {!isFlat && (
         <>
-          <Stepper tag="ADULTS" val={c.a || 0} inc={() => app.bumpSel(line.key, 'a', 1)} dec={() => app.bumpSel(line.key, 'a', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
-          <Stepper tag="CHILD 6–11" val={c.k || 0} inc={() => app.bumpSel(line.key, 'k', 1)} dec={() => app.bumpSel(line.key, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+          <Stepper tag={t('ADULTS')} val={c.a || 0} inc={() => app.bumpSel(line.key, 'a', 1)} dec={() => app.bumpSel(line.key, 'a', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
+          <Stepper tag={t('CHILD 6–11')} val={c.k || 0} inc={() => app.bumpSel(line.key, 'k', 1)} dec={() => app.bumpSel(line.key, 'k', -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
         </>
       )}
       {isFlat && (
@@ -133,7 +139,7 @@ function CartLine({ line }: { line: SelLine }) {
       <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{money(amt)}</div>
       <button
         onClick={() => app.toggleSel(a.id, line.variant)}
-        title="Remove"
+        title={t('Remove')}
         {...bindX}
         style={{
           border: '1.5px solid ' + (hx ? '#FF3358' : '#EBE2FF'), background: 'transparent',
@@ -147,10 +153,11 @@ function CartLine({ line }: { line: SelLine }) {
 
 /* 3 · WHEN: how busy a slot already is (from /api/bookings/availability) */
 const LEVEL_COLOR: Record<BusyLevel, string> = { quiet: '#33FF74', busy: '#FFFC33', 'very-busy': '#FF9F33', full: '#FF3358' };
-const LEVEL_LABEL: Record<BusyLevel, string> = { quiet: 'QUIET', busy: 'BUSY', 'very-busy': 'VERY BUSY', full: 'FULLY BOOKED' };
-const LEVEL_WORD: Record<BusyLevel, string> = { quiet: 'quiet', busy: 'busy', 'very-busy': 'very busy', full: 'fully booked' };
+const LEVEL_LABEL: Record<BusyLevel, string> = { quiet: _t('QUIET'), busy: _t('BUSY'), 'very-busy': _t('VERY BUSY'), full: _t('FULLY BOOKED') };
+const LEVEL_WORD: Record<BusyLevel, string> = { quiet: _t('quiet'), busy: _t('busy'), 'very-busy': _t('very busy'), full: _t('fully booked') };
 
 function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
+  const t = useT();
   if (!load) return <div style={{ height: '6px', marginTop: '5px' }} />;
   const dot = (l: BusyLevel): CSSProperties => ({
     width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block',
@@ -159,7 +166,7 @@ function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
   return (
     <div
       data-testid="load-dots"
-      title={`Morning: ${LEVEL_WORD[load.morning.level]} · Afternoon: ${LEVEL_WORD[load.afternoon.level]}`}
+      title={t('Morning: {morning} · Afternoon: {afternoon}', { morning: t(LEVEL_WORD[load.morning.level]), afternoon: t(LEVEL_WORD[load.afternoon.level]) })}
       style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginTop: '5px', height: '6px', alignItems: 'center' }}
     >
       <span style={dot(load.morning.level)} />
@@ -194,6 +201,7 @@ function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: 
 
 /* 3 · WHEN: slot chip */
 function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel }) {
+  const t = useT();
   const [h, bind] = useHover();
   return (
     <button
@@ -213,7 +221,7 @@ function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: stri
       {level && (
         <div data-testid="slot-level" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.08em', marginTop: '7px', color: on ? '#FFFFFF' : '#340057' }}>
           <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[level], display: 'inline-block' }} />
-          {LEVEL_LABEL[level]}
+          {t(LEVEL_LABEL[level])}
         </div>
       )}
     </button>
@@ -281,7 +289,8 @@ function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) 
 }
 
 export default function BookingPage() {
-  useSeo({ title: 'Book your day · VALLÉ Advenature™ Park', description: 'Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.', canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
+  const t = useT();
+  useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
   const app = useApp();
@@ -339,27 +348,27 @@ export default function BookingPage() {
   const bookCards = catalog.ACTS.filter((a) => a.mode === 'pp' || a.mode === 'flat').map(card);
   const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
-    ? 'PARK ENTRY'
-    : cartActs.length + ' EXPERIENCE' + (cartActs.length > 1 ? 'S' : '') + ' + ENTRY';
+    ? t('PARK ENTRY')
+    : (cartActs.length > 1 ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length }) : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length }));
   const ep = entryPrices(catalog, rate);
-  const entryNote = money(ep.adult) + ' /ADULT (12+) · ' + money(ep.child) + ' /CHILD (6 TO 11) · UNDER 6 FREE';
+  const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD (6 TO 11) · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
   const entryAmt = money(ep.adult * adults + ep.child * kids);
   const passHint = booking.hasDiscount
-    ? '✓ Explorer Pass applied · 15% off your adventures.'
-    : 'Tip: pick any 3 adventures and the Explorer Pass takes 15% off them automatically.';
+    ? t('✓ Explorer Pass applied · 15% off your adventures.')
+    : t('Tip: pick any 3 adventures and the Explorer Pass takes 15% off them automatically.');
   const passHintBg = booking.hasDiscount ? '#E2FFEB' : '#FFFFE2';
   const inForeign = app.currency !== 'MUR';
-  const sumLine = (cartActs.length === 0 ? 'Park entry only' : cartActs.length + ' experience' + (cartActs.length > 1 ? 's' : '') + ' + entry')
+  const sumLine = (cartActs.length === 0 ? t('Park entry only') : (cartActs.length > 1 ? t('{n} experiences + entry', { n: cartActs.length }) : t('{n} experience + entry', { n: cartActs.length })))
     + ' · ' + mur(booking.total) + (inForeign ? ' (' + money(booking.total) + ')' : '');
-  const payModeNote = payMode === 'online' ? 'E-RECEIPT BY EMAIL & SMS, INSTANTLY' : 'FREE · NO CANCELLATION FEE';
-  const confirmLabel = payMode === 'online' ? 'Pay ' + mur(booking.total) + ' now →' : 'Confirm and pay on arrival →';
+  const payModeNote = payMode === 'online' ? t('E-RECEIPT BY EMAIL & SMS, INSTANTLY') : t('FREE · NO CANCELLATION FEE');
+  const confirmLabel = payMode === 'online' ? t('Pay {amount} now →', { amount: mur(booking.total) }) : t('Confirm and pay on arrival →');
 
   let dateSummary = dOpts[dateIdx] ? dOpts[dateIdx].full : '';
   if (customDate) {
     const f = fullDateFromIso(customDate);
     if (f) dateSummary = f;
   }
-  const slotName = slot === 0 ? 'Morning arrival' : 'Afternoon arrival';
+  const slotName = slot === 0 ? t('Morning arrival') : t('Afternoon arrival');
   const partySummary = partyLabel(adults, kids);
 
   const setNatAndPrefill = (v: string) => {
@@ -401,8 +410,8 @@ export default function BookingPage() {
       // is worse than a retry.
       const status = (e as { status?: number }).status;
       setApiErr(status
-        ? ((e as Error).message || 'We could not confirm your booking. Please try again.')
-        : 'We could not reach the booking desk. Check your connection and try again, or WhatsApp us on +230 5292 8841.');
+        ? ((e as Error).message || t('We could not confirm your booking. Please try again.'))
+        : t('We could not reach the booking desk. Check your connection and try again, or WhatsApp us on {phone}.', { phone: '+230 5292 8841' }));
       setSubmitting(false);
       return;
     }
@@ -426,17 +435,17 @@ export default function BookingPage() {
   };
 
   // confirmation bits
-  const guestLine = (name.trim() || 'Guest') + (nat ? ' · ' + nat : '');
-  const payStamp = payMode === 'online' ? 'PAID ✓' : 'PAY ON ARRIVAL';
+  const guestLine = (name.trim() || t('Guest')) + (nat ? ' · ' + t(nat) : '');
+  const payStamp = payMode === 'online' ? t('PAID ✓') : t('PAY ON ARRIVAL');
   const payStampBg = payMode === 'online' ? '#33FF74' : '#FFFC33';
-  const totalRowLabel = payMode === 'online' ? 'Total paid' : 'Total on arrival';
+  const totalRowLabel = payMode === 'online' ? t('Total paid') : t('Total on arrival');
   const receiptHint = payMode === 'online'
-    ? 'All paid. Just show this QR at the gate.'
-    : 'Show this reference at the gate and pay there, cash or card.';
+    ? t('All paid. Just show this QR at the gate.')
+    : t('Show this reference at the gate and pay there, cash or card.');
   const contactBits: string[] = [];
   if (email.trim()) contactBits.push(email.trim());
   if (phone.trim()) contactBits.push('SMS ' + phone.trim());
-  const sentLine = 'CONFIRMATION & E-RECEIPT SENT TO ' + (contactBits.join(' · ') || 'YOUR CONTACT DETAILS').toUpperCase();
+  const sentLine = t('CONFIRMATION & E-RECEIPT SENT TO {contact}', { contact: (contactBits.join(' · ') || t('YOUR CONTACT DETAILS')).toUpperCase() });
 
   return (
     <main ref={ref} style={{ maxWidth: '1180px', margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
@@ -447,16 +456,16 @@ export default function BookingPage() {
               fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(38px,5.8vw,74px)',
               lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase',
               transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
-            }}>Build your day</h1>
-            <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>BOOKING MADE SIMPLE</span>
+            }}>{t('Build your day')}</h1>
+            <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('BOOKING MADE SIMPLE')}</span>
           </div>
-          <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL &amp; SMS</div>
+          <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
 
           <div style={{ display: 'flex', gap: 'clamp(18px,2.5vw,28px)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             <div style={{ flex: 1.7, minWidth: 'min(100%,380px)' }}>
               {/* 1 · PICK EXPERIENCES */}
               <div style={{ marginTop: '30px' }}>
-                <div style={stepLabel}>1 · TAP TO ADD EXPERIENCES</div>
+                <div style={stepLabel}>{t('1 · TAP TO ADD EXPERIENCES')}</div>
                 <div style={{ background: passHintBg, borderRadius: '14px', padding: '13px 18px', fontSize: '13.5px', color: '#340057', fontWeight: 600, marginTop: '12px' }}>{passHint}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(146px,1fr))', gap: '10px', marginTop: '14px' }}>
                   {bookCards.map((m) => <BookCard key={m.id} m={m} />)}
@@ -465,21 +474,21 @@ export default function BookingPage() {
 
               {/* 2 · YOUR DAY (cart) */}
               <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>2 · YOUR DAY · {cartCountLabel}</div>
+                <div style={stepLabel}>{t('2 · YOUR DAY')} · {cartCountLabel}</div>
                 <div style={{ background: '#FFFFFF', borderRadius: '18px', boxShadow: '0 0 0 1.5px #EBE2FF', marginTop: '12px', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', flexWrap: 'wrap', background: '#F7F3FF' }}>
                     <div style={{ flex: 1, minWidth: '150px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '14.5px' }}>Park entry</div>
-                      <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote} · ALL NATURE TRAILS INCLUDED</div>
+                      <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{t('Park entry')}</div>
+                      <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote} · {t('ALL NATURE TRAILS INCLUDED')}</div>
                     </div>
-                    <Stepper tag="ADULTS" val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
-                    <Stepper tag="CHILD 6–11" val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+                    <Stepper tag={t('ADULTS')} val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+                    <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
                     <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{entryAmt}</div>
                   </div>
                   {cartActs.map((l) => <CartLine key={l.key} line={l} />)}
                   {cartActs.length === 0 && (
                     <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.55)' }}>
-                      No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.
+                      {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
                     </div>
                   )}
                 </div>
@@ -487,7 +496,7 @@ export default function BookingPage() {
 
               {/* 3 · WHEN */}
               <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>3 · WHEN ARE YOU COMING?</div>
+                <div style={stepLabel}>{t('3 · WHEN ARE YOU COMING?')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(86px,1fr))', gap: '8px', marginTop: '12px' }}>
                   {dOpts.map((o) => (
                     <DateChip
@@ -500,7 +509,7 @@ export default function BookingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>ANOTHER MONTH? PICK ANY DATE →</span>
+                  <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
                   <input
                     type="date"
                     value={customDate}
@@ -516,15 +525,15 @@ export default function BookingPage() {
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                  <SlotChip label="Morning" sub="ARRIVE 09:00–12:00" on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} />
-                  <SlotChip label="Afternoon" sub="ARRIVE 12:00–15:30" on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} />
+                  <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} />
+                  <SlotChip label={t('Afternoon')} sub={t('ARRIVE 12:00–15:30')} on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} />
                 </div>
                 {Object.keys(avail).length > 0 && (
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
-                    <span>DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:</span>
+                    <span>{t('DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:')}</span>
                     {(['quiet', 'busy', 'very-busy', 'full'] as BusyLevel[]).map((l) => (
                       <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{LEVEL_LABEL[l]}
+                        <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{t(LEVEL_LABEL[l])}
                       </span>
                     ))}
                   </div>
@@ -535,9 +544,9 @@ export default function BookingPage() {
             <div style={{ flex: 1, minWidth: 'min(100%,300px)', position: 'sticky', top: '84px' }}>
               {/* 4 · DETAILS */}
               <div style={{ marginTop: '30px' }}>
-                <div style={stepLabel}>4 · YOUR DETAILS · FOR YOUR CONFIRMATION &amp; E-RECEIPT</div>
+                <div style={stepLabel}>{t('4 · YOUR DETAILS · FOR YOUR CONFIRMATION & E-RECEIPT')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px', marginTop: '12px' }}>
-                  <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder="Full name" />
+                  <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder={t('Full name')} />
                   <div style={{ position: 'relative' }}>
                     <select
                       value={nat}
@@ -551,43 +560,43 @@ export default function BookingPage() {
                         fontSize: '15px', color: '#340057', cursor: 'pointer', outline: 'none',
                       }}
                     >
-                      <option value="">Nationality</option>
-                      <option value="Mauritius">Mauritius</option>
-                      <option value="Réunion / France">Réunion / France</option>
-                      <option value="United Kingdom">United Kingdom</option>
-                      <option value="Germany">Germany</option>
-                      <option value="Italy">Italy</option>
-                      <option value="India">India</option>
-                      <option value="China">China</option>
-                      <option value="South Africa">South Africa</option>
-                      <option value="UAE">UAE</option>
-                      <option value="Australia">Australia</option>
-                      <option value="USA">USA</option>
-                      <option value="Other">Other</option>
+                      <option value="">{t('Nationality')}</option>
+                      <option value="Mauritius">{t('Mauritius')}</option>
+                      <option value="Réunion / France">{t('Réunion / France')}</option>
+                      <option value="United Kingdom">{t('United Kingdom')}</option>
+                      <option value="Germany">{t('Germany')}</option>
+                      <option value="Italy">{t('Italy')}</option>
+                      <option value="India">{t('India')}</option>
+                      <option value="China">{t('China')}</option>
+                      <option value="South Africa">{t('South Africa')}</option>
+                      <option value="UAE">{t('UAE')}</option>
+                      <option value="Australia">{t('Australia')}</option>
+                      <option value="USA">{t('USA')}</option>
+                      <option value="Other">{t('Other')}</option>
                     </select>
                     <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '11px', color: 'rgba(52,0,87,.55)' }}>▾</span>
                   </div>
-                  <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder="Contact number (SMS / WhatsApp)" />
-                  <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder="Email" />
+                  <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder={t('Contact number (SMS / WhatsApp)')} />
+                  <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder={t('Email')} />
                 </div>
               </div>
 
               {/* 5 · PAYMENT */}
               <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>5 · HOW WOULD YOU LIKE TO PAY?</div>
+                <div style={stepLabel}>{t('5 · HOW WOULD YOU LIKE TO PAY?')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <PayCard
                     on={payMode === 'gate'}
                     bgOn="#FFFFE2"
-                    title="Pay on arrival"
-                    note="Free to book · no cancellation fee · cash or card at the gate."
+                    title={t('Pay on arrival')}
+                    note={t('Free to book · no cancellation fee · cash or card at the gate.')}
                     onClick={() => setPayMode('gate')}
                   />
                   <PayCard
                     on={payMode === 'online'}
                     bgOn="#E2FFEB"
-                    title="Pay online now"
-                    note="Visa, Mastercard or Juice · skip the till, straight to the fun."
+                    title={t('Pay online now')}
+                    note={t('Visa, Mastercard or Juice · skip the till, straight to the fun.')}
                     onClick={() => setPayMode('online')}
                   />
                 </div>
@@ -597,7 +606,7 @@ export default function BookingPage() {
 
           {formErr && (
             <div style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
-              Add your name and an email or contact number, that's where your confirmation &amp; receipt go.
+              {t("Add your name and an email or contact number, that's where your confirmation & receipt go.")}
             </div>
           )}
           {apiErr && (
@@ -625,7 +634,7 @@ export default function BookingPage() {
           <div style={{ width: '74px', height: '74px', borderRadius: '999px', background: '#33FF74', color: '#340057', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 800, margin: '10px auto 0' }}>✓</div>
           <div style={{ transform: 'rotate(-4deg)', marginTop: '22px' }}>
             <h1 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(36px,5.2vw,62px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase' }}>
-              See you in<br />the valley.
+              {t('See you in')}<br />{t('the valley.')}
             </h1>
           </div>
           <div style={{ fontSize: '15.5px', color: 'rgba(52,0,87,.72)', marginTop: '14px', lineHeight: 1.6 }}>
@@ -636,7 +645,7 @@ export default function BookingPage() {
             <div style={{ height: '8px', background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)', margin: '0 -24px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginTop: '18px' }}>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>BOOKING REFERENCE</div>
+                <div style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('BOOKING REFERENCE')}</div>
                 <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '28px', letterSpacing: '.04em', marginTop: '6px', color: '#FF3358' }}>{refCode}</div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(52,0,87,.75)', marginTop: '6px' }}>{guestLine}</div>
               </div>
@@ -644,18 +653,18 @@ export default function BookingPage() {
             </div>
             {ticket.qrUrl ? (
               <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', margin: '18px auto 0', width: 170 }}>
-                <img src={ticket.qrUrl} alt={`Ticket QR code ${refCode}`} width={170} height={170} data-testid="receipt-qr" style={{ display: 'block', width: 170, height: 170, borderRadius: 14, border: '1.5px solid #EBE2FF', padding: 6, background: '#FFFFFF' }} />
-                <span style={{ display: 'block', fontFamily: MONO, fontSize: '10px', letterSpacing: '.1em', color: '#7333FF', marginTop: 6 }}>SHOW THIS AT THE GATE</span>
+                <img src={ticket.qrUrl} alt={t('Ticket QR code {ref}', { ref: refCode })} width={170} height={170} data-testid="receipt-qr" style={{ display: 'block', width: 170, height: 170, borderRadius: 14, border: '1.5px solid #EBE2FF', padding: 6, background: '#FFFFFF' }} />
+                <span style={{ display: 'block', fontFamily: MONO, fontSize: '10px', letterSpacing: '.1em', color: '#7333FF', marginTop: 6 }}>{t('SHOW THIS AT THE GATE')}</span>
               </a>
             ) : (
               <div style={{ margin: '18px auto 0', width: '130px', height: '130px', borderRadius: '14px', background: 'repeating-linear-gradient(45deg,#340057 0 8px,#FFFFFF 8px 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ background: '#FFFFFF', fontFamily: MONO, fontSize: '10px', padding: '4px 7px', borderRadius: '6px', color: '#340057' }}>QR AT GATE</span>
+                <span style={{ background: '#FFFFFF', fontFamily: MONO, fontSize: '10px', padding: '4px 7px', borderRadius: '6px', color: '#340057' }}>{t('QR AT GATE')}</span>
               </div>
             )}
             {ticket.ticketUrl && (
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
-                <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Open my ticket</a>
-                <a href={`https://wa.me/?text=${encodeURIComponent(`My VALLÉ Advenature™ Park ticket ${refCode} · ${dateSummary} · ${slotName}\n${ticket.ticketUrl}`)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Send to my WhatsApp</a>
+                <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Open my ticket')}</a>
+                <a href={`https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot}', { ref: refCode, date: dateSummary, slot: slotName }) + '\n' + ticket.ticketUrl)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Send to my WhatsApp')}</a>
               </div>
             )}
             <div style={{ height: '1px', background: '#EBE2FF', margin: '18px 0' }} />
@@ -670,7 +679,7 @@ export default function BookingPage() {
               <span style={{ fontFamily: MONO }}>{mur(booking.total)}</span>
             </div>
             {inForeign && (
-              <div style={{ textAlign: 'right', fontFamily: MONO, fontSize: '11px', color: 'rgba(52,0,87,.6)', marginTop: '4px' }}>{money(booking.total)} · indicative</div>
+              <div style={{ textAlign: 'right', fontFamily: MONO, fontSize: '11px', color: 'rgba(52,0,87,.6)', marginTop: '4px' }}>{money(booking.total)} · {t('indicative')}</div>
             )}
           </div>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '22px', flexWrap: 'wrap' }}>
@@ -679,12 +688,12 @@ export default function BookingPage() {
               target="_blank"
               rel="noopener"
               style={{ border: '2px solid #340057', color: '#340057', fontSize: '14px', fontWeight: 700, padding: '13px 24px', borderRadius: '999px', display: 'inline-block' }}
-            >Questions? WhatsApp us</a>
+            >{t('Questions? WhatsApp us')}</a>
             <button
               onClick={startOver}
               {...backBind}
               style={{ border: 0, background: backHov ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: 700, color: '#FFFFFF', padding: '14px 26px', borderRadius: '999px' }}
-            >Back to the park →</button>
+            >{t('Back to the park →')}</button>
           </div>
         </div>
       )}

@@ -12,6 +12,7 @@ import { useReveal } from '../hooks/useReveal';
 import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import type { GalleryShot } from '../types';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -78,6 +79,7 @@ function RelatedCard({ a }: { a: CardModel }) {
 }
 
 export default function DetailPage() {
+  const t = useT();
   const { id } = useParams();
   const catalog = useCatalog();
   const app = useApp();
@@ -95,7 +97,7 @@ export default function DetailPage() {
   const catName = act ? catalog.CAT[act.cat].name : '';
   const rp = act ? catalog.RATEP[act.id] : undefined;
   useSeo(act ? {
-    title: `${act.name} · ${catName} at VALLÉ Advenature™ Park, Mauritius`,
+    title: t('{name} · {category} at VALLÉ Advenature™ Park, Mauritius', { name: act.name, category: catName }),
     description: act.blurb,
     canonicalPath: paths.detail(act.id),
     image: act.img,
@@ -108,8 +110,8 @@ export default function DetailPage() {
         ...(act.mode === 'pp' || act.mode === 'flat' ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'MUR', lowPrice: rp ? rp[0] : act.price, highPrice: rp ? rp[1] : act.price, url: abs(paths.booking()), availability: 'https://schema.org/InStock' } } : {}),
       },
     ],
-  } : { title: 'Experience not found · VALLÉ Advenature™ Park', description: 'That experience is not in the valley.', noindex: true });
-  if (!act) return <NotFoundPage what="that experience" />;
+  } : { title: t('Experience not found · VALLÉ Advenature™ Park'), description: t('That experience is not in the valley.'), noindex: true });
+  if (!act) return <NotFoundPage what={t('that experience')} />;
 
   const d = card(act);
   const related = catalog.ACTS.filter((a) => a.cat === act.cat && a.id !== act.id).slice(0, 4).map(card);
@@ -119,7 +121,7 @@ export default function DetailPage() {
   const galRest = gal ? gal.shots.slice(1) : [];
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const pl = catalog.PL[act.id] || [];
-  const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : 'FREE' }));
+  const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
   const hasPrices = pl.length > 0;
   const showReviews = act.id === 'zipline';
 
@@ -145,7 +147,7 @@ export default function DetailPage() {
         onClick={backExplore}
         {...bBack}
         style={{ border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: hBack ? '#FF3358' : '#7333FF', padding: '8px 0' }}
-      >← All experiences</button>
+      >{t('← All experiences')}</button>
 
       <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(58vh,540px)', minHeight: 320, background: '#EBE2FF', marginTop: 12 }}>
         <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -170,33 +172,33 @@ export default function DetailPage() {
               <StripesSm height={10} />
               <div style={{ padding: '16px 20px 18px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>Pricelist</span>
-                  <button onClick={app.openRateGate} title="Change rate" style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
+                  <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>{t('Pricelist')}</span>
+                  <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
                 </div>
                 <div style={{ marginTop: 10 }}>
                   {prices.map((pr) => {
                     const on = d.hasAdd && app.isSelected(act.id, pr.n);
                     return (
                       <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
-                        <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{pr.n}</span>
+                        <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
                         <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
                         {d.hasAdd && (
                           <button
                             onClick={() => app.toggleSel(act.id, pr.n)}
-                            title={on ? 'Remove from My Day' : 'Add this option to My Day'}
+                            title={on ? t('Remove from My Day') : t('Add this option to My Day')}
                             style={{ border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, padding: '6px 10px', borderRadius: 999, whiteSpace: 'nowrap', minWidth: 68 }}
-                          >{on ? '✓ Added' : '+ Add'}</button>
+                          >{on ? t('✓ Added') : t('+ Add')}</button>
                         )}
                       </div>
                     );
                   })}
                 </div>
-                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE</div>
+                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE')}</div>
               </div>
             </div>
           )}
 
-          <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 28 }}>GOOD TO KNOW</div>
+          <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
           <div style={{ marginTop: 10 }}>
             {act.gtk.map((g) => (
               <div key={g.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px dashed #D9C9F0', fontSize: 15, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
@@ -208,17 +210,17 @@ export default function DetailPage() {
 
           {showReviews && (
             <>
-              <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 30 }}>WHAT VISITORS SAY</div>
+              <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 30 }}>{t('WHAT VISITORS SAY')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginTop: 12 }}>
                 <div style={{ background: '#FFFFE2', borderRadius: 16, padding: '18px 20px' }}>
                   <div style={{ color: '#FF3358', letterSpacing: 2, fontSize: 13 }}>★★★★★</div>
-                  <div style={{ fontSize: 14.5, lineHeight: 1.55, marginTop: 8, color: 'rgba(52,0,87,.82)' }}>"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday."</div>
-                  <div style={{ fontFamily: MONO, fontSize: 11, marginTop: 10, color: 'rgba(52,0,87,.6)' }}>KATE O · TRIPADVISOR, MAY 2025</div>
+                  <div style={{ fontSize: 14.5, lineHeight: 1.55, marginTop: 8, color: 'rgba(52,0,87,.82)' }}>{t('"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday."')}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11, marginTop: 10, color: 'rgba(52,0,87,.6)' }}>{t('KATE O · TRIPADVISOR, MAY 2025')}</div>
                 </div>
                 <div style={{ background: '#E2FFEB', borderRadius: 16, padding: '18px 20px' }}>
                   <div style={{ color: '#FF3358', letterSpacing: 2, fontSize: 13 }}>★★★★★</div>
-                  <div style={{ fontSize: 14.5, lineHeight: 1.55, marginTop: 8, color: 'rgba(52,0,87,.82)' }}>"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again."</div>
-                  <div style={{ fontFamily: MONO, fontSize: 11, marginTop: 10, color: 'rgba(52,0,87,.6)' }}>ANNABELLE A · TRIPADVISOR, MAY 2025</div>
+                  <div style={{ fontSize: 14.5, lineHeight: 1.55, marginTop: 8, color: 'rgba(52,0,87,.82)' }}>{t('"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again."')}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11, marginTop: 10, color: 'rgba(52,0,87,.6)' }}>{t('ANNABELLE A · TRIPADVISOR, MAY 2025')}</div>
                 </div>
               </div>
             </>
@@ -230,19 +232,19 @@ export default function DetailPage() {
           <div style={{ padding: '22px 26px 0' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: MONO }}>
               <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>DURATION</div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('DURATION')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.dur}</div>
               </div>
               <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>MIN AGE</div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('MIN AGE')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.age}</div>
               </div>
               <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>PULSE</div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PULSE')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4, color: '#FFFC33' }}>{d.pulseName}</div>
               </div>
               <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>PRICE</div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PRICE')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{d.priceLabel}</div>
               </div>
             </div>
@@ -269,8 +271,8 @@ export default function DetailPage() {
                 padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
                 ...(hBook ? { transform: 'translateY(-1px)' } : undefined),
               }}
-            >Book this now →</button>
-            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>PAY ON ARRIVAL · NO CANCELLATION FEE</div>
+            >{t('Book this now →')}</button>
+            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
           </div>
         </div>
       </div>
@@ -325,14 +327,14 @@ export default function DetailPage() {
         </div>
       )}
 
-      <nav aria-label="Related pages" style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>SEE ALSO</span>
+      <nav aria-label={t('Related pages')} style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('SEE ALSO')}</span>
         {([
-          [`All ${catName.toLowerCase()} experiences`, paths.explore(act.cat)],
-          ['Packages & 2026 prices', paths.packages()],
-          ['Book your day', paths.booking()],
-          ['Plan your visit', paths.plan()],
-          ['Lunch at Le Chamouzé', paths.resto('chamouze')],
+          [t('All {category} experiences', { category: catName.toLowerCase() }), paths.explore(act.cat)],
+          [t('Packages & 2026 prices'), paths.packages()],
+          [t('Book your day'), paths.booking()],
+          [t('Plan your visit'), paths.plan()],
+          [t('Lunch at Le Chamouzé'), paths.resto('chamouze')],
         ] as [string, string][]).map(([label, href]) => (
           <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} →</Link>
         ))}
@@ -340,7 +342,7 @@ export default function DetailPage() {
 
       <div style={{ marginTop: 'clamp(44px,6vw,72px)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>
-          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,3.6vw,46px)', letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>Pairs well with</h2>
+          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,3.6vw,46px)', letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Pairs well with')}</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 14 }}>
           {related.map((a) => <RelatedCard key={a.id} a={a} />)}

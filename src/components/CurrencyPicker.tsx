@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from '../store/AppStore';
 import { CURRENCY_ORDER } from '../lib/fx';
+import { useT, _t } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
+
+// Currency names come from the fx table (English); listed here so the extractor collects them.
+const CURRENCY_NAME_KEYS = [_t('Mauritian rupee'), _t('Euro'), _t('US dollar'), _t('British pound'), _t('UAE dirham'), _t('Saudi riyal'), _t('Indian rupee'), _t('South African rand'), _t('Swiss franc'), _t('Australian dollar'), _t('Canadian dollar'), _t('Chinese yuan'), _t('Japanese yen'), _t('Singapore dollar'), _t('New Zealand dollar')];
+void CURRENCY_NAME_KEYS;
 
 /**
  * Header currency switch. Rupees are what the park charges; every other
@@ -11,6 +16,7 @@ const MONO = "'Chivo Mono',monospace";
  */
 export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean }) {
   const app = useApp();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [h, setH] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -35,7 +41,7 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
         onMouseLeave={() => setH(false)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Prices shown in ${rates[app.currency]?.name ?? app.currency}. Change currency`}
+        aria-label={t('Prices shown in {name}. Change currency', { name: rates[app.currency]?.name ? t(rates[app.currency].name) : app.currency })}
         data-testid="currency-picker"
         style={{
           border: `1.5px solid ${h || open ? '#7333FF' : 'rgba(115,51,255,.5)'}`,
@@ -50,7 +56,7 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
       {open && (
         <div
           role="listbox"
-          aria-label="Currency"
+          aria-label={t('Currency')}
           style={{
             position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 250, maxHeight: '70vh', overflowY: 'auto',
             background: '#FFFFFF', color: '#340057', borderRadius: 16, boxShadow: '0 24px 60px -18px rgba(31,0,51,.55), 0 0 0 1.5px #EBE2FF',
@@ -73,13 +79,13 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
                 onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent'; }}
               >
                 <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.08em', width: 36 }}>{c}</span>
-                <span style={{ fontSize: 13.5, flex: 1 }}>{rates[c].name}</span>
+                <span style={{ fontSize: 13.5, flex: 1 }}>{t(rates[c].name)}</span>
                 <span style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6 }}>{c === 'MUR' ? '' : rates[c].symbol}</span>
               </button>
             );
           })}
           <div style={{ fontFamily: MONO, fontSize: 9.5, lineHeight: 1.5, letterSpacing: '.04em', color: 'rgba(52,0,87,.55)', padding: '8px 10px 4px', borderTop: '1px dashed #EBE2FF', marginTop: 6 }}>
-            YOU PAY IN RUPEES. OTHER CURRENCIES ARE INDICATIVE, BANK OF MAURITIUS RATES OF {app.fx.asOf.split('-').reverse().join('/')}.
+            {t('YOU PAY IN RUPEES. OTHER CURRENCIES ARE INDICATIVE, BANK OF MAURITIUS RATES OF {date}.', { date: app.fx.asOf.split('-').reverse().join('/') })}
           </div>
         </div>
       )}

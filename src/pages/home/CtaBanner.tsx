@@ -1,8 +1,10 @@
 import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
+import { useT } from '../../i18n';
 
 /** Final CTA banner: "Hold on tight. Are you ready?" (markup: CTA banner section). */
 export function CtaBanner() {
+  const t = useT();
   const goto = useGoto();
   const [bookH, bookBind] = useHover();
   const [pkgH, pkgBind] = useHover();
@@ -19,10 +21,10 @@ export function CtaBanner() {
         <div style={{ position: 'relative' }}>
           <div style={{ transform: 'rotate(-4deg)' }}>
             <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(40px,6.6vw,92px)', lineHeight: 0.82, letterSpacing: '-0.01em', color: '#FFFFFF', margin: 0, textTransform: 'uppercase' }}>
-              Hold on tight.<br /><span style={{ color: '#FFFC33' }}>Are you ready?</span>
+              {t('Hold on tight.')}<br /><span style={{ color: '#FFFC33' }}>{t('Are you ready?')}</span>
             </h2>
           </div>
-          <p style={{ color: 'rgba(255,255,255,.94)', fontSize: 16, margin: '20px auto 0', maxWidth: '44ch', lineHeight: 1.55 }}>Pick a date, build your day, pay when you arrive. No cancellation fee, just show up wild.</p>
+          <p style={{ color: 'rgba(255,255,255,.94)', fontSize: 16, margin: '20px auto 0', maxWidth: '44ch', lineHeight: 1.55 }}>{t('Pick a date, build your day, pay when you arrive. No cancellation fee, just show up wild.')}</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 28 }}>
             <a
               href={paths.booking()}
@@ -35,7 +37,7 @@ export function CtaBanner() {
                 ...(bookH ? { transform: 'translateY(-2px)', boxShadow: '0 14px 30px rgba(0,0,0,.3)' } : {}),
               }}
             >
-              Book your adventure →
+              {t('Book your adventure →')}
             </a>
             <a
               href={paths.packages()}
@@ -48,7 +50,7 @@ export function CtaBanner() {
                 ...(pkgH ? { background: '#FFFFFF', color: '#FF3358' } : {}),
               }}
             >
-              View packages
+              {t('View packages')}
             </a>
           </div>
         </div>

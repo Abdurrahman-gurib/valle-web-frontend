@@ -5,10 +5,12 @@ import { useCardModel, type CardModel } from '../../lib/card';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
+import { useT } from '../../i18n';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
 function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
+  const t = useT();
   const [h, bind] = useHover();
   const [hTick, bindTick] = useHover();
   return (
@@ -48,12 +50,12 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
       <div style={{ padding: '16px 18px 18px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
           <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 21, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
-          <div title="Pulse level" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: a.pulseColor, whiteSpace: 'nowrap' }}>{a.pulseStr}</div>
+          <div title={t('Pulse level')} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: a.pulseColor, whiteSpace: 'nowrap' }}>{a.pulseStr}</div>
         </div>
         <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40 }}>{a.blurb}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)' }}>{a.dur} · {a.age}</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>Details →</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>{t('Details →')}</span>
         </div>
       </div>
     </div>
@@ -79,6 +81,7 @@ function ArrowBtn({ label, onClick, children }: { label: string; onClick: () => 
 
 /** "Go big. Go wild.": auto-advancing horizontal rail of the park classics. */
 export function ClassicsRail() {
+  const t = useT();
   const { ACTS } = useCatalog();
   const { rateTag } = useApp();
   const card = useCardModel();
@@ -118,12 +121,12 @@ export function ClassicsRail() {
     <section style={{ padding: 'clamp(56px,8vw,104px) 0 0' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 28, marginBottom: 28 }}>
         <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>
-          Go big. <span style={{ color: '#FF3358' }}>Go wild.</span>
+          {t('Go big.')} <span style={{ color: '#FF3358' }}>{t('Go wild.')}</span>
         </h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)', marginRight: 10 }}>03 · FAVOURITES</span>
-          <ArrowBtn label="Scroll back" onClick={() => railRef.current?.scrollBy({ left: -370, behavior: 'smooth' })}>←</ArrowBtn>
-          <ArrowBtn label="Scroll forward" onClick={() => railRef.current?.scrollBy({ left: 370, behavior: 'smooth' })}>→</ArrowBtn>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)', marginRight: 10 }}>{t('03 · FAVOURITES')}</span>
+          <ArrowBtn label={t('Scroll back')} onClick={() => railRef.current?.scrollBy({ left: -370, behavior: 'smooth' })}>←</ArrowBtn>
+          <ArrowBtn label={t('Scroll forward')} onClick={() => railRef.current?.scrollBy({ left: 370, behavior: 'smooth' })}>→</ArrowBtn>
         </div>
       </div>
       <div

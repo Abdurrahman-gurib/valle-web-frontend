@@ -5,7 +5,6 @@ import TicketPage from './pages/Ticket';
 import { CatalogProvider } from './store/CatalogContext';
 import { LANGS, LangProvider } from './i18n';
 import { paths } from './lib/nav';
-import { LanguageSuggest } from './components/LanguagePicker';
 import { AppStoreProvider } from './store/AppStore';
 import { StaffAuthProvider } from './store/StaffAuth';
 import { Header } from './components/Header';
@@ -66,7 +65,6 @@ function PublicShell() {
       minHeight: '100vh', background: '#FFFFFF', color: '#340057',
       fontFamily: "'Work Sans',sans-serif", paddingBottom: isMobile ? 84 : 0,
     }}>
-      <LanguageSuggest />
       <Header />
       <Outlet />
       <Footer />

@@ -5,6 +5,10 @@ import { paths } from '../lib/nav';
 import { mur, partyLabel, fullDateFromIso } from '../lib/format';
 import { fetchTicket, type TicketView } from '../lib/api';
 import { Stripes } from '../components/Stripes';
+import { tr, useT, _t } from '../i18n';
+
+/** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
+const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -14,67 +18,68 @@ const BARLOW = "'Barlow',sans-serif";
  * token in the URL, so it is never indexed and cannot be browsed by reference.
  */
 export default function TicketPage() {
+  const t = useT();
   const { ref = '' } = useParams();
   const [params] = useSearchParams();
   const token = params.get('t') || '';
-  useSeo({ title: `Ticket ${ref.toUpperCase()} · VALLÉ Advenature™ Park`, description: 'Your VALLÉ ticket.', noindex: true });
-  const [t, setT] = useState<TicketView | null>(null);
+  useSeo({ title: t('Ticket {ref} · VALLÉ Advenature™ Park', { ref: ref.toUpperCase() }), description: t('Your VALLÉ ticket.'), noindex: true });
+  const [tk, setT] = useState<TicketView | null>(null);
   const [err, setErr] = useState('');
 
   useEffect(() => {
     let dead = false;
     fetchTicket(ref, token)
       .then((v) => { if (!dead) setT(v); })
-      .catch((e: Error & { status?: number }) => { if (!dead) setErr(e.status === 403 ? 'This ticket link is not valid. Open the link from your confirmation e-mail or WhatsApp.' : e.status === 404 ? 'We could not find this booking.' : 'Could not load the ticket right now. Please try again.'); });
+      .catch((e: Error & { status?: number }) => { if (!dead) setErr(e.status === 403 ? tr('This ticket link is not valid. Open the link from your confirmation e-mail or WhatsApp.') : e.status === 404 ? tr('We could not find this booking.') : tr('Could not load the ticket right now. Please try again.')); });
     return () => { dead = true; };
   }, [ref, token]);
 
-  const share = t ? `https://wa.me/?text=${encodeURIComponent(`My VALLÉ Advenature™ Park ticket ${t.refCode} · ${fullDateFromIso(t.visitDate) || t.visitDate} · ${t.slot} arrival\n${t.ticketUrl}`)}` : '';
+  const share = tk ? `https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot} arrival', { ref: tk.refCode, date: fullDateFromIso(tk.visitDate) || tk.visitDate, slot: t(SLOT_WORDS[tk.slot] ?? tk.slot) }) + '\n' + tk.ticketUrl)}` : '';
 
   return (
     <main style={{ maxWidth: 560, margin: '0 auto', padding: '110px clamp(16px,3.5vw,40px) 60px', fontFamily: "'Work Sans',sans-serif", color: '#340057' }}>
       {err && (
         <div style={{ background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: 16, padding: '16px 20px', fontWeight: 600 }}>
-          {err} <Link to={paths.booking()} style={{ color: '#7333FF' }}>Book a day</Link>
+          {err} <Link to={paths.booking()} style={{ color: '#7333FF' }}>{t('Book a day')}</Link>
         </div>
       )}
-      {!t && !err && <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>LOADING YOUR TICKET…</div>}
-      {t && (
+      {!tk && !err && <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>{t('LOADING YOUR TICKET…')}</div>}
+      {tk && (
         <article data-testid="ticket" style={{ background: '#FFFFFF', borderRadius: 22, overflow: 'hidden', boxShadow: '0 30px 70px -30px rgba(31,0,51,.5), 0 0 0 1.5px #EBE2FF' }}>
           <div style={{ background: '#340057', color: '#FFFFFF', padding: '20px 24px' }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.16em', opacity: 0.7 }}>VALLÉ ADVENATURE™ PARK · YOUR TICKET</div>
-            <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 30, marginTop: 4, textTransform: 'uppercase' }}>{t.guestName}</div>
+            <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.16em', opacity: 0.7 }}>{t('VALLÉ ADVENATURE™ PARK · YOUR TICKET')}</div>
+            <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 30, marginTop: 4, textTransform: 'uppercase' }}>{tk.guestName}</div>
           </div>
           <Stripes />
           <div style={{ padding: 24, textAlign: 'center' }}>
-            <img src={t.qrUrl} alt={`Ticket QR code ${t.refCode}`} width={240} height={240} data-testid="ticket-qr" style={{ display: 'inline-block', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: 8, background: '#FFFFFF', width: 240, height: 240 }} />
-            <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 28, letterSpacing: '.06em', color: '#FF3358', marginTop: 12 }}>{t.refCode}</div>
-            {t.status === 'cancelled' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#D91E44', fontWeight: 700 }}>THIS BOOKING WAS CANCELLED</div>}
-            {t.status === 'arrived' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#1E9E4A', fontWeight: 700 }}>CHECKED IN · ENJOY THE VALLEY</div>}
+            <img src={tk.qrUrl} alt={t('Ticket QR code {ref}', { ref: tk.refCode })} width={240} height={240} data-testid="ticket-qr" style={{ display: 'inline-block', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: 8, background: '#FFFFFF', width: 240, height: 240 }} />
+            <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 28, letterSpacing: '.06em', color: '#FF3358', marginTop: 12 }}>{tk.refCode}</div>
+            {tk.status === 'cancelled' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#D91E44', fontWeight: 700 }}>{t('THIS BOOKING WAS CANCELLED')}</div>}
+            {tk.status === 'arrived' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#1E9E4A', fontWeight: 700 }}>{t('CHECKED IN · ENJOY THE VALLEY')}</div>}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, textAlign: 'left', marginTop: 22 }}>
-              <Fact tag="VISIT" value={fullDateFromIso(t.visitDate) || t.visitDate} />
-              <Fact tag="ARRIVAL" value={t.slot === 'morning' ? 'Morning · 09:00–12:00' : 'Afternoon · 12:00–15:30'} />
-              <Fact tag="PARTY" value={partyLabel(t.adults, t.kids)} />
-              <Fact tag="RATE" value={t.rate === 'nr' ? 'Visitor' : 'Resident (bring an ID)'} />
+              <Fact tag={t('VISIT')} value={fullDateFromIso(tk.visitDate) || tk.visitDate} />
+              <Fact tag={t('ARRIVAL')} value={tk.slot === 'morning' ? t('Morning · 09:00–12:00') : t('Afternoon · 12:00–15:30')} />
+              <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
+              <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
-            {t.lines.map((l, i) => (
+            {tk.lines.map((l, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left' }}>
                 <span style={{ color: 'rgba(52,0,87,.72)' }}>{l.label}</span>
                 <span style={{ fontFamily: MONO, fontWeight: 600, whiteSpace: 'nowrap' }}>{mur(l.amount)}</span>
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: '1px dashed #D9C9F0', fontWeight: 800, fontSize: 16 }}>
-              <span>{t.payMode === 'online' ? 'Paid online' : 'To pay on arrival'}</span>
-              <span style={{ fontFamily: MONO }}>{mur(t.total)}</span>
+              <span>{tk.payMode === 'online' ? t('Paid online') : t('To pay on arrival')}</span>
+              <span style={{ fontFamily: MONO }}>{mur(tk.total)}</span>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 22 }} data-print-hide="">
-              <a href={share} target="_blank" rel="noopener noreferrer" style={btn('#25D366', '#FFFFFF')}>Add to WhatsApp</a>
-              <button onClick={() => window.print()} style={btn('#FFFFFF', '#340057', true)}>Save / print</button>
+              <a href={share} target="_blank" rel="noopener noreferrer" style={btn('#25D366', '#FFFFFF')}>{t('Add to WhatsApp')}</a>
+              <button onClick={() => window.print()} style={btn('#FFFFFF', '#340057', true)}>{t('Save / print')}</button>
             </div>
             <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.65)', marginTop: 18, textAlign: 'left' }}>
-              Show this QR code at the gate. B102, Mare Anguilles, Chamouny · <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>directions</a>.
-              Bring closed shoes, sunscreen and water. Free cancellation: call <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 44 77</a> or write to sales@vallepark.com.
+              {t('Show this QR code at the gate. B102, Mare Anguilles, Chamouny ·')} <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>{t('directions')}</a>.{' '}
+              {t('Bring closed shoes, sunscreen and water. Free cancellation: call')} <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 44 77</a> {t('or write to {email}.', { email: 'sales@vallepark.com' })}
             </p>
           </div>
         </article>

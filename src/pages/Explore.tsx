@@ -9,24 +9,25 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { Img } from '../components/Img';
+import { _t, useT } from '../i18n';
 
 const PULSE_RANGES: Record<string, [number, number]> = {
   any: [1, 5], serene: [1, 2], moderate: [3, 3], extreme: [4, 5],
 };
 
 const CAT_CHIPS = [
-  { key: 'all', label: 'Everything', c: '#340057', f: '#FFFFFF' },
-  { key: 'adventure', label: 'Adventure', c: '#FF3358', f: '#FFFFFF' },
-  { key: 'nature', label: 'Nature', c: '#33FF74', f: '#340057' },
-  { key: 'kids', label: 'Kids Park', c: '#FFFC33', f: '#340057' },
-  { key: 'tours', label: 'Tours & Groups', c: '#7333FF', f: '#FFFFFF' },
+  { key: 'all', label: _t('Everything'), c: '#340057', f: '#FFFFFF' },
+  { key: 'adventure', label: _t('Adventure'), c: '#FF3358', f: '#FFFFFF' },
+  { key: 'nature', label: _t('Nature'), c: '#33FF74', f: '#340057' },
+  { key: 'kids', label: _t('Kids Park'), c: '#FFFC33', f: '#340057' },
+  { key: 'tours', label: _t('Tours & Groups'), c: '#7333FF', f: '#FFFFFF' },
 ];
 
 const PULSE_CHIPS = [
-  { key: 'any', label: 'Any' },
-  { key: 'serene', label: '● Serene' },
-  { key: 'moderate', label: '●●● Moderate' },
-  { key: 'extreme', label: '●●●●● Extreme' },
+  { key: 'any', label: _t('Any') },
+  { key: 'serene', label: _t('● Serene') },
+  { key: 'moderate', label: _t('●●● Moderate') },
+  { key: 'extreme', label: _t('●●●●● Extreme') },
 ];
 
 /** chip(on, c, f): same colouring rule as the original template */
@@ -66,6 +67,7 @@ function Chip({ label, onClick, bg, fg, bd, small }: {
 }
 
 function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
+  const t = useT();
   const [h, bind] = useHover();
   const [hAdd, bindAdd] = useHover();
   return (
@@ -109,7 +111,7 @@ function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
             fontSize: 20, textTransform: 'uppercase',
           }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
-          <div title="Pulse level" style={{
+          <div title={t('Pulse level')} style={{
             fontSize: '10.5px', fontWeight: 700, letterSpacing: '.13em', color: a.pulseColor, whiteSpace: 'nowrap',
           }}>{a.pulseStr}</div>
         </div>
@@ -149,6 +151,7 @@ function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
 }
 
 export default function ExplorePage() {
+  const t = useT();
   const catalog = useCatalog();
   const app = useApp();
   const goto = useGoto();
@@ -161,10 +164,10 @@ export default function ExplorePage() {
   const pulseLvl = params.get('pulse') || 'any';
   const catName = cat !== 'all' && catalog.CAT[cat as keyof typeof catalog.CAT] ? catalog.CAT[cat as keyof typeof catalog.CAT].name : '';
   useSeo({
-    title: (catName ? `${catName} experiences` : `All ${catalog.ACTS.length} experiences`) + ' · VALLÉ Advenature™ Park',
+    title: catName ? t('{name} experiences · VALLÉ Advenature™ Park', { name: catName }) : t('All {count} experiences · VALLÉ Advenature™ Park', { count: catalog.ACTS.length }),
     description: catName
-      ? `${catName} at Vallé Advenature Park, Chamouny: every ${catName.toLowerCase()} experience with prices, age limits and thrill level.`
-      : 'Every experience in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.',
+      ? t('{name} at Vallé Advenature Park, Chamouny: every {lower} experience with prices, age limits and thrill level.', { name: catName, lower: catName.toLowerCase() })
+      : t('Every experience in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.'),
     canonicalPath: catName ? `/explore?cat=${cat}` : '/explore',
     noindex: Boolean(q) || pulseLvl !== 'any',
     jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, ...(catName ? [{ name: catName, path: `/explore?cat=${cat}` }] : [])])],
@@ -201,7 +204,7 @@ export default function ExplorePage() {
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const admissionRows = (catalog.PL.admission || []).map((r) => ({
     n: r.n,
-    p: r[rk] ? money(r[rk]) : 'FREE',
+    p: r[rk] ? money(r[rk]) : t('FREE'),
   }));
 
   const results = useMemo(() => {
@@ -216,8 +219,8 @@ export default function ExplorePage() {
 
   const cards = results.map((a) => card(a));
   const noResults = results.length === 0;
-  const resultCount = results.length + ' OF ' + catalog.ACTS.length;
-  const exploreCtaLabel = app.selCount > 0 ? 'Book My Day · ' + app.selCount : 'Start booking';
+  const resultCount = t('{shown} OF {total}', { shown: results.length, total: catalog.ACTS.length });
+  const exploreCtaLabel = app.selCount > 0 ? t('Book My Day · {count}', { count: app.selCount }) : t('Start booking');
 
   const clearFilters = () => {
     setParams(new URLSearchParams(), { replace: true });
@@ -243,11 +246,11 @@ export default function ExplorePage() {
           fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
           fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em',
           margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
-        }}>Explore Vallé</h1>
+        }}>{t('Explore Vallé')}</h1>
         <span style={{
           fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600,
           letterSpacing: '.16em', color: 'rgba(52,0,87,.55)',
-        }}>{catalog.ACTS.length} EXPERIENCES · ONE PARK</span>
+        }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
       </div>
 
       <div style={{ marginTop: 20, background: '#340057', borderRadius: 18, overflow: 'hidden' }}>
@@ -257,11 +260,11 @@ export default function ExplorePage() {
             <div style={{
               fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700,
               letterSpacing: '.14em', color: '#FFFC33',
-            }}>ADMISSION FEE · {app.rateTag}</div>
+            }}>{t('ADMISSION FEE')} · {app.rateTag}</div>
             <div style={{
               fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
               fontSize: 22, textTransform: 'uppercase', color: '#FFFFFF', marginTop: 2,
-            }}>{app.rateWord} prices</div>
+            }}>{t('{rate} prices', { rate: app.rateWord })}</div>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
             {admissionRows.map((ar) => (
@@ -269,7 +272,7 @@ export default function ExplorePage() {
                 display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)',
                 borderRadius: 10, padding: '8px 12px', fontSize: 13, color: 'rgba(255,255,255,.9)',
               }}>
-                {ar.n}
+                {t(ar.n)}
                 <span style={{
                   background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace",
                   fontWeight: 700, fontSize: 12, borderRadius: 5, padding: '3px 7px',
@@ -293,7 +296,7 @@ export default function ExplorePage() {
               borderRadius: 999,
               ...(hRate ? { background: '#FFFFFF', color: '#340057' } : undefined),
             }}
-          >CHANGE RATE ⇄</button>
+          >{t('CHANGE RATE ⇄')}</button>
         </div>
       </div>
 
@@ -304,7 +307,7 @@ export default function ExplorePage() {
             onChange={(e) => setParam('q', e.target.value, true)}
             onFocus={() => setSearchFocus(true)}
             onBlur={() => setSearchFocus(false)}
-            placeholder="Search ziplines, tortoises, waterfalls…"
+            placeholder={t('Search ziplines, tortoises, waterfalls…')}
             style={searchStyle}
           />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -313,7 +316,7 @@ export default function ExplorePage() {
               return (
                 <Chip
                   key={c.key}
-                  label={c.label}
+                  label={t(c.label)}
                   onClick={() => setParam('cat', c.key)}
                   bg={cc.bg}
                   fg={cc.fg}
@@ -327,13 +330,13 @@ export default function ExplorePage() {
           <span style={{
             fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 600,
             letterSpacing: '.12em', color: 'rgba(52,0,87,.55)', marginRight: 4,
-          }}>PULSE LEVEL</span>
+          }}>{t('PULSE LEVEL')}</span>
           {PULSE_CHIPS.map((c) => {
             const cc = chipColors(pulseLvl === c.key);
             return (
               <Chip
                 key={c.key}
-                label={c.label}
+                label={t(c.label)}
                 onClick={() => setPulseLvl(c.key)}
                 bg={cc.bg}
                 fg={cc.fg}
@@ -361,8 +364,8 @@ export default function ExplorePage() {
           <div style={{
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
             fontSize: 28, color: '#340057', textTransform: 'uppercase',
-          }}>Nothing matches that</div>
-          <div style={{ fontSize: 15, marginTop: 8 }}>Try a different search, or clear the filters.</div>
+          }}>{t('Nothing matches that')}</div>
+          <div style={{ fontSize: 15, marginTop: 8 }}>{t('Try a different search, or clear the filters.')}</div>
           <button
             {...bindClear}
             onClick={clearFilters}
@@ -379,7 +382,7 @@ export default function ExplorePage() {
               borderRadius: 999,
               ...(hClear ? { background: '#340057', color: '#FFFFFF' } : undefined),
             }}
-          >Clear filters</button>
+          >{t('Clear filters')}</button>
         </div>
       )}
 
@@ -391,9 +394,9 @@ export default function ExplorePage() {
           <div style={{
             fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
             fontSize: 24, color: '#FFFFFF', textTransform: 'uppercase',
-          }}>Can't decide? Build your day as you go.</div>
+          }}>{t("Can't decide? Build your day as you go.")}</div>
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,.75)', marginTop: 5 }}>
-            Add experiences to My Day, then book them all in one step, pay on arrival.
+            {t('Add experiences to My Day, then book them all in one step, pay on arrival.')}
           </div>
         </div>
         <button

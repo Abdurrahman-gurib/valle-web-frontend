@@ -1,6 +1,7 @@
 import { useApp } from '../store/AppStore';
 import { Stripes } from './Stripes';
 import { useHover } from '../hooks/useHover';
+import { useT } from '../i18n';
 
 function RateCard({ tag, title, body, cta, onClick }: {
   tag: string; title: string; body: string; cta: string; onClick: () => void;
@@ -27,6 +28,7 @@ function RateCard({ tag, title, body, cta, onClick }: {
 
 export function RateGate() {
   const app = useApp();
+  const t = useT();
   const [hKeep, bindKeep] = useHover();
   if (!app.rateGateOpen) return null;
 
@@ -44,35 +46,35 @@ export function RateGate() {
         <Stripes />
         <div style={{ padding: 'clamp(22px,3.4vw,34px)' }}>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>
-            WELCOME TO VALLÉ ADVENATURE™ PARK
+            {t('WELCOME TO VALLÉ ADVENATURE™ PARK')}
           </span>
           <div style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom', marginTop: 12 }}>
             <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,4.2vw,46px)', lineHeight: 0.86, margin: 0, textTransform: 'uppercase' }}>
-              Which rate<br />applies to you?
+              {t('Which rate')}<br />{t('applies to you?')}
             </h2>
           </div>
           <p style={{ fontSize: 15, lineHeight: 1.55, color: 'rgba(52,0,87,.72)', margin: '14px 0 0' }}>
-            Mauritian residents pay a local rate. Pick yours and every price on the site updates instantly.
+            {t('Mauritian residents pay a local rate. Pick yours and every price on the site updates instantly.')}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 12, marginTop: 20 }}>
             <RateCard
-              tag="RR · RESIDENT RATE"
-              title="I live in Mauritius"
-              body="Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free."
-              cta="SHOW RESIDENT PRICES →"
+              tag={t('RR · RESIDENT RATE')}
+              title={t('I live in Mauritius')}
+              body={t('Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.')}
+              cta={t('SHOW RESIDENT PRICES') + ' →'}
               onClick={() => app.setRate('rr')}
             />
             <RateCard
-              tag="NR · NON-RESIDENT RATE"
-              title="I am visiting"
-              body="Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free."
-              cta="SHOW VISITOR PRICES →"
+              tag={t('NR · NON-RESIDENT RATE')}
+              title={t('I am visiting')}
+              body={t('Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.')}
+              cta={t('SHOW VISITOR PRICES') + ' →'}
               onClick={() => app.setRate('nr')}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>
-              YOU CAN SWITCH ANY TIME FROM THE MENU
+              {t('YOU CAN SWITCH ANY TIME FROM THE MENU')}
             </span>
             {app.rateGateDismissable && (
               <button
@@ -84,7 +86,7 @@ export function RateGate() {
                   color: hKeep ? '#FFFFFF' : '#340057', padding: '10px 20px', borderRadius: 999,
                 }}
               >
-                Keep {app.rateWord}
+                {t('Keep {rate}', { rate: t(app.rateWord) })}
               </button>
             )}
           </div>

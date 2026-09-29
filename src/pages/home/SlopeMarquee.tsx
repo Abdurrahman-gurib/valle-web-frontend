@@ -1,12 +1,14 @@
 import { Stripes } from '../../components/Stripes';
+import { useT } from '../../i18n';
 
 function MarqueeLine() {
+  const t = useT();
   return (
     <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(15px,1.7vw,20px)', letterSpacing: '.1em', color: '#FFFFFF' }}>
-      ZIPLINES <span style={{ color: '#FF3358' }}>●</span> QUAD &amp; BUGGY <span style={{ color: '#33FF74' }}>●</span> WATERFALLS{' '}
-      <span style={{ color: '#FFFC33' }}>●</span> 23 COLOURED EARTH <span style={{ color: '#FF3358' }}>●</span> NEPALESE BRIDGE{' '}
-      <span style={{ color: '#33FF74' }}>●</span> KIDS PARK <span style={{ color: '#FFFC33' }}>●</span> GIANT TORTOISES{' '}
-      <span style={{ color: '#FF3358' }}>●</span> MOUNTAIN LUGE <span style={{ color: '#33FF74' }}>●</span> THE PEAK{' '}
+      {t('ZIPLINES')} <span style={{ color: '#FF3358' }}>●</span> {t('QUAD & BUGGY')} <span style={{ color: '#33FF74' }}>●</span> {t('WATERFALLS')}{' '}
+      <span style={{ color: '#FFFC33' }}>●</span> {t('23 COLOURED EARTH')} <span style={{ color: '#FF3358' }}>●</span> {t('NEPALESE BRIDGE')}{' '}
+      <span style={{ color: '#33FF74' }}>●</span> {t('KIDS PARK')} <span style={{ color: '#FFFC33' }}>●</span> {t('GIANT TORTOISES')}{' '}
+      <span style={{ color: '#FF3358' }}>●</span> {t('MOUNTAIN LUGE')} <span style={{ color: '#33FF74' }}>●</span> {t('THE PEAK')}{' '}
       <span style={{ color: '#FFFC33' }}>●</span>&nbsp;
     </span>
   );

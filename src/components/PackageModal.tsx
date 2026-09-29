@@ -1,6 +1,7 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
@@ -20,11 +21,12 @@ export interface PackModalData {
 
 function CloseBtn({ onClose }: { onClose: () => void }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <button
       {...bind}
       onClick={onClose}
-      title="Close"
+      title={t('Close')}
       style={{
         border: 0, background: h ? '#340057' : '#F7F3FF', cursor: 'pointer', fontFamily: 'inherit',
         fontSize: 19, fontWeight: 700, color: h ? '#FFFFFF' : '#340057',
@@ -38,6 +40,7 @@ function CloseBtn({ onClose }: { onClose: () => void }) {
 
 function ReserveLink({ href }: { href: string }) {
   const [h, bind] = useHover();
+  const t = useT();
   return (
     <a
       {...bind}
@@ -51,7 +54,7 @@ function ReserveLink({ href }: { href: string }) {
         transform: h ? 'translateY(-1px)' : undefined,
       }}
     >
-      Reserve this package →
+      {t('Reserve this package')} →
     </a>
   );
 }
@@ -78,6 +81,7 @@ function PillLink({ href, title, label, blank }: { href: string; title: string; 
 }
 
 export function PackageModal({ pack, onClose }: { pack: PackModalData | null; onClose: () => void }) {
+  const t = useT();
   if (!pack) return null;
 
   const whatsapp = 'https://api.whatsapp.com/send/?phone=23052928841&text='
@@ -106,7 +110,7 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
         }}
       >
         <div style={{ flex: 1.1, minWidth: 'min(100%,320px)', position: 'relative', minHeight: 280, background: '#EBE2FF' }}>
-          <Img src={pack.img} alt={pack.name + ' package'} priority style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Img src={pack.img} alt={t('{name} package', { name: pack.name })} priority style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
           <span style={{
             position: 'absolute', top: 14, left: 14, background: pack.color, color: pack.fg || '#FFFFFF',
             fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
@@ -124,7 +128,7 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
           {!!pack.hero && (
             <div style={{ fontSize: 14, fontWeight: 700, color: '#7333FF', marginTop: 6 }}>{pack.hero}</div>
           )}
-          <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 16 }}>WHAT IS INCLUDED</div>
+          <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 16 }}>{t('WHAT IS INCLUDED')}</div>
           <div style={{ marginTop: 6 }}>
             {pack.items.map((pi) => (
               <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '5px 0', fontSize: 14.5, color: 'rgba(52,0,87,.85)' }}>
@@ -139,22 +143,22 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
           <div style={{ flex: 1, minHeight: 12 }} />
           <div style={{ display: 'flex', gap: 18, borderTop: '1px dashed #D9C9F0', paddingTop: 14, marginTop: 14 }}>
             <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>SINGLE</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('SINGLE')}</div>
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.single}</div>
             </div>
             <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>DOUBLE</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('DOUBLE')}</div>
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.dbl}</div>
             </div>
           </div>
           <ReserveLink href={whatsapp} />
           <div style={{ display: 'flex', gap: 8, marginTop: 9 }}>
-            <PillLink href={whatsapp} title="Chat with a park host" label="CHAT" blank />
-            <PillLink href={mailto} title="Email the reservations team" label="EMAIL" />
-            <PillLink href="tel:+2306604477" title="Call the park" label="CALL" />
+            <PillLink href={whatsapp} title={t('Chat with a park host')} label={t('CHAT')} blank />
+            <PillLink href={mailto} title={t('Email the reservations team')} label={t('EMAIL')} />
+            <PillLink href="tel:+2306604477" title={t('Call the park')} label={t('CALL')} />
           </div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.5)', marginTop: 10, textAlign: 'center' }}>
-            REPLY WITHIN 1 WORKING DAY · VAT INCLUSIVE · T&amp;C APPLY
+            {t('REPLY WITHIN 1 WORKING DAY · VAT INCLUSIVE · T&C APPLY')}
           </div>
         </div>
       </div>
