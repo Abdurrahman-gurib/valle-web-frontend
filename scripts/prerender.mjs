@@ -27,8 +27,9 @@ const baseRoutes = [
   ...catalog.ACTS.map((a) => `/activities/${a.id}`),
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];
-// Every page in every language: /explore, /fr/explore, /de/explore, /it/explore.
-const LANG_PREFIXES = ['', '/fr', '/de', '/it'];
+// Every page in every language: /explore, /fr/explore, /de/explore, /it/explore, /ar/explore.
+const LANG_PREFIXES = ['', '/fr', '/de', '/it', '/ar'];
+const RTL = new Set(['ar']);
 const routes = LANG_PREFIXES.flatMap((p) => baseRoutes.map((r) => (r === '/' ? (p || '/') : p + r)));
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 if (!template.includes('<!--seo-head-->') || !template.includes('<!--seo-organization-->') || !template.includes('<div id="root"></div>')) {
@@ -39,7 +40,7 @@ let count = 0;
 const write = (route, outFile) => {
   const { html, head, title, lang } = render(route, origin);
   const page = template
-    .replace('<html lang="en">', `<html lang="${lang}">`)
+    .replace('<html lang="en">', `<html lang="${lang}"${RTL.has(lang) ? ' dir="rtl"' : ''}>`)
     .replace(/<title>[^<]*<\/title>/, `<title>${title.replace(/</g, '&lt;')}</title>`)
     .replace('<!--seo-head-->', head)
     .replace('<!--seo-organization-->', organizationScript())

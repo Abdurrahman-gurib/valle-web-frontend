@@ -12,7 +12,7 @@ import { useReveal } from '../hooks/useReveal';
 import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import type { GalleryShot } from '../types';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -336,7 +336,7 @@ export default function DetailPage() {
           [t('Plan your visit'), paths.plan()],
           [t('Lunch at Le Chamouzé'), paths.resto('chamouze')],
         ] as [string, string][]).map(([label, href]) => (
-          <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} →</Link>
+          <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} {fwd()}</Link>
         ))}
       </nav>
 

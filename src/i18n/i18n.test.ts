@@ -15,6 +15,9 @@ describe('i18n paths', () => {
     expect(stripLang('/fr')).toBe('/');
     expect(stripLang('/de/activities/zipline')).toBe('/activities/zipline');
     expect(stripLang('/fresh-air')).toBe('/fresh-air');
+    expect(localizePath('/packages', 'ar')).toBe('/ar/packages');
+    expect(stripLang('/ar/booking')).toBe('/booking');
+    expect(stripLang('/army')).toBe('/army');
   });
 
   it('keeps ids, option keys and images when localising catalog data', () => {

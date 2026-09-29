@@ -7,7 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
  * them on the same page.
  */
 const dict = (lang: string): Record<string, string> => JSON.parse(readFileSync(`src/i18n/${lang}.json`, 'utf8'));
-const LANGS = ['fr', 'de', 'it'] as const;
+const LANGS = ['fr', 'de', 'it', 'ar'] as const;
 
 function preset(page: Page) {
   return page.addInitScript(() => {
@@ -28,10 +28,10 @@ test.describe('language versions (served HTML)', () => {
         const res = await request.get(`/${lang}${path}`, { maxRedirects: 0 });
         expect(res.status(), `/${lang}${path}`).toBe(200);
         const html = await res.text();
-        expect(html, `/${lang}${path} lang`).toContain(`<html lang="${lang}">`);
+        expect(html, `/${lang}${path} lang`).toContain(lang === 'ar' ? '<html lang="ar" dir="rtl">' : `<html lang="${lang}">`);
         const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
         if (canonical) expect(canonical).toMatch(new RegExp(`/${lang}${path.replace(/\//g, '\\/')}$`));
-        for (const l of ['en', 'fr', 'de', 'it', 'x-default']) expect(html, `hreflang ${l}`).toContain(`hreflang="${l}"`);
+        for (const l of ['en', 'fr', 'de', 'it', 'ar', 'x-default']) expect(html, `hreflang ${l}`).toContain(`hreflang="${l}"`);
       }
       // the home page's own words are in the language, not English
       const home = await (await request.get(`/${lang}`)).text();
@@ -81,6 +81,24 @@ test.describe('language switch', () => {
     await offer.getByRole('button').first().click();
     await expect(page).toHaveURL(/\/fr$/);
     await ctx.close();
+  });
+});
+
+test.describe('Arabic reads right to left', () => {
+  test('the Arabic pages flip direction, render in Arabic and fit the screen', async ({ page }) => {
+    await preset(page);
+    const d = dict('ar');
+    for (const path of ['/ar', '/ar/explore', '/ar/booking', '/ar/activities/zipline']) {
+      await page.goto(path);
+      await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+      await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, `${path} is wider than the screen`).toBeLessThanOrEqual(1);
+    }
+    await expect(page.getByText(d['Book now'] ?? '__missing__').first()).toBeAttached();
+    // leaving Arabic restores left-to-right
+    await page.goto('/explore');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   });
 });
 

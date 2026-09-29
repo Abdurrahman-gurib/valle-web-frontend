@@ -107,15 +107,15 @@ export function LanguageSuggest() {
   if (!target) return null;
   const dismiss = () => { try { localStorage.setItem('valle_lang_dismissed', '1'); } catch { /* ignore */ } setTarget(null); };
   return (
-    <div role="region" aria-label="Language" data-testid="language-suggest" lang={target} style={{
+    <div role="region" aria-label="Language" data-testid="language-suggest" lang={target} dir={LANG_META[target].dir} style={{
       position: 'relative', zIndex: 61, background: '#340057', color: '#FFFFFF', fontFamily: "'Work Sans',sans-serif",
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', padding: '9px 44px 9px 16px', fontSize: 13.5,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', paddingBlock: 9, paddingInline: '16px 44px', fontSize: 13.5,
     }}>
       <span>{tr('This site is also available in {language}.', { language: LANG_META[target].name }, target)}</span>
       <button onClick={() => switchTo(target)} style={{ border: 0, background: '#FFFC33', color: '#340057', fontWeight: 700, fontSize: 13, padding: '6px 14px', borderRadius: 999, cursor: 'pointer' }}>
         {tr('Switch to {language}', { language: LANG_META[target].name }, target)}
       </button>
-      <button onClick={dismiss} aria-label="Dismiss" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', border: 0, background: 'transparent', color: '#FFFFFF', fontSize: 18, cursor: 'pointer' }}>×</button>
+      <button onClick={dismiss} aria-label="Dismiss" style={{ position: 'absolute', insetInlineEnd: 10, top: '50%', transform: 'translateY(-50%)', border: 0, background: 'transparent', color: '#FFFFFF', fontSize: 18, cursor: 'pointer' }}>×</button>
     </div>
   );
 }

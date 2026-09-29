@@ -1,7 +1,7 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
@@ -54,7 +54,7 @@ function ReserveLink({ href }: { href: string }) {
         transform: h ? 'translateY(-1px)' : undefined,
       }}
     >
-      {t('Reserve this package')} →
+      {t('Reserve this package')} {fwd()}
     </a>
   );
 }

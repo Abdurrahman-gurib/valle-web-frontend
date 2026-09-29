@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -33,7 +33,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
       </p>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
         {links.map(([label, href]) => (
-          <Link key={href} to={href} style={{ border: '1.5px solid #340057', borderRadius: 999, padding: '11px 18px', fontWeight: 700, fontSize: 14, color: '#340057', textDecoration: 'none' }}>{label} →</Link>
+          <Link key={href} to={href} style={{ border: '1.5px solid #340057', borderRadius: 999, padding: '11px 18px', fontWeight: 700, fontSize: 14, color: '#340057', textDecoration: 'none' }}>{label} {fwd()}</Link>
         ))}
       </div>
       <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)', marginTop: 40 }}>

@@ -12,7 +12,7 @@ import { PinButton } from './ParkMap';
 import type { MapKeyItem, MapLine, MapPin, MapRoute } from '../../data/maps';
 import type { TrailArrow, TrailEdge } from '../../data/quadTrails';
 import type { MapGallery, MapShot } from '../../data/mapGalleries';
-import { _t, useT } from '../../i18n';
+import { _t, useT, fwd } from '../../i18n';
 
 /** Price-option labels built from data at runtime (priceCat.toUpperCase()); registered so the dictionaries cover them. */
 const DYNAMIC_OPTION_LABELS = [_t('QUAD'), _t('ZIPLINE'), _t('BUGGY')];
@@ -528,7 +528,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
       name: t(pp.name), sub: t(pp.sub), img: pp.img,
       badge, badgeColor: isRoutePin ? route.color : '#EBE2FF', badgeFg: isRoutePin ? route.fg : '#340057',
       facts,
-      btnLabel: (pp.btnLabel ? t(pp.btnLabel) : t('View details')) + ' →',
+      btnLabel: (pp.btnLabel ? t(pp.btnLabel) : t('View details')) + ' ' + fwd(),
       btnClick: nav,
     };
   }
@@ -728,7 +728,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{t('{n} PHOTOS · TAP TO OPEN', { n: gallery.shots.length })}</span>
             </div>
             <div style={{ position: 'relative' }}>
-              <div ref={wall} onScroll={onWallScroll} style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', scrollBehavior: 'smooth' }}>
+              <div ref={wall} dir="ltr" onScroll={onWallScroll} style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', scrollBehavior: 'smooth' }}>
                 {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
               </div>
               {wallPos !== 'start' && <WallArrow side="left" onClick={() => scrollWall(-1)} />}

@@ -6,7 +6,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import type { Pin } from '../../types';
-import { useT } from '../../i18n';
+import { useT, fwd } from '../../i18n';
 
 interface SelPinModel {
   name: string;
@@ -114,7 +114,7 @@ export function ParkMap() {
         catBadge: pp.go === 'kids' ? t('KIDS PARK') : (pp.go === 'plan' ? t('SERVICES') : t('DINE')),
         catColor: pp.go === 'kids' ? '#FFFC33' : '#EBE2FF',
         catFg: '#340057',
-        btnLabel: (pp.btnLabel || '') + ' →',
+        btnLabel: (pp.btnLabel || '') + ' ' + fwd(),
         btnClick: () => {
           if (pp.go === 'kids') goto.explore('kids');
           else if (pp.go === 'chamouze' || pp.go === 'citronelle') goto.resto(pp.go);

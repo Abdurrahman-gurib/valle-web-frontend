@@ -5,7 +5,7 @@ import { useCardModel, type CardModel } from '../../lib/card';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
-import { useT } from '../../i18n';
+import { useT, fwd, back, isRtl } from '../../i18n';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
@@ -105,8 +105,10 @@ export function ClassicsRail() {
     r.addEventListener('touchend', resume, { passive: true });
     const t = setInterval(() => {
       if (pausedRef.current) return;
-      if (r.scrollLeft + r.clientWidth >= r.scrollWidth - 24) r.scrollTo({ left: 0, behavior: 'smooth' });
-      else r.scrollBy({ left: 348, behavior: 'smooth' });
+      // right-to-left pages scroll towards negative scrollLeft
+      const sign = getComputedStyle(r).direction === 'rtl' ? -1 : 1;
+      if (Math.abs(r.scrollLeft) + r.clientWidth >= r.scrollWidth - 24) r.scrollTo({ left: 0, behavior: 'smooth' });
+      else r.scrollBy({ left: sign * 348, behavior: 'smooth' });
     }, 3500);
     return () => {
       clearInterval(t);
@@ -117,6 +119,7 @@ export function ClassicsRail() {
     };
   }, []);
 
+  const dirSign = isRtl() ? -1 : 1;
   return (
     <section style={{ padding: 'clamp(56px,8vw,104px) 0 0' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 28, marginBottom: 28 }}>
@@ -125,8 +128,8 @@ export function ClassicsRail() {
         </h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)', marginRight: 10 }}>{t('03 · FAVOURITES')}</span>
-          <ArrowBtn label={t('Scroll back')} onClick={() => railRef.current?.scrollBy({ left: -370, behavior: 'smooth' })}>←</ArrowBtn>
-          <ArrowBtn label={t('Scroll forward')} onClick={() => railRef.current?.scrollBy({ left: 370, behavior: 'smooth' })}>→</ArrowBtn>
+          <ArrowBtn label={t('Scroll back')} onClick={() => railRef.current?.scrollBy({ left: -370 * dirSign, behavior: 'smooth' })}>{back()}</ArrowBtn>
+          <ArrowBtn label={t('Scroll forward')} onClick={() => railRef.current?.scrollBy({ left: 370 * dirSign, behavior: 'smooth' })}>{fwd()}</ArrowBtn>
         </div>
       </div>
       <div

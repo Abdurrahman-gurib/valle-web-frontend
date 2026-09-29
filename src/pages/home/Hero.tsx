@@ -3,7 +3,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { paths, useGoto } from '../../lib/nav';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
-import { useT } from '../../i18n';
+import { useT, fwd } from '../../i18n';
 
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
@@ -68,7 +68,7 @@ export function Hero() {
             }}
           >
             {t('Start your adventure')}
-            <span style={{ background: '#FFFC33', color: '#340057', width: 28, height: 28, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontStyle: 'normal' }}>→</span>
+            <span style={{ background: '#FFFC33', color: '#340057', width: 28, height: 28, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontStyle: 'normal' }}>{fwd()}</span>
           </a>
           <a
             href={paths.explore('all')}

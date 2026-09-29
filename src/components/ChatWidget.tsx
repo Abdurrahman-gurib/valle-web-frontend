@@ -8,7 +8,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { Stripes } from './Stripes';
 import { color, display, font, motion, radius, shadow } from '../styles/theme';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from './chatParts';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 /**
  * Public floating chat launcher (visitors only, never rendered on /staff*).
@@ -547,7 +547,7 @@ export function ChatWidget() {
                 borderRadius: radius.pill, boxShadow: shadow.pink,
               }}
             >
-              {t('Start chat')} →
+              {t('Start chat')} {fwd()}
             </button>
           </div>
         </div>

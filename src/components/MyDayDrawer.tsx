@@ -5,7 +5,7 @@ import { money } from '../lib/format';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 import type { SelLine } from '../types';
 
 const qtyBtn: React.CSSProperties = {
@@ -160,7 +160,7 @@ export function MyDayDrawer() {
                   color: hBrowse ? '#FFFFFF' : '#340057', padding: '11px 22px', borderRadius: 999,
                 }}
               >
-                {t('Explore experiences')} →
+                {t('Explore experiences')} {fwd()}
               </button>
             </div>
           )}
@@ -179,7 +179,7 @@ export function MyDayDrawer() {
               padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
             }}
           >
-            {t('Check out')} →
+            {t('Check out')} {fwd()}
           </button>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', textAlign: 'center', marginTop: 9 }}>
             {t('FREE TO BOOK · PAY ONLINE OR AT THE GATE')}

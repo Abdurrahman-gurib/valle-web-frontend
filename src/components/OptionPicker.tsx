@@ -6,7 +6,7 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { StripesSm } from './Stripes';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -95,7 +95,7 @@ export function OptionPicker() {
             {chosen === 0 ? t('NOTHING ADDED YET') : chosen > 1 ? t('{n} OPTIONS IN MY DAY', { n: chosen }) : t('{n} OPTION IN MY DAY', { n: chosen })}
           </span>
           <button {...bindDone} onClick={app.closeOptions} style={{ border: '1.5px solid #340057', background: hDone ? '#340057' : 'transparent', color: hDone ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999 }}>{t('Done')}</button>
-          <button {...bindBook} onClick={() => { app.closeOptions(); goto.booking(); }} style={{ border: 0, background: hBook ? '#D91E44' : '#FF3358', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)' }}>{t('Book now')} →</button>
+          <button {...bindBook} onClick={() => { app.closeOptions(); goto.booking(); }} style={{ border: 0, background: hBook ? '#D91E44' : '#FF3358', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)' }}>{t('Book now')} {fwd()}</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useApp } from '../store/AppStore';
 import { Stripes } from './Stripes';
 import { useHover } from '../hooks/useHover';
-import { useT } from '../i18n';
+import { useT, fwd } from '../i18n';
 
 function RateCard({ tag, title, body, cta, onClick }: {
   tag: string; title: string; body: string; cta: string; onClick: () => void;
@@ -61,14 +61,14 @@ export function RateGate() {
               tag={t('RR · RESIDENT RATE')}
               title={t('I live in Mauritius')}
               body={t('Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.')}
-              cta={t('SHOW RESIDENT PRICES') + ' →'}
+              cta={t('SHOW RESIDENT PRICES') + ' ' + fwd()}
               onClick={() => app.setRate('rr')}
             />
             <RateCard
               tag={t('NR · NON-RESIDENT RATE')}
               title={t('I am visiting')}
               body={t('Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.')}
-              cta={t('SHOW VISITOR PRICES') + ' →'}
+              cta={t('SHOW VISITOR PRICES') + ' ' + fwd()}
               onClick={() => app.setRate('nr')}
             />
           </div>

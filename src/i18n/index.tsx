@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import fr from './fr.json';
 import de from './de.json';
 import it from './it.json';
+import ar from './ar.json';
 
 /**
  * Languages of the public site. English lives at the root (/explore), every
@@ -17,14 +18,16 @@ import it from './it.json';
  *
  * Placeholders: `t('{n} adults', { n: 3 })`. Keep them identical in translations.
  */
-export const LANGS = ['en', 'fr', 'de', 'it'] as const;
+export const LANGS = ['en', 'fr', 'de', 'it', 'ar'] as const;
 export type Lang = (typeof LANGS)[number];
 
-export const LANG_META: Record<Lang, { name: string; short: string; locale: string; og: string }> = {
-  en: { name: 'English', short: 'EN', locale: 'en-GB', og: 'en_MU' },
-  fr: { name: 'Français', short: 'FR', locale: 'fr-FR', og: 'fr_FR' },
-  de: { name: 'Deutsch', short: 'DE', locale: 'de-DE', og: 'de_DE' },
-  it: { name: 'Italiano', short: 'IT', locale: 'it-IT', og: 'it_IT' },
+export const LANG_META: Record<Lang, { name: string; short: string; locale: string; og: string; dir: 'ltr' | 'rtl' }> = {
+  en: { name: 'English', short: 'EN', locale: 'en-GB', og: 'en_MU', dir: 'ltr' },
+  fr: { name: 'Français', short: 'FR', locale: 'fr-FR', og: 'fr_FR', dir: 'ltr' },
+  de: { name: 'Deutsch', short: 'DE', locale: 'de-DE', og: 'de_DE', dir: 'ltr' },
+  it: { name: 'Italiano', short: 'IT', locale: 'it-IT', og: 'it_IT', dir: 'ltr' },
+  // Modern Standard Arabic for Saudi and Emirati visitors; Western digits in dates.
+  ar: { name: 'العربية', short: 'AR', locale: 'ar-AE-u-nu-latn', og: 'ar_AR', dir: 'rtl' },
 };
 
 const DICTS: Record<Lang, Record<string, string>> = {
@@ -32,6 +35,7 @@ const DICTS: Record<Lang, Record<string, string>> = {
   fr: fr as Record<string, string>,
   de: de as Record<string, string>,
   it: it as Record<string, string>,
+  ar: ar as Record<string, string>,
 };
 
 export const isLang = (v: unknown): v is Lang => typeof v === 'string' && (LANGS as readonly string[]).includes(v);
@@ -48,6 +52,13 @@ export function tr(s: string, vars?: Record<string, string | number>, lang: Lang
   return out;
 }
 
+/** True when the current page reads right to left (Arabic). */
+export const isRtl = (lang: Lang = current): boolean => LANG_META[lang].dir === 'rtl';
+/** "Onward" arrow for UI text outside the dictionaries: → in English, ← in Arabic. */
+export const fwd = (lang: Lang = current): string => (isRtl(lang) ? '←' : '→');
+/** "Back" arrow: ← in English, → in Arabic. */
+export const back = (lang: Lang = current): string => (isRtl(lang) ? '→' : '←');
+
 /**
  * Identity marker for text that lives in data files (map pins, tour copy...).
  * It changes nothing at runtime; the extractor collects `_t('...')` literals so
@@ -63,7 +74,7 @@ export function langFromPath(pathname: string): Lang {
 
 /** '/fr/explore?x#y' -> '/explore?x#y'; '/fr' -> '/'. */
 export function stripLang(path: string): string {
-  const m = path.match(/^\/(fr|de|it)(?=\/|$|\?|#)(.*)$/);
+  const m = path.match(/^\/(fr|de|it|ar)(?=\/|$|\?|#)(.*)$/);
   if (!m) return path || '/';
   const rest = m[2] || '/';
   return rest.startsWith('/') ? rest : '/' + rest;
@@ -91,6 +102,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   setCurrentLang(lang);
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = LANG_META[lang].dir;
     try { localStorage.setItem('valle_lang', lang); } catch { /* private mode */ }
   }, [lang]);
   return <Ctx.Provider value={lang}>{children}</Ctx.Provider>;

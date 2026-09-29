@@ -86,7 +86,7 @@ function StaffShell() {
   );
 }
 
-/** The public pages; mounted once per language prefix ('' for English, '/fr', '/de', '/it'). */
+/** The public pages; mounted once per language prefix ('' for English, '/fr', '/de', '/it', '/ar'). */
 function publicRoutes(prefix: string) {
   return [
     <Route key={prefix + '/'} path={prefix || '/'} element={<HomePage />} />,
