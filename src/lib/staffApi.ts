@@ -250,6 +250,11 @@ export function updateBooking(refCode: string, patch: BookingPatch): Promise<Boo
   });
 }
 
+/** Re-send the guest's ticket by e-mail and WhatsApp. */
+export function resendTicket(refCode: string): Promise<{ email: boolean; whatsapp: boolean }> {
+  return request<{ email: boolean; whatsapp: boolean }>('/staff/bookings/' + encodeURIComponent(refCode) + '/resend-ticket', { method: 'POST' });
+}
+
 export function setBookingStatus(refCode: string, status: BookingStatus): Promise<BookingUpdated> {
   return updateBooking(refCode, { status });
 }

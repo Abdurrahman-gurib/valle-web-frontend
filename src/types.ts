@@ -178,6 +178,9 @@ export interface BookingResponse {
   discount: number;
   lines: { label: string; amount: number }[];
   status: string;
+  /** The guest's ticket page (QR inside); also e-mailed / WhatsApped. */
+  ticketUrl?: string;
+  qrUrl?: string;
 }
 
 export interface QuoteRequest {
@@ -237,7 +240,7 @@ export interface BookingDetailLine {
 }
 
 /** GET /api/staff/bookings/:refCode */
-export type BookingDetail = BookingRow & { lines: BookingDetailLine[] };
+export type BookingDetail = BookingRow & { lines: BookingDetailLine[]; ticketUrl?: string; ticketSentAt?: string | null; reminderSentAt?: string | null };
 
 export interface Paged<T> {
   items: T[];

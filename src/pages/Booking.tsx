@@ -299,6 +299,7 @@ export default function BookingPage() {
   const [apiErr, setApiErr] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [refCode, setRefCode] = useState('');
+  const [ticket, setTicket] = useState<{ ticketUrl?: string; qrUrl?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [natFocus, setNatFocus] = useState(false);
   const [backHov, backBind] = useHover();
@@ -391,7 +392,9 @@ export default function BookingPage() {
     };
     let code: string;
     try {
-      code = (await createBooking(req)).refCode;
+      const res = await createBooking(req);
+      code = res.refCode;
+      setTicket({ ticketUrl: res.ticketUrl, qrUrl: res.qrUrl });
     } catch (e) {
       // Whether the server refused or never answered, the desk has no record of this
       // booking, so no reference is shown: a guest turning up with a phantom VAL code
@@ -639,9 +642,22 @@ export default function BookingPage() {
               </div>
               <span style={{ background: payStampBg, color: '#340057', fontFamily: MONO, fontSize: '10.5px', fontWeight: 700, borderRadius: '999px', padding: '8px 13px', transform: 'rotate(-4deg)', whiteSpace: 'nowrap', flexShrink: 0 }}>{payStamp}</span>
             </div>
-            <div style={{ margin: '18px auto 0', width: '130px', height: '130px', borderRadius: '14px', background: 'repeating-linear-gradient(45deg,#340057 0 8px,#FFFFFF 8px 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ background: '#FFFFFF', fontFamily: MONO, fontSize: '10px', padding: '4px 7px', borderRadius: '6px', color: '#340057' }}>QR AT GATE</span>
-            </div>
+            {ticket.qrUrl ? (
+              <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', margin: '18px auto 0', width: 170 }}>
+                <img src={ticket.qrUrl} alt={`Ticket QR code ${refCode}`} width={170} height={170} data-testid="receipt-qr" style={{ display: 'block', width: 170, height: 170, borderRadius: 14, border: '1.5px solid #EBE2FF', padding: 6, background: '#FFFFFF' }} />
+                <span style={{ display: 'block', fontFamily: MONO, fontSize: '10px', letterSpacing: '.1em', color: '#7333FF', marginTop: 6 }}>SHOW THIS AT THE GATE</span>
+              </a>
+            ) : (
+              <div style={{ margin: '18px auto 0', width: '130px', height: '130px', borderRadius: '14px', background: 'repeating-linear-gradient(45deg,#340057 0 8px,#FFFFFF 8px 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ background: '#FFFFFF', fontFamily: MONO, fontSize: '10px', padding: '4px 7px', borderRadius: '6px', color: '#340057' }}>QR AT GATE</span>
+              </div>
+            )}
+            {ticket.ticketUrl && (
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
+                <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Open my ticket</a>
+                <a href={`https://wa.me/?text=${encodeURIComponent(`My VALLÉ Advenature™ Park ticket ${refCode} · ${dateSummary} · ${slotName}\n${ticket.ticketUrl}`)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>Send to my WhatsApp</a>
+              </div>
+            )}
             <div style={{ height: '1px', background: '#EBE2FF', margin: '18px 0' }} />
             {booking.lines.map((ln, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '5px 0', fontSize: '13.5px', textAlign: 'left' }}>

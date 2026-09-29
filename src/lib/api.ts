@@ -38,6 +38,15 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
   return request<AvailabilityDay[]>(`/bookings/availability?from=${encodeURIComponent(from)}&days=${days}`);
 }
 
+/** GET /api/tickets/:ref?t= : the guest's ticket, from the QR / e-mail link. */
+export interface TicketView {
+  refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
+  rate: string; payMode: string; status: string; total: number; lines: { label: string; amount: number }[]; ticketUrl: string; qrUrl: string;
+}
+export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
+  return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
+}
+
 export function createBooking(body: BookingRequest): Promise<BookingResponse> {
   return request<BookingResponse>('/bookings', { method: 'POST', body: JSON.stringify(body) });
 }

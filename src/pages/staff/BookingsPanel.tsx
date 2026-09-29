@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { BookingRow, BookingStatus, PayMode, RateKey, SlotKey } from '../../types';
 import {
-  exportUrl, getBooking, isHttpError, listBookings, updateBooking,
+  exportUrl, getBooking, isHttpError, listBookings, resendTicket, updateBooking,
   type BookingAuditEntry, type BookingDetailFull, type BookingPatch, type BookingSort,
 } from '../../lib/staffApi';
 import { NATC } from '../../lib/format';
@@ -98,13 +98,25 @@ function confirmationText(d: BookingDetailFull): string {
     `Visit: ${shortDate(d.visitDate)}, ${slotLabel(d.slot).toLowerCase()} arrival (${d.slot === 'morning' ? '09:00–12:00' : '12:00–15:30'})`,
     lines,
     `Total: ${money(d.total)} · ${d.payMode === 'online' ? 'paid online' : 'to pay on arrival'}`,
-    'Show this reference at the gate. B102, Mare Anguilles, Chamouny · +230 660 44 77',
+    d.ticketUrl ? `Your ticket with QR code: ${d.ticketUrl}` : '',
+    'Show it at the gate. B102, Mare Anguilles, Chamouny · +230 660 44 77',
   ].filter(Boolean).join('\n');
 }
 
 /** WhatsApp / call / e-mail the guest, or copy the confirmation to paste anywhere. */
 function ContactActions({ data }: { data: BookingDetailFull }) {
   const [copied, setCopied] = useState(false);
+  const [resent, setResent] = useState('');
+  const resend = async () => {
+    setResent('…');
+    try {
+      const r = await resendTicket(data.refCode);
+      setResent(r.email || r.whatsapp ? `Sent${r.email ? ' by e-mail' : ''}${r.whatsapp ? ' and WhatsApp' : ''} ✓` : 'Nothing sent: no e-mail / mail is off');
+    } catch {
+      setResent('Could not send');
+    }
+    setTimeout(() => setResent(''), 4000);
+  };
   const wa = waDigits(data.phone);
   const text = confirmationText(data);
   const copy = async () => {
@@ -117,6 +129,9 @@ function ContactActions({ data }: { data: BookingDetailFull }) {
       {data.phone && <a href={`tel:${data.phone.replace(/\s+/g, '')}`} style={a}>Call</a>}
       {data.email && <a href={`mailto:${data.email}?subject=${encodeURIComponent('Your VALLÉ booking ' + data.refCode)}&body=${encodeURIComponent(text)}`} style={a}>E-mail</a>}
       <button type="button" onClick={() => { void copy(); }} style={{ ...a, background: copied ? '#E2FFEB' : '#FFFFFF' }}>{copied ? 'Copied ✓' : 'Copy confirmation'}</button>
+      {data.ticketUrl && <a href={data.ticketUrl} target="_blank" rel="noopener noreferrer" style={a}>Ticket</a>}
+      <button type="button" onClick={() => { void resend(); }} disabled={resent === '…'} data-testid="resend-ticket" style={{ ...a, background: resent && resent !== '…' ? '#E2FFEB' : '#FFFFFF' }}>{resent || 'Resend ticket'}</button>
+      {data.ticketSentAt && <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', alignSelf: 'center' }}>TICKET SENT {dateTimeSec(data.ticketSentAt).toUpperCase()}</span>}
     </div>
   );
 }

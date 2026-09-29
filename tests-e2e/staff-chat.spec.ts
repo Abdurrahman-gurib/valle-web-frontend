@@ -245,6 +245,47 @@ test.describe('staff dashboard', () => {
     await visitor.close();
   });
 
+  test('a booking gets a QR ticket: on the receipt, on the ticket page, and re-sendable from the desk', async ({ page, context }) => {
+    // guest books on the website
+    const guest = await context.newPage();
+    await guest.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_sel', '{}'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
+    await guest.goto('/booking');
+    const tag = Math.random().toString(36).slice(2, 8);
+    await guest.getByPlaceholder(/name/i).first().fill(`Ticket Guest ${tag}`);
+    await guest.getByPlaceholder(/email/i).first().fill(`ticket-${tag}@example.mu`);
+    await guest.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
+    await expect(guest.getByText(/BOOKING REFERENCE/i)).toBeVisible({ timeout: 15000 });
+    const ref = (await guest.getByText(/VAL-\d{4}-26/).first().textContent())!.trim();
+    // a real QR image, served by the API for this booking only
+    const qr = guest.getByTestId('receipt-qr');
+    await expect(qr).toBeVisible();
+    expect(await qr.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+    const ticketHref = await guest.getByRole('link', { name: /open my ticket/i }).getAttribute('href');
+    expect(ticketHref).toMatch(new RegExp(`/ticket/${ref}\\?t=[A-Za-z0-9_-]{24}$`));
+    await expect(guest.getByRole('link', { name: /send to my whatsapp/i })).toHaveAttribute('href', /wa\.me\/\?text=/);
+
+    // the ticket page opens from the link and refuses a bad token
+    await guest.goto(ticketHref!.replace(/^https?:\/\/[^/]+/, ''));
+    await expect(guest.getByTestId('ticket')).toBeVisible({ timeout: 15000 });
+    await expect(guest.getByText(`Ticket Guest ${tag}`)).toBeVisible();
+    expect(await guest.getByTestId('ticket-qr').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+    await guest.goto(`/ticket/${ref}?t=AAAAAAAAAAAAAAAAAAAAAAAA`);
+    await expect(guest.getByText(/not valid/i)).toBeVisible({ timeout: 15000 });
+    const bad = await guest.request.get(`/api/tickets/${ref}/qr.png?t=AAAAAAAAAAAAAAAAAAAAAAAA`);
+    expect(bad.status()).toBe(403);
+    await guest.close();
+
+    // the desk sees the ticket link and can re-send it
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.getByPlaceholder(/search ref/i).fill(ref);
+    await page.getByText(ref).first().click({ timeout: 15000 });
+    await expect(page.getByTestId('contact-actions').getByRole('link', { name: 'Ticket' })).toHaveAttribute('href', /\/ticket\//, { timeout: 15000 });
+    await page.getByTestId('resend-ticket').click();
+    // the local stack mails through the JSON test transport, so "sent" means rendered and handed over
+    await expect(page.getByTestId('resend-ticket')).toContainText(/Sent by e-mail|Nothing sent/, { timeout: 15000 });
+  });
+
   test('an operator takes a phone booking from the dashboard', async ({ page }) => {
     await page.goto('/staff');
     await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });

@@ -45,6 +45,7 @@ export function nginxLikeRoutes(): Plugin {
         if (/\.[a-z0-9]+$/i.test(path)) return next(); // assets: sirv
         if (/^\/(staff|hr)(\/.*)?$/.test(path)) return html(res, 200, shell(), { 'X-Robots-Tag': 'noindex, nofollow' });
         if (/^\/vacancies\/[a-z0-9-]+$/.test(path)) return html(res, 200, shell());
+        if (/^\/ticket\/[A-Za-z0-9-]+$/.test(path)) return html(res, 200, shell(), { 'X-Robots-Tag': 'noindex, nofollow' });
 
         const file = path === '/' ? join(dist, 'index.html') : join(dist, path.slice(1), 'index.html');
         if (path === '/' || /^\/[a-z0-9-]+(\/[a-z0-9-]+)?$/.test(path)) {

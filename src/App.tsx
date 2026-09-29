@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import NotFoundPage from './pages/NotFound';
+import TicketPage from './pages/Ticket';
 import { CatalogProvider } from './store/CatalogContext';
 import { AppStoreProvider } from './store/AppStore';
 import { StaffAuthProvider } from './store/StaffAuth';
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/vacancies" element={<VacanciesPage />} />
             <Route path="/vacancies/:slug" element={<VacancyDetailPage />} />
+            <Route path="/ticket/:ref" element={<TicketPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
