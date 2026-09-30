@@ -120,6 +120,21 @@ test.describe('staff dashboard', () => {
     await page.getByText(ref).first().click();
     await expect(page.getByText('E2E Drawer Guest').first()).toBeVisible();
     await expect(page.getByText(/zipline/i).first()).toBeVisible();
+    // the window opens in the middle of the screen, not docked to the right edge
+    const dialog = page.getByRole('dialog', { name: 'Booking ' + ref });
+    const box = (await dialog.boundingBox())!;
+    const vw = page.viewportSize()!.width;
+    expect(Math.abs(box.x + box.width / 2 - vw / 2)).toBeLessThan(4);
+    // the waiver link can be re-sent while someone still has to sign
+    await expect(page.getByTestId('resend-waiver')).toBeVisible({ timeout: 10000 });
+    await page.getByTestId('resend-waiver').click();
+    await expect(page.getByTestId('resend-waiver')).toHaveText(/Sent|Nothing sent|Could not/, { timeout: 15000 });
+    // cancelling asks first, and "Keep it" changes nothing
+    await page.getByRole('button', { name: 'Cancel booking' }).click();
+    await expect(page.getByTestId('cancel-confirm')).toBeVisible();
+    await page.getByRole('button', { name: 'Keep it' }).click();
+    await expect(page.getByTestId('cancel-confirm')).toHaveCount(0);
+    await expect(dialog.getByText(/^confirmed$/i).first()).toBeVisible();
   });
 
   test('a booking made on the website reaches the open dashboard live, without a reload', async ({ page, context }) => {

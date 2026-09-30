@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { BookingRow, BookingStatus, PayMode, RateKey, SlotKey } from '../../types';
 import {
-  exportUrl, getBooking, getGateView, isHttpError, listBookings, resendTicket, updateBooking,
+  exportUrl, getBooking, getGateView, isHttpError, listBookings, resendTicket, resendWaiver, updateBooking,
   type BookingAuditEntry, type BookingDetailFull, type BookingPatch, type BookingSort,
 } from '../../lib/staffApi';
 import { NATC } from '../../lib/format';
@@ -107,6 +107,7 @@ function confirmationText(d: BookingDetailFull): string {
 function ContactActions({ data }: { data: BookingDetailFull }) {
   const [copied, setCopied] = useState(false);
   const [resent, setResent] = useState('');
+  const [waiverSent, setWaiverSent] = useState('');
   const [waivers, setWaivers] = useState<{ signed: number; required: number; url: string } | null>(null);
   useEffect(() => {
     let dead = false;
@@ -124,6 +125,16 @@ function ContactActions({ data }: { data: BookingDetailFull }) {
       setResent('Could not send');
     }
     setTimeout(() => setResent(''), 4000);
+  };
+  const sendWaiver = async () => {
+    setWaiverSent('…');
+    try {
+      const r = await resendWaiver(data.refCode);
+      setWaiverSent(r.email || r.whatsapp ? `Sent${r.email ? ' by e-mail' : ''}${r.whatsapp ? ' and WhatsApp' : ''} ✓` : 'Nothing sent: no e-mail / mail is off');
+    } catch {
+      setWaiverSent('Could not send');
+    }
+    setTimeout(() => setWaiverSent(''), 4000);
   };
   const wa = waDigits(data.phone);
   const text = confirmationText(data);
@@ -143,6 +154,11 @@ function ContactActions({ data }: { data: BookingDetailFull }) {
         <a href={waivers.url} target="_blank" rel="noopener noreferrer" data-testid="drawer-waivers" title="Waiver form for this booking (send it to the guest)" style={{ ...a, borderColor: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44', color: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44' }}>
           Waivers {Math.min(waivers.signed, waivers.required)}/{waivers.required}
         </a>
+      )}
+      {waivers && waivers.signed < waivers.required && data.status !== 'cancelled' && (
+        <button type="button" onClick={() => { void sendWaiver(); }} disabled={waiverSent === '…'} data-testid="resend-waiver" title="E-mail (and WhatsApp when possible) the link to sign the waivers" style={{ ...a, background: waiverSent && waiverSent !== '…' ? '#E2FFEB' : '#FFFFFF' }}>
+          {waiverSent || 'Resend waiver form'}
+        </button>
       )}
       {data.ticketSentAt && <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', alignSelf: 'center' }}>TICKET SENT {dateTimeSec(data.ticketSentAt).toUpperCase()}</span>}
     </div>
@@ -303,6 +319,8 @@ function Drawer({ refCode, onClose, onPatched }: {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState<BookingStatus | null>(null);
+  // 'Cancel booking' asks once before releasing the reservation
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Draft | null>(null);
   const [fieldErr, setFieldErr] = useState<Record<string, string>>({});
@@ -444,10 +462,11 @@ function Drawer({ refCode, onClose, onPatched }: {
         role="dialog"
         aria-label={'Booking ' + refCode}
         style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 96, width: 'min(100vw,480px)',
-          background: '#FFFFFF', display: 'flex', flexDirection: 'column',
-          boxShadow: '-24px 0 60px -20px rgba(38,0,64,.5)',
-          animation: reduced ? 'vfade .2s ease both' : 'vslidein .3s cubic-bezier(.2,.7,.2,1) both',
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 96,
+          width: 'min(100vw - 24px, 620px)', maxHeight: 'min(100vh - 24px, 920px)',
+          background: '#FFFFFF', display: 'flex', flexDirection: 'column', borderRadius: 22, overflow: 'hidden',
+          boxShadow: '0 40px 90px -30px rgba(38,0,64,.6)',
+          animation: reduced ? 'vfade .2s ease both' : 'vpop .25s cubic-bezier(.2,.7,.2,1) both',
         }}
       >
         <div style={{ background: '#340057', color: '#FFFFFF', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -718,14 +737,24 @@ function Drawer({ refCode, onClose, onPatched }: {
                 >
                   {busy === 'arrived' ? <Spinner /> : 'Mark arrived'}
                 </Btn>
-                <Btn
-                  variant="danger"
-                  onClick={() => { void quickStatus('cancelled'); }}
-                  disabled={busy !== null || data.status === 'cancelled'}
-                  style={{ flex: 1 }}
-                >
-                  {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Cancel'}
-                </Btn>
+                {confirmCancel ? (
+                  <div data-testid="cancel-confirm" style={{ flexBasis: '100%', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', background: '#FFF1F3', border: '1.5px solid #FF3358', borderRadius: 14, padding: '10px 14px' }}>
+                    <span style={{ fontWeight: 700, fontSize: 13.5, flex: '1 1 200px' }}>Cancel booking {data.refCode}? The guest keeps their e-mail but the reservation is released.</span>
+                    <Btn variant="danger" onClick={() => { setConfirmCancel(false); void quickStatus('cancelled'); }} disabled={busy !== null}>
+                      {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Yes, cancel booking'}
+                    </Btn>
+                    <Btn variant="ghost" onClick={() => setConfirmCancel(false)}>Keep it</Btn>
+                  </div>
+                ) : (
+                  <Btn
+                    variant="danger"
+                    onClick={() => setConfirmCancel(true)}
+                    disabled={busy !== null || data.status === 'cancelled'}
+                    style={{ flex: 1 }}
+                  >
+                    {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Cancel booking'}
+                  </Btn>
+                )}
               </>
             )}
           </div>
