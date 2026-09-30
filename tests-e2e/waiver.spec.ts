@@ -46,10 +46,13 @@ async function fillParticipant(page: Page, p: { name: string; birth: string; hei
   if (p.guardian) await page.getByTestId('w-guardian').fill(p.guardian);
   const em = page.getByTestId('w-em-name');
   if (!(await em.inputValue())) {
+    await page.getByTestId('w-address').fill('Lux Le Morne');
+    await page.getByTestId('w-phone').fill('+971 50 111 2222');
+    await page.getByTestId('w-nationality').fill('UAE');
     await em.fill('Omar Rahman');
     await page.getByTestId('w-em-phone').fill('+971 50 123 4567');
   }
-  for (const k of ['risks', 'health', 'sober', 'rules', 'data']) await page.getByTestId('w-decl-' + k).check();
+  for (const k of ['terms', 'health', 'consent']) await page.getByTestId('w-decl-' + k).check();
   await sign(page);
 }
 
@@ -68,7 +71,8 @@ test.describe('digital waiver (guest)', () => {
 
     await page.goto(b.waiverPath);
     await expect(page.getByTestId('waiver-progress')).toContainText('0 of 2 signed');
-    await expect(page.getByTestId('waiver-terms')).toContainText('law of Mauritius');
+    await expect(page.getByTestId('waiver-terms')).toContainText('Mare Anguilles Farms Ltd');
+    await expect(page.getByTestId('waiver-terms')).toContainText('strictly forbidden to swim in the park');
 
     // nothing filled in: the form says what is missing instead of sending
     await page.getByTestId('w-submit').click();
@@ -110,8 +114,8 @@ test.describe('gate check-in', () => {
     const signed = await page.request.post(`/api/tickets/${b.ref}/waivers?t=${b.token}`, {
       data: {
         participantName: 'Lead Guest', birthDate: '1985-06-01', heightCm: 180, weightKg: 82,
-        emergencyName: 'Friend', emergencyPhone: '+230 5123 4567',
-        declarations: { risks: true, health: true, sober: true, rules: true, data: true },
+        phone: '+32 477 59 26 59', nationality: 'Belgium', emergencyName: 'Friend', emergencyPhone: '+230 5123 4567',
+        declarations: { terms: true, health: true, consent: true },
         signature: 'data:image/png;base64,' + 'iVBORw0KGgo'.padEnd(400, 'A'),
       },
     });

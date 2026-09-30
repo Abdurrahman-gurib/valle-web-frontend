@@ -58,9 +58,10 @@ export interface WaiverView {
 }
 export interface WaiverRequest {
   participantName: string; birthDate: string; heightCm: number; weightKg: number; guardianName?: string;
+  address?: string; email?: string; phone: string; nationality: string; idNumber?: string; marketingConsent?: boolean;
   emergencyName: string; emergencyPhone: string; medicalNotes?: string;
-  declarations: { risks: boolean; health: boolean; sober: boolean; rules: boolean; data: boolean };
-  photoConsent?: boolean; signature: string; lang?: string;
+  declarations: { terms: boolean; health: boolean; consent: boolean };
+  signature: string; lang?: string;
 }
 const waiverPath = (refCode: string, token: string) => `/tickets/${encodeURIComponent(refCode)}/waivers?t=${encodeURIComponent(token)}`;
 export function fetchWaivers(refCode: string, token: string): Promise<WaiverView> {

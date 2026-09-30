@@ -207,8 +207,10 @@ export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
                   <div style={{ marginTop: 8, display: 'grid', gap: 6, fontSize: 13 }}>
                     <img src={w.signature} alt={`Signature of ${w.signedBy}`} style={{ maxWidth: 320, width: '100%', border: '1px solid #EBE2FF', borderRadius: 10, background: '#FFFFFF' }} />
                     <div>Signed by <strong>{w.signedBy}</strong>{w.isMinor ? ' (guardian)' : ''} · {shortDate(w.signedAt)} {clockTime(w.signedAt)} · read in {w.lang.toUpperCase()}</div>
-                    <div>Born {shortDate(w.birthDate)} · emergency: {w.emergencyName}, {w.emergencyPhone}</div>
-                    <div>Photo consent: {w.photoConsent ? 'yes' : 'no'}</div>
+                    <div>Born {shortDate(w.birthDate)} · {w.nationality || 'nationality not given'}{w.idNumber ? ` · ID/passport ${w.idNumber}` : ''}</div>
+                    <div>{w.address ? `${w.address} · ` : ''}{w.phone}{w.email ? ` · ${w.email}` : ''}</div>
+                    <div>Emergency: {w.emergencyName}, {w.emergencyPhone}</div>
+                    <div>Promotions (clause 18): {w.marketingConsent ? 'yes' : 'no'}</div>
                   </div>
                 )}
               </div>

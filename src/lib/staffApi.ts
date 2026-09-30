@@ -345,7 +345,8 @@ export function postVisitorMessage(conversationId: string, visitorKey: string, b
 export interface GateFlag { level: 'stop' | 'check'; activity: string; message: string }
 export interface GateWaiver {
   id: string; participantName: string; age: number; birthDate: string; heightCm: number; weightKg: number;
-  isMinor: boolean; guardianName: string; emergencyName: string; emergencyPhone: string; medicalNotes: string;
+  isMinor: boolean; guardianName: string; address: string; email: string; phone: string; nationality: string; idNumber: string; marketingConsent: boolean;
+  emergencyName: string; emergencyPhone: string; medicalNotes: string;
   photoConsent: boolean; signedBy: string; signature: string; lang: string; signedAt: string; flags: GateFlag[];
 }
 export interface GateView {

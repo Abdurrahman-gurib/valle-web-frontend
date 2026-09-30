@@ -12,27 +12,35 @@ const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
 
 /**
- * The waiver the guest reads and signs. Keys are the English text; the
- * backend records the terms version and the language it was read in.
+ * The park's Disclaimer Form (Mare Anguilles Farms Ltd), clause for clause.
+ * Keys are the English text; the backend records the terms version and the
+ * language it was read in.
  */
 const WAIVER_TERMS = [
-  _t('I am taking part voluntarily in activities at VALLÉ Advenature™ Park, which may include ziplines, the bicycle zipline, the Nepalese bridge, quad bikes, buggies, the luge kart and walks on uneven ground to the waterfalls.'),
-  _t('I understand that these activities carry inherent risks, including falls, collisions, equipment failure, sudden changes in weather, insects and uneven ground, and that they can lead to injury.'),
-  _t('I will follow every instruction from the guides, wear the safety equipment provided, respect the age, height and weight limits of each activity, and stop when a guide asks me to.'),
-  _t('I confirm that I have no medical condition that makes these activities unsafe for me, such as a heart, back or neck condition, epilepsy, recent surgery or pregnancy, or that I have declared it on this form and will tell the guide.'),
-  _t('I will not take part under the influence of alcohol or drugs.'),
-  _t('To the extent permitted by the law of Mauritius, I release VALLÉ Advenature™ Park, its staff and partners from claims for injury, loss or damage arising from these risks, except where caused by their negligence or wilful misconduct.'),
-  _t('I agree that the park may give or arrange first aid and medical treatment if needed.'),
-  _t('A parent or guardian who signs for a participant under 18 accepts these terms on their behalf and confirms that they will supervise them during the visit.'),
-  _t('The park keeps this waiver and the details on it with the booking, uses them for safety at the gate and on the activities, and never uses them for marketing.'),
+  _t('Acknowledges that he/the minor Participant has attended the introductory session delivered by the employees/representatives of the Company which is designed to familiarize the attendees with the handling and use of the relevant equipment and accessories with respect to the selected activity (the “Equipment”). The Participant/the Legal Guardians declare being satisfied with such introductory session.'),
+  _t('Declares that he/the minor Participant is capable of handling and operating the Equipment and accepts that the use of the Equipment shall be at his/the minor Participant’s own risks.'),
+  _t('Accepts that for the duration of the activity, the Equipment shall be under his care and custody (“garde”), until same returned to the Company.'),
+  _t('Accepts that the Company reserves the right to claim any incurred costs following any damage of its equipment and/or accessories as a direct result of it not being used in orderly or proper manner or non-conformity with any instructions delivered by the Company’s employees/representatives or not used as a reasonable person would. Further agrees to indemnify the Company in the non-negotiable and minimum sum of Rupees 25,000/- whenever a quad or a buggy is damaged by the acts and doings of the Participant.'),
+  _t('Accepts to promptly report to the Company any defect noted in the operation of the Equipment before the start of the activity or at the soonest the defect comes to the knowledge of the Participant. In the absence of any such report, the Company shall consider that the Participant/Legal Guardian accepts that the Equipment has been handed to him/minor Participant in good working condition.'),
+  _t('Agrees to ensure that he/the minor Participant shall at all time wear such helmet provided to him/the minor Participant for the purpose of the activity.'),
+  _t('Acknowledges having been made aware of the wilderness of the site and of the level of difficulty pertaining to the tracks.'),
+  _t('Declares that he/the minor Participant has agreed to participate in the activity voluntarily and has agreed to do so at his/the minor Participant’s own risks. The Legal Guardian hereby expressly gives his consent to the minor Participant’s participation in the selected activity and agrees that the minor Participant shall be under his responsibilities during the course of the activity.'),
+  _t('Warrants that he/the minor Participant is physically and mentally able to participate safely in the activity and that he/the minor Participant has no particular health problem and suffers from no handicap whatsoever that may endanger his/the minor Participant’s life or the life of any participant during the course of the activity. The Participant/Legal Guardian furthermore warrants not being/that the minor Participant isn’t under the influence of any alcohol, drugs or medication which may impair/endanger his/the minor Participant’s participation or that of any other participant during the course of the activity.'),
+  _t('Acknowledges that it is strictly forbidden to engage/participate in any of the activity whilst pregnant. Acknowledges that he/the minor Participant has been informed of the security measures to be complied with during the course of the activity and accepts the importance of complying with same at all times. The Participant/Legal Guardian therefore expressly agrees to obey/to ensure that the minor Participant obeys such security measures and agrees to comply with all the instructions of the guide(s)/Company’s employees during the course of the activity.'),
+  _t('Accepts that non-compliance with the instructions of the guide(s)/Company’s employees during the course of the activity may result in the latter ending the activity forthwith. In such an event, the Participant/Legal Guardian agrees that he shall not be entitled to any reimbursement whatsoever from the Company.'),
+  _t('Takes note of and agrees to the strict non-refund policy operated by the Company whenever an activity is cancelled by the Participant after having been booked and payment made, and such activity can be undertaken at that material time. Rainfall or any weather condition cannot and should not account for the cancellation of any activity.'),
+  _t('Hereby agrees to be solely responsible for his/the minor Participant’s personal belongings during the course of the activity.'),
+  _t('Agrees that the Company, its employees or agents shall not in any way whatsoever be held liable for any physical, moral or material damage that he/the minor Participant may suffer during the course of the activity, save and except where same results from the “major misconduct” of the Company or its employees or agents.'),
+  _t('Expressly waives all rights and actions that he may have against the Company, its employees or agents in respect of any claim/s whatsoever that may arise out of or in connection with his/the minor Participant’s participation in the activity, save and except where same results from the “major misconduct” of the Company or its employees or agents.'),
+  _t('Undertakes to indemnify and hold harmless the Company, its employees or agents from and against all claims and actions whatsoever which may at any time be suffered or incurred by, or asserted against, any one of them, as a result of or in connection with the acts and doings of the Participant/minor Participant during the latter’s participation in the activity.'),
+  _t('Acknowledges that it is strictly forbidden to swim in the park.'),
+  _t('Grants the Company the right to send future promotions to the provided email and/or phone number for advertising purposes (optional: tick the box below).'),
 ];
 
 const DECLARATIONS = [
-  ['risks', _t('I have read the waiver above and accept the risks.')],
-  ['health', _t('The participant is fit and healthy enough to take part, or has declared any condition below.')],
-  ['sober', _t('The participant will not take part under the influence of alcohol or drugs.')],
-  ['rules', _t("The participant will follow the guides' instructions and the safety rules.")],
-  ['data', _t('I agree that the park may keep this waiver and these details for safety purposes.')],
+  ['terms', _t('I have read the Disclaimer Form above and agree to all its clauses on my own behalf or on behalf of the minor Participant.')],
+  ['health', _t('I confirm clauses 9 and 10: the Participant is physically and mentally able to take part, is not pregnant, and is not under the influence of alcohol, drugs or medication.')],
+  ['consent', _t('I confirm clause 8: participation is voluntary and at the Participant’s own risk; as Legal Guardian I consent to the minor Participant taking part and take responsibility for them.')],
 ] as const;
 type DeclKey = (typeof DECLARATIONS)[number][0];
 
@@ -60,7 +68,7 @@ function limitWarnings(acts: WaiverActivity[], age: number | null, heightCm: num
   return out;
 }
 
-const blankDecl = (): Record<DeclKey, boolean> => ({ risks: false, health: false, sober: false, rules: false, data: false });
+const blankDecl = (): Record<DeclKey, boolean> => ({ terms: false, health: false, consent: false });
 
 export default function WaiverPage() {
   const t = useT();
@@ -77,11 +85,16 @@ export default function WaiverPage() {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [guardian, setGuardian] = useState('');
+  const [address, setAddress] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [idNumber, setIdNumber] = useState('');
+  const [marketing, setMarketing] = useState(false);
   const [emName, setEmName] = useState('');
   const [emPhone, setEmPhone] = useState('');
   const [medical, setMedical] = useState('');
   const [decl, setDecl] = useState(blankDecl);
-  const [photo, setPhoto] = useState(false);
   const [hasInk, setHasInk] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -116,9 +129,11 @@ export default function WaiverPage() {
     if (age === null || age < 0 || age > 110) problems.push(t('a valid date of birth'));
     if (!(h >= 50 && h <= 230)) problems.push(t('height in cm'));
     if (!(w >= 10 && w <= 250)) problems.push(t('weight in kg'));
-    if (minor && !guardian.trim()) problems.push(t('the parent or guardian’s name'));
+    if (minor && !guardian.trim()) problems.push(t('the Legal Guardian’s name'));
+    if (!/^[+0-9 ()-]{6,24}$/.test(phone.trim())) problems.push(t('a phone number'));
+    if (!nationality.trim()) problems.push(t('the nationality'));
     if (!emName.trim() || !/^[+0-9 ()-]{6,24}$/.test(emPhone.trim())) problems.push(t('an emergency contact and phone number'));
-    if (!DECLARATIONS.every(([k]) => decl[k])) problems.push(t('all five statements ticked'));
+    if (!DECLARATIONS.every(([k]) => decl[k])) problems.push(t('the three confirmations ticked'));
     const signature = pad.current?.toPng() || '';
     if (!signature) problems.push(t('a signature'));
     if (problems.length) { setErr(t('Please add: {list}.', { list: problems.join(', ') })); return; }
@@ -127,13 +142,16 @@ export default function WaiverPage() {
     try {
       const next = await signWaiver(ref, token, {
         participantName: name.trim(), birthDate: birth, heightCm: Math.round(h), weightKg: Math.round(w),
-        guardianName: minor ? guardian.trim() : undefined, emergencyName: emName.trim(), emergencyPhone: emPhone.trim(),
-        medicalNotes: medical.trim() || undefined, declarations: decl, photoConsent: photo, signature, lang,
+        guardianName: minor ? guardian.trim() : undefined, address: address.trim() || undefined, email: email.trim() || undefined,
+        phone: phone.trim(), nationality: nationality.trim(), idNumber: idNumber.trim() || undefined, marketingConsent: marketing,
+        emergencyName: emName.trim(), emergencyPhone: emPhone.trim(),
+        medicalNotes: medical.trim() || undefined, declarations: decl, signature, lang,
       });
       setView(next);
       setDone(t('Thank you. The waiver for {name} is signed.', { name: name.trim() }));
       // next participant: keep the emergency contact and the guardian, clear the rest
-      setName(''); setBirth(''); setHeight(''); setWeight(''); setMedical(''); setDecl(blankDecl()); setPhoto(false); setCorrecting(false);
+      // next participant: the group's address, contacts, nationality and guardian stay filled in
+      setName(''); setBirth(''); setHeight(''); setWeight(''); setIdNumber(''); setMedical(''); setDecl(blankDecl()); setCorrecting(false);
       pad.current?.clear();
       formTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
@@ -161,7 +179,7 @@ export default function WaiverPage() {
             {t('Sign before you arrive')}
           </h1>
           <p style={{ fontSize: 15, lineHeight: 1.55, margin: 0, color: 'rgba(52,0,87,.8)' }}>
-            {t('One waiver per participant, about two minutes each. Signed waivers go straight to the gate, so your party walks past the paperwork queue.')}
+            {t('One Disclaimer Form per participant, about two minutes each. Signed forms go straight to the gate, so your party walks past the paperwork queue.')}
           </p>
 
           <section data-testid="waiver-progress" style={{ marginTop: 20, background: '#FFFFFF', borderRadius: 18, boxShadow: '0 0 0 1.5px #EBE2FF', overflow: 'hidden' }}>
@@ -215,9 +233,12 @@ export default function WaiverPage() {
             <div ref={formTop} style={{ scrollMarginTop: 90 }}>
               {correcting && <p style={{ margin: '18px 0 0', fontSize: 13.5, color: '#7333FF', fontWeight: 600 }}>{t('To correct a waiver, sign again with exactly the same full name; the new one replaces it.')}</p>}
 
-              <Section n="1" title={t('The waiver')}>
-                <div data-testid="waiver-terms" style={{ maxHeight: 260, overflowY: 'auto', background: '#F7F3FF', borderRadius: 14, padding: '14px 18px', fontSize: 13.5, lineHeight: 1.6 }}>
-                  <div style={{ fontWeight: 800, marginBottom: 8 }}>{t('Release of liability, assumption of risk and safety agreement')}</div>
+              <Section n="1" title={t('Disclaimer Form')}>
+                <div data-testid="waiver-terms" style={{ maxHeight: 300, overflowY: 'auto', background: '#F7F3FF', borderRadius: 14, padding: '14px 18px', fontSize: 13.5, lineHeight: 1.6 }}>
+                  <div style={{ fontWeight: 800, marginBottom: 4 }}>{t('DISCLAIMER FORM')}</div>
+                  <div style={{ fontSize: 12.5, marginBottom: 8 }}>{t('Mare Anguilles Farms Ltd (hereinafter referred to as “The Company”)')}</div>
+                  <p style={{ margin: '0 0 8px' }}>{t('The activities booked are hereinafter referred to as the “activity”. Where the context so requires words denoting the singular include the plural and vice versa.')}</p>
+                  <p style={{ margin: '0 0 8px', fontWeight: 700 }}>{t('The Participant/Legal Guardian hereby:')}</p>
                   <ol style={{ margin: 0, paddingInlineStart: 20 }}>
                     {WAIVER_TERMS.map((p) => <li key={p} style={{ marginBottom: 8 }}>{t(p)}</li>)}
                   </ol>
@@ -226,7 +247,7 @@ export default function WaiverPage() {
               </Section>
 
               <Section n="2" title={t('Participant')}>
-                <Field label={t('Full name of the participant')}><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" style={input} data-testid="w-name" /></Field>
+                <Field label={t('First and last name')}><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" style={input} data-testid="w-name" /></Field>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12 }}>
                   <Field label={t('Date of birth')}><input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} max={view.visitDate} style={input} data-testid="w-birth" /></Field>
                   <Field label={t('Height (cm)')}><input inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9]/g, ''))} placeholder="170" style={input} data-testid="w-height" /></Field>
@@ -241,8 +262,15 @@ export default function WaiverPage() {
                   </div>
                 )}
                 {minor && (
-                  <Field label={t('Parent or guardian signing for this participant')}><input value={guardian} onChange={(e) => setGuardian(e.target.value)} style={input} data-testid="w-guardian" /></Field>
+                  <Field label={t('Legal Guardian signing for this minor Participant (first and last name)')}><input value={guardian} onChange={(e) => setGuardian(e.target.value)} style={input} data-testid="w-guardian" /></Field>
                 )}
+                <Field label={t('Address / Hotel')}><input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" style={input} data-testid="w-address" /></Field>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12 }}>
+                  <Field label={t('E-mail')}><input type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" style={input} data-testid="w-email" /></Field>
+                  <Field label={t('Phone number')}><input type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" placeholder="+230 5xxx xxxx" style={input} data-testid="w-phone" /></Field>
+                  <Field label={t('Nationality')}><input value={nationality} onChange={(e) => setNationality(e.target.value)} autoComplete="country-name" style={input} data-testid="w-nationality" /></Field>
+                  <Field label={t('National Identity Card / Passport number (optional)')}><input dir="ltr" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} style={input} data-testid="w-id" /></Field>
+                </div>
                 <Field label={t('Medical conditions, allergies or injuries the guides should know about (optional)')}>
                   <textarea value={medical} onChange={(e) => setMedical(e.target.value)} rows={2} maxLength={500} style={{ ...input, resize: 'vertical' }} />
                 </Field>
@@ -250,19 +278,19 @@ export default function WaiverPage() {
 
               <Section n="3" title={t('Emergency contact')}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12 }}>
-                  <Field label={t('Name')}><input value={emName} onChange={(e) => setEmName(e.target.value)} style={input} data-testid="w-em-name" /></Field>
-                  <Field label={t('Phone number')}><input type="tel" dir="ltr" value={emPhone} onChange={(e) => setEmPhone(e.target.value)} placeholder="+230 5xxx xxxx" style={input} data-testid="w-em-phone" /></Field>
+                  <Field label={t('Name of contact person in case of emergency')}><input value={emName} onChange={(e) => setEmName(e.target.value)} style={input} data-testid="w-em-name" /></Field>
+                  <Field label={t('Phone number of the person to contact in case of emergency')}><input type="tel" dir="ltr" value={emPhone} onChange={(e) => setEmPhone(e.target.value)} placeholder="+230 5xxx xxxx" style={input} data-testid="w-em-phone" /></Field>
                 </div>
               </Section>
 
-              <Section n="4" title={t('Declarations')}>
+              <Section n="4" title={t('Confirmations')}>
                 {DECLARATIONS.map(([k, label]) => (
                   <Check key={k} checked={decl[k]} onChange={(v) => setDecl((d) => ({ ...d, [k]: v }))} testId={'w-decl-' + k}>{t(label)}</Check>
                 ))}
-                <Check checked={photo} onChange={setPhoto}>{t('Optional: the park may share photos of the participant on its social media.')}</Check>
+                <Check checked={marketing} onChange={setMarketing} testId="w-marketing">{t('Optional (clause 18): the Company may send future promotions to this e-mail address and/or phone number.')}</Check>
               </Section>
 
-              <Section n="5" title={minor ? t('Signature of the parent or guardian') : t('Signature of the participant')}>
+              <Section n="5" title={minor ? t('Signature of the Legal Guardian') : t('Signature of the Participant')}>
                 <SignaturePad ref={pad} label={t('Sign here with your finger')} clearLabel={t('Clear signature')} onChange={setHasInk} />
               </Section>
 
