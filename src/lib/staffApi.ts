@@ -358,6 +358,7 @@ export interface GateView {
 export interface GateDayRow { refCode: string; guestName: string; slot: SlotKey; party: number; status: BookingStatus; signed: number }
 
 export const getGateDay = (date?: string) => request<GateDayRow[]>('/staff/gate' + qs({ date }));
+export const gateWaiverPdfUrl = (refCode: string, id: string) => `${BASE}/staff/gate/${encodeURIComponent(refCode)}/waivers/${encodeURIComponent(id)}.pdf`;
 export const getGateView = (refCode: string) => request<GateView>(`/staff/gate/${encodeURIComponent(refCode)}`);
 export const gateCheckIn = (refCode: string, override = false, reason?: string) =>
   request<GateView>(`/staff/gate/${encodeURIComponent(refCode)}/check-in`, { method: 'POST', body: JSON.stringify({ override, reason }) });

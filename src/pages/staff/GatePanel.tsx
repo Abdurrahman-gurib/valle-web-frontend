@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Btn, card, display, inputStyle, label, mono, StatusChip, clockTime, shortDate } from './ui';
-import { gateCheckIn, getGateDay, getGateView, isHttpError, type GateDayRow, type GateView } from '../../lib/staffApi';
+import { gateCheckIn, gateWaiverPdfUrl, getGateDay, getGateView, isHttpError, type GateDayRow, type GateView } from '../../lib/staffApi';
 
 const money = (n: number) => 'Rs ' + n.toLocaleString('en-US');
 
@@ -193,9 +193,12 @@ export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
                     {w.participantName}
                     <span style={{ ...mono, fontWeight: 600, fontSize: 12, marginLeft: 10 }}>{w.age} yrs · {w.heightCm} cm · {w.weightKg} kg</span>
                   </div>
-                  <button type="button" onClick={() => setOpenSig(openSig === w.id ? null : w.id)} style={{ border: 0, background: 'transparent', color: '#7333FF', fontWeight: 700, cursor: 'pointer', fontSize: 12.5 }}>
-                    {openSig === w.id ? 'Hide details' : 'Signature & details'}
-                  </button>
+                  <span style={{ display: 'flex', gap: 12 }}>
+                    <a href={gateWaiverPdfUrl(view.refCode, w.id)} target="_blank" rel="noopener noreferrer" style={{ color: '#7333FF', fontWeight: 700, fontSize: 12.5, textDecoration: 'none' }}>PDF</a>
+                    <button type="button" onClick={() => setOpenSig(openSig === w.id ? null : w.id)} style={{ border: 0, background: 'transparent', color: '#7333FF', fontWeight: 700, cursor: 'pointer', fontSize: 12.5, padding: 0 }}>
+                      {openSig === w.id ? 'Hide details' : 'Signature & details'}
+                    </button>
+                  </span>
                 </div>
                 {w.flags.map((f, i) => (
                   <div key={i} style={{ fontSize: 13, fontWeight: 700, color: f.level === 'stop' ? '#D91E44' : '#B7791F', marginTop: 4 }}>

@@ -47,6 +47,7 @@ async function fillParticipant(page: Page, p: { name: string; birth: string; hei
   const em = page.getByTestId('w-em-name');
   if (!(await em.inputValue())) {
     await page.getByTestId('w-address').fill('Lux Le Morne');
+    await page.getByTestId('w-email').fill('waiver-copy@example.mu');
     await page.getByTestId('w-phone').fill('+971 50 111 2222');
     await page.getByTestId('w-nationality').fill('UAE');
     await em.fill('Omar Rahman');
@@ -81,6 +82,12 @@ test.describe('digital waiver (guest)', () => {
     await fillParticipant(page, { name: 'Aisha Rahman', birth: '1990-04-12', height: '165', weight: '60' });
     await page.getByTestId('w-submit').click();
     await expect(page.getByRole('status')).toContainText('Aisha Rahman');
+    // the guest's PDF copy is one click away and really is a PDF
+    const pdfHref = await page.getByTestId('waiver-pdf').first().getAttribute('href');
+    const pdf = await page.request.get(pdfHref!);
+    expect(pdf.ok()).toBeTruthy();
+    expect(pdf.headers()['content-type']).toContain('application/pdf');
+    expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
     await expect(page.getByTestId('waiver-progress')).toContainText('1 of 2 signed');
 
     // a six-year-old: guardian field appears and the zipline age limit is shown

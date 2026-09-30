@@ -53,8 +53,10 @@ export function fetchTicket(refCode: string, token: string): Promise<TicketView>
 export interface WaiverActivity { name: string; minAge?: number; maxAge?: number; driveMinAge?: number; minWeightKg?: number; maxWeightKg?: number; minHeightCm?: number; maxHeightCm?: number }
 export interface WaiverView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon';
-  required: number; signed: { participantName: string; isMinor: boolean; signedAt: string }[];
+  required: number; signed: { id: string; participantName: string; isMinor: boolean; signedAt: string }[];
   open: boolean; termsVersion: string; activities: WaiverActivity[];
+  /** after signing: whether the guest's copy went out */
+  copy?: { email: boolean; whatsapp: boolean };
 }
 export interface WaiverRequest {
   participantName: string; birthDate: string; heightCm: number; weightKg: number; guardianName?: string;
@@ -63,6 +65,8 @@ export interface WaiverRequest {
   declarations: { terms: boolean; health: boolean; consent: boolean };
   signature: string; lang?: string;
 }
+/** PDF copy of one signed waiver. */
+export const waiverPdfUrl = (refCode: string, id: string, token: string) => `${BASE}/tickets/${encodeURIComponent(refCode)}/waivers/${encodeURIComponent(id)}.pdf?t=${encodeURIComponent(token)}`;
 const waiverPath = (refCode: string, token: string) => `/tickets/${encodeURIComponent(refCode)}/waivers?t=${encodeURIComponent(token)}`;
 export function fetchWaivers(refCode: string, token: string): Promise<WaiverView> {
   return request<WaiverView>(waiverPath(refCode, token));

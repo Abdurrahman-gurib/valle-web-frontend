@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
 import { fullDateFromIso } from '../lib/format';
-import { fetchWaivers, signWaiver, type WaiverActivity, type WaiverView } from '../lib/api';
+import { fetchWaivers, signWaiver, waiverPdfUrl, type WaiverActivity, type WaiverView } from '../lib/api';
 import { Stripes } from '../components/Stripes';
 import { SignaturePad, type SignaturePadHandle } from '../components/SignaturePad';
 import { localizePath, tr, useLang, useT, _t } from '../i18n';
@@ -148,7 +148,10 @@ export default function WaiverPage() {
         medicalNotes: medical.trim() || undefined, declarations: decl, signature, lang,
       });
       setView(next);
-      setDone(t('Thank you. The waiver for {name} is signed.', { name: name.trim() }));
+      const where = [next.copy?.email ? (email.trim() || t('your e-mail')) : '', next.copy?.whatsapp ? 'WhatsApp' : ''].filter(Boolean).join(' · ');
+      setDone(where
+        ? t('Thank you. The form for {name} is signed. Your copy (PDF) was sent to: {where}', { name: name.trim(), where })
+        : t('Thank you. The form for {name} is signed. Download your copy below.', { name: name.trim() }));
       // next participant: keep the emergency contact and the guardian, clear the rest
       // next participant: the group's address, contacts, nationality and guardian stay filled in
       setName(''); setBirth(''); setHeight(''); setWeight(''); setIdNumber(''); setMedical(''); setDecl(blankDecl()); setCorrecting(false);
@@ -200,10 +203,11 @@ export default function WaiverPage() {
             {view.signed.length > 0 && (
               <ul style={{ listStyle: 'none', margin: 0, padding: '10px 20px 14px' }}>
                 {view.signed.map((s) => (
-                  <li key={s.participantName} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, padding: '4px 0' }}>
+                  <li key={s.id} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 14, padding: '4px 0', flexWrap: 'wrap' }}>
                     <span aria-hidden style={{ color: '#1E9E4A', fontWeight: 900 }}>✓</span>
                     <span style={{ fontWeight: 600 }}>{s.participantName}</span>
                     {s.isMinor && <span style={{ fontFamily: MONO, fontSize: 10, color: '#7333FF' }}>{t('UNDER 18 · SIGNED BY GUARDIAN')}</span>}
+                    <a href={waiverPdfUrl(view.refCode, s.id, token)} target="_blank" rel="noopener noreferrer" data-testid="waiver-pdf" style={{ marginInlineStart: 'auto', fontFamily: MONO, fontSize: 11, fontWeight: 700, color: '#7333FF', textDecoration: 'none', border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '3px 10px' }}>PDF</a>
                   </li>
                 ))}
               </ul>
