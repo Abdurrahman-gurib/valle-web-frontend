@@ -527,7 +527,7 @@ function Drawer({ refCode, onClose, onPatched }: {
           width: 'min(100vw - 24px, 620px)', maxHeight: 'min(100vh - 24px, 920px)',
           background: '#FFFFFF', display: 'flex', flexDirection: 'column', borderRadius: 22, overflow: 'hidden',
           boxShadow: '0 40px 90px -30px rgba(38,0,64,.6)',
-          animation: reduced ? 'vfade .2s ease both' : 'vpop .25s cubic-bezier(.2,.7,.2,1) both',
+          animation: reduced ? 'vfade .2s ease both' : 'vcenterpop .25s cubic-bezier(.2,.7,.2,1) both',
         }}
       >
         <div style={{ background: '#340057', color: '#FFFFFF', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
