@@ -8,7 +8,7 @@ import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
-import { fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/api';
+import { checkCoupon, fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -318,7 +318,25 @@ export default function BookingPage() {
   const [apiErr, setApiErr] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [refCode, setRefCode] = useState('');
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [ticket, setTicket] = useState<{ ticketUrl?: string; qrUrl?: string }>({});
+  // promo / partner code: checked live, applied by the server when the booking is made
+  const [coupon, setCoupon] = useState('');
+  const [offer, setOffer] = useState<{ code: string; kind: string; value: number; note: string } | null>(null);
+  const [couponMsg, setCouponMsg] = useState('');
+  const [applied, setApplied] = useState<{ amount: number; note: string; code: string } | null>(null);
+  const tryCoupon = async () => {
+    const code = coupon.trim();
+    if (!code) { setOffer(null); setCouponMsg(''); return; }
+    try {
+      const o = await checkCoupon(code);
+      setOffer(o);
+      setCouponMsg(o.kind === 'percent' ? t('Code applied: {n}% off', { n: o.value }) : o.kind === 'amount' ? t('Code applied: Rs {n} off', { n: o.value }) : o.kind === 'entry_free' ? t('Code applied: park entry free') : t('Code applied: free of charge'));
+    } catch {
+      setOffer(null);
+      setCouponMsg(t('This code is not valid or has expired.'));
+    }
+  };
   const [submitting, setSubmitting] = useState(false);
   const [natFocus, setNatFocus] = useState(false);
   const [backHov, backBind] = useHover();
@@ -408,12 +426,15 @@ export default function BookingPage() {
       email: email.trim() || undefined,
       nationality: nat || undefined,
       payMode,
+      couponCode: offer ? offer.code : undefined,
     };
     let code: string;
     try {
       const res = await createBooking(req);
       code = res.refCode;
       setTicket({ ticketUrl: res.ticketUrl, qrUrl: res.qrUrl });
+      setApplied(res.adjustment ? { amount: res.adjustment, note: res.adjustmentNote || '', code: res.couponCode || '' } : null);
+      setServerTotal(typeof res.total === 'number' ? res.total : null);
     } catch (e) {
       // Whether the server refused or never answered, the desk has no record of this
       // booking, so no reference is shown: a guest turning up with a phantom VAL code
@@ -589,6 +610,20 @@ export default function BookingPage() {
                   <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder={t('Contact number (SMS / WhatsApp)')} />
                   <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder={t('Email')} />
                 </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '10px' }}>
+                  <input
+                    value={coupon}
+                    onChange={(e) => { setCoupon(e.target.value.toUpperCase()); setOffer(null); setCouponMsg(''); }}
+                    onBlur={() => { void tryCoupon(); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void tryCoupon(); } }}
+                    placeholder={t('Promo or partner code (optional)')}
+                    data-testid="coupon-input"
+                    dir="ltr"
+                    style={{ ...inputStyle, flex: '1 1 220px', fontFamily: MONO, textTransform: 'uppercase', borderColor: offer ? '#33FF74' : '#EBE2FF' }}
+                  />
+                  <button type="button" onClick={() => { void tryCoupon(); }} style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '11px 16px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>{t('Apply')}</button>
+                  {couponMsg && <span data-testid="coupon-msg" style={{ fontSize: '13px', fontWeight: 600, color: offer ? '#1E9E4A' : '#D91E44', flex: '1 1 100%' }}>{couponMsg}{offer?.note ? ' · ' + offer.note : ''}</span>}
+                </div>
               </div>
 
               {/* 5 · PAYMENT */}
@@ -685,9 +720,15 @@ export default function BookingPage() {
                 <span style={{ fontFamily: MONO, fontWeight: 600, whiteSpace: 'nowrap' }}>{ln.amt}</span>
               </div>
             ))}
+            {applied && (
+              <div data-testid="receipt-adjustment" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '5px 0', fontSize: '13.5px', textAlign: 'left', color: '#1E9E4A', fontWeight: 600 }}>
+                <span>{t('Code {code}', { code: applied.code })}{applied.note ? ' · ' + applied.note : ''}</span>
+                <span style={{ fontFamily: MONO, whiteSpace: 'nowrap' }}>− {mur(applied.amount)}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px', marginTop: '6px', borderTop: '1px dashed #D9C9F0', fontWeight: 800, fontSize: '16px' }}>
               <span>{totalRowLabel}</span>
-              <span style={{ fontFamily: MONO }}>{mur(booking.total)}</span>
+              <span style={{ fontFamily: MONO }}>{mur(serverTotal ?? booking.total)}</span>
             </div>
             {inForeign && (
               <div style={{ textAlign: 'right', fontFamily: MONO, fontSize: '11px', color: 'rgba(52,0,87,.6)', marginTop: '4px' }}>{money(booking.total)} · {t('indicative')}</div>

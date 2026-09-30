@@ -118,7 +118,8 @@ export default function WaiverPage() {
   const minor = age !== null && age < 18;
   const warnings = view ? limitWarnings(view.activities, age, Number(height) || 0, Number(weight) || 0) : [];
   const allSigned = !!view && view.signed.length >= view.required;
-  const showForm = !!view && view.open && (!allSigned || correcting);
+  const nothingToSign = !!view && view.required === 0;
+  const showForm = !!view && view.open && !nothingToSign && (!allSigned || correcting);
 
   const submit = async () => {
     if (!view) return;
@@ -222,7 +223,15 @@ export default function WaiverPage() {
             </div>
           )}
 
-          {view.open && allSigned && !correcting && (
+          {view.open && nothingToSign && (
+            <div data-testid="waiver-none" style={{ marginTop: 18, background: '#E6FFEE', borderRadius: 16, padding: '18px 20px' }}>
+              <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 24, textTransform: 'uppercase' }}>{t('No waiver needed for this booking')}</div>
+              <p style={{ margin: '6px 0 12px', fontSize: 14, lineHeight: 1.5 }}>{t('The Disclaimer Form is only for ziplines, quads, buggies, the luge kart and the Nepalese bridge. Your booking has none of these: just show your ticket at the gate.')}</p>
+              <a href={ticketHref} style={pill('#340057', '#FFFFFF')}>{t('Open my ticket')}</a>
+            </div>
+          )}
+
+          {view.open && allSigned && !nothingToSign && !correcting && (
             <div style={{ marginTop: 18, background: '#E6FFEE', borderRadius: 16, padding: '18px 20px' }}>
               <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 24, textTransform: 'uppercase' }}>{t('Everyone is signed. See you at the gate!')}</div>
               <p style={{ margin: '6px 0 12px', fontSize: 14, lineHeight: 1.5 }}>{t('Show your ticket QR code on arrival and head straight to your first activity.')}</p>

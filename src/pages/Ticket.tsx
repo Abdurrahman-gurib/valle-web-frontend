@@ -63,7 +63,8 @@ export default function TicketPage() {
               <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
               <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
-            {tk.waiversRequired !== undefined && tk.status !== 'cancelled' && (
+            {tk.status === 'postponed' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#8A6A00', fontWeight: 700 }}>{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
+            {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && (
               <WaiverBlock signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
@@ -73,13 +74,26 @@ export default function TicketPage() {
                 <span style={{ fontFamily: MONO, fontWeight: 600, whiteSpace: 'nowrap' }}>{mur(l.amount)}</span>
               </div>
             ))}
+            {(tk.adjustmentAmount ?? 0) > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left', color: '#1E9E4A', fontWeight: 600 }}>
+                <span>{tk.couponCode ? t('Code {code}', { code: tk.couponCode }) : t('Discount')}{tk.adjustmentNote ? ' · ' + tk.adjustmentNote : ''}</span>
+                <span style={{ fontFamily: MONO, whiteSpace: 'nowrap' }}>− {mur(tk.adjustmentAmount ?? 0)}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: '1px dashed #D9C9F0', fontWeight: 800, fontSize: 16 }}>
-              <span>{tk.payMode === 'online' ? t('Paid online') : t('To pay on arrival')}</span>
+              <span>{t('Total')}</span>
               <span style={{ fontFamily: MONO }}>{mur(tk.total)}</span>
             </div>
+            {tk.balance !== undefined && (
+              <div data-testid="ticket-balance" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6, fontSize: 14, fontWeight: 700, color: tk.balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+                <span>{tk.balance > 0 ? t('To pay on arrival') : t('Paid')}</span>
+                <span style={{ fontFamily: MONO }}>{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 22 }} data-print-hide="">
               <a href={share} target="_blank" rel="noopener noreferrer" style={btn('#25D366', '#FFFFFF')}>{t('Add to WhatsApp')}</a>
               <button onClick={() => window.print()} style={btn('#FFFFFF', '#340057', true)}>{t('Save / print')}</button>
+              {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" style={btn('#FFFFFF', '#340057', true)}>{t('Receipt (PDF)')}</a>}
             </div>
             <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.65)', marginTop: 18, textAlign: 'left' }}>
               {t('Show this QR code at the gate. B102, Mare Anguilles, Chamouny ·')} <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>{t('directions')}</a>.{' '}

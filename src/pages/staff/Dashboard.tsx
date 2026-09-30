@@ -13,12 +13,13 @@ import { Spinner, card, display, mono } from './ui';
 import BookingsPanel from './BookingsPanel';
 import ChatConsole from './ChatConsole';
 import GatePanel from './GatePanel';
+import CouponsPanel from './CouponsPanel';
 import ReportsPanel from './ReportsPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
 
-type Tab = 'bookings' | 'gate' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
+type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -77,6 +78,8 @@ export default function StaffDashboard() {
   const navigate = useNavigate();
   const narrow = useIsMobile(700);
   const [tab, setTab] = useState<Tab>('bookings');
+  // a reference the gate asked to open in the bookings tab
+  const [jumpRef, setJumpRef] = useState<string | null>(null);
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -252,6 +255,7 @@ export default function StaffDashboard() {
         }}>
           <TabBtn on={tab === 'bookings'} onClick={() => setTab('bookings')}>Bookings</TabBtn>
           <TabBtn on={tab === 'gate'} onClick={() => setTab('gate')}>Gate & waivers</TabBtn>
+          <TabBtn on={tab === 'offers'} onClick={() => setTab('offers')}>Offers & codes</TabBtn>
           <TabBtn on={tab === 'reports'} onClick={() => setTab('reports')}>Sales & reports</TabBtn>
           <TabBtn on={tab === 'reconciliation'} onClick={() => setTab('reconciliation')}>Reconciliation</TabBtn>
           <TabBtn on={tab === 'forecast'} onClick={() => setTab('forecast')}>Forecast</TabBtn>
@@ -270,9 +274,10 @@ export default function StaffDashboard() {
 
         {/* Both panels stay mounted so the chat socket survives a tab switch. */}
         <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
-          <BookingsPanel onChanged={reloadStats} />
+          <BookingsPanel onChanged={reloadStats} openRef={jumpRef} onOpened={() => setJumpRef(null)} />
         </div>
-        {tab === 'gate' && <GatePanel onChanged={reloadStats} />}
+        {tab === 'gate' && <GatePanel onChanged={reloadStats} onOpenBooking={(ref) => { setJumpRef(ref); setTab('bookings'); }} />}
+        {tab === 'offers' && <CouponsPanel />}
         {tab === 'reports' && <ReportsPanel />}
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}

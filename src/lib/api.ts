@@ -44,9 +44,16 @@ export interface TicketView {
   rate: string; payMode: string; status: string; total: number; lines: { label: string; amount: number }[]; ticketUrl: string; qrUrl: string;
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
+  paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;
 }
 export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
+}
+
+/** GET /api/coupons/:code : what a promo code gives today (404 when it cannot be used). */
+export interface CouponOffer { code: string; kind: 'percent' | 'amount' | 'foc' | 'entry_free'; value: number; note: string }
+export function checkCoupon(code: string): Promise<CouponOffer> {
+  return request<CouponOffer>(`/coupons/${encodeURIComponent(code.trim().toUpperCase())}`);
 }
 
 /** GET/POST /api/tickets/:ref/waivers?t= : the party's digital waivers. */

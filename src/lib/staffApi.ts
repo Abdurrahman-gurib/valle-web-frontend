@@ -227,6 +227,12 @@ export interface BookingPatch {
   payMode?: PayMode;
   status?: BookingStatus;
   staffNote?: string;
+  /** full new list of experience lines (top-up) */
+  items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[];
+  adjustmentKind?: 'none' | 'percent' | 'amount' | 'foc' | 'entry_free';
+  adjustmentValue?: number;
+  adjustmentNote?: string;
+  couponCode?: string;
 }
 
 /** The updated row plus its re-priced lines (and the fresh audit when sent). */
@@ -251,6 +257,21 @@ export function updateBooking(refCode: string, patch: BookingPatch): Promise<Boo
 }
 
 /** Re-send the guest's ticket by e-mail and WhatsApp. */
+export type PaymentMethod = 'cash' | 'card' | 'juice' | 'online' | 'other';
+export function recordPayment(refCode: string, body: { amount: number; method: PaymentMethod; receiptNo?: string }): Promise<BookingDetailFull> {
+  return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/payment', { method: 'POST', body: JSON.stringify(body) });
+}
+export function postponeBooking(refCode: string, reason: string): Promise<BookingDetailFull> {
+  return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/postpone', { method: 'POST', body: JSON.stringify({ reason }) });
+}
+export const receiptPdfUrl = (refCode: string) => `${BASE}/staff/bookings/${encodeURIComponent(refCode)}/receipt.pdf`;
+
+export interface CouponRow { code: string; kind: 'percent' | 'amount' | 'foc' | 'entry_free'; value: number; note: string; active: boolean; validFrom: string | null; validTo: string | null; maxUses: number | null; uses: number; createdBy: string; createdAt: string }
+export const listCoupons = () => request<CouponRow[]>('/staff/coupons');
+export const createCoupon = (body: { code: string; kind: CouponRow['kind']; value?: number; note?: string; validFrom?: string; validTo?: string; maxUses?: number }) =>
+  request<CouponRow>('/staff/coupons', { method: 'POST', body: JSON.stringify(body) });
+export const setCouponActive = (code: string, active: boolean) => request<CouponRow>('/staff/coupons/' + encodeURIComponent(code), { method: 'PATCH', body: JSON.stringify({ active }) });
+
 export function resendWaiver(refCode: string): Promise<{ email: boolean; whatsapp: boolean }> {
   return request<{ email: boolean; whatsapp: boolean }>('/staff/bookings/' + encodeURIComponent(refCode) + '/resend-waiver', { method: 'POST' });
 }
@@ -355,11 +376,11 @@ export interface GateWaiver {
 }
 export interface GateView {
   refCode: string; guestName: string; phone: string; visitDate: string; slot: SlotKey; adults: number; kids: number;
-  status: BookingStatus; payMode: PayMode; total: number; isToday: boolean; lines: { label: string; amount: number }[];
+  status: BookingStatus; payMode: PayMode; total: number; paidAmount: number; balance: number; adjustmentAmount: number; adjustmentNote: string; isToday: boolean; lines: { label: string; amount: number }[];
   activities: { id: string; name: string; limits: Record<string, number> }[];
   required: number; signedCount: number; missing: number; stops: number; waivers: GateWaiver[]; waiverUrl: string;
 }
-export interface GateDayRow { refCode: string; guestName: string; slot: SlotKey; party: number; status: BookingStatus; signed: number }
+export interface GateDayRow { refCode: string; guestName: string; slot: SlotKey; party: number; status: BookingStatus; signed: number; balance: number }
 
 export const getGateDay = (date?: string) => request<GateDayRow[]>('/staff/gate' + qs({ date }));
 export const gateWaiverPdfUrl = (refCode: string, id: string) => `${BASE}/staff/gate/${encodeURIComponent(refCode)}/waivers/${encodeURIComponent(id)}.pdf`;

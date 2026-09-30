@@ -128,6 +128,7 @@ export function StatusChip({ status }: { status: BookingStatus | string }) {
     confirmed: ['#EBE2FF', '#7333FF'],
     arrived: ['#33FF74', '#340057'],
     cancelled: ['rgba(217,30,68,.12)', '#D91E44'],
+    postponed: ['#FFF4D6', '#8A6A00'],
   };
   const [bg, fg] = skin[status] || ['#F7F3FF', '#340057'];
   return (

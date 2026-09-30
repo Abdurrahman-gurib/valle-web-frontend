@@ -170,12 +170,17 @@ export interface BookingRequest {
   email?: string;
   nationality?: string;
   payMode: 'gate' | 'online';
+  /** promo / partner code, checked server-side */
+  couponCode?: string;
 }
 
 export interface BookingResponse {
   refCode: string;
   total: number;
   discount: number;
+  adjustment?: number;
+  adjustmentNote?: string;
+  couponCode?: string;
   lines: { label: string; amount: number }[];
   status: string;
   /** The guest's ticket page (QR inside); also e-mailed / WhatsApped. */
@@ -204,7 +209,7 @@ export interface StaffUser {
   role: StaffRole;
 }
 
-export type BookingStatus = 'confirmed' | 'arrived' | 'cancelled';
+export type BookingStatus = 'confirmed' | 'arrived' | 'cancelled' | 'postponed';
 export type SlotKey = 'morning' | 'afternoon';
 export type PayMode = 'gate' | 'online';
 
@@ -228,10 +233,26 @@ export interface BookingRow {
   discount: number;
   total: number;
   currency: string;
+  /** cashier (older API responses may omit these) */
+  paidAmount?: number;
+  balance?: number;
+  paidAt?: string | null;
+  paymentMethod?: string;
+  receiptNo?: string;
+  /** FOC pass / discount / coupon */
+  adjustmentKind?: string;
+  adjustmentValue?: number;
+  adjustmentAmount?: number;
+  adjustmentNote?: string;
+  couponCode?: string;
+  postponedFrom?: string | null;
   createdAt: string;          // ISO datetime
 }
 
 export interface BookingDetailLine {
+  /** null for park entry */
+  experienceId?: string | null;
+  variant?: string;
   label: string;
   adults: number;
   kids: number;

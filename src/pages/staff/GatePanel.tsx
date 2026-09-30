@@ -95,7 +95,7 @@ function Scanner({ onRef, onClose }: { onRef: (ref: string) => void; onClose: ()
   );
 }
 
-export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
+export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: () => void; onOpenBooking?: (ref: string) => void }) {
   const [day, setDay] = useState<GateDayRow[] | null>(null);
   const [view, setView] = useState<GateView | null>(null);
   const [typed, setTyped] = useState('');
@@ -171,6 +171,9 @@ export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
                 {shortDate(view.visitDate)} · {view.slot} · {view.adults} adult{view.adults === 1 ? '' : 's'}{view.kids ? ` · ${view.kids} child${view.kids === 1 ? '' : 'ren'}` : ''} · {view.payMode === 'online' ? 'paid online' : `to pay ${money(view.total)}`}
               </div>
               {!view.isToday && <div style={{ ...mono, fontSize: 11, fontWeight: 700, color: '#D91E44', marginTop: 6 }}>NOT TODAY'S BOOKING</div>}
+              <div data-testid="gate-balance" style={{ ...mono, fontSize: 12, fontWeight: 700, marginTop: 6, color: view.balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+                {view.balance > 0 ? `TO COLLECT ${money(view.balance)} · PAID ${money(view.paidAmount)}` : 'FULLY PAID'}{view.adjustmentAmount > 0 ? ` · ${view.adjustmentNote || 'discount'} −${money(view.adjustmentAmount)}` : ''}
+              </div>
             </div>
             <div style={{ textAlign: 'right', display: 'grid', gap: 6, justifyItems: 'end' }}>
               <StatusChip status={view.status} />
@@ -185,7 +188,11 @@ export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
             {view.lines.length > 0 && (
               <div style={{ fontSize: 13, color: 'rgba(52,0,87,.75)' }}>{view.lines.map((l) => l.label).join(' · ')}</div>
             )}
-            {view.waivers.length === 0 && <div style={{ fontWeight: 600 }}>No waiver signed yet. The guest can sign at the gate on their phone from the ticket link, or on paper.</div>}
+            {view.required === 0 && <div style={{ fontWeight: 600, color: '#1E9E4A' }}>No waiver needed: nothing on this booking is a zipline, quad, buggy or luge.</div>}
+            {view.required > 0 && view.waivers.length === 0 && <div style={{ fontWeight: 600 }}>No waiver signed yet. The guest can sign at the gate on their phone from the ticket link, or on paper.</div>}
+            {onOpenBooking && (
+              <div><Btn variant="ghost" onClick={() => onOpenBooking(view.refCode)} style={{ padding: '7px 14px', fontSize: 12.5 }}>Open booking (payment, top-up, FOC, postpone)</Btn></div>
+            )}
             {view.waivers.map((w) => (
               <div key={w.id} data-testid="gate-waiver" style={{ border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '10px 14px', background: w.flags.some((f) => f.level === 'stop') ? '#FFF6F7' : '#FFFFFF' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
@@ -269,6 +276,7 @@ export default function GatePanel({ onChanged }: { onChanged?: () => void }) {
                     <td style={{ padding: '8px 6px', fontWeight: 600 }}>{r.guestName}</td>
                     <td style={{ padding: '8px 6px' }}>{r.slot}</td>
                     <td style={{ padding: '8px 6px', ...mono, fontWeight: 700, color: r.signed >= r.party ? '#1E9E4A' : '#D91E44' }}>{Math.min(r.signed, r.party)}/{r.party}</td>
+                    <td style={{ padding: '8px 6px', ...mono, fontSize: 12, color: r.balance > 0 ? '#D91E44' : '#1E9E4A' }}>{r.balance > 0 ? money(r.balance) : 'paid'}</td>
                     <td style={{ padding: '8px 6px' }}><StatusChip status={r.status} /></td>
                   </tr>
                 ))}
