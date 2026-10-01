@@ -35,7 +35,7 @@ export function RateGate() {
   if (!app.rateGateOpen) return null;
   // A guest opening their ticket or waiver from the e-mail has already booked:
   // the first-visit rate question would only stand between them and the form.
-  if (!app.rateGateDismissable && /^(\/(fr|de|it|ar|ru))?\/(ticket|waiver)\//.test(pathname)) return null;
+  if (!app.rateGateDismissable && /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname)) return null;
 
   return (
     <div style={{
