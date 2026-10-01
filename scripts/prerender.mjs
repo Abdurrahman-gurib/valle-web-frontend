@@ -28,7 +28,7 @@ const baseRoutes = [
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];
 // Every page in every language: /explore, /fr/explore, /de/explore, /it/explore, /ar/explore.
-const LANG_PREFIXES = ['', '/fr', '/de', '/it', '/ar'];
+const LANG_PREFIXES = ['', '/fr', '/de', '/it', '/ar', '/ru'];
 const RTL = new Set(['ar']);
 const routes = LANG_PREFIXES.flatMap((p) => baseRoutes.map((r) => (r === '/' ? (p || '/') : p + r)));
 const template = readFileSync(join(dist, 'index.html'), 'utf8');

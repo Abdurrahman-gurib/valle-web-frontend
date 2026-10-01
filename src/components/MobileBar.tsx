@@ -12,7 +12,7 @@ export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
   const t = useT();
   const { pathname } = useLocation();
   // A guest on their ticket or waiver has already booked; the bar would only cover the form.
-  const guestDoc = /^(\/(fr|de|it|ar))?\/(ticket|waiver)\//.test(pathname);
+  const guestDoc = /^(\/(fr|de|it|ar|ru))?\/(ticket|waiver)\//.test(pathname);
   if (!isMobile || mobileNavOpen || app.dayOpen || guestDoc) return null;
 
   return (

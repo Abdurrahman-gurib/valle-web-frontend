@@ -4,6 +4,7 @@ import fr from './fr.json';
 import de from './de.json';
 import it from './it.json';
 import ar from './ar.json';
+import ru from './ru.json';
 
 /**
  * Languages of the public site. English lives at the root (/explore), every
@@ -18,7 +19,7 @@ import ar from './ar.json';
  *
  * Placeholders: `t('{n} adults', { n: 3 })`. Keep them identical in translations.
  */
-export const LANGS = ['en', 'fr', 'de', 'it', 'ar'] as const;
+export const LANGS = ['en', 'fr', 'de', 'it', 'ar', 'ru'] as const;
 export type Lang = (typeof LANGS)[number];
 
 export const LANG_META: Record<Lang, { name: string; short: string; locale: string; og: string; dir: 'ltr' | 'rtl' }> = {
@@ -28,6 +29,7 @@ export const LANG_META: Record<Lang, { name: string; short: string; locale: stri
   it: { name: 'Italiano', short: 'IT', locale: 'it-IT', og: 'it_IT', dir: 'ltr' },
   // Modern Standard Arabic for Saudi and Emirati visitors; Western digits in dates.
   ar: { name: 'العربية', short: 'AR', locale: 'ar-AE-u-nu-latn', og: 'ar_AR', dir: 'rtl' },
+  ru: { name: 'Русский', short: 'RU', locale: 'ru-RU', og: 'ru_RU', dir: 'ltr' },
 };
 
 const DICTS: Record<Lang, Record<string, string>> = {
@@ -36,6 +38,7 @@ const DICTS: Record<Lang, Record<string, string>> = {
   de: de as Record<string, string>,
   it: it as Record<string, string>,
   ar: ar as Record<string, string>,
+  ru: ru as Record<string, string>,
 };
 
 export const isLang = (v: unknown): v is Lang => typeof v === 'string' && (LANGS as readonly string[]).includes(v);
@@ -74,7 +77,7 @@ export function langFromPath(pathname: string): Lang {
 
 /** '/fr/explore?x#y' -> '/explore?x#y'; '/fr' -> '/'. */
 export function stripLang(path: string): string {
-  const m = path.match(/^\/(fr|de|it|ar)(?=\/|$|\?|#)(.*)$/);
+  const m = path.match(/^\/(fr|de|it|ar|ru)(?=\/|$|\?|#)(.*)$/);
   if (!m) return path || '/';
   const rest = m[2] || '/';
   return rest.startsWith('/') ? rest : '/' + rest;

@@ -136,7 +136,7 @@ export const ORGANIZATION = {
   sameAs: ['https://www.instagram.com/valleadvenaturepark/', 'https://www.facebook.com/share/1ADvErZgRi/', 'https://www.youtube.com/channel/UCfHmy2KfmQk32tiT0zcxbTQ'],
   isAccessibleForFree: false,
   touristType: ['families', 'adventure travellers', 'nature lovers'],
-  availableLanguage: ['English', 'French', 'German', 'Italian'],
+  availableLanguage: ['English', 'French', 'German', 'Italian', 'Arabic', 'Russian'],
 };
 
 /** Breadcrumb names are translated and item URLs point at the current language. */

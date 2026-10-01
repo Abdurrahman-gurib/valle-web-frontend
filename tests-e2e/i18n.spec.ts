@@ -7,7 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
  * them on the same page.
  */
 const dict = (lang: string): Record<string, string> => JSON.parse(readFileSync(`src/i18n/${lang}.json`, 'utf8'));
-const LANGS = ['fr', 'de', 'it', 'ar'] as const;
+const LANGS = ['fr', 'de', 'it', 'ar', 'ru'] as const;
 
 function preset(page: Page) {
   return page.addInitScript(() => {
@@ -31,7 +31,7 @@ test.describe('language versions (served HTML)', () => {
         expect(html, `/${lang}${path} lang`).toContain(lang === 'ar' ? '<html lang="ar" dir="rtl">' : `<html lang="${lang}">`);
         const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
         if (canonical) expect(canonical).toMatch(new RegExp(`/${lang}${path.replace(/\//g, '\\/')}$`));
-        for (const l of ['en', 'fr', 'de', 'it', 'ar', 'x-default']) expect(html, `hreflang ${l}`).toContain(`hreflang="${l}"`);
+        for (const l of ['en', 'fr', 'de', 'it', 'ar', 'ru', 'x-default']) expect(html, `hreflang ${l}`).toContain(`hreflang="${l}"`);
       }
       // the home page's own words are in the language, not English
       const home = await (await request.get(`/${lang}`)).text();
