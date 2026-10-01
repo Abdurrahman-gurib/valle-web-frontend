@@ -24,7 +24,7 @@ test.describe('language versions (served HTML)', () => {
   for (const lang of LANGS) {
     test(`/${lang} pages are prerendered in ${lang}, canonical to themselves, with all four hreflang links`, async ({ request }) => {
       const d = dict(lang);
-      for (const path of ['', '/explore', '/activities/zipline', '/packages', '/booking']) {
+      for (const path of ['', '/explore', '/activities/zipline', '/packages', '/booking', '/story']) {
         const res = await request.get(`/${lang}${path}`, { maxRedirects: 0 });
         expect(res.status(), `/${lang}${path}`).toBe(200);
         const html = await res.text();

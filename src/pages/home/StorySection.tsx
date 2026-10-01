@@ -1,9 +1,11 @@
 import { Img } from '../../components/Img';
-import { useT } from '../../i18n';
+import { fwd, useT } from '../../i18n';
+import { paths, useGoto } from '../../lib/nav';
 
 /** "Our story": formerly La Vallée des Couleurs narrative + stats (markup: Story section). */
 export function StorySection() {
   const t = useT();
+  const goto = useGoto();
   return (
     <section
       id="story"
@@ -20,6 +22,13 @@ export function StorySection() {
             {t('Formerly La Vallée des Couleurs.')} <span style={{ color: '#7333FF' }}>{t('Forever Vallé.')}</span>
           </h2>
           <p style={{ fontSize: 16, lineHeight: 1.65, color: 'rgba(52,0,87,.75)', margin: '20px 0 0' }}>{t("We unearth the true colours of Maurice, so you live the pulse of every breath. Twenty-three hues of volcanic earth, centuries-old ebony trees, free-roaming giant tortoises, and strung above it all, some of the island's wildest ziplines.")}</p>
+          <a
+            href={paths.story()}
+            onClick={(e) => { e.preventDefault(); goto.story(); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 18, fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FF3358', textDecoration: 'none', borderBottom: '2px solid #FF3358', paddingBottom: 3 }}
+          >
+            {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden>{fwd()}</span>
+          </a>
           <div style={{ display: 'flex', gap: 30, marginTop: 28, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 40, color: '#FF3358' }}>23</div>

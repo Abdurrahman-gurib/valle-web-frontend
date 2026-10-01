@@ -122,6 +122,8 @@ export const ORGANIZATION = {
   '@id': abs('/#organization'),
   name: SITE_NAME,
   alternateName: ['Vallé Advenature Park', 'La Vallée des Couleurs'],
+  foundingDate: '1998',
+  founder: { '@type': 'Person', name: 'Asiff Polin' },
   url: abs('/'),
   logo: abs('/favicon-512.png'),
   image: abs(DEFAULT_IMAGE),
