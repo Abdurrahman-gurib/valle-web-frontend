@@ -15,6 +15,7 @@ import ChatConsole from './ChatConsole';
 import GatePanel from './GatePanel';
 import CouponsPanel from './CouponsPanel';
 import ReportsPanel from './ReportsPanel';
+import BackupsPanel from './BackupsPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
@@ -279,6 +280,8 @@ export default function StaffDashboard() {
         {tab === 'gate' && <GatePanel onChanged={reloadStats} onOpenBooking={(ref) => { setJumpRef(ref); setTab('bookings'); }} />}
         {tab === 'offers' && <CouponsPanel />}
         {tab === 'reports' && <ReportsPanel />}
+        {/* managers only; the API enforces it (the StaffRole type predates the manager role) */}
+        {tab === 'reports' && String(auth.user.role) === 'manager' && <BackupsPanel />}
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}
         {tab === 'quotes' && <QuotesPanel />}

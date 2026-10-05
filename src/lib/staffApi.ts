@@ -172,6 +172,19 @@ export const getNationalities = (from: string, to: string) => request<Nationalit
 export const getExperienceSales = (from: string, to: string) => request<ExperienceRow[]>('/staff/reports/experiences' + qs({ from, to }));
 export const getReconciliation = (date: string) => request<Reconciliation>('/staff/reports/reconciliation' + qs({ date }));
 export const getForecast = (days: number) => request<ForecastDay[]>('/staff/reports/forecast' + qs({ days }));
+
+/** GET /api/staff/ops/backups (managers): the nightly backup and monthly restore-test log. */
+export interface BackupRun {
+  id: string; kind: 'backup' | 'restore_test'; ok: boolean; startedAt: string; finishedAt: string;
+  file: string; bytes: number; tables: number; rows: number; detail: string;
+}
+export interface BackupStatus {
+  state: 'ok' | 'warning' | 'failing' | 'unknown';
+  problems: string[];
+  lastBackup: BackupRun | null; lastGoodBackup: BackupRun | null; lastRestoreTest: BackupRun | null; lastGoodRestoreTest: BackupRun | null;
+  recent: BackupRun[];
+}
+export const getBackupStatus = () => request<BackupStatus>('/staff/ops/backups');
 /** Same-origin link; the session cookie travels with it, so a plain <a download> works. */
 export const exportUrl = (type: ExportType, from?: string, to?: string) => BASE + '/staff/reports/export.csv' + qs({ type, from, to });
 
