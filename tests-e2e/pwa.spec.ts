@@ -133,7 +133,52 @@ test.describe('install', () => {
     await page.goto('/');
     const link = page.getByTestId('install-link');
     await expect(link).toBeVisible();
+    // the home page section already shows the steps once; the footer link adds its own
+    const hint = page.getByText('On iPhone or iPad: tap Share, then “Add to Home Screen”.');
+    await expect(hint).toHaveCount(1);
     await link.click();
-    await expect(page.getByText('On iPhone or iPad: tap Share, then “Add to Home Screen”.')).toBeVisible();
+    await expect(hint).toHaveCount(2);
+  });
+
+  test('the home page has an install section: steps first, a button once the browser offers the dialog', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'tablet and mobile emulate Safari on iOS: see the next test');
+    await preset(page);
+    await page.goto('/');
+    const section = page.getByTestId('install-section');
+    await section.scrollIntoViewIfNeeded();
+    await expect(section.getByRole('heading', { level: 2 })).toContainText('The park in');
+    await expect(section).toContainText('Activities, packages and prices, saved for offline');
+    await expect(section.getByRole('img', { name: 'The VALLÉ icon on a phone home screen' })).toBeVisible();
+    // no dialog offered yet: the section explains both phones instead
+    await expect(section.getByTestId('install-button')).toHaveCount(0);
+    await expect(section.getByTestId('install-steps-android')).toBeVisible();
+    await expect(section.getByTestId('install-steps-ios')).toBeVisible();
+
+    await page.evaluate(() => {
+      const w = window as unknown as { __prompted: number };
+      w.__prompted = 0;
+      const e = Object.assign(new Event('beforeinstallprompt', { cancelable: true }), {
+        prompt: async () => { w.__prompted += 1; },
+        userChoice: Promise.resolve({ outcome: 'accepted' as const }),
+      });
+      window.dispatchEvent(e);
+    });
+    await expect(section.getByTestId('install-steps-android')).toHaveCount(0);
+    await section.getByTestId('install-button').click();
+    expect(await page.evaluate(() => (window as unknown as { __prompted: number }).__prompted)).toBe(1);
+    await page.evaluate(() => window.dispatchEvent(new Event('appinstalled')));
+    await expect(page.getByTestId('install-section')).toHaveCount(0);
+  });
+
+  test('on iPhone and iPad the home page section gives the Share steps, translated', async ({ page }, info) => {
+    test.skip(info.project.name === 'desktop', 'iOS user agents only');
+    await preset(page);
+    await page.goto('/fr');
+    const section = page.getByTestId('install-section');
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toContainText('votre poche.');
+    await expect(section.getByTestId('install-steps-ios')).toBeVisible();
+    await expect(section.getByTestId('install-steps-android')).toHaveCount(0);
+    await expect(section.getByTestId('install-button')).toHaveCount(0);
   });
 });

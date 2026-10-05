@@ -11,6 +11,7 @@ import { DineTeasers } from './home/DineTeasers';
 import { StorySection } from './home/StorySection';
 import { PlanSection } from './home/PlanSection';
 import { CtaBanner } from './home/CtaBanner';
+import { InstallSection } from './home/InstallSection';
 import { useT } from '../i18n';
 
 export default function HomePage() {
@@ -30,6 +31,7 @@ export default function HomePage() {
       <DineTeasers />
       <StorySection />
       <PlanSection />
+      <InstallSection />
       <CtaBanner />
     </main>
   );
