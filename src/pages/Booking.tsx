@@ -13,6 +13,7 @@ import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { localizePath, tr, useT, _t } from '../i18n';
+import { InstallCard } from '../components/InstallApp';
 
 /** The waiver form sits next to the ticket: same reference, same token, in the page's language. */
 function waiverHref(ticketUrl: string): string {
@@ -713,6 +714,7 @@ export default function BookingPage() {
                 <a href={`https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot}', { ref: refCode, date: dateSummary, slot: slotName }) + '\n' + ticket.ticketUrl)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Send to my WhatsApp')}</a>
               </div>
             )}
+            <InstallCard style={{ marginTop: 16 }} />
             <div style={{ height: '1px', background: '#EBE2FF', margin: '18px 0' }} />
             {booking.lines.map((ln, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '5px 0', fontSize: '13.5px', textAlign: 'left' }}>

@@ -21,6 +21,9 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     baseURL: BASE_URL,
+    // The suite stubs and counts network calls with page.route(), which never sees requests a
+    // service worker makes; tests-e2e/pwa.spec.ts turns the worker back on for itself.
+    serviceWorkers: 'block',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

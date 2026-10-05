@@ -22,6 +22,7 @@ import DetailPage from './pages/Detail';
 import PackagesPage from './pages/Packages';
 import RestaurantPage from './pages/Restaurant';
 import BookingPage from './pages/Booking';
+import { OfflineStatus } from './components/InstallApp';
 import VacanciesPage from './pages/Vacancies';
 import StoryPage from './pages/Story';
 import VacancyDetailPage from './pages/VacancyDetail';
@@ -75,6 +76,7 @@ function PublicShell() {
       <OptionPicker />
       <ChatWidget />
       <CookieConsent />
+      <OfflineStatus />
     </div>
   );
 }

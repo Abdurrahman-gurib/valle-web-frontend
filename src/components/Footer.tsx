@@ -4,6 +4,7 @@ import { paths, useGoto } from '../lib/nav';
 import { LANGS, LANG_META, localizePath, stripLang, useLang, useT } from '../i18n';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
+import { InstallFooterLink } from './InstallApp';
 
 /** EN / FR / DE / IT as real links to the same page in each language (crawlable, hreflang'd). */
 function FooterLangs() {
@@ -132,6 +133,7 @@ export function Footer() {
           <span>
             <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>{t('COOKIE SETTINGS')}</button>
             {' · ' + t('PRIVACY POLICY') + ' · ' + t('TERMS OF USE') + ' · '}
+            <InstallFooterLink />
             <FooterLangs />
           </span>
         </div>

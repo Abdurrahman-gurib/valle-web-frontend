@@ -217,6 +217,21 @@ server {
         try_files /index.html =404;
     }
 
+    # The service worker and the manifest keep their names across deploys, so they must
+    # be revalidated every time: a worker cached for 30 days would pin guests to an old
+    # app. Exact matches win over the long-lived asset rule below.
+    location = /sw.js {
+        include /etc/nginx/security-headers.conf;
+        add_header Cache-Control "no-cache, must-revalidate" always;
+        try_files $uri =404;
+    }
+    location = /site.webmanifest {
+        include /etc/nginx/security-headers.conf;
+        add_header Cache-Control "no-cache, must-revalidate" always;
+        default_type application/manifest+json;
+        try_files $uri =404;
+    }
+
     # Long-lived caching for hashed assets and media.
     location ~* \.(js|css|woff2|jpg|jpeg|png|webp|avif|svg|ico|pdf|webmanifest)$ {
         expires 30d;

@@ -1,14 +1,111 @@
 {
+  "id": "/",
   "name": "VALLÉ Advenature™ Park",
   "short_name": "VALLÉ",
-  "description": "Where nature and adventure collide. Chamouny, Mauritius.",
-  "start_url": "/",
+  "description": "Ziplines, quad trails, waterfalls and the 23 Coloured Earth in Chamouny, Mauritius. Plan your day, check prices and keep your ticket, even offline.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#340057",
   "theme_color": "#340057",
+  "categories": [
+    "travel",
+    "entertainment",
+    "sports"
+  ],
   "icons": [
-    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Book your day",
+      "short_name": "Book",
+      "url": "/booking?source=pwa",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Explore experiences",
+      "short_name": "Explore",
+      "url": "/explore?source=pwa",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Packages & prices",
+      "short_name": "Prices",
+      "url": "/packages?source=pwa",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/pwa/home-mobile.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Feel the colours: the valley at a glance"
+    },
+    {
+      "src": "/images/pwa/explore-mobile.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "All 21 experiences with prices"
+    },
+    {
+      "src": "/images/pwa/home-desktop.jpg",
+      "sizes": "1280x800",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "VALLÉ Advenature Park"
+    }
   ]
 }
