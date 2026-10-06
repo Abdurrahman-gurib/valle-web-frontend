@@ -15,7 +15,7 @@ const MONO = "'Chivo Mono',monospace";
 const input: CSSProperties = { border: '1.5px solid #EBE2FF', background: '#F7F3FF', borderRadius: 12, padding: '10px 14px', fontFamily: 'inherit', fontSize: 14, color: '#340057', outline: 'none' };
 const pill = (bg: string, fg: string, outline = false): CSSProperties => ({ background: bg, color: fg, border: outline ? '1.5px solid #340057' : 0, borderRadius: 999, padding: '10px 18px', fontWeight: 700, fontSize: 13.5, cursor: 'pointer', fontFamily: 'inherit' });
 
-type Line = { id: string; name: string; variant: string; mode: 'pp' | 'flat'; adults: number; kids: number; units: number };
+type Line = { id: string; name: string; variant: string; mode: 'pp' | 'flat'; adults: number; kids: number; units: number; time?: string };
 
 function Counter({ label, value, onChange, min, testId }: { label: string; value: number; onChange: (n: number) => void; min: number; testId: string }) {
   const b: CSSProperties = { width: 30, height: 30, borderRadius: 999, border: '1.5px solid #D9C9F0', background: '#FFFFFF', color: '#340057', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' };
@@ -41,7 +41,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
   const byId = useMemo(() => new Map(acts.map((a) => [a.id, a])), [acts]);
   const linesOf = (v: TicketView): Line[] => v.lines
     .filter((l) => l.experienceId && byId.has(l.experienceId))
-    .map((l) => { const a = byId.get(l.experienceId as string)!; return { id: a.id, name: a.name, variant: l.variant ?? '', mode: a.mode as 'pp' | 'flat', adults: l.adults ?? 0, kids: l.kids ?? 0, units: l.units ?? 0 }; });
+    .map((l) => { const a = byId.get(l.experienceId as string)!; return { id: a.id, name: a.name, variant: l.variant ?? '', mode: a.mode as 'pp' | 'flat', adults: l.adults ?? 0, kids: l.kids ?? 0, units: l.units ?? 0, time: l.time ?? undefined }; });
   const [lines, setLines] = useState<Line[]>(() => linesOf(tk));
   /** Opening the editor always starts from what the ticket says now (it may have been changed and saved). */
   const openEditor = () => { setDate(tk.visitDate); setSlot(tk.slot); setAdults(tk.adults); setKids(tk.kids); setLines(linesOf(tk)); setConfirmCancel(false); setOpen(true); };
@@ -71,7 +71,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
       if (slot !== tk.slot) body.slot = slot;
       if (adults !== tk.adults) body.adults = adults;
       if (kids !== tk.kids) body.kids = kids;
-      const items = lines.map((l) => ({ id: l.id, variant: l.variant || undefined, adults: l.mode === 'pp' ? l.adults : undefined, kids: l.mode === 'pp' ? l.kids : undefined, units: l.mode === 'flat' ? l.units : undefined }));
+      const items = lines.map((l) => ({ id: l.id, variant: l.variant || undefined, adults: l.mode === 'pp' ? l.adults : undefined, kids: l.mode === 'pp' ? l.kids : undefined, units: l.mode === 'flat' ? l.units : undefined, time: l.time }));
       const before = JSON.stringify(tk.lines.filter((l) => l.experienceId).map((l) => [l.experienceId, l.variant, l.adults, l.kids, l.units]));
       const after = JSON.stringify(lines.map((l) => [l.id, l.variant, l.mode === 'pp' ? l.adults : 0, l.mode === 'pp' ? l.kids : 0, l.mode === 'flat' ? l.units : 0]));
       if (before !== after) body.items = items;
@@ -131,7 +131,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
             {lines.length === 0 && <div style={{ fontSize: 13, color: 'rgba(52,0,87,.6)', marginTop: 6 }}>{t('Park entry only. Add an experience below.')}</div>}
             {lines.map((l, i) => (
               <div key={l.id + '|' + l.variant} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 8, background: '#FFFFFF', borderRadius: 12, padding: '8px 12px' }} data-testid="manage-line">
-                <span style={{ flex: '1 1 160px', fontWeight: 700, fontSize: 14 }}>{l.name}{l.variant ? <span style={{ fontWeight: 400, color: 'rgba(52,0,87,.6)' }}> · {l.variant}</span> : null}</span>
+                <span style={{ flex: '1 1 160px', fontWeight: 700, fontSize: 14 }}>{l.name}{l.variant ? <span style={{ fontWeight: 400, color: 'rgba(52,0,87,.6)' }}> · {l.variant}</span> : null}{l.time ? <span style={{ fontFamily: MONO, fontWeight: 700, color: '#7333FF' }}> · {l.time}</span> : null}</span>
                 {l.mode === 'pp'
                   ? <><Counter label={t('ADULTS')} value={l.adults} onChange={(n) => setLines((ls) => ls.map((x, j) => (j === i ? { ...x, adults: n } : x)))} min={0} testId={`line-adults-${l.id}`} /><Counter label={t('CHILD 6–11')} value={l.kids} onChange={(n) => setLines((ls) => ls.map((x, j) => (j === i ? { ...x, kids: n } : x)))} min={0} testId={`line-kids-${l.id}`} /></>
                   : <Counter label={t('UNITS')} value={l.units} onChange={(n) => setLines((ls) => ls.map((x, j) => (j === i ? { ...x, units: n } : x)))} min={1} testId={`line-units-${l.id}`} />}

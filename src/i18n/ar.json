@@ -1849,5 +1849,11 @@
  "Cancel booking {ref}? Your places are released.": "إلغاء الحجز {ref}؟ سيتم تحرير أماكنك.",
  "Yes, cancel": "نعم، إلغاء",
  "Keep it": "الاحتفاظ به",
- "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "إذا خفّض تغييرك الإجمالي، يردّ مكتب الاستقبال الفرق؛ وإذا رفعه، تدفع المتبقي عند البوابة أو عبر الإنترنت."
+ "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "إذا خفّض تغييرك الإجمالي، يردّ مكتب الاستقبال الفرق؛ وإذا رفعه، تدفع المتبقي عند البوابة أو عبر الإنترنت.",
+ "Pick a start time for {names}.": "اختر وقت البدء لـ {names}.",
+ "START TIME": "وقت البدء",
+ "FULL": "مكتمل",
+ "FEW LEFT": "أماكن قليلة",
+ "No session for an afternoon arrival: choose the morning.": "لا توجد جلسة لوصول بعد الظهر: اختر الصباح.",
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "يومك · كن في كل بداية قبل 15 دقيقة"
 }

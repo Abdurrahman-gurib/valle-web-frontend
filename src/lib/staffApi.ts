@@ -192,10 +192,12 @@ export interface CalendarView {
   slotCapacity: number; slotCapacitySource: 'setting' | 'default';
   closures: CalendarClosure[];
   activityCapacity: Record<string, { morning: number | null; afternoon: number | null }>;
+  /** Experiences that run in timed sessions. */
+  sessions: Record<string, { times: string[]; capacity: number | null; durationMin: number }>;
   experiences: { id: string; name: string; priceMode: string }[];
 }
 export const getCalendar = () => request<CalendarView>('/staff/ops/calendar');
-export function saveCalendar(body: { slotCapacity?: number; closures: CalendarClosure[]; activityCapacity: Record<string, { morning: number | null; afternoon: number | null }> }): Promise<CalendarView> {
+export function saveCalendar(body: { slotCapacity?: number; closures: CalendarClosure[]; activityCapacity: Record<string, { morning: number | null; afternoon: number | null }>; sessions?: Record<string, { times: string[]; capacity: number | null; durationMin: number }> }): Promise<CalendarView> {
   return request<CalendarView>('/staff/ops/calendar', { method: 'PUT', body: JSON.stringify(body) });
 }
 /** Same-origin link; the session cookie travels with it, so a plain <a download> works. */

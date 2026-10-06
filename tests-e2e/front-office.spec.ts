@@ -228,3 +228,51 @@ test.describe('calendar and capacity', () => {
     }
   });
 });
+
+test.describe('timed sessions', () => {
+  test.use({ storageState: STAFF_STATE });
+
+  test('a manager gives the zipline start times; sessions fill by name, suit the arrival slot, and the ticket shows the itinerary', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const original = await (await page.request.get('/api/staff/ops/calendar')).json() as { slotCapacity: number; closures: unknown[]; activityCapacity: Record<string, unknown>; sessions: Record<string, unknown> };
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + 42); const day = d.toISOString().slice(0, 10);
+    const base = { slotCapacity: original.slotCapacity <= 5000 ? original.slotCapacity : undefined, closures: original.closures, activityCapacity: original.activityCapacity };
+    try {
+      const saved = await page.request.put('/api/staff/ops/calendar', { data: { ...base, sessions: { ...original.sessions, zipline: { times: ['09:30', '10:30', '14:00'], capacity: 2, durationMin: 90 } } } });
+      expect(saved.status()).toBe(200);
+      const avail = await (await page.request.get(`/api/bookings/availability?from=${day}&days=1`)).json() as { sessions?: Record<string, { times: Record<string, string> }> }[];
+      expect(avail[0].sessions?.zipline.times).toEqual({ '09:30': 'quiet', '10:30': 'quiet', '14:00': 'quiet' });
+
+      const book = (time: string, slot: string, adults: number) => page.request.post('/api/bookings', { data: { visitDate: day, slot, adults, kids: 0, rate: 'rr', items: [{ id: 'zipline', adults, time }], name: 'Session Guest', email: 'session@example.mu', payMode: 'gate' } });
+      const first = await book('09:30', 'morning', 2);
+      expect(first.status()).toBe(201);
+      const b = (await first.json()) as { lines: { label: string }[]; ticketUrl: string };
+      expect(b.lines.some((l) => /Zipline.*09:30$/.test(l.label))).toBe(true);
+      const full = await book('09:30', 'morning', 1);
+      expect(full.status()).toBe(409);
+      expect(((await full.json()) as { message: string }).message).toMatch(/09:30 Zipline Adventures session is full/);
+      const wrongSlot = await book('09:30', 'afternoon', 1);
+      expect(wrongSlot.status()).toBe(400);
+      const unknown = await book('11:00', 'morning', 1);
+      expect(unknown.status()).toBe(400);
+      const after = await (await page.request.get(`/api/bookings/availability?from=${day}&days=1`)).json() as { sessions?: Record<string, { times: Record<string, string> }> }[];
+      expect(after[0].sessions?.zipline.times['09:30']).toBe('full');
+
+      // the ticket shows the day's itinerary
+      const u = new URL(b.ticketUrl);
+      await page.goto(u.pathname + u.search);
+      await expect(page.getByTestId('itinerary')).toContainText('09:30');
+      await expect(page.getByTestId('itinerary')).toContainText('Zipline Adventures');
+
+      // the back office shows the plan
+      await page.goto('/staff');
+      await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+      await page.getByRole('button', { name: 'Calendar' }).click();
+      await expect(page.getByTestId('ses-zipline-times')).toHaveValue('09:30, 10:30, 14:00', { timeout: 15000 });
+      await expect(page.getByTestId('ses-zipline-cap')).toHaveValue('2');
+    } finally {
+      await page.request.put('/api/staff/ops/calendar', { data: { ...base, sessions: original.sessions } });
+    }
+  });
+});

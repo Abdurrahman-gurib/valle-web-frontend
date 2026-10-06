@@ -1849,5 +1849,11 @@
  "Cancel booking {ref}? Your places are released.": "Annullare la prenotazione {ref}? I tuoi posti vengono liberati.",
  "Yes, cancel": "Sì, annulla",
  "Keep it": "Tienila",
- "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "Se la modifica abbassa il totale, la differenza viene rimborsata dalla reception; se lo alza, paghi il saldo all’ingresso o online."
+ "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "Se la modifica abbassa il totale, la differenza viene rimborsata dalla reception; se lo alza, paghi il saldo all’ingresso o online.",
+ "Pick a start time for {names}.": "Scegli un orario di partenza per {names}.",
+ "START TIME": "ORARIO DI PARTENZA",
+ "FULL": "COMPLETO",
+ "FEW LEFT": "ULTIMI POSTI",
+ "No session for an afternoon arrival: choose the morning.": "Nessuna sessione per un arrivo pomeridiano: scegli la mattina.",
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "LA TUA GIORNATA · ARRIVA 15 MINUTI PRIMA DI OGNI PARTENZA"
 }

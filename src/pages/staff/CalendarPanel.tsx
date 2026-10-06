@@ -22,6 +22,7 @@ export default function CalendarPanel() {
   const [slotCapacity, setSlotCapacity] = useState('');
   const [closures, setClosures] = useState<CalendarClosure[]>([]);
   const [capacity, setCapacity] = useState<Record<string, { morning: string; afternoon: string }>>({});
+  const [sessions, setSessions] = useState<Record<string, { times: string; capacity: string; durationMin: string }>>({});
   const [draft, setDraft] = useState<CalendarClosure>({ from: todayIsoPark(), to: todayIsoPark(), slot: 'all', kind: 'closed', reason: '' });
 
   const load = () => getCalendar().then((d) => {
@@ -34,6 +35,12 @@ export default function CalendarPanel() {
       cap[e.id] = { morning: c?.morning == null ? '' : String(c.morning), afternoon: c?.afternoon == null ? '' : String(c.afternoon) };
     }
     setCapacity(cap);
+    const ses: Record<string, { times: string; capacity: string; durationMin: string }> = {};
+    for (const e of d.experiences) {
+      const p = d.sessions?.[e.id];
+      ses[e.id] = { times: p ? p.times.join(', ') : '', capacity: p && p.capacity != null ? String(p.capacity) : '', durationMin: p ? String(p.durationMin) : '' };
+    }
+    setSessions(ses);
   });
   useEffect(() => { load().catch(() => setErr('Could not load the calendar.')); }, []);
 
@@ -52,8 +59,18 @@ export default function CalendarPanel() {
         const m = n(v.morning), a = n(v.afternoon);
         if ((m !== null && !Number.isNaN(m)) || (a !== null && !Number.isNaN(a))) activityCapacity[id] = { morning: Number.isNaN(m) ? null : m, afternoon: Number.isNaN(a) ? null : a };
       }
+      const sessionPlans: Record<string, { times: string[]; capacity: number | null; durationMin: number }> = {};
+      for (const [id, v] of Object.entries(sessions)) {
+        const times = v.times.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean).map((x) => (/^\d:\d{2}$/.test(x) ? '0' + x : x));
+        const bad = times.find((x) => !/^([01]\d|2[0-3]):[0-5]\d$/.test(x));
+        if (bad) throw new Error(`"${bad}" is not a time (use HH:MM, e.g. 09:30).`);
+        if (times.length === 0) continue;
+        const c = v.capacity.trim() === '' ? null : Math.max(0, Math.floor(Number(v.capacity)));
+        const dm = Math.floor(Number(v.durationMin));
+        sessionPlans[id] = { times: [...new Set(times)].sort(), capacity: c === null || Number.isNaN(c) ? null : c, durationMin: dm > 0 ? dm : 60 };
+      }
       const cap = Math.floor(Number(slotCapacity));
-      const d = await saveCalendar({ slotCapacity: cap > 0 ? cap : undefined, closures, activityCapacity });
+      const d = await saveCalendar({ slotCapacity: cap > 0 ? cap : undefined, closures, activityCapacity, sessions: sessionPlans });
       setData(d);
       setSaved('Saved. New bookings are checked against this from now on.');
     } catch (e) { setErr((e as Error).message || 'Could not save.'); } finally { setBusy(false); }
@@ -101,6 +118,26 @@ export default function CalendarPanel() {
                               />
                             </td>
                           ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section>
+                <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>TIMED SESSIONS · START TIMES PER DAY</div>
+                <div style={{ fontSize: 13, color: 'rgba(52,0,87,.65)', marginTop: 4 }}>An experience with start times runs in sessions: the guest picks a time when booking, each session has its own capacity, and the ticket shows the day's itinerary. Afternoon arrivals can only take sessions from 12:00. Leave empty for a free-flow experience.</div>
+                <div style={{ overflowX: 'auto', marginTop: 8 }}>
+                  <table style={{ borderCollapse: 'collapse', minWidth: 640 }} data-testid="activity-sessions">
+                    <thead><tr><th style={th}>Experience</th><th style={th}>Start times (HH:MM, comma separated)</th><th style={th}>Per session</th><th style={th}>Minutes</th></tr></thead>
+                    <tbody>
+                      {data.experiences.map((e) => (
+                        <tr key={e.id}>
+                          <td style={td}>{e.name}</td>
+                          <td style={td}><input value={sessions[e.id]?.times ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), times: ev.target.value } }))} placeholder="e.g. 09:30, 10:30, 14:00" aria-label={`${e.name} session times`} data-testid={`ses-${e.id}-times`} style={{ ...inputStyle, width: 260, padding: '7px 10px' }} /></td>
+                          <td style={td}><input value={sessions[e.id]?.capacity ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), capacity: ev.target.value } }))} inputMode="numeric" placeholder="no limit" aria-label={`${e.name} per session`} data-testid={`ses-${e.id}-cap`} style={{ ...inputStyle, width: 90, padding: '7px 10px' }} /></td>
+                          <td style={td}><input value={sessions[e.id]?.durationMin ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), durationMin: ev.target.value } }))} inputMode="numeric" placeholder="60" aria-label={`${e.name} minutes`} style={{ ...inputStyle, width: 70, padding: '7px 10px' }} /></td>
                         </tr>
                       ))}
                     </tbody>

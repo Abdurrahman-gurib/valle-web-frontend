@@ -663,3 +663,42 @@ test.describe('manage my booking', () => {
     expect([400, 403]).toContain(none.status());
   });
 });
+
+test.describe('timed sessions on the booking page', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('a sessioned activity asks for a start time, full times are disabled, and the time travels with the hold', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same logic on every viewport');
+    await page.route('**/api/bookings/availability**', async (route) => {
+      const url = new URL(route.request().url());
+      const from = url.searchParams.get('from') || '';
+      const days = Number(url.searchParams.get('days') || '1');
+      const out = [] as unknown[];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(from + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + i);
+        out.push({ date: d.toISOString().slice(0, 10), morning: { bookings: 0, guests: 0, level: 'quiet' }, afternoon: { bookings: 0, guests: 0, level: 'quiet' }, sessions: { zipline: { durationMin: 90, times: { '09:30': 'full', '10:30': 'quiet', '14:00': 'busy' } } } });
+      }
+      await route.fulfill({ json: out });
+    });
+    let held: { items?: { id: string; time?: string }[] } | null = null;
+    await page.route('**/api/bookings/hold', async (route) => {
+      held = route.request().postDataJSON();
+      await route.fulfill({ status: 201, json: { holdId: '11111111-1111-4111-8111-111111111111', expiresAt: new Date(Date.now() + 600_000).toISOString() } });
+    });
+    // two adults on the zipline, straight into the saved cart
+    await page.addInitScript(() => { localStorage.setItem('valle_sel', JSON.stringify({ zipline: { a: 2 } })); });
+    await page.goto('/booking');
+    const picker = page.getByTestId('session-picker-zipline');
+    await expect(picker).toBeVisible();
+    await expect(picker.getByRole('button', { name: /09:30/ })).toBeDisabled();
+    await expect(picker.getByRole('button', { name: /14:00/ })).toContainText('FEW LEFT');
+    // no time yet: the confirm refuses and names the activity
+    await page.getByPlaceholder(/name/i).first().fill('Timed Guest');
+    await page.getByPlaceholder(/email/i).first().fill('timed@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
+    await expect(page.getByText(/Pick a start time for Zipline/)).toBeVisible();
+    await picker.getByRole('button', { name: /10:30/ }).click();
+    await expect(page.getByTestId('hold-note')).toBeVisible({ timeout: 10000 });
+    expect(held?.items?.[0]).toMatchObject({ id: 'zipline', time: '10:30' });
+  });
+});

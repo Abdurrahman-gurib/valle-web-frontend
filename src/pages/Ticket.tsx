@@ -107,6 +107,17 @@ export default function TicketPage() {
               <WaiverBlock signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
+            {tk.lines.some((l) => l.time) && (
+              <div data-testid="itinerary" style={{ margin: '14px 0 10px', textAlign: 'start', background: '#FFFDE0', border: '1.5px solid #FFE94D', borderRadius: 14, padding: '12px 16px' }}>
+                <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#8A6A00' }}>{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</div>
+                {tk.lines.filter((l) => l.time).sort((a, b) => (a.time as string).localeCompare(b.time as string)).map((l, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'baseline', marginTop: 6, fontSize: 14 }}>
+                    <span style={{ fontFamily: MONO, fontWeight: 800, color: '#340057', minWidth: 48 }}>{l.time}</span>
+                    <span style={{ fontWeight: 600 }}>{l.label.replace(/ · \d{2}:\d{2}$/, '')}</span>
+                  </div>
+                ))}
+              </div>
+            )}
             {tk.lines.map((l, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left' }}>
                 <span style={{ color: 'rgba(52,0,87,.72)' }}>{l.label}</span>

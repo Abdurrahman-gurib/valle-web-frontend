@@ -1849,5 +1849,11 @@
  "Cancel booking {ref}? Your places are released.": "Отменить бронирование {ref}? Ваши места будут освобождены.",
  "Yes, cancel": "Да, отменить",
  "Keep it": "Оставить",
- "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "Если изменение уменьшает сумму, разницу вернёт стойка; если увеличивает, остаток вы оплатите на входе или онлайн."
+ "If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.": "Если изменение уменьшает сумму, разницу вернёт стойка; если увеличивает, остаток вы оплатите на входе или онлайн.",
+ "Pick a start time for {names}.": "Выберите время начала для {names}.",
+ "START TIME": "ВРЕМЯ НАЧАЛА",
+ "FULL": "НЕТ МЕСТ",
+ "FEW LEFT": "МАЛО МЕСТ",
+ "No session for an afternoon arrival: choose the morning.": "Для прибытия во второй половине дня сеансов нет: выберите утро.",
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "ВАШ ДЕНЬ · ПРИХОДИТЕ НА КАЖДЫЙ СТАРТ ЗА 15 МИНУТ"
 }

@@ -445,20 +445,28 @@ export default function BookingPage() {
   const selectedSlotLevel = selectedLoad ? (slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level) : undefined;
   const selectedSlotFull = selectedSlotLevel === 'full' || selectedSlotLevel === 'closed';
   const slotKey = slot === 0 ? 'morning' : 'afternoon';
+  // Timed sessions: the start time chosen per cart line (key = activity|variant); cleared when the date changes.
+  const [times, setTimes] = useState<Record<string, string>>({});
+  useEffect(() => { setTimes({}); }, [selectedIso]);
+  const sessionsOf = (id: string) => selectedLoad?.sessions?.[id];
+  /** Session times a guest arriving in the chosen slot can take (afternoon arrivals from 12:00). */
+  const timesFor = (id: string) => Object.entries(sessionsOf(id)?.times ?? {}).filter(([tm]) => slotKey === 'morning' || tm >= '12:00');
+  /** Cart lines that run in sessions but have no (valid, open) time yet. */
+  const needsTime = cartActs.filter((l) => sessionsOf(l.act.id) && !timesFor(l.act.id).some(([tm, lv]) => tm === times[l.key] && lv !== 'full')).map((l) => l.act.name);
   /** Experiences in the cart that have no room left in the chosen slot (from the picker's per-activity levels). */
   const activityFull = cartActs.filter((l) => selectedLoad?.activities?.[l.act.id]?.[slotKey] === 'full').map((l) => l.act.name);
 
   // Hold the places while the guest types their details, so the last spots are not lost mid-form.
   const [hold, setHold] = useState<{ id: string; until: string } | null>(null);
-  const holdKey = JSON.stringify([selectedIso, slotKey, adults, kids, booking.selLines.map((l) => [l.act.id, l.qty.a, l.qty.k, l.qty.u])]);
-  const wantsHold = name.trim().length >= 2 && !selectedSlotFull && activityFull.length === 0;
+  const holdKey = JSON.stringify([selectedIso, slotKey, adults, kids, booking.selLines.map((l) => [l.act.id, l.qty.a, l.qty.k, l.qty.u, times[l.key] || ''])]);
+  const wantsHold = name.trim().length >= 2 && !selectedSlotFull && activityFull.length === 0 && needsTime.length === 0;
   useEffect(() => {
     if (!wantsHold || confirmed) return;
     let dead = false;
     const timer = setTimeout(() => {
       void createHold({
         visitDate: selectedIso, slot: slotKey, adults, kids,
-        items: booking.selLines.map((l) => ({ id: l.act.id, adults: l.qty.a, kids: l.qty.k, units: l.qty.u })),
+        items: booking.selLines.map((l) => ({ id: l.act.id, adults: l.qty.a, kids: l.qty.k, units: l.qty.u, time: times[l.key] || undefined })),
         holdId: hold?.id,
       }).then((h) => {
         if (dead) { void releaseHold(h.holdId); return; }
@@ -473,6 +481,10 @@ export default function BookingPage() {
 
   const confirmNow = async () => {
     if (submitting) return;
+    if (needsTime.length > 0) {
+      setApiErr(t('Pick a start time for {names}.', { names: needsTime.join(', ') }));
+      return;
+    }
     if (selectedSlotFull || activityFull.length > 0) {
       setApiErr(selectedSlotLevel === 'closed'
         ? t('The park is closed for that arrival slot. Pick another day.')
@@ -492,7 +504,7 @@ export default function BookingPage() {
       adults,
       kids,
       rate: rate ?? 'rr',
-      items: booking.selLines.map((l) => ({ id: l.act.id, variant: l.variant, adults: l.qty.a, kids: l.qty.k, units: l.qty.u })),
+      items: booking.selLines.map((l) => ({ id: l.act.id, variant: l.variant, adults: l.qty.a, kids: l.qty.k, units: l.qty.u, time: times[l.key] || undefined })),
       name: name.trim(),
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
@@ -608,7 +620,31 @@ export default function BookingPage() {
                     <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
                     <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{entryAmt}</div>
                   </div>
-                  {cartActs.map((l) => <CartLine key={l.key} line={l} />)}
+                  {cartActs.map((l) => (
+                    <div key={l.key}>
+                      <CartLine line={l} />
+                      {sessionsOf(l.act.id) && (
+                        <div data-testid={`session-picker-${l.act.id}`} style={{ padding: '0 18px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: times[l.key] ? 'rgba(52,0,87,.6)' : '#D91E44' }}>{t('START TIME')}</span>
+                          {timesFor(l.act.id).map(([tm, lv]) => (
+                            <button
+                              key={tm}
+                              type="button"
+                              disabled={lv === 'full'}
+                              aria-pressed={times[l.key] === tm}
+                              onClick={() => setTimes((x) => ({ ...x, [l.key]: tm }))}
+                              style={{
+                                border: '1.5px solid ' + (times[l.key] === tm ? '#7333FF' : '#EBE2FF'), background: times[l.key] === tm ? '#7333FF' : lv === 'full' ? '#F7F3FF' : '#FFFFFF',
+                                color: times[l.key] === tm ? '#FFFFFF' : '#340057', opacity: lv === 'full' ? 0.5 : 1, cursor: lv === 'full' ? 'not-allowed' : 'pointer',
+                                fontFamily: MONO, fontWeight: 700, fontSize: '12px', padding: '6px 10px', borderRadius: '999px',
+                              }}
+                            >{tm}{lv === 'full' ? ' · ' + t('FULL') : lv === 'busy' ? ' · ' + t('FEW LEFT') : ''}</button>
+                          ))}
+                          {timesFor(l.act.id).length === 0 && <span style={{ fontSize: '12.5px', color: '#D91E44', fontWeight: 600 }}>{t('No session for an afternoon arrival: choose the morning.')}</span>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                   {cartActs.length === 0 && (
                     <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.55)' }}>
                       {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}

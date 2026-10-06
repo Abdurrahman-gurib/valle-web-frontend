@@ -35,10 +35,12 @@ export interface AvailabilityDay {
   date: string; morning: SlotLoad; afternoon: SlotLoad;
   /** Only experiences with a capacity: how full each slot is for them. */
   activities?: Record<string, { morning: 'quiet' | 'busy' | 'full'; afternoon: 'quiet' | 'busy' | 'full' }>;
+  /** Experiences that run in timed sessions: each start time and how full it is. */
+  sessions?: Record<string, { durationMin: number; times: Record<string, 'quiet' | 'busy' | 'full'> }>;
 }
 
 /** POST /api/bookings/hold: keeps the party's places for a few minutes while the form is filled in. */
-export interface HoldRequest { visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number; items: { id: string; adults?: number; kids?: number; units?: number }[]; holdId?: string }
+export interface HoldRequest { visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number; items: { id: string; adults?: number; kids?: number; units?: number; time?: string }[]; holdId?: string }
 export function createHold(body: HoldRequest): Promise<{ holdId: string; expiresAt: string }> {
   return request<{ holdId: string; expiresAt: string }>('/bookings/hold', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -55,7 +57,7 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
 export interface TicketView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
   rate: string; payMode: string; status: string; total: number; ticketUrl: string; qrUrl: string;
-  lines: { label: string; amount: number; experienceId?: string | null; variant?: string; adults?: number; kids?: number; units?: number }[];
+  lines: { label: string; amount: number; experienceId?: string | null; variant?: string; adults?: number; kids?: number; units?: number; time?: string | null }[];
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
   paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;
@@ -64,7 +66,7 @@ export function fetchTicket(refCode: string, token: string): Promise<TicketView>
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
 }
 /** PATCH /api/tickets/:ref/booking?t= : the guest changes date, slot, party or experiences. */
-export interface GuestChange { visitDate?: string; slot?: 'morning' | 'afternoon'; adults?: number; kids?: number; items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[] }
+export interface GuestChange { visitDate?: string; slot?: 'morning' | 'afternoon'; adults?: number; kids?: number; items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[] }
 export function changeBooking(refCode: string, token: string, body: GuestChange): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}/booking?t=${encodeURIComponent(token)}`, { method: 'PATCH', body: JSON.stringify(body) });
 }
