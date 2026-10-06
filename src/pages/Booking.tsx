@@ -8,7 +8,7 @@ import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
-import { checkCoupon, fetchAvailability, fetchPaymentConfig, type AvailabilityDay, type BusyLevel } from '../lib/api';
+import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, releaseHold, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -169,9 +169,10 @@ function CartLine({ line }: { line: SelLine }) {
 }
 
 /* 3 · WHEN: how busy a slot already is (from /api/bookings/availability) */
-const LEVEL_COLOR: Record<BusyLevel, string> = { quiet: '#33FF74', busy: '#FFFC33', 'very-busy': '#FF9F33', full: '#FF3358' };
-const LEVEL_LABEL: Record<BusyLevel, string> = { quiet: _t('QUIET'), busy: _t('BUSY'), 'very-busy': _t('VERY BUSY'), full: _t('FULLY BOOKED') };
-const LEVEL_WORD: Record<BusyLevel, string> = { quiet: _t('quiet'), busy: _t('busy'), 'very-busy': _t('very busy'), full: _t('fully booked') };
+const LEVEL_COLOR: Record<BusyLevel, string> = { quiet: '#33FF74', busy: '#FFFC33', 'very-busy': '#FF9F33', full: '#FF3358', closed: '#9A8FB0' };
+const LEVEL_LABEL: Record<BusyLevel, string> = { quiet: _t('QUIET'), busy: _t('BUSY'), 'very-busy': _t('VERY BUSY'), full: _t('FULLY BOOKED'), closed: _t('CLOSED') };
+const CLOSURE_LABEL: Record<'closed' | 'maintenance' | 'private', string> = { closed: _t('CLOSED'), maintenance: _t('MAINTENANCE'), private: _t('PRIVATE EVENT') };
+const LEVEL_WORD: Record<BusyLevel, string> = { quiet: _t('quiet'), busy: _t('busy'), 'very-busy': _t('very busy'), full: _t('fully booked'), closed: _t('closed') };
 
 function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
   const t = useT();
@@ -195,7 +196,8 @@ function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
 /* 3 · WHEN: date chip */
 function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: () => void; load?: AvailabilityDay }) {
   const [h, bind] = useHover();
-  const full = !!load && load.morning.level === 'full' && load.afternoon.level === 'full';
+  const out = (l: BusyLevel) => l === 'full' || l === 'closed';
+  const full = !!load && out(load.morning.level) && out(load.afternoon.level);
   return (
     <button
       onClick={onClick}
@@ -221,17 +223,17 @@ function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: 
 }
 
 /* 3 · WHEN: slot chip */
-function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel }) {
+function SlotChip({ label, sub, on, onClick, level, closure }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel; closure?: { kind: 'closed' | 'maintenance' | 'private'; reason: string } }) {
   const t = useT();
   const [h, bind] = useHover();
-  const full = level === 'full';
+  const full = level === 'full' || level === 'closed';
   return (
     <button
       onClick={onClick}
       {...bind}
       aria-pressed={on}
       disabled={full}
-      data-testid={full ? 'slot-full' : undefined}
+      data-testid={level === 'closed' ? 'slot-closed' : full ? 'slot-full' : undefined}
       style={{
         border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
         background: on ? '#7333FF' : full ? '#F7F3FF' : '#FFFFFF',
@@ -247,7 +249,7 @@ function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: stri
       {level && (
         <div data-testid="slot-level" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.08em', marginTop: '7px', color: on ? '#FFFFFF' : '#340057' }}>
           <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[level], display: 'inline-block' }} />
-          {t(LEVEL_LABEL[level])}
+          {closure ? t(CLOSURE_LABEL[closure.kind]) + (closure.reason ? ' · ' + closure.reason : '') : t(LEVEL_LABEL[level])}
         </div>
       )}
     </button>
@@ -399,7 +401,8 @@ export default function BookingPage() {
     if (!selectedLoad) return;
     const cur = slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level;
     const other = slot === 0 ? selectedLoad.afternoon.level : selectedLoad.morning.level;
-    if (cur === 'full' && other !== 'full') setSlot(slot === 0 ? 1 : 0);
+    const out = (l: BusyLevel) => l === 'full' || l === 'closed';
+    if (out(cur) && !out(other)) setSlot(slot === 0 ? 1 : 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLoad]);
 
@@ -439,13 +442,43 @@ export default function BookingPage() {
     if (code && (!phone.trim() || /^\+\d{1,4}$/.test(phone.trim()))) setPhone(code + ' ');
   };
 
-  const selectedSlotFull = selectedLoad ? (slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level) === 'full' : false;
+  const selectedSlotLevel = selectedLoad ? (slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level) : undefined;
+  const selectedSlotFull = selectedSlotLevel === 'full' || selectedSlotLevel === 'closed';
+  const slotKey = slot === 0 ? 'morning' : 'afternoon';
+  /** Experiences in the cart that have no room left in the chosen slot (from the picker's per-activity levels). */
+  const activityFull = cartActs.filter((l) => selectedLoad?.activities?.[l.act.id]?.[slotKey] === 'full').map((l) => l.act.name);
+
+  // Hold the places while the guest types their details, so the last spots are not lost mid-form.
+  const [hold, setHold] = useState<{ id: string; until: string } | null>(null);
+  const holdKey = JSON.stringify([selectedIso, slotKey, adults, kids, booking.selLines.map((l) => [l.act.id, l.qty.a, l.qty.k, l.qty.u])]);
+  const wantsHold = name.trim().length >= 2 && !selectedSlotFull && activityFull.length === 0;
+  useEffect(() => {
+    if (!wantsHold || confirmed) return;
+    let dead = false;
+    const timer = setTimeout(() => {
+      void createHold({
+        visitDate: selectedIso, slot: slotKey, adults, kids,
+        items: booking.selLines.map((l) => ({ id: l.act.id, adults: l.qty.a, kids: l.qty.k, units: l.qty.u })),
+        holdId: hold?.id,
+      }).then((h) => {
+        if (dead) { void releaseHold(h.holdId); return; }
+        setHold({ id: h.holdId, until: new Date(h.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      }).catch(() => { if (!dead) setHold(null); });
+    }, 700);
+    return () => { dead = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantsHold, holdKey]);
+  useEffect(() => () => { if (hold) void releaseHold(hold.id); }, [hold]);
   const refreshAvail = (iso: string) => fetchAvailability(iso, 1).then(mergeAvail).catch(() => { /* ignore */ });
 
   const confirmNow = async () => {
     if (submitting) return;
-    if (selectedSlotFull) {
-      setApiErr(t('That arrival slot is fully booked on this date. Pick the other slot or another day.'));
+    if (selectedSlotFull || activityFull.length > 0) {
+      setApiErr(selectedSlotLevel === 'closed'
+        ? t('The park is closed for that arrival slot. Pick another day.')
+        : activityFull.length > 0
+        ? t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })
+        : t('That arrival slot is fully booked on this date. Pick the other slot or another day.'));
       return;
     }
     const ok = name.trim() && (email.trim() || phone.trim());
@@ -466,6 +499,7 @@ export default function BookingPage() {
       nationality: nat || undefined,
       payMode: ONLINE_PAYMENT ? payMode : 'gate',
       couponCode: offer ? offer.code : undefined,
+      holdId: hold?.id,
     };
     let code: string;
     try {
@@ -494,7 +528,7 @@ export default function BookingPage() {
       setApiErr(codeUsed
         ? t('This code has just been fully used. Remove it or try another.')
         : status === 409
-        ? t('That arrival slot is fully booked on this date. Pick the other slot or another day.')
+        ? (/^That arrival slot is fully booked/.test(msg) ? t('That arrival slot is fully booked on this date. Pick the other slot or another day.') : msg)
         : status
         ? ((e as Error).message || t('We could not confirm your booking. Please try again.'))
         : t('We could not reach the booking desk. Check your connection and try again, or WhatsApp us on {phone}.', { phone: '+230 5292 8841' }));
@@ -502,6 +536,7 @@ export default function BookingPage() {
       return;
     }
     setRefCode(code);
+    setHold(null);
     setSubmitting(false);
     setConfirmed(true);
     window.scrollTo(0, 0);
@@ -613,13 +648,23 @@ export default function BookingPage() {
                   />
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                  <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} />
-                  <SlotChip label={t('Afternoon')} sub={t('ARRIVE 12:00–15:30')} on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} />
+                  <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} closure={selectedLoad?.morning.closure} />
+                  <SlotChip label={t('Afternoon')} sub={t('ARRIVE 12:00–15:30')} on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} closure={selectedLoad?.afternoon.closure} />
                 </div>
+                {activityFull.length > 0 && (
+                  <div role="alert" data-testid="activity-full" style={{ marginTop: '10px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '12px', padding: '10px 14px', fontSize: '13.5px', fontWeight: 600, color: '#340057' }}>
+                    {t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })}
+                  </div>
+                )}
+                {hold && !selectedSlotFull && activityFull.length === 0 && (
+                  <div data-testid="hold-note" style={{ marginTop: '10px', fontFamily: MONO, fontSize: '10px', letterSpacing: '.08em', color: '#1E9E4A', fontWeight: 700 }}>
+                    {t('YOUR PLACES ARE HELD UNTIL {time}', { time: hold.until })}
+                  </div>
+                )}
                 {Object.keys(avail).length > 0 && (
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
                     <span>{t('DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:')}</span>
-                    {(['quiet', 'busy', 'very-busy', 'full'] as BusyLevel[]).map((l) => (
+                    {(['quiet', 'busy', 'very-busy', 'full', 'closed'] as BusyLevel[]).map((l) => (
                       <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{t(LEVEL_LABEL[l])}
                       </span>

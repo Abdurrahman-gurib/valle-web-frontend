@@ -169,3 +169,62 @@ test.describe('online payment refunds', () => {
     await expect(dialog.getByText(/rain day/)).toBeVisible();
   });
 });
+
+test.describe('calendar and capacity', () => {
+  test.use({ storageState: STAFF_STATE });
+  const far = (n: number) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+
+  test('a manager closes a day and caps an activity; the website shows it and the API refuses what does not fit', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const original = await (await page.request.get('/api/staff/ops/calendar')).json() as { slotCapacity: number; closures: unknown[]; activityCapacity: Record<string, unknown> };
+    const closedDay = far(40), cappedDay = far(41);
+    try {
+      // 1. save a private-event closure and one buggy per morning
+      // the local stack runs with a huge BOOKING_SLOT_CAPACITY; the setting itself is capped at 5000
+      const slotCapacity = original.slotCapacity <= 5000 ? original.slotCapacity : undefined;
+      const saved = await page.request.put('/api/staff/ops/calendar', { data: {
+        slotCapacity,
+        closures: [...original.closures, { from: closedDay, to: closedDay, slot: 'all', kind: 'private', reason: 'Wedding' }],
+        activityCapacity: { ...original.activityCapacity, buggy: { morning: 1, afternoon: null } },
+      } });
+      expect(saved.status()).toBe(200);
+
+      // 2. the back office lists it
+      await page.goto('/staff');
+      await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+      await page.getByRole('button', { name: 'Calendar' }).click();
+      const panel = page.getByTestId('calendar-panel');
+      await expect(panel.getByTestId('closure-list')).toContainText('Wedding', { timeout: 15000 });
+      await expect(panel.getByTestId('cap-buggy-morning')).toHaveValue('1');
+
+      // 3. the picker shows the closed day and the API refuses a booking on it
+      const avail = await (await page.request.get(`/api/bookings/availability?from=${closedDay}&days=1`)).json() as { morning: { level: string; closure?: { reason: string } } }[];
+      expect(avail[0].morning.level).toBe('closed');
+      expect(avail[0].morning.closure?.reason).toBe('Wedding');
+      const refused = await page.request.post('/api/bookings', { data: { visitDate: closedDay, slot: 'morning', adults: 2, kids: 0, rate: 'rr', items: [], name: 'Closed Day', email: 'closed@example.mu', payMode: 'gate' } });
+      expect(refused.status()).toBe(409);
+      expect(((await refused.json()) as { message: string }).message).toMatch(/reserved for a private event .*Wedding/);
+
+      // 4. one buggy per morning: a hold takes it, a booking is refused by name, releasing the hold frees it
+      const buggy = (slot: string) => ({ visitDate: cappedDay, slot, adults: 2, kids: 0, rate: 'rr', items: [{ id: 'buggy', units: 1 }], name: 'Buggy Guest', email: 'buggy@example.mu', payMode: 'gate' });
+      const hold = await page.request.post('/api/bookings/hold', { data: { visitDate: cappedDay, slot: 'morning', adults: 2, kids: 0, items: [{ id: 'buggy', units: 1 }] } });
+      expect(hold.status()).toBe(201);
+      const { holdId } = (await hold.json()) as { holdId: string };
+      const while_held = await page.request.post('/api/bookings', { data: buggy('morning') });
+      expect(while_held.status()).toBe(409);
+      expect(((await while_held.json()) as { message: string }).message).toMatch(/Buggy is fully booked for the morning/);
+      const levels = await (await page.request.get(`/api/bookings/availability?from=${cappedDay}&days=1`)).json() as { activities?: Record<string, { morning: string; afternoon: string }> }[];
+      expect(levels[0].activities?.buggy).toEqual({ morning: 'full', afternoon: 'quiet' });
+      expect((await page.request.delete(`/api/bookings/hold/${holdId}`)).status()).toBe(204);
+      const first = await page.request.post('/api/bookings', { data: buggy('morning') });
+      expect(first.status()).toBe(201);
+      const second = await page.request.post('/api/bookings', { data: buggy('morning') });
+      expect(second.status()).toBe(409);
+      const afternoon = await page.request.post('/api/bookings', { data: buggy('afternoon') });
+      expect(afternoon.status()).toBe(201);
+    } finally {
+      await page.request.put('/api/staff/ops/calendar', { data: { slotCapacity: original.slotCapacity <= 5000 ? original.slotCapacity : undefined, closures: original.closures, activityCapacity: original.activityCapacity } });
+    }
+  });
+});

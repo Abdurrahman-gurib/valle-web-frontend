@@ -1820,5 +1820,12 @@
  "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "لم تتم عملية الدفع. لم يُخصم أي مبلغ: حاول مجددًا أو ادفع عند البوابة.",
  "Opening secure payment…": "جارٍ فتح الدفع الآمن…",
  "Pay {amount} online now": "ادفع {amount} عبر الإنترنت الآن",
- "Online payment is not available right now. You can pay at the gate.": "الدفع عبر الإنترنت غير متاح حاليًا. يمكنك الدفع عند البوابة."
+ "Online payment is not available right now. You can pay at the gate.": "الدفع عبر الإنترنت غير متاح حاليًا. يمكنك الدفع عند البوابة.",
+ "CLOSED": "مغلق",
+ "MAINTENANCE": "صيانة",
+ "PRIVATE EVENT": "فعالية خاصة",
+ "closed": "مغلق",
+ "{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.": "{names}: محجوز بالكامل لفترة {slot} في هذا التاريخ. اختر الفترة الأخرى أو يومًا آخر أو أزله من يومك.",
+ "YOUR PLACES ARE HELD UNTIL {time}": "أماكنك محجوزة حتى {time}",
+ "The park is closed for that arrival slot. Pick another day.": "المنتزه مغلق في فترة الوصول هذه. اختر يومًا آخر."
 }

@@ -165,6 +165,8 @@ export interface BookingRequest {
   kids: number;
   rate: RateKey;
   items: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[];
+  /** The hold taken while filling in the form; its places become this booking. */
+  holdId?: string;
   name: string;
   phone?: string;
   email?: string;

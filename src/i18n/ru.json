@@ -1820,5 +1820,12 @@
  "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "Платёж не прошёл. Деньги не списаны: попробуйте ещё раз или оплатите на входе.",
  "Opening secure payment…": "Открываем защищённую оплату…",
  "Pay {amount} online now": "Оплатить {amount} онлайн сейчас",
- "Online payment is not available right now. You can pay at the gate.": "Онлайн-оплата сейчас недоступна. Вы можете оплатить на входе."
+ "Online payment is not available right now. You can pay at the gate.": "Онлайн-оплата сейчас недоступна. Вы можете оплатить на входе.",
+ "CLOSED": "ЗАКРЫТО",
+ "MAINTENANCE": "ТЕХОБСЛУЖИВАНИЕ",
+ "PRIVATE EVENT": "ЧАСТНОЕ МЕРОПРИЯТИЕ",
+ "closed": "закрыто",
+ "{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.": "{names}: нет мест на {slot} в эту дату. Выберите другое время, другой день или уберите это из своего дня.",
+ "YOUR PLACES ARE HELD UNTIL {time}": "ВАШИ МЕСТА УДЕРЖИВАЮТСЯ ДО {time}",
+ "The park is closed for that arrival slot. Pick another day.": "Парк закрыт в это время прибытия. Выберите другой день."
 }

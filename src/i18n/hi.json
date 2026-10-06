@@ -1820,5 +1820,12 @@
  "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "आपका भुगतान पूरा नहीं हुआ। कुछ भी नहीं काटा गया: फिर कोशिश करें या गेट पर भुगतान करें।",
  "Opening secure payment…": "सुरक्षित भुगतान खुल रहा है…",
  "Pay {amount} online now": "{amount} अभी ऑनलाइन भुगतान करें",
- "Online payment is not available right now. You can pay at the gate.": "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। आप गेट पर भुगतान कर सकते हैं।"
+ "Online payment is not available right now. You can pay at the gate.": "ऑनलाइन भुगतान अभी उपलब्ध नहीं है। आप गेट पर भुगतान कर सकते हैं।",
+ "CLOSED": "बंद",
+ "MAINTENANCE": "रखरखाव",
+ "PRIVATE EVENT": "निजी आयोजन",
+ "closed": "बंद",
+ "{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.": "{names}: इस तारीख़ पर {slot} के लिए पूरी तरह बुक है। दूसरा स्लॉट, कोई और दिन चुनें, या इसे अपने दिन से हटाएँ।",
+ "YOUR PLACES ARE HELD UNTIL {time}": "आपकी जगहें {time} तक रोकी गई हैं",
+ "The park is closed for that arrival slot. Pick another day.": "उस आगमन स्लॉट में पार्क बंद है। कोई और दिन चुनें।"
 }

@@ -185,6 +185,19 @@ export interface BackupStatus {
   recent: BackupRun[];
 }
 export const getBackupStatus = () => request<BackupStatus>('/staff/ops/backups');
+
+/** Calendar & capacity (managers). */
+export interface CalendarClosure { from: string; to: string; slot: 'all' | 'morning' | 'afternoon'; kind: 'closed' | 'maintenance' | 'private'; reason: string }
+export interface CalendarView {
+  slotCapacity: number; slotCapacitySource: 'setting' | 'default';
+  closures: CalendarClosure[];
+  activityCapacity: Record<string, { morning: number | null; afternoon: number | null }>;
+  experiences: { id: string; name: string; priceMode: string }[];
+}
+export const getCalendar = () => request<CalendarView>('/staff/ops/calendar');
+export function saveCalendar(body: { slotCapacity?: number; closures: CalendarClosure[]; activityCapacity: Record<string, { morning: number | null; afternoon: number | null }> }): Promise<CalendarView> {
+  return request<CalendarView>('/staff/ops/calendar', { method: 'PUT', body: JSON.stringify(body) });
+}
 /** Same-origin link; the session cookie travels with it, so a plain <a download> works. */
 export const exportUrl = (type: ExportType, from?: string, to?: string) => BASE + '/staff/reports/export.csv' + qs({ type, from, to });
 

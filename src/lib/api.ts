@@ -29,9 +29,22 @@ export function fetchFx(): Promise<FxTable> {
   return request<FxTable>('/fx');
 }
 
-export type BusyLevel = 'quiet' | 'busy' | 'very-busy' | 'full';
-export interface SlotLoad { bookings: number; guests: number; level: BusyLevel }
-export interface AvailabilityDay { date: string; morning: SlotLoad; afternoon: SlotLoad }
+export type BusyLevel = 'quiet' | 'busy' | 'very-busy' | 'full' | 'closed';
+export interface SlotLoad { bookings: number; guests: number; level: BusyLevel; closure?: { kind: 'closed' | 'maintenance' | 'private'; reason: string } }
+export interface AvailabilityDay {
+  date: string; morning: SlotLoad; afternoon: SlotLoad;
+  /** Only experiences with a capacity: how full each slot is for them. */
+  activities?: Record<string, { morning: 'quiet' | 'busy' | 'full'; afternoon: 'quiet' | 'busy' | 'full' }>;
+}
+
+/** POST /api/bookings/hold: keeps the party's places for a few minutes while the form is filled in. */
+export interface HoldRequest { visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number; items: { id: string; adults?: number; kids?: number; units?: number }[]; holdId?: string }
+export function createHold(body: HoldRequest): Promise<{ holdId: string; expiresAt: string }> {
+  return request<{ holdId: string; expiresAt: string }>('/bookings/hold', { method: 'POST', body: JSON.stringify(body) });
+}
+export function releaseHold(holdId: string): Promise<void> {
+  return request<void>(`/bookings/hold/${encodeURIComponent(holdId)}`, { method: 'DELETE' }).catch(() => undefined);
+}
 
 /** How busy each arrival slot already is, for `days` days from `from` (YYYY-MM-DD). */
 export function fetchAvailability(from: string, days: number): Promise<AvailabilityDay[]> {

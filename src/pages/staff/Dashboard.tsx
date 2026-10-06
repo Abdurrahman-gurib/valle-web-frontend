@@ -16,11 +16,12 @@ import GatePanel from './GatePanel';
 import CouponsPanel from './CouponsPanel';
 import ReportsPanel from './ReportsPanel';
 import BackupsPanel from './BackupsPanel';
+import CalendarPanel from './CalendarPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
 
-type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat';
+type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat' | 'calendar';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -271,6 +272,7 @@ export default function StaffDashboard() {
           <TabBtn on={tab === 'forecast'} onClick={() => setTab('forecast')}>Forecast</TabBtn>
           <TabBtn on={tab === 'quotes'} onClick={() => setTab('quotes')}>Quotes</TabBtn>
           <TabBtn on={tab === 'chat'} onClick={() => setTab('chat')}>Chat</TabBtn>
+          {String(auth.user.role) === 'manager' && <TabBtn on={tab === 'calendar'} onClick={() => setTab('calendar')}>Calendar</TabBtn>}
         </div>
 
         {toast && (
@@ -294,6 +296,7 @@ export default function StaffDashboard() {
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}
         {tab === 'quotes' && <QuotesPanel />}
+        {tab === 'calendar' && String(auth.user.role) === 'manager' && <CalendarPanel />}
         <div style={{ display: tab === 'chat' ? 'block' : 'none' }}>
           <ChatConsole active={tab === 'chat'} onChanged={reloadStats} />
         </div>

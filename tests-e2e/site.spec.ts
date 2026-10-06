@@ -578,3 +578,36 @@ test.describe('online payment', () => {
     await expect(page.getByTestId('payment-outcome')).toHaveAttribute('data-status', 'paid', { timeout: 20000 });
   });
 });
+
+test.describe('closed days and holds on the booking page', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('a closed slot reads as closed with its reason and cannot be chosen; typing a name holds the places', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same logic on every viewport');
+    await page.route('**/api/bookings/availability**', async (route) => {
+      const url = new URL(route.request().url());
+      const from = url.searchParams.get('from') || '';
+      const days = Number(url.searchParams.get('days') || '1');
+      const out = [] as unknown[];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(from + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + i);
+        out.push({ date: d.toISOString().slice(0, 10), morning: i === 1 ? { bookings: 0, guests: 0, level: 'closed', closure: { kind: 'private', reason: 'Wedding' } } : { bookings: 0, guests: 0, level: 'quiet' }, afternoon: { bookings: 0, guests: 0, level: 'quiet' } });
+      }
+      await route.fulfill({ json: out });
+    });
+    let held: unknown = null;
+    await page.route('**/api/bookings/hold', async (route) => {
+      held = route.request().postDataJSON();
+      await route.fulfill({ status: 201, json: { holdId: '11111111-1111-4111-8111-111111111111', expiresAt: new Date(Date.now() + 600_000).toISOString() } });
+    });
+    await page.goto('/booking');
+    const closed = page.getByTestId('slot-closed');
+    await expect(closed).toBeDisabled();
+    await expect(closed).toContainText('PRIVATE EVENT · Wedding');
+    await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
+
+    await page.getByPlaceholder(/name/i).first().fill('Holder');
+    await expect(page.getByTestId('hold-note')).toContainText('HELD UNTIL', { timeout: 10000 });
+    expect(held).toMatchObject({ slot: 'afternoon', adults: 2 });
+  });
+});

@@ -1820,5 +1820,12 @@
  "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "Deine Zahlung ist nicht durchgegangen. Es wurde nichts abgebucht: versuche es erneut oder zahle am Eingang.",
  "Opening secure payment…": "Sichere Zahlung wird geöffnet…",
  "Pay {amount} online now": "{amount} jetzt online zahlen",
- "Online payment is not available right now. You can pay at the gate.": "Online-Zahlung ist gerade nicht verfügbar. Du kannst am Eingang zahlen."
+ "Online payment is not available right now. You can pay at the gate.": "Online-Zahlung ist gerade nicht verfügbar. Du kannst am Eingang zahlen.",
+ "CLOSED": "GESCHLOSSEN",
+ "MAINTENANCE": "WARTUNG",
+ "PRIVATE EVENT": "PRIVATE VERANSTALTUNG",
+ "closed": "geschlossen",
+ "{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.": "{names}: für den {slot} an diesem Tag ausgebucht. Wähle das andere Fenster, einen anderen Tag, oder nimm es aus deinem Tag.",
+ "YOUR PLACES ARE HELD UNTIL {time}": "DEINE PLÄTZE SIND BIS {time} RESERVIERT",
+ "The park is closed for that arrival slot. Pick another day.": "Der Park ist für dieses Ankunftsfenster geschlossen. Wähle einen anderen Tag."
 }
