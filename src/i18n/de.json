@@ -1116,7 +1116,6 @@
  "Resident": "Einheimische",
  "Resident (bring an ID)": "Einheimische (Ausweis mitbringen)",
  "Resident packages": "Pakete für Einheimische",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "Einheimischen-Tarif · Erwachsene Rs 400 Eintritt, Kinder Rs 275, unter 5 gratis.",
  "RESIDENT RATE (RR)": "EINHEIMISCHEN-TARIF (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "EINHEIMISCHEN-TARIFE GELTEN NUR GEGEN VORLAGE EINES GÜLTIGEN MAURITISCHEN PERSONALAUSWEISES, EINER AUFENTHALTS-, BESCHÄFTIGUNGS- ODER DAUERAUFENTHALTSGENEHMIGUNG ODER EINER ARBEITS-/ANGEHÖRIGENERLAUBNIS.",
  "Restaurant not found · VALLÉ Advenature™ Park": "Restaurant nicht gefunden · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Valley Hub",
  "VALLEY KICK": "KICK IM TAL",
  "valley, line by line": "Tal, Linie für Linie",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "INKL. MWST. · 1. JULI 2026 BIS 30. JUNI 2027 · NICHT ERSTATTBAR",
  "VEHICLES": "FAHRZEUGE",
  "Ventu Rush": "Ventu Rush",
  "very busy": "sehr voll",
@@ -1628,7 +1626,6 @@
  "Visit →": "Besuchen →",
  "Visit by jeep (45 min)": "Besichtigung per Jeep (45 Min.)",
  "Visitor": "Besucher",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "Besuchertarif · Erwachsene Rs 550 Eintritt, Kinder Rs 325, unter 5 gratis.",
  "Visitors walking through the wooden palisade entrance": "Besucher gehen durch den hölzernen Palisadeneingang",
  "VOICE NOTE": "SPRACHNACHRICHT",
  "Voice notes are not supported in this browser": "Sprachnachrichten werden in diesem Browser nicht unterstützt",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "DEINE DATEN IM VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "Deine Referenz und dein QR-Code sind dein Ticket. Deine Buchung reserviert Plätze für den gewählten Tag und das gewählte Ankunftsfenster; wir bemühen uns, die Wartezeiten bei den Aktivitäten kurz zu halten, doch die Aktivitäten laufen in der Reihenfolge der Ankunft, und zu Stoßzeiten kann es Warteschlangen geben.",
  "Your rights": "Deine Rechte",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Dein Ticket, die Erinnerung am Vorabend und eine Kopie deiner unterschriebenen Sicherheitserklärung werden per E-Mail und, wenn du eine Handynummer angegeben hast, per WhatsApp gesendet. Werbung senden wir nur, wenn du dafür auf der Sicherheitserklärung das Kästchen angekreuzt hast; das kannst du jederzeit widerrufen, indem du uns schreibst."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Dein Ticket, die Erinnerung am Vorabend und eine Kopie deiner unterschriebenen Sicherheitserklärung werden per E-Mail und, wenn du eine Handynummer angegeben hast, per WhatsApp gesendet. Werbung senden wir nur, wenn du dafür auf der Sicherheitserklärung das Kästchen angekreuzt hast; das kannst du jederzeit widerrufen, indem du uns schreibst.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Einwohnertarif · Eintritt Erwachsene {adult}, Kinder {child}, unter 6 frei.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Besuchertarif · Eintritt Erwachsene {adult}, Kinder {child}, unter 6 frei.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "INKL. MWST. · 1. JULI 2026 BIS 30. JUNI 2027 · KOSTENLOS BUCHEN · ZAHLUNG AM EINGANG"
 }

@@ -67,6 +67,16 @@ test.describe('language switch', () => {
     await expect(page).toHaveURL(/\/explore\?cat=kids$/);
   });
 
+  test('back links on activity and careers pages keep the language', async ({ page }) => {
+    await preset(page);
+    await page.goto('/fr/activities/zipline');
+    await page.getByRole('button', { name: /Toutes les expériences|All experiences/ }).first().click();
+    await expect(page).toHaveURL(/\/fr\/explore/);
+    await page.goto('/de');
+    await page.locator('a[href="/de/vacancies"]').first().click();
+    await expect(page).toHaveURL(/\/de\/vacancies$/);
+  });
+
   test('a French browser gets an offer, never a forced redirect', async ({ browser }) => {
     const ctx = await browser.newContext({ locale: 'fr-FR' });
     const page = await ctx.newPage();

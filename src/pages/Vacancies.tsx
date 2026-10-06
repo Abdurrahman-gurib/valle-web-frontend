@@ -10,6 +10,7 @@ import { listVacancies } from '../lib/careersApi';
 import { fullDateFromIso } from '../lib/format';
 import type { EmploymentType, VacancyCard } from '../types';
 import { color, display, font, mono, motion, radius, shadow } from '../styles/theme';
+import { paths } from '../lib/nav';
 import { tr, useT, _t } from '../i18n';
 
 /** Where a speculative application goes when nothing is open (or nothing fits). */
@@ -162,7 +163,7 @@ export default function VacanciesPage() {
 
   useEffect(load, [load]);
 
-  const openRole = (slug: string) => navigate('/vacancies/' + encodeURIComponent(slug));
+  const openRole = (slug: string) => navigate(paths.vacancy(encodeURIComponent(slug)));
 
   const countLabel = state === 'ready'
     ? (items.length === 0 ? t('NO ROLES OPEN RIGHT NOW') : (items.length === 1 ? t('{n} ROLE OPEN', { n: items.length }) : t('{n} ROLES OPEN', { n: items.length })))

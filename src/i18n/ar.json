@@ -1116,7 +1116,6 @@
  "Resident": "مقيم",
  "Resident (bring an ID)": "مقيم (أحضر بطاقة هوية)",
  "Resident packages": "باقات المقيمين",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "سعر المقيمين · دخول البالغين Rs 400، والأطفال Rs 275، ومجاني لمن هم دون 5 سنوات.",
  "RESIDENT RATE (RR)": "سعر المقيمين (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "تُطبَّق أسعار المقيمين عند تقديم بطاقة هوية وطنية موريشية سارية، أو تصريح إقامة، أو تصريح عمل وإقامة (Occupation Permit)، أو تصريح إقامة دائمة، أو تصريح عمل/تصريح مُعال.",
  "Restaurant not found · VALLÉ Advenature™ Park": "المطعم غير موجود · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "قلب الوادي",
  "VALLEY KICK": "انطلاقة في الوادي",
  "valley, line by line": "الوادي، خطاً بعد خط",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "شاملة ضريبة القيمة المضافة · من 1 يوليو 2026 إلى 30 يونيو 2027 · غير قابلة للاسترداد",
  "VEHICLES": "المركبات",
  "Ventu Rush": "Ventu Rush",
  "very busy": "مزدحم جداً",
@@ -1628,7 +1626,6 @@
  "Visit →": "اكتشف ←",
  "Visit by jeep (45 min)": "زيارة بسيارة الجيب (45 دقيقة)",
  "Visitor": "زائر",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "سعر الزائر · دخول البالغين Rs 550، الأطفال Rs 325، مجاناً لمن هم دون 5 سنوات.",
  "Visitors walking through the wooden palisade entrance": "زوار يعبرون مدخل السياج الخشبي",
  "VOICE NOTE": "رسالة صوتية",
  "Voice notes are not supported in this browser": "الرسائل الصوتية غير مدعومة في هذا المتصفح",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "بياناتك في VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "مرجعك ورمز QR هما تذكرتك. ويحجز حجزك أماكن لليوم وفترة الوصول اللذين اخترتهما؛ ونبذل قصارى جهدنا لإبقاء أوقات الانتظار قصيرة، لكن الأنشطة تعمل بحسب ترتيب الوصول وقد يكون هناك طابور في أوقات الذروة.",
  "Your rights": "حقوقك",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "تُرسل تذكرتك وتذكير ليلة اليوم السابق ونسخة من إقرارك الموقّع بالبريد الإلكتروني، وبواتساب عندما تقدّم رقم هاتف محمول. ولا نرسل مواد تسويقية إلا إذا حددت خانة ذلك في الإقرار؛ ويمكنك سحب موافقتك في أي وقت بمراسلتنا."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "تُرسل تذكرتك وتذكير ليلة اليوم السابق ونسخة من إقرارك الموقّع بالبريد الإلكتروني، وبواتساب عندما تقدّم رقم هاتف محمول. ولا نرسل مواد تسويقية إلا إذا حددت خانة ذلك في الإقرار؛ ويمكنك سحب موافقتك في أي وقت بمراسلتنا.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "سعر المقيمين · دخول البالغين {adult}، الأطفال {child}، مجانًا دون 6 سنوات.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "سعر الزوار · دخول البالغين {adult}، الأطفال {child}، مجانًا دون 6 سنوات.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "شامل ضريبة القيمة المضافة · من 1 يوليو 2026 إلى 30 يونيو 2027 · الحجز مجاني · الدفع عند البوابة"
 }

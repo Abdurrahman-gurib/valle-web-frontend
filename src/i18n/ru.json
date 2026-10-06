@@ -1116,7 +1116,6 @@
  "Resident": "Резидент",
  "Resident (bring an ID)": "Резидент (возьмите удостоверение)",
  "Resident packages": "Пакеты для резидентов",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "Тариф для резидентов · вход взрослые Rs 400, дети Rs 275, до 5 лет бесплатно.",
  "RESIDENT RATE (RR)": "ТАРИФ ДЛЯ РЕЗИДЕНТОВ (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "ТАРИФЫ ДЛЯ РЕЗИДЕНТОВ ДЕЙСТВУЮТ ПРИ ПРЕДЪЯВЛЕНИИ ДЕЙСТВИТЕЛЬНОГО МАВРИКИЙСКОГО УДОСТОВЕРЕНИЯ ЛИЧНОСТИ, ВИДА НА ЖИТЕЛЬСТВО, РАЗРЕШЕНИЯ НА РАБОТУ, ПМЖ ИЛИ РАЗРЕШЕНИЯ ДЛЯ ИЖДИВЕНЦЕВ.",
  "Restaurant not found · VALLÉ Advenature™ Park": "Ресторан не найден · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Valley Hub",
  "VALLEY KICK": "ДОЛИННЫЙ РЫВОК",
  "valley, line by line": "долину, линия за линией",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "С НДС · С 1 ИЮЛЯ 2026 ПО 30 ИЮНЯ 2027 · ВОЗВРАТУ НЕ ПОДЛЕЖИТ",
  "VEHICLES": "ТРАНСПОРТ",
  "Ventu Rush": "Ventu Rush",
  "very busy": "очень много гостей",
@@ -1628,7 +1626,6 @@
  "Visit →": "Посетить →",
  "Visit by jeep (45 min)": "Экскурсия на джипе (45 мин)",
  "Visitor": "Турист",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "Тариф для туристов · вход взрослые Rs 550, дети Rs 325, до 5 лет бесплатно.",
  "Visitors walking through the wooden palisade entrance": "Посетители проходят через деревянный вход из частокола",
  "VOICE NOTE": "ГОЛОСОВОЕ СООБЩЕНИЕ",
  "Voice notes are not supported in this browser": "Голосовые сообщения не поддерживаются в этом браузере",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "ВАШИ ДАННЫЕ В VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "Ваш номер бронирования и QR-код служат вашим билетом. Бронирование закрепляет места на выбранный вами день и время прибытия; мы стараемся сократить время ожидания активностей, однако активности проходят в порядке прибытия, и в загруженное время возможна очередь.",
  "Your rights": "Ваши права",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Ваш билет, напоминание накануне вечером и копия подписанного вами соглашения отправляются по электронной почте, а если вы указали номер мобильного телефона, то и через WhatsApp. Маркетинговые сообщения мы отправляем только в том случае, если вы отметили соответствующий пункт в соглашении; вы можете отозвать согласие в любое время, написав нам."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Ваш билет, напоминание накануне вечером и копия подписанного вами соглашения отправляются по электронной почте, а если вы указали номер мобильного телефона, то и через WhatsApp. Маркетинговые сообщения мы отправляем только в том случае, если вы отметили соответствующий пункт в соглашении; вы можете отозвать согласие в любое время, написав нам.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Тариф для резидентов · вход для взрослых {adult}, для детей {child}, до 6 лет бесплатно.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Тариф для гостей · вход для взрослых {adult}, для детей {child}, до 6 лет бесплатно.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "С УЧЁТОМ НДС · С 1 ИЮЛЯ 2026 ПО 30 ИЮНЯ 2027 · БРОНИРОВАНИЕ БЕСПЛАТНО · ОПЛАТА НА ВХОДЕ"
 }

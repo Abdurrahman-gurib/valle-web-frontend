@@ -13,6 +13,7 @@ import { applyToVacancy, getVacancy, isHttpError } from '../lib/careersApi';
 import { fullDateFromIso } from '../lib/format';
 import type { ApplicationRequest, EmploymentType, VacancyDetail } from '../types';
 import { color, display, font, mono, motion, radius, shadow } from '../styles/theme';
+import { paths } from '../lib/nav';
 import { useT, _t } from '../i18n';
 
 const CAREERS_EMAIL = 'sales@vallepark.com';
@@ -429,7 +430,7 @@ export default function VacancyDetailPage() {
             : t('Please try again in a moment. If it keeps happening, write to us at {email}.', { email: CAREERS_EMAIL })}
         </p>
         <div style={{ marginTop: 22, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <GhostButton label={t('← All open roles')} onClick={() => navigate('/vacancies')} />
+          <GhostButton label={t('← All open roles')} onClick={() => navigate(paths.vacancies())} />
         </div>
       </div>,
     );
@@ -454,7 +455,7 @@ export default function VacancyDetailPage() {
   return (
     <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
       <button
-        onClick={() => navigate('/vacancies')}
+        onClick={() => navigate(paths.vacancies())}
         style={{
           border: 0, background: 'transparent', cursor: 'pointer', padding: 0,
           ...mono, color: color.violet, marginBottom: 18,
@@ -630,7 +631,7 @@ export default function VacancyDetailPage() {
                   ))}
                 </ol>
                 <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <GhostButton label={t('Browse other roles')} onClick={() => navigate('/vacancies')} />
+                  <GhostButton label={t('Browse other roles')} onClick={() => navigate(paths.vacancies())} />
                 </div>
               </div>
             ) : (

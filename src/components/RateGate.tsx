@@ -1,5 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
+import { useCatalog } from '../store/CatalogContext';
+import { entryPrices } from '../store/booking';
+import { mur } from '../lib/format';
 import { Stripes } from './Stripes';
 import { useHover } from '../hooks/useHover';
 import { useT, fwd } from '../i18n';
@@ -29,6 +32,9 @@ function RateCard({ tag, title, body, cta, onClick }: {
 
 export function RateGate() {
   const app = useApp();
+  const catalog = useCatalog();
+  const rr = entryPrices(catalog, 'rr');
+  const nr = entryPrices(catalog, 'nr');
   const t = useT();
   const [hKeep, bindKeep] = useHover();
   const { pathname } = useLocation();
@@ -65,14 +71,14 @@ export function RateGate() {
             <RateCard
               tag={t('RR · RESIDENT RATE')}
               title={t('I live in Mauritius')}
-              body={t('Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.')}
+              body={t('Resident rate · adults {adult} entry, kids {child}, under 6 free.', { adult: mur(rr.adult), child: mur(rr.child) })}
               cta={t('SHOW RESIDENT PRICES') + ' ' + fwd()}
               onClick={() => app.setRate('rr')}
             />
             <RateCard
               tag={t('NR · NON-RESIDENT RATE')}
               title={t('I am visiting')}
-              body={t('Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.')}
+              body={t('Visitor rate · adults {adult} entry, kids {child}, under 6 free.', { adult: mur(nr.adult), child: mur(nr.child) })}
               cta={t('SHOW VISITOR PRICES') + ' ' + fwd()}
               onClick={() => app.setRate('nr')}
             />

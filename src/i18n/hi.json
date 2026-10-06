@@ -1116,7 +1116,6 @@
  "Resident": "निवासी",
  "Resident (bring an ID)": "निवासी (पहचान पत्र लाएँ)",
  "Resident packages": "निवासी पैकेज",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "निवासी दर · वयस्क प्रवेश Rs 400, बच्चे Rs 275, 5 से कम निःशुल्क।",
  "RESIDENT RATE (RR)": "निवासी दर (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "निवासी दरें मान्य मॉरीशस राष्ट्रीय पहचान पत्र, निवास, व्यवसाय, स्थायी निवास या कार्य/आश्रित परमिट दिखाने पर लागू होती हैं।",
  "Restaurant not found · VALLÉ Advenature™ Park": "रेस्तराँ नहीं मिला · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Valley Hub",
  "VALLEY KICK": "घाटी की उछाल",
  "valley, line by line": "एक-एक लाइन",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "VAT सहित · 1 जुलाई 2026 से 30 जून 2027 · अप्रतिदेय",
  "VEHICLES": "वाहन",
  "Ventu Rush": "Ventu Rush",
  "very busy": "बहुत व्यस्त",
@@ -1628,7 +1626,6 @@
  "Visit →": "देखें →",
  "Visit by jeep (45 min)": "जीप से भ्रमण (45 मिनट)",
  "Visitor": "आगंतुक",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "आगंतुक दर · वयस्क प्रवेश Rs 550, बच्चे Rs 325, 5 से कम निःशुल्क।",
  "Visitors walking through the wooden palisade entrance": "लकड़ी के खंभों वाले प्रवेश द्वार से गुज़रते आगंतुक",
  "VOICE NOTE": "वॉइस नोट",
  "Voice notes are not supported in this browser": "इस ब्राउज़र में वॉइस नोट समर्थित नहीं हैं",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "VALLÉ में आपका डेटा",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "आपका संदर्भ और QR कोड ही आपका टिकट हैं। आपकी बुकिंग आपके चुने हुए दिन और आगमन स्लॉट के लिए जगहें रोकती है; हम गतिविधियों में प्रतीक्षा का समय कम रखने की पूरी कोशिश करते हैं, लेकिन गतिविधियाँ आगमन के क्रम में चलती हैं और व्यस्त समय में कतार लग सकती है।",
  "Your rights": "आपके अधिकार",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "आपका टिकट, एक दिन पहले शाम का रिमाइंडर और आपके हस्ताक्षरित वेवर की प्रति ई-मेल से भेजी जाती है और, जब आपने मोबाइल नंबर दिया हो, WhatsApp से भी। हम मार्केटिंग केवल तभी भेजते हैं जब आपने वेवर पर उसके लिए बॉक्स चुना हो; आप हमें लिखकर इसे कभी भी वापस ले सकते हैं।"
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "आपका टिकट, एक दिन पहले शाम का रिमाइंडर और आपके हस्ताक्षरित वेवर की प्रति ई-मेल से भेजी जाती है और, जब आपने मोबाइल नंबर दिया हो, WhatsApp से भी। हम मार्केटिंग केवल तभी भेजते हैं जब आपने वेवर पर उसके लिए बॉक्स चुना हो; आप हमें लिखकर इसे कभी भी वापस ले सकते हैं।",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "निवासी दर · वयस्क प्रवेश {adult}, बच्चे {child}, 6 साल से कम मुफ़्त।",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "आगंतुक दर · वयस्क प्रवेश {adult}, बच्चे {child}, 6 साल से कम मुफ़्त।",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "वैट सहित · 1 जुलाई 2026 से 30 जून 2027 · बुकिंग मुफ़्त · गेट पर भुगतान"
 }

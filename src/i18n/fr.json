@@ -1116,7 +1116,6 @@
  "Resident": "Résident",
  "Resident (bring an ID)": "Résident (munissez-vous d'une pièce d'identité)",
  "Resident packages": "Forfaits résidents",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "Tarif résident · entrée adulte Rs 400, enfant Rs 275, gratuit pour les moins de 5 ans.",
  "RESIDENT RATE (RR)": "TARIF RÉSIDENT (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "LES TARIFS RÉSIDENTS S'APPLIQUENT SUR PRÉSENTATION D'UNE CARTE D'IDENTITÉ NATIONALE MAURICIENNE, D'UN PERMIS DE RÉSIDENCE, D'OCCUPATION, DE RÉSIDENCE PERMANENTE OU D'UN PERMIS DE TRAVAIL/DÉPENDANT EN COURS DE VALIDITÉ.",
  "Restaurant not found · VALLÉ Advenature™ Park": "Restaurant introuvable · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Cœur de la vallée",
  "VALLEY KICK": "ÉLAN DANS LA VALLÉE",
  "valley, line by line": "la vallée, ligne après ligne",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "TTC · DU 1ER JUILLET 2026 AU 30 JUIN 2027 · NON REMBOURSABLE",
  "VEHICLES": "VÉHICULES",
  "Ventu Rush": "Ventu Rush",
  "very busy": "très chargé",
@@ -1628,7 +1626,6 @@
  "Visit →": "Découvrir →",
  "Visit by jeep (45 min)": "Visite en jeep (45 min)",
  "Visitor": "Visiteur",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "Tarif visiteur · entrée adulte Rs 550, enfant Rs 325, gratuit pour les moins de 5 ans.",
  "Visitors walking through the wooden palisade entrance": "Des visiteurs franchissent l'entrée en palissade de bois",
  "VOICE NOTE": "MESSAGE VOCAL",
  "Voice notes are not supported in this browser": "Les messages vocaux ne sont pas pris en charge par ce navigateur",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "VOS DONNÉES CHEZ VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "Votre référence et votre QR code constituent votre billet. Votre réservation garde des places pour le jour et le créneau d’arrivée choisis ; nous faisons de notre mieux pour limiter les temps d’attente, mais les activités se déroulent par ordre d’arrivée et peuvent donner lieu à une file d’attente aux heures d’affluence.",
  "Your rights": "Vos droits",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Votre billet, le rappel de la veille au soir et une copie de votre décharge signée sont envoyés par e-mail et, lorsque vous avez fourni un numéro de mobile, par WhatsApp. Nous n’envoyons de communications commerciales que si vous avez coché la case correspondante sur la décharge ; vous pouvez retirer ce consentement à tout moment en nous écrivant."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Votre billet, le rappel de la veille au soir et une copie de votre décharge signée sont envoyés par e-mail et, lorsque vous avez fourni un numéro de mobile, par WhatsApp. Nous n’envoyons de communications commerciales que si vous avez coché la case correspondante sur la décharge ; vous pouvez retirer ce consentement à tout moment en nous écrivant.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Tarif résident · entrée adultes {adult}, enfants {child}, gratuit avant 6 ans.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Tarif visiteur · entrée adultes {adult}, enfants {child}, gratuit avant 6 ans.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "TVA INCLUSE · DU 1ER JUILLET 2026 AU 30 JUIN 2027 · RÉSERVATION GRATUITE · PAIEMENT À L’ENTRÉE"
 }

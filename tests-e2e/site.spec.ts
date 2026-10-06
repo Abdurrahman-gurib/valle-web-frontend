@@ -39,6 +39,9 @@ test.describe('rate gate', () => {
     await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
     await expect(page.getByText('Which rate', { exact: false })).toBeVisible();
+    // the same age rule as the booking page and the admission price list
+    await expect(page.getByText(/under 6 free/).first()).toBeVisible();
+    await expect(page.getByText(/under 5/)).toHaveCount(0);
     await page.getByText('I live in Mauritius').click();
     await expect(page.getByText('Which rate', { exact: false })).toBeHidden();
   });

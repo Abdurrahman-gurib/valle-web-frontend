@@ -1116,7 +1116,6 @@
  "Resident": "Residente",
  "Resident (bring an ID)": "Residente (trae un documento de identidad)",
  "Resident packages": "Paquetes para residentes",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "Tarifa residente · entrada adultos Rs 400, niños Rs 275, menores de 5 gratis.",
  "RESIDENT RATE (RR)": "TARIFA RESIDENTE (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "LAS TARIFAS DE RESIDENTE SE APLICAN PRESENTANDO UN DOCUMENTO NACIONAL DE IDENTIDAD MAURICIANO VÁLIDO O UN PERMISO DE RESIDENCIA, OCUPACIÓN, RESIDENCIA PERMANENTE O TRABAJO/DEPENDIENTE.",
  "Restaurant not found · VALLÉ Advenature™ Park": "Restaurante no encontrado · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Valley Hub",
  "VALLEY KICK": "IMPULSO DEL VALLE",
  "valley, line by line": "valle, línea a línea",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "IVA INCLUIDO · DEL 1 DE JULIO DE 2026 AL 30 DE JUNIO DE 2027 · NO REEMBOLSABLE",
  "VEHICLES": "VEHÍCULOS",
  "Ventu Rush": "Ventu Rush",
  "very busy": "muy concurrido",
@@ -1628,7 +1626,6 @@
  "Visit →": "Visitar →",
  "Visit by jeep (45 min)": "Visita en jeep (45 min)",
  "Visitor": "Visitante",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "Tarifa visitante · entrada adultos Rs 550, niños Rs 325, menores de 5 gratis.",
  "Visitors walking through the wooden palisade entrance": "Visitantes cruzando la entrada de empalizada de madera",
  "VOICE NOTE": "NOTA DE VOZ",
  "Voice notes are not supported in this browser": "Las notas de voz no son compatibles con este navegador",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "TUS DATOS EN VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "Tu referencia y tu código QR son tu entrada. Tu reserva garantiza plazas para el día y la franja de llegada que has elegido; hacemos lo posible por que los tiempos de espera de las actividades sean cortos, pero las actividades se realizan por orden de llegada y puede haber cola en las horas de mayor afluencia.",
  "Your rights": "Tus derechos",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Tu entrada, el recordatorio de la víspera y una copia de tu exención de responsabilidad firmada se envían por correo electrónico y, si has facilitado un número de móvil, por WhatsApp. Solo enviamos publicidad si marcaste la casilla correspondiente en la exención de responsabilidad; puedes retirar ese consentimiento en cualquier momento escribiéndonos."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Tu entrada, el recordatorio de la víspera y una copia de tu exención de responsabilidad firmada se envían por correo electrónico y, si has facilitado un número de móvil, por WhatsApp. Solo enviamos publicidad si marcaste la casilla correspondiente en la exención de responsabilidad; puedes retirar ese consentimiento en cualquier momento escribiéndonos.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Tarifa residente · entrada adultos {adult}, niños {child}, menores de 6 gratis.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Tarifa visitante · entrada adultos {adult}, niños {child}, menores de 6 gratis.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "IVA INCLUIDO · DEL 1 DE JULIO DE 2026 AL 30 DE JUNIO DE 2027 · RESERVA GRATIS · PAGA EN LA ENTRADA"
 }

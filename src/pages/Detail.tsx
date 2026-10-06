@@ -12,7 +12,7 @@ import { useReveal } from '../hooks/useReveal';
 import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import type { GalleryShot } from '../types';
-import { useT, fwd } from '../i18n';
+import { localizePath, useT, fwd } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -133,7 +133,7 @@ export default function DetailPage() {
     } catch {
       /* private mode can throw, so fall back to the unfiltered list */
     }
-    navigate('/explore' + (qs ? '?' + qs : ''));
+    navigate(localizePath('/explore' + (qs ? '?' + qs : '')));
   };
 
   const bookThisNow = () => {
@@ -193,7 +193,7 @@ export default function DetailPage() {
                     );
                   })}
                 </div>
-                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE')}</div>
+                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE')}</div>
               </div>
             </div>
           )}

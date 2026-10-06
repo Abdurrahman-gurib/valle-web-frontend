@@ -1116,7 +1116,6 @@
  "Resident": "Residente",
  "Resident (bring an ID)": "Residente (porta un documento d'identità)",
  "Resident packages": "Pacchetti residenti",
- "Resident rate · adults Rs 400 entry, kids Rs 275, under 5 free.": "Tariffa residenti · ingresso adulti Rs 400, bambini Rs 275, gratis sotto i 5 anni.",
  "RESIDENT RATE (RR)": "TARIFFA RESIDENTI (RR)",
  "RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.": "LE TARIFFE RESIDENTI SI APPLICANO SU PRESENTAZIONE DI UNA CARTA D'IDENTITÀ NAZIONALE MAURIZIANA VALIDA O DI UN PERMESSO DI RESIDENZA, DI OCCUPAZIONE, DI RESIDENZA PERMANENTE, DI LAVORO O PER FAMILIARI A CARICO.",
  "Restaurant not found · VALLÉ Advenature™ Park": "Ristorante non trovato · VALLÉ Advenature™ Park",
@@ -1608,7 +1607,6 @@
  "Valley Hub": "Valley Hub",
  "VALLEY KICK": "SLANCIO NELLA VALLE",
  "valley, line by line": "la valle, linea dopo linea",
- "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · NON REFUNDABLE": "IVA INCLUSA · DAL 1° LUGLIO 2026 AL 30 GIUGNO 2027 · NON RIMBORSABILE",
  "VEHICLES": "VEICOLI",
  "Ventu Rush": "Ventu Rush",
  "very busy": "molto affollato",
@@ -1628,7 +1626,6 @@
  "Visit →": "Visita →",
  "Visit by jeep (45 min)": "Visita in jeep (45 min)",
  "Visitor": "Visitatore",
- "Visitor rate · adults Rs 550 entry, kids Rs 325, under 5 free.": "Tariffa visitatori · ingresso adulti Rs 550, bambini Rs 325, gratis sotto i 5 anni.",
  "Visitors walking through the wooden palisade entrance": "Visitatori che attraversano l'ingresso a palizzata di legno",
  "VOICE NOTE": "MESSAGGIO VOCALE",
  "Voice notes are not supported in this browser": "I messaggi vocali non sono supportati in questo browser",
@@ -1811,5 +1808,8 @@
  "YOUR DATA AT VALLÉ": "I TUOI DATI A VALLÉ",
  "Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.": "Il tuo riferimento e il codice QR sono il tuo biglietto. La prenotazione tiene i posti per il giorno e la fascia oraria di arrivo che hai scelto; facciamo del nostro meglio per mantenere brevi i tempi di attesa, ma le attività si svolgono in ordine di arrivo e nei momenti di punta può esserci una coda.",
  "Your rights": "I tuoi diritti",
- "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Il tuo biglietto, il promemoria della sera prima e una copia della liberatoria firmata vengono inviati per e-mail e, se hai indicato un numero di cellulare, tramite WhatsApp. Inviamo comunicazioni di marketing solo se hai spuntato la relativa casella nella liberatoria; puoi revocare il consenso in qualsiasi momento scrivendoci."
+ "Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.": "Il tuo biglietto, il promemoria della sera prima e una copia della liberatoria firmata vengono inviati per e-mail e, se hai indicato un numero di cellulare, tramite WhatsApp. Inviamo comunicazioni di marketing solo se hai spuntato la relativa casella nella liberatoria; puoi revocare il consenso in qualsiasi momento scrivendoci.",
+ "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Tariffa residenti · ingresso adulti {adult}, bambini {child}, gratis sotto i 6 anni.",
+ "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Tariffa visitatori · ingresso adulti {adult}, bambini {child}, gratis sotto i 6 anni.",
+ "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "IVA INCLUSA · DAL 1º LUGLIO 2026 AL 30 GIUGNO 2027 · PRENOTAZIONE GRATUITA · PAGAMENTO ALL’INGRESSO"
 }

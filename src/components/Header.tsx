@@ -105,7 +105,7 @@ export function Header() {
   const t = useT();
   const menu = (en: string) => { const k = 'menu:' + en; const s = t(k); return s === k ? t(en) : s; };
   // Careers lives outside the catalog-driven nav helpers, so it routes directly.
-  const gotoVacancies = () => navigate('/vacancies');
+  const gotoVacancies = () => navigate(paths.vacancies());
 
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
