@@ -335,7 +335,31 @@ test.describe('packages', () => {
     await name.fill('HR Team');
     await page.getByPlaceholder(/email/i).first().fill('hr@corp.mu');
     await page.getByRole('button', { name: /request|quote|send/i }).last().click();
+    // The form is rate-limited per IP (5 per 10 min); parallel projects and reruns share one.
+    const outcome = page.getByText(/hr@corp\.mu|request .* sent|thank/i).first().or(page.getByTestId('quote-error'));
+    await expect(outcome).toBeVisible();
+    test.skip(/Too many requests/.test(await outcome.innerText()), 'quote budget used by a parallel project');
     await expect(page.getByText(/hr@corp\.mu|request .* sent|thank/i).first()).toBeVisible();
+  });
+
+  test('a quote request that the desk did not receive is never reported as sent', async ({ page }) => {
+    await page.route('**/api/quotes', (route) => route.fulfill({ status: 500, json: { message: 'boom' } }));
+    await page.goto('/packages#quote');
+    const name = page.getByPlaceholder(/name/i).first();
+    await name.scrollIntoViewIfNeeded();
+    await name.fill('Unlucky Team');
+    await page.getByPlaceholder(/email/i).first().fill('unlucky@corp.mu');
+    const submit = page.locator('#quote').getByRole('button', { name: /request a quote/i });
+    await submit.click();
+    await expect(page.getByTestId('quote-error')).toContainText('We could not send your request');
+    await expect(page.getByText(/Request sent/i)).toHaveCount(0);
+    // the form is still there with what was typed
+    await expect(page.getByPlaceholder(/name/i).first()).toHaveValue('Unlucky Team');
+
+    await page.unroute('**/api/quotes');
+    await page.route('**/api/quotes', (route) => route.fulfill({ status: 429, json: { message: 'Too many' } }));
+    await submit.click();
+    await expect(page.getByTestId('quote-error')).toContainText('Too many requests');
   });
 });
 

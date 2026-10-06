@@ -213,16 +213,19 @@ test.describe('staff dashboard', () => {
     await expect(page.getByText('CHATS TO ANSWER')).toBeVisible();
   });
 
-  test('quote requests from the packages page land in the Quotes tab with reply links', async ({ page }) => {
+  test('quote requests from the packages page raise a toast on the dashboard and land in the Quotes tab with reply links', async ({ page }) => {
     const tag = Math.random().toString(36).slice(2, 8);
+    // the dashboard is open first, so the staff socket is listening when the request arrives
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(1500);
     const res = await page.request.post('/api/quotes', {
       data: { name: `Quote Guest ${tag}`, company: `Acme ${tag}`, email: `quote-${tag}@example.mu`, phone: '+230 5111 2222', groupSize: '25', preferredDate: '2026-11-12', message: 'Team day with ziplines and lunch.' },
     });
     // The quote form is rate-limited per IP; three viewport projects share one.
     test.skip(res.status() === 429, 'quote budget used by a parallel project');
     expect(res.ok()).toBeTruthy();
-    await page.goto('/staff');
-    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('booking-toast')).toContainText(`New quote request · Quote Guest ${tag} · Acme ${tag} · 25 people`, { timeout: 15000 });
     await page.getByRole('button', { name: /^quotes$/i }).click();
     const panel = page.getByTestId('quotes-panel');
     await expect(panel.getByText(`Quote Guest ${tag}`)).toBeVisible({ timeout: 15000 });

@@ -1756,5 +1756,7 @@
  "Your online payment is being confirmed. Show this QR at the gate.": "جارٍ تأكيد دفعك عبر الإنترنت. أظهر رمز QR هذا عند البوابة.",
  "FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS": "الحجز مجاني · الدفع عند البوابة · إيصال إلكتروني عبر البريد والرسائل",
  "FREE TO BOOK · PAY AT THE GATE": "الحجز مجاني · الدفع عند البوابة",
- "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "خطّط ليومك في فالي: زيبلاين ومسارات كواد وباجي والمزيد، اختر تاريخًا وادفع عند البوابة. الحجز مجاني وبدون رسوم إلغاء."
+ "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "خطّط ليومك في فالي: زيبلاين ومسارات كواد وباجي والمزيد، اختر تاريخًا وادفع عند البوابة. الحجز مجاني وبدون رسوم إلغاء.",
+ "Too many requests from this connection. Please try again in a few minutes, or write to sales@vallepark.com.": "طلبات كثيرة جدًا من هذا الاتصال. حاول مجددًا بعد بضع دقائق أو راسلنا على sales@vallepark.com.",
+ "We could not send your request. Please try again, or write to sales@vallepark.com.": "تعذّر إرسال طلبك. حاول مجددًا أو راسلنا على sales@vallepark.com."
 }

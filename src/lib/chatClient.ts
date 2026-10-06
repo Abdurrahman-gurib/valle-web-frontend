@@ -230,9 +230,13 @@ export class VisitorChat extends Emitter<VisitorChatEvents> {
 
 // ------------------------------------------------------------------ staff ----
 
+export interface QuoteAlert { id: string; name: string; company: string; groupSize: string; preferredDate: string; createdAt: string }
+
 export interface StaffChatEvents {
   /** A guest just booked on the website (staff room fan-out). */
   booking: BookingRow;
+  /** A group asked for a quote on the packages page. */
+  quote: QuoteAlert;
   /** Full conversation list (initial load and every poll refresh). */
   conversations: ConversationSummary[];
   /** One conversation changed (new message, closed, unread reset). */
@@ -296,6 +300,9 @@ export class StaffChat extends Emitter<StaffChatEvents> {
     });
     socket.on('booking:new', (p: { booking: BookingRow }) => {
       if (p?.booking?.refCode) this.fire('booking', p.booking);
+    });
+    socket.on('quote:new', (p: { quote: QuoteAlert }) => {
+      if (p?.quote?.id) this.fire('quote', p.quote);
     });
     socket.on('peer:typing', (p: { conversationId: string }) => {
       if (p?.conversationId) this.fire('typing', p);

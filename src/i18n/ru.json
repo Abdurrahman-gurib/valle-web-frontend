@@ -1756,5 +1756,7 @@
  "Your online payment is being confirmed. Show this QR at the gate.": "Ваш онлайн-платёж подтверждается. Покажите этот QR-код на входе.",
  "FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS": "БРОНИРОВАНИЕ БЕСПЛАТНО · ОПЛАТА НА ВХОДЕ · ЭЛЕКТРОННЫЙ ЧЕК ПО E-MAIL И SMS",
  "FREE TO BOOK · PAY AT THE GATE": "БРОНИРОВАНИЕ БЕСПЛАТНО · ОПЛАТА НА ВХОДЕ",
- "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "Составьте свой день в Vallé: зиплайны, квадроциклы, багги и многое другое, выберите дату и оплатите на входе. Бронирование бесплатно, без платы за отмену."
+ "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "Составьте свой день в Vallé: зиплайны, квадроциклы, багги и многое другое, выберите дату и оплатите на входе. Бронирование бесплатно, без платы за отмену.",
+ "Too many requests from this connection. Please try again in a few minutes, or write to sales@vallepark.com.": "Слишком много запросов с этого подключения. Попробуйте через несколько минут или напишите на sales@vallepark.com.",
+ "We could not send your request. Please try again, or write to sales@vallepark.com.": "Не удалось отправить запрос. Попробуйте ещё раз или напишите на sales@vallepark.com."
 }

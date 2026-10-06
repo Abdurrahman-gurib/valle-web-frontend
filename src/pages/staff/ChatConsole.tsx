@@ -202,6 +202,9 @@ export default function ChatConsole({ active, onChanged }: {
       chat.on('booking', (b) => {
         window.dispatchEvent(new CustomEvent('valle:booking-new', { detail: b }));
       }),
+      chat.on('quote', (q) => {
+        window.dispatchEvent(new CustomEvent('valle:quote-new', { detail: q }));
+      }),
 
       chat.on('updated', (conv) => {
         setConvos((prev) => {

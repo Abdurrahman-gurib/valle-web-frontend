@@ -1243,7 +1243,7 @@
  "Send another request": "Invia un'altra richiesta",
  "Send my application": "Invia la mia candidatura",
  "Send to my WhatsApp": "Invia al mio WhatsApp",
- "Sending…": "Invio in corso…",
+ "Sending…": "Invio…",
  "Senior citizens": "Senior",
  "Senior citizens 55+": "Senior 55+",
  "SERENE": "RILASSANTE",
@@ -1756,5 +1756,7 @@
  "Your online payment is being confirmed. Show this QR at the gate.": "Il tuo pagamento online è in fase di conferma. Mostra questo QR all’ingresso.",
  "FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS": "PRENOTAZIONE GRATUITA · PAGAMENTO ALL’INGRESSO · RICEVUTA VIA E-MAIL E SMS",
  "FREE TO BOOK · PAY AT THE GATE": "PRENOTAZIONE GRATUITA · PAGAMENTO ALL’INGRESSO",
- "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "Componi la tua giornata a Vallé: zipline, percorsi in quad, buggy e altro, scegli una data e paga all’ingresso. Prenotazione gratuita, nessuna penale di cancellazione."
+ "Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.": "Componi la tua giornata a Vallé: zipline, percorsi in quad, buggy e altro, scegli una data e paga all’ingresso. Prenotazione gratuita, nessuna penale di cancellazione.",
+ "Too many requests from this connection. Please try again in a few minutes, or write to sales@vallepark.com.": "Troppe richieste da questa connessione. Riprova tra qualche minuto o scrivi a sales@vallepark.com.",
+ "We could not send your request. Please try again, or write to sales@vallepark.com.": "Non siamo riusciti a inviare la tua richiesta. Riprova o scrivi a sales@vallepark.com."
 }

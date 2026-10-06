@@ -115,8 +115,17 @@ export default function StaffDashboard() {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => setToast(''), 9000);
     };
+    // A quote request from the packages page: same toast, so it is not missed until someone opens Quotes.
+    const q = (e: Event) => {
+      const d = (e as CustomEvent<{ id: string; name: string; company: string; groupSize: string; preferredDate: string }>).detail;
+      if (!d?.id) return;
+      setToast(`New quote request · ${d.name}${d.company ? ' · ' + d.company : ''}${d.groupSize ? ' · ' + d.groupSize + ' people' : ''}${d.preferredDate ? ' · ' + d.preferredDate : ''} · see Quotes`);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => setToast(''), 12000);
+    };
     window.addEventListener('valle:booking-new', h);
-    return () => { window.removeEventListener('valle:booking-new', h); if (timer) clearTimeout(timer); };
+    window.addEventListener('valle:quote-new', q);
+    return () => { window.removeEventListener('valle:booking-new', h); window.removeEventListener('valle:quote-new', q); if (timer) clearTimeout(timer); };
   }, [reloadStats]);
 
   const signOut = async () => {

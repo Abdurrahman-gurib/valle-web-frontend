@@ -262,11 +262,11 @@ function QInput({ value, onChange, placeholder, type, min, title, style }: {
   );
 }
 
-function QuoteSubmitBtn({ onClick }: { onClick: () => void }) {
+function QuoteSubmitBtn({ onClick, busy }: { onClick: () => void; busy?: boolean }) {
   const t = useT();
   const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} style={{ border: 0, background: h ? '#D91E44' : '#FF3358', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 30px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)', transform: h ? 'translateY(-1px)' : undefined }}>{t('Request a quote →')}</button>
+    <button {...bind} onClick={onClick} disabled={busy} aria-busy={busy || undefined} style={{ border: 0, background: busy ? '#B98AA7' : h ? '#D91E44' : '#FF3358', cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 30px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)', transform: h ? 'translateY(-1px)' : undefined }}>{busy ? t('Sending…') : t('Request a quote →')}</button>
   );
 }
 
@@ -308,6 +308,8 @@ export default function PackagesPage() {
   const [qMsg, setQMsg] = useState('');
   const [qErr, setQErr] = useState(false);
   const [qSent, setQSent] = useState(false);
+  const [qBusy, setQBusy] = useState(false);
+  const [qFail, setQFail] = useState('');
 
   const quoteEl = useRef<HTMLDivElement | null>(null);
   const quoteGo = () => {
@@ -331,20 +333,32 @@ export default function PackagesPage() {
   const photoAddons = catalog.PHOTO[rk].addons;
   const photoRateLabel = rk === 'rr' ? t('RESIDENT RATE (RR)') : t('NON-RESIDENT RATE (NR)');
 
-  const quoteSubmit = () => {
+  const quoteSubmit = async () => {
+    if (qBusy) return;
     if (!qName.trim() || !qEmail.trim()) { setQErr(true); return; }
     setQErr(false);
-    createQuote({
+    setQFail('');
+    setQBusy(true);
+    try {
+      await createQuote({
       name: qName.trim(),
       company: qCompany.trim() || undefined,
       email: qEmail.trim(),
       phone: qPhone.trim() || undefined,
       groupSize: qSize.trim() || undefined,
       preferredDate: qDate || undefined,
-      message: qMsg.trim() || undefined,
-    })
-      .catch(() => undefined)
-      .finally(() => setQSent(true));
+        message: qMsg.trim() || undefined,
+      });
+      setQSent(true);
+    } catch (e) {
+      // "Request sent" only when the desk really has it: a failed send shows why and keeps the form.
+      const status = (e as { status?: number }).status;
+      setQFail(status === 429
+        ? t('Too many requests from this connection. Please try again in a few minutes, or write to sales@vallepark.com.')
+        : t('We could not send your request. Please try again, or write to sales@vallepark.com.'));
+    } finally {
+      setQBusy(false);
+    }
   };
   const quoteAgain = () => setQSent(false);
   const qReplyTo = qEmail.trim() || qPhone.trim() || t('your inbox');
@@ -559,10 +573,13 @@ export default function PackagesPage() {
               </div>
               <QInput value={qMsg} onChange={setQMsg} placeholder={t('Anything else? Objectives, timing, dietary needs…')} style={{ width: '100%', marginTop: 10 }} />
               {qErr && (
-                <div style={{ marginTop: 10, background: '#FFE2E7', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, fontWeight: 600, color: '#D91E44' }}>{t('Please add your name and an email so we can reply.')}</div>
+                <div role="alert" style={{ marginTop: 10, background: '#FFE2E7', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, fontWeight: 600, color: '#D91E44' }}>{t('Please add your name and an email so we can reply.')}</div>
+              )}
+              {qFail && (
+                <div role="alert" data-testid="quote-error" style={{ marginTop: 10, background: '#FFE2E7', borderRadius: 10, padding: '11px 14px', fontSize: 13.5, fontWeight: 600, color: '#D91E44' }}>{qFail}</div>
               )}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-                <QuoteSubmitBtn onClick={quoteSubmit} />
+                <QuoteSubmitBtn onClick={() => { void quoteSubmit(); }} busy={qBusy} />
                 <span style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)' }}>{t('*HRDC REFUND CONDITIONS APPLY · REPLY WITHIN 1 WORKING DAY')}</span>
               </div>
             </div>
