@@ -28,12 +28,12 @@ export function PlanSection() {
         <div style={{ background: '#FFFFE2', borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('GETTING HERE')}</div>
           <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 27, marginTop: 8, textTransform: 'uppercase' }}>{t('Chamouny, South')}</div>
-          <div style={{ fontSize: 14, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}>B102, Mare Anguilles, Chamouny. <a href="https://www.google.comimapsiplaceiVall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)i@-20.457614,57.4826031,17z" target="_blank" rel="noopener">{t('Open in Google Maps →')}</a></div>
+          <div style={{ fontSize: 14, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}>B102, Mare Anguilles, Chamouny. <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z" target="_blank" rel="noopener">{t('Open in Google Maps →')}</a></div>
         </div>
         <div style={{ background: '#EBE2FF', borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('TALK TO US')}</div>
           <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 27, marginTop: 8 }}>+230 660 44 77</div>
-          <div style={{ fontSize: 14, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}><a href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener">{t('WhatsApp us →')}</a> · sales@vallepark.com</div>
+          <div style={{ fontSize: 14, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}><a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener">{t('WhatsApp us →')}</a> · sales@vallepark.com</div>
         </div>
       </div>
       <div style={{ marginTop: 16, background: '#340057', borderRadius: 18, padding: '20px 26px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
@@ -47,7 +47,7 @@ export function PlanSection() {
           style={{ height: 54, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain', flexShrink: 0 }}
         />
         <div style={{ color: '#FFFFFF', fontSize: 15, fontWeight: 600, flex: 1, minWidth: 220 }}>{t('World Luxury Travel Awards 2026 winner, rated Excellent by visitors on TripAdvisor.')}</div>
-        <a href="https://www.tripadvisor.comiAttraction_Review-g2359803-d1994858-Reviews-Valle_Advenature_Park-Chamouny.html" target="_blank" rel="noopener" style={{ color: '#FFFC33', fontFamily: "'Chivo Mono',monospace", fontSize: 12.5, fontWeight: 600 }}>{t('READ REVIEWS →')}</a>
+        <a href="https://www.tripadvisor.com/Attraction_Review-g2359803-d1994858-Reviews-Valle_Advenature_Park-Chamouny.html" target="_blank" rel="noopener" style={{ color: '#FFFC33', fontFamily: "'Chivo Mono',monospace", fontSize: 12.5, fontWeight: 600 }}>{t('READ REVIEWS →')}</a>
       </div>
     </section>
   );

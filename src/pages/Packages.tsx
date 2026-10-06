@@ -235,7 +235,7 @@ function CineBookLink() {
   const t = useT();
   const [h, bind] = useHover();
   return (
-    <a {...bind} href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={{ marginTop: 16, textAlign: 'center', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999, display: 'block' }}>{t('Book a shooter for my day →')}</a>
+    <a {...bind} href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener" style={{ marginTop: 16, textAlign: 'center', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999, display: 'block' }}>{t('Book a shooter for my day →')}</a>
   );
 }
 
@@ -579,7 +579,7 @@ export default function PackagesPage() {
 
         <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('TALK TO A PARK HOST:')}</span>
-          <a href="https://api.whatsapp.comisendi?phone=23052928841" target="_blank" rel="noopener" style={contactPill}>{t('Chat')} · +230 5292 8841</a>
+          <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener" style={contactPill}>{t('Chat')} · +230 5292 8841</a>
           <a href="mailto:sales@vallepark.com" style={contactPill}>{t('Email')} · sales@vallepark.com</a>
           <a href="tel:+2306604477" style={contactPill}>{t('Call')} · +230 660 4477</a>
         </div>

@@ -175,7 +175,7 @@ export function ParkMap() {
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
                 <span>{t('TAP A PIN TO PREVIEW A STOP')}</span>
                 <a
-                  href="https://www.google.comimapsiplaceiVall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)i@-20.457614,57.4826031,17z"
+                  href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z"
                   target="_blank"
                   rel="noopener"
                   style={{ color: '#FFFC33', fontWeight: 600 }}

@@ -357,3 +357,22 @@ test.describe('visual sweep', () => {
     });
   }
 });
+
+test.describe('external links', () => {
+  // Guards against a past defect where every "/" in six outbound URLs had become "i"
+  // (api.whatsapp.comisendi…), which left Directions, WhatsApp and Read reviews dead.
+  for (const path of ['/', '/packages', '/activities/zipline', '/dine/chamouze']) {
+    test(`every outbound link on ${path} has a real host and path`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'desktop', 'markup is the same on every viewport');
+      await page.goto(path);
+      const hrefs = await page.locator('a[href^="http"]').evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).getAttribute('href') || ''));
+      expect(hrefs.length).toBeGreaterThan(0);
+      for (const href of hrefs) {
+        const u = new URL(href);
+        expect(u.hostname, href).toMatch(/^[a-z0-9.-]+\.[a-z]{2,}$/);
+        expect(u.hostname, href).not.toMatch(/\.(com|org|net)i$/);
+        expect(href, href).not.toMatch(/\.(com|org|net)i[a-zA-Z]/);
+      }
+    });
+  }
+});
