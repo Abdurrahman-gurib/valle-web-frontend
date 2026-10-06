@@ -54,13 +54,22 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
 /** GET /api/tickets/:ref?t= : the guest's ticket, from the QR / e-mail link. */
 export interface TicketView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
-  rate: string; payMode: string; status: string; total: number; lines: { label: string; amount: number }[]; ticketUrl: string; qrUrl: string;
+  rate: string; payMode: string; status: string; total: number; ticketUrl: string; qrUrl: string;
+  lines: { label: string; amount: number; experienceId?: string | null; variant?: string; adults?: number; kids?: number; units?: number }[];
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
   paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;
 }
 export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
+}
+/** PATCH /api/tickets/:ref/booking?t= : the guest changes date, slot, party or experiences. */
+export interface GuestChange { visitDate?: string; slot?: 'morning' | 'afternoon'; adults?: number; kids?: number; items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number }[] }
+export function changeBooking(refCode: string, token: string, body: GuestChange): Promise<TicketView> {
+  return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}/booking?t=${encodeURIComponent(token)}`, { method: 'PATCH', body: JSON.stringify(body) });
+}
+export function cancelBooking(refCode: string, token: string, reason?: string): Promise<TicketView> {
+  return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}/cancel?t=${encodeURIComponent(token)}`, { method: 'POST', body: JSON.stringify({ reason }) });
 }
 
 /** GET /api/coupons/:code : what a promo code gives today (404 when it cannot be used). */

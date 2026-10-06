@@ -7,6 +7,7 @@ import { fetchPaymentConfig, fetchPaymentStatus, fetchTicket, startCheckout, typ
 import { Stripes } from '../components/Stripes';
 import { localizePath, tr, useLang, useT, _t } from '../i18n';
 import { InstallCard } from '../components/InstallApp';
+import { ManageBooking } from './ManageBooking';
 
 /** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
 const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
@@ -155,6 +156,7 @@ export default function TicketPage() {
               <button onClick={() => window.print()} style={btn('#FFFFFF', '#340057', true)}>{t('Save / print')}</button>
               {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" style={btn('#FFFFFF', '#340057', true)}>{t('Receipt (PDF)')}</a>}
             </div>
+            <ManageBooking tk={tk} token={token} onChanged={(v) => setT(v)} />
             <InstallCard style={{ marginTop: 18 }} />
             <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.65)', marginTop: 18, textAlign: 'left' }}>
               {t('Show this QR code at the gate. B102, Mare Anguilles, Chamouny ·')} <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>{t('directions')}</a>.{' '}

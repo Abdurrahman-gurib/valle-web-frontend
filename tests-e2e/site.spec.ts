@@ -611,3 +611,55 @@ test.describe('closed days and holds on the booking page', () => {
     expect(held).toMatchObject({ slot: 'afternoon', adults: 2 });
   });
 });
+
+test.describe('manage my booking', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('from the ticket link a guest moves the date, adds a person and an experience, then cancels; the trail says guest', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const day = (n: number) => { const d = new Date(); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+    const booked = await request.post('/api/bookings', {
+      data: { visitDate: day(2), slot: 'morning', adults: 2, kids: 0, rate: 'rr', items: [{ id: 'zipline', adults: 2 }], name: 'Self Service', email: 'self@example.com', payMode: 'gate' },
+    });
+    expect(booked.status()).toBe(201);
+    const b = (await booked.json()) as { refCode: string; total: number; ticketUrl: string };
+    const u = new URL(b.ticketUrl);
+    await page.goto(u.pathname + u.search);
+    await expect(page.getByTestId('ticket')).toBeVisible();
+
+    await page.getByTestId('manage-toggle').click();
+    await page.getByTestId('manage-date').fill(day(3));
+    await page.getByTestId('manage-slot').selectOption('afternoon');
+    await page.getByTestId('manage-adults').getByRole('button', { name: /\+/ }).click();
+    await page.getByTestId('manage-add-select').selectOption('luge');
+    await page.getByTestId('manage-add').click();
+    await page.getByTestId('manage-save').click();
+    await expect(page.getByTestId('manage-done')).toContainText('Saved', { timeout: 15000 });
+    await expect(page.getByTestId('ticket')).toContainText('3 adults');
+    await expect(page.getByTestId('ticket')).toContainText(/Afternoon/);
+    await expect(page.getByTestId('ticket')).toContainText(/Luge/);
+    const after = await (await request.get(u.pathname.replace(/^.*\/ticket\//, '/api/tickets/') + u.search)).json() as { visitDate: string; adults: number; total: number };
+    expect(after.visitDate).toBe(day(3));
+    expect(after.adults).toBe(3);
+    expect(after.total).toBeGreaterThan(b.total);
+
+    await page.getByTestId('manage-toggle').click();
+    await page.getByTestId('manage-cancel').click();
+    await page.getByTestId('manage-cancel-confirm').click();
+    await expect(page.getByTestId('manage-done')).toContainText('cancelled', { timeout: 15000 });
+    await expect(page.getByText('THIS BOOKING WAS CANCELLED')).toBeVisible();
+    await expect(page.getByTestId('manage-toggle')).toHaveCount(0);
+  });
+
+  test('a guest cannot touch an arrived or past booking, and a bad token is refused', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'API only');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const booked = await request.post('/api/bookings', { data: { visitDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10), slot: 'afternoon', adults: 1, kids: 0, rate: 'rr', items: [], name: 'Token Guest', email: 'token@example.com', payMode: 'gate' } });
+    const b = (await booked.json()) as { refCode: string };
+    const bad = await request.patch(`/api/tickets/${b.refCode}/booking?t=${'x'.repeat(24)}`, { data: { adults: 2 } });
+    expect(bad.status()).toBe(403);
+    const none = await request.post(`/api/tickets/${b.refCode}/cancel`, { data: {} });
+    expect([400, 403]).toContain(none.status());
+  });
+});
