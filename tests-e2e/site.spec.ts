@@ -444,3 +444,58 @@ test.describe('legal pages', () => {
     }
   });
 });
+
+test.describe('slot capacity', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('a full slot cannot be chosen, the picker switches to the other slot, and a 409 is explained', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same logic on every viewport');
+    // tomorrow's morning is reported full, afternoon has room
+    await page.route('**/api/bookings/availability**', async (route) => {
+      const url = new URL(route.request().url());
+      const from = url.searchParams.get('from') || '';
+      const days = Number(url.searchParams.get('days') || '1');
+      const out = [] as unknown[];
+      for (let i = 0; i < days; i++) {
+        const d = new Date(from + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        out.push({ date: iso, morning: { bookings: 40, guests: 150, level: i === 1 ? 'full' : 'quiet' }, afternoon: { bookings: 0, guests: 0, level: 'quiet' } });
+      }
+      await route.fulfill({ json: out });
+    });
+    await page.goto('/booking');
+    // the default date is tomorrow (index 1): the full morning chip is disabled and the afternoon is selected
+    const full = page.getByTestId('slot-full');
+    await expect(full).toBeDisabled();
+    await expect(full).toContainText('Morning');
+    await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
+
+    // the server is the judge: a 409 is shown as a plain sentence and the picker is refreshed
+    await page.route('**/api/bookings', (route) => route.fulfill({ status: 409, json: { message: 'That arrival slot is fully booked on this date. Pick the other slot or another day.' } }));
+    await page.getByPlaceholder(/name/i).first().fill('Late Guest');
+    await page.getByPlaceholder(/email/i).first().fill('late@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
+    await expect(page.getByText(/fully booked on this date/)).toBeVisible();
+    await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
+  });
+
+  test('the API refuses the party that would overfill a slot', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one project fills the slot');
+    test.skip(!(await apiUp(page)), 'API not running');
+    // a date nobody else books in the suite, 58 days out (inside the availability window)
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + 58);
+    const iso = d.toISOString().slice(0, 10);
+    const book = (n: number) => request.post('/api/bookings', {
+      data: { visitDate: iso, slot: 'afternoon', adults: 12, kids: 0, rate: 'rr', items: [], name: `Coach ${n}`, email: `coach${n}@example.com`, payMode: 'gate' },
+    });
+    let full = 0;
+    for (let n = 0; n < 14; n++) {
+      const res = await book(n);
+      if (res.status() === 409) { full++; expect(await res.json()).toMatchObject({ message: /fully booked/ }); break; }
+      expect(res.status(), `booking ${n}`).toBe(201);
+    }
+    expect(full).toBe(1); // 12 × 12 = 144 fit in 150; the 13th party of 12 does not
+    const avail = await (await request.get(`/api/bookings/availability?from=${iso}&days=1`)).json();
+    expect(avail[0].afternoon.level).toBe('very-busy');
+  });
+});

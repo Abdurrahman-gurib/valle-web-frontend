@@ -192,11 +192,15 @@ function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
 /* 3 · WHEN: date chip */
 function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: () => void; load?: AvailabilityDay }) {
   const [h, bind] = useHover();
+  const full = !!load && load.morning.level === 'full' && load.afternoon.level === 'full';
   return (
     <button
       onClick={onClick}
       {...bind}
+      aria-pressed={on}
+      data-full={full || undefined}
       style={{
+        opacity: full ? 0.45 : 1,
         border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
         background: on ? '#7333FF' : '#FFFFFF',
         color: on ? '#FFFFFF' : '#340057',
@@ -217,15 +221,20 @@ function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: 
 function SlotChip({ label, sub, on, onClick, level }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel }) {
   const t = useT();
   const [h, bind] = useHover();
+  const full = level === 'full';
   return (
     <button
       onClick={onClick}
       {...bind}
+      aria-pressed={on}
+      disabled={full}
+      data-testid={full ? 'slot-full' : undefined}
       style={{
         border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
-        background: on ? '#7333FF' : '#FFFFFF',
+        background: on ? '#7333FF' : full ? '#F7F3FF' : '#FFFFFF',
         color: on ? '#FFFFFF' : '#340057',
-        cursor: 'pointer', fontFamily: 'inherit', padding: '13px 20px', borderRadius: '14px',
+        opacity: full ? 0.6 : 1,
+        cursor: full ? 'not-allowed' : 'pointer', fontFamily: 'inherit', padding: '13px 20px', borderRadius: '14px',
         textAlign: 'left', transition: 'all .15s',
         ...(h ? { transform: 'translateY(-1px)' } : undefined),
       }}
@@ -376,6 +385,13 @@ export default function BookingPage() {
   }, [customDate]);
   const selectedIso = customDate || (dOpts[dateIdx] ? dOpts[dateIdx].iso : dOpts[0].iso);
   const selectedLoad = avail[selectedIso];
+  useEffect(() => {
+    if (!selectedLoad) return;
+    const cur = slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level;
+    const other = slot === 0 ? selectedLoad.afternoon.level : selectedLoad.morning.level;
+    if (cur === 'full' && other !== 'full') setSlot(slot === 0 ? 1 : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLoad]);
 
   const bookCards = catalog.ACTS.filter((a) => a.mode === 'pp' || a.mode === 'flat').map(card);
   const cartActs = booking.selLines;
@@ -413,8 +429,15 @@ export default function BookingPage() {
     if (code && (!phone.trim() || /^\+\d{1,4}$/.test(phone.trim()))) setPhone(code + ' ');
   };
 
+  const selectedSlotFull = selectedLoad ? (slot === 0 ? selectedLoad.morning.level : selectedLoad.afternoon.level) === 'full' : false;
+  const refreshAvail = (iso: string) => fetchAvailability(iso, 1).then(mergeAvail).catch(() => { /* ignore */ });
+
   const confirmNow = async () => {
     if (submitting) return;
+    if (selectedSlotFull) {
+      setApiErr(t('That arrival slot is fully booked on this date. Pick the other slot or another day.'));
+      return;
+    }
     const ok = name.trim() && (email.trim() || phone.trim());
     if (!ok) { setFormErr(true); return; }
     setFormErr(false);
@@ -446,7 +469,11 @@ export default function BookingPage() {
       // booking, so no reference is shown: a guest turning up with a phantom VAL code
       // is worse than a retry.
       const status = (e as { status?: number }).status;
-      setApiErr(status
+      // 409: the slot filled up while the guest was typing; show the picker the truth.
+      if (status === 409) void refreshAvail(req.visitDate);
+      setApiErr(status === 409
+        ? t('That arrival slot is fully booked on this date. Pick the other slot or another day.')
+        : status
         ? ((e as Error).message || t('We could not confirm your booking. Please try again.'))
         : t('We could not reach the booking desk. Check your connection and try again, or WhatsApp us on {phone}.', { phone: '+230 5292 8841' }));
       setSubmitting(false);
