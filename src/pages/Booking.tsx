@@ -493,8 +493,9 @@ export default function BookingPage() {
           </div>
           <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
 
-          <div style={{ display: 'flex', gap: 'clamp(18px,2.5vw,28px)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1.7, minWidth: 'min(100%,380px)' }}>
+          {/* One column, top to bottom: the five steps read as a flow (1 pick, 2 your day, 3 when, 4 details, 5 pay). */}
+          <div>
+            <div>
               {/* 1 · PICK EXPERIENCES */}
               <div style={{ marginTop: '30px' }}>
                 <div style={stepLabel}>{t('1 · TAP TO ADD EXPERIENCES')}</div>
@@ -573,9 +574,9 @@ export default function BookingPage() {
               </div>
             </div>
 
-            <div style={{ flex: 1, minWidth: 'min(100%,300px)', position: 'sticky', top: '84px' }}>
+            <div>
               {/* 4 · DETAILS */}
-              <div style={{ marginTop: '30px' }}>
+              <div style={{ marginTop: '34px' }}>
                 <div style={stepLabel}>{t('4 · YOUR DETAILS · FOR YOUR CONFIRMATION & E-RECEIPT')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder={t('Full name')} />
