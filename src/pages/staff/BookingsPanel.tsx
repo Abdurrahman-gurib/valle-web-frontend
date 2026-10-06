@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { BookingRow, BookingStatus, PayMode, RateKey, SlotKey } from '../../types';
 import {
-  exportUrl, getBooking, getGateView, isHttpError, listBookings, postponeBooking, receiptPdfUrl, recordPayment, resendTicket, resendWaiver, updateBooking,
+  exportUrl, getBooking, getGateView, isHttpError, listBookings, postponeBooking, receiptPdfUrl, recordPayment, refundPayment, resendTicket, resendWaiver, updateBooking,
   type PaymentMethod,
   type BookingAuditEntry, type BookingDetailFull, type BookingPatch, type BookingSort,
 } from '../../lib/staffApi';
@@ -351,6 +351,9 @@ function Drawer({ refCode, onClose, onPatched }: {
   const [confirmCancel, setConfirmCancel] = useState(false);
   // experience lines while editing (a top-up on the day adds to them); null = untouched
   const [editLines, setEditLines] = useState<EditableLine[] | null>(null);
+  const [refundOpen, setRefundOpen] = useState(false);
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundReason, setRefundReason] = useState('');
   const [payOpen, setPayOpen] = useState(false);
   const [payAmount, setPayAmount] = useState('');
   const [payMethod, setPayMethod] = useState<PaymentMethod>('cash');
@@ -429,6 +432,17 @@ function Drawer({ refCode, onClose, onPatched }: {
       applyUpdate(updated); refreshAudit(); setPayOpen(false); setPayAmount(''); setPayReceipt('');
       setSaved(`Payment of ${money(amount)} recorded.`);
     } catch (e) { setErr((e as Error).message || 'Could not record the payment.'); } finally { setBusy(null); }
+  };
+  const refund = async () => {
+    if (!data) return;
+    const amount = Math.round(Number(refundAmount));
+    if (!(amount > 0)) { setErr('Enter the amount to refund.'); return; }
+    setBusy('arrived'); setErr('');
+    try {
+      const updated = await refundPayment(refCode, { amount, reason: refundReason.trim() || undefined });
+      applyUpdate(updated); refreshAudit(); setRefundOpen(false); setRefundAmount(''); setRefundReason('');
+      setSaved(`Refund of ${money(amount)} sent through the payment provider.`);
+    } catch (e) { setErr((e as Error).message || 'Could not refund.'); } finally { setBusy(null); }
   };
   const postpone = async () => {
     if (!data) return;
@@ -865,6 +879,18 @@ function Drawer({ refCode, onClose, onPatched }: {
                 <Btn variant="dark" onClick={startEdit} disabled={busy !== null} style={{ flex: 1 }}>Edit</Btn>
                 {(data.balance ?? data.total) > 0 && data.status !== 'cancelled' && (
                   <Btn variant="ghost" onClick={() => { setPayOpen((v) => !v); setPayAmount(String(data.balance ?? data.total)); }} disabled={busy !== null} style={{ flex: 1 }} data-testid="pay-open">Record payment</Btn>
+                )}
+                {data.paymentMethod === 'online' && (data.paidAmount ?? 0) > 0 && (
+                  <Btn variant="ghost" onClick={() => { setRefundOpen((v) => !v); setRefundAmount(String(data.paidAmount ?? 0)); }} disabled={busy !== null} style={{ flex: 1 }} data-testid="refund-open">Refund online payment</Btn>
+                )}
+                {refundOpen && (
+                  <div data-testid="refund-form" style={{ flexBasis: '100%', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', background: '#FFF1F3', border: '1.5px solid #FF3358', borderRadius: 14, padding: '10px 14px' }}>
+                    <span style={{ fontWeight: 700, fontSize: 13.5, flex: '1 1 100%' }}>Send money back through the payment provider. Up to {money(data.paidAmount ?? 0)} on this booking.</span>
+                    <input value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="Amount (Rs)" aria-label="Refund amount" style={{ ...inputStyle, width: 130 }} data-testid="refund-amount" />
+                    <input value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Reason (shown in the trail)" aria-label="Refund reason" style={{ ...inputStyle, flex: '1 1 200px' }} data-testid="refund-reason" />
+                    <Btn variant="danger" onClick={() => { void refund(); }} disabled={busy !== null} data-testid="refund-submit">{busy === 'arrived' ? <Spinner color="#D91E44" /> : 'Refund'}</Btn>
+                    <Btn variant="ghost" onClick={() => setRefundOpen(false)}>Close</Btn>
+                  </div>
                 )}
                 {data.status !== 'cancelled' && data.status !== 'postponed' && (
                   <Btn variant="ghost" onClick={() => setPostponeOpen((v) => !v)} disabled={busy !== null} style={{ flex: 1 }} data-testid="postpone-open">Postpone (weather)</Btn>

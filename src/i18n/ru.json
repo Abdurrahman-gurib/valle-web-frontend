@@ -1813,5 +1813,12 @@
  "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Тариф для гостей · вход для взрослых {adult}, для детей {child}, до 6 лет бесплатно.",
  "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "С УЧЁТОМ НДС · С 1 ИЮЛЯ 2026 ПО 30 ИЮНЯ 2027 · БРОНИРОВАНИЕ БЕСПЛАТНО · ОПЛАТА НА ВХОДЕ",
  "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Это время прибытия полностью занято на выбранную дату. Выберите другое время или другой день.",
- "This code has just been fully used. Remove it or try another.": "Этот код только что был полностью использован. Удалите его или попробуйте другой."
+ "This code has just been fully used. Remove it or try another.": "Этот код только что был полностью использован. Удалите его или попробуйте другой.",
+ "Taking you to the secure payment page…": "Переходим на защищённую страницу оплаты…",
+ "Confirming your payment…": "Подтверждаем ваш платёж…",
+ "Payment received · {amount}. Your ticket is on its way by e-mail.": "Платёж получен · {amount}. Билет уже отправлен вам на e-mail.",
+ "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "Платёж не прошёл. Деньги не списаны: попробуйте ещё раз или оплатите на входе.",
+ "Opening secure payment…": "Открываем защищённую оплату…",
+ "Pay {amount} online now": "Оплатить {amount} онлайн сейчас",
+ "Online payment is not available right now. You can pay at the gate.": "Онлайн-оплата сейчас недоступна. Вы можете оплатить на входе."
 }

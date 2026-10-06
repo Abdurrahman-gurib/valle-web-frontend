@@ -186,6 +186,9 @@ export interface BookingResponse {
   /** The guest's ticket page (QR inside); also e-mailed / WhatsApped. */
   ticketUrl?: string;
   qrUrl?: string;
+  /** Pay online: the hosted checkout to send the guest to; the ticket follows the payment. */
+  checkoutUrl?: string;
+  paymentId?: string;
 }
 
 export interface QuoteRequest {

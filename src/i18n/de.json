@@ -1813,5 +1813,12 @@
  "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Besuchertarif · Eintritt Erwachsene {adult}, Kinder {child}, unter 6 frei.",
  "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "INKL. MWST. · 1. JULI 2026 BIS 30. JUNI 2027 · KOSTENLOS BUCHEN · ZAHLUNG AM EINGANG",
  "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Dieses Ankunftsfenster ist an diesem Tag ausgebucht. Wähle das andere Fenster oder einen anderen Tag.",
- "This code has just been fully used. Remove it or try another.": "Dieser Code wurde gerade vollständig eingelöst. Entferne ihn oder probiere einen anderen."
+ "This code has just been fully used. Remove it or try another.": "Dieser Code wurde gerade vollständig eingelöst. Entferne ihn oder probiere einen anderen.",
+ "Taking you to the secure payment page…": "Du wirst zur sicheren Zahlungsseite weitergeleitet…",
+ "Confirming your payment…": "Deine Zahlung wird bestätigt…",
+ "Payment received · {amount}. Your ticket is on its way by e-mail.": "Zahlung erhalten · {amount}. Dein Ticket ist per E-Mail unterwegs.",
+ "Your payment did not go through. Nothing was charged: try again, or pay at the gate.": "Deine Zahlung ist nicht durchgegangen. Es wurde nichts abgebucht: versuche es erneut oder zahle am Eingang.",
+ "Opening secure payment…": "Sichere Zahlung wird geöffnet…",
+ "Pay {amount} online now": "{amount} jetzt online zahlen",
+ "Online payment is not available right now. You can pay at the gate.": "Online-Zahlung ist gerade nicht verfügbar. Du kannst am Eingang zahlen."
 }

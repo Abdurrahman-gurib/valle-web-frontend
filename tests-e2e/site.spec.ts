@@ -278,10 +278,16 @@ test.describe('regressions', () => {
   test('no "pay online" is offered and a fresh booking is never stamped as paid', async ({ page }) => {
     // Nothing on the site takes money yet: the choice is hidden and the receipt says pay on arrival.
     test.skip(!(await apiUp(page)), 'API not running');
+    // the option exists only when the API has a payment provider (the e2e stack runs the sandbox; production has none)
+    const cfg = await (await page.request.get('/api/payments/config')).json() as { enabled: boolean };
     await page.goto('/booking');
-    await expect(page.getByText(/Pay online now/i)).toHaveCount(0);
-    await expect(page.getByText(/HOW WOULD YOU LIKE TO PAY/i)).toHaveCount(0);
-    await expect(page.getByText(/PAY AT THE GATE/i).first()).toBeVisible();
+    if (cfg.enabled) {
+      await expect(page.getByText(/Pay online now/i)).toBeVisible();
+    } else {
+      await expect(page.getByText(/Pay online now/i)).toHaveCount(0);
+      await expect(page.getByText(/HOW WOULD YOU LIKE TO PAY/i)).toHaveCount(0);
+      await expect(page.getByText(/PAY AT THE GATE/i).first()).toBeVisible();
+    }
     await page.getByPlaceholder(/name/i).first().fill('Gate Payer');
     await page.getByPlaceholder(/email/i).first().fill('gate@example.com');
     await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
@@ -520,5 +526,55 @@ test.describe('promo code race', () => {
     await expect(page.getByText(/This code has just been fully used/)).toBeVisible();
     await expect(page.getByText(/fully booked on this date/)).toHaveCount(0);
     await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
+  });
+});
+
+test.describe('online payment', () => {
+  // Needs the api with PAYMENT_PROVIDER=sandbox (the e2e compose override); production runs without a provider.
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('pay online: hosted checkout, webhook, ticket reads paid, ticket mail follows the money', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cfg = await (await request.get('/api/payments/config')).json() as { enabled: boolean };
+    test.skip(!cfg.enabled, 'no payment provider on this server');
+
+    await page.goto('/booking');
+    await page.getByPlaceholder(/name/i).first().fill('Card Guest');
+    await page.getByPlaceholder(/email/i).first().fill('card@example.com');
+    await page.getByText('Pay online now').click();
+    await page.getByRole('button', { name: /Pay Rs .* now/ }).click();
+    // the stand-in hosted page served by the api
+    await expect(page.getByTestId('sandbox-checkout')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('sandbox-pay').click();
+    // back on the ticket: the outcome is read, the balance is zero, the stamp says paid
+    await expect(page).toHaveURL(/\/ticket\/VAL-\d+-\d+\?t=.*&payment=/, { timeout: 15000 });
+    await expect(page.getByTestId('payment-outcome')).toHaveAttribute('data-status', 'paid', { timeout: 20000 });
+    await expect(page.getByTestId('payment-outcome')).toContainText('Payment received');
+    await expect(page.getByTestId('ticket-balance')).toContainText('Paid');
+    await expect(page.getByTestId('ticket-pay-online')).toHaveCount(0);
+  });
+
+  test('a declined card is explained, nothing is charged, and the ticket still offers to pay online', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cfg = await (await request.get('/api/payments/config')).json() as { enabled: boolean };
+    test.skip(!cfg.enabled, 'no payment provider on this server');
+
+    await page.goto('/booking');
+    await page.getByPlaceholder(/name/i).first().fill('Declined Guest');
+    await page.getByPlaceholder(/email/i).first().fill('declined@example.com');
+    await page.getByText('Pay online now').click();
+    await page.getByRole('button', { name: /Pay Rs .* now/ }).click();
+    await expect(page.getByTestId('sandbox-checkout')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('sandbox-fail').click();
+    await expect(page.getByTestId('payment-outcome')).toHaveAttribute('data-status', 'failed', { timeout: 20000 });
+    await expect(page.getByTestId('payment-outcome')).toContainText('did not go through');
+    await expect(page.getByTestId('ticket-balance')).toContainText('To pay on arrival');
+    // try again from the ticket page
+    await page.getByTestId('ticket-pay-online').click();
+    await expect(page.getByTestId('sandbox-checkout')).toBeVisible({ timeout: 15000 });
+    await page.getByTestId('sandbox-pay').click();
+    await expect(page.getByTestId('payment-outcome')).toHaveAttribute('data-status', 'paid', { timeout: 20000 });
   });
 });

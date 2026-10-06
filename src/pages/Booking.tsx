@@ -8,7 +8,7 @@ import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
-import { checkCoupon, fetchAvailability, type AvailabilityDay, type BusyLevel } from '../lib/api';
+import { checkCoupon, fetchAvailability, fetchPaymentConfig, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -25,8 +25,11 @@ function waiverHref(ticketUrl: string): string {
   }
 }
 
-/** "Pay online now" is offered only once a real payment gateway is connected. */
-const ONLINE_PAYMENT = import.meta.env.VITE_ONLINE_PAYMENT === '1';
+/**
+ * "Pay online now" is offered only when the API has a payment provider configured
+ * (GET /api/payments/config); VITE_ONLINE_PAYMENT=1 forces it on for a build.
+ */
+const FORCE_ONLINE_PAYMENT = import.meta.env.VITE_ONLINE_PAYMENT === '1';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -313,6 +316,13 @@ function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) 
 
 export default function BookingPage() {
   const t = useT();
+  const [ONLINE_PAYMENT, setOnlinePayment] = useState(FORCE_ONLINE_PAYMENT);
+  useEffect(() => {
+    let dead = false;
+    void fetchPaymentConfig().then((c) => { if (!dead && c.enabled) setOnlinePayment(true); });
+    return () => { dead = true; };
+  }, []);
+  const [redirecting, setRedirecting] = useState(false);
   useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: ONLINE_PAYMENT ? t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.') : t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
@@ -460,6 +470,12 @@ export default function BookingPage() {
     let code: string;
     try {
       const res = await createBooking(req);
+      if (res.checkoutUrl) {
+        // The provider's hosted page takes over; the ticket page reads the outcome when the guest comes back.
+        setRedirecting(true);
+        window.location.assign(res.checkoutUrl);
+        return;
+      }
       code = res.refCode;
       setTicket({ ticketUrl: res.ticketUrl, qrUrl: res.qrUrl });
       setApplied(res.adjustment ? { amount: res.adjustment, note: res.adjustmentNote || '', code: res.couponCode || '' } : null);
@@ -667,7 +683,7 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* 5 · PAYMENT: shown once a payment gateway is wired up (VITE_ONLINE_PAYMENT=1) */}
+              {/* 5 · PAYMENT: shown when the API has a payment provider (or VITE_ONLINE_PAYMENT=1) */}
               {ONLINE_PAYMENT && <div style={{ marginTop: '34px' }}>
                 <div style={stepLabel}>{t('5 · HOW WOULD YOU LIKE TO PAY?')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
@@ -709,7 +725,9 @@ export default function BookingPage() {
               <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
               <div style={{ fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: '3px' }}>{payModeNote}</div>
             </div>
-            <ConfirmBtn label={confirmLabel} onClick={confirmNow} />
+            {redirecting
+              ? <div data-testid="checkout-redirect" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '14.5px', padding: '14px 4px' }}>{t('Taking you to the secure payment page…')}</div>
+              : <ConfirmBtn label={confirmLabel} onClick={confirmNow} />}
           </div>
         </>
       )}

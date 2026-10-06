@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
 import { mur, partyLabel, fullDateFromIso } from '../lib/format';
-import { fetchTicket, type TicketView } from '../lib/api';
+import { fetchPaymentConfig, fetchPaymentStatus, fetchTicket, startCheckout, type PaymentStatus, type TicketView } from '../lib/api';
 import { Stripes } from '../components/Stripes';
 import { localizePath, tr, useLang, useT, _t } from '../i18n';
 import { InstallCard } from '../components/InstallApp';
@@ -27,6 +27,43 @@ export default function TicketPage() {
   useSeo({ title: t('Ticket {ref} · VALLÉ Advenature™ Park', { ref: ref.toUpperCase() }), description: t('Your VALLÉ ticket.'), noindex: true });
   const [tk, setT] = useState<TicketView | null>(null);
   const [err, setErr] = useState('');
+  // ?payment=<id>: back from the hosted checkout; poll until the provider's webhook has settled it
+  const paymentId = params.get('payment') || '';
+  const [pay, setPay] = useState<PaymentStatus | null>(null);
+  const [payWait, setPayWait] = useState(!!paymentId);
+  const [reload, setReload] = useState(0);
+  const [canPayOnline, setCanPayOnline] = useState(false);
+  const [paying, setPaying] = useState('');
+  useEffect(() => {
+    let dead = false;
+    void fetchPaymentConfig().then((c) => { if (!dead) setCanPayOnline(c.enabled); });
+    return () => { dead = true; };
+  }, []);
+  useEffect(() => {
+    if (!paymentId || !token) return;
+    let dead = false;
+    let tries = 0;
+    const tick = async () => {
+      if (dead) return;
+      try {
+        const s = await fetchPaymentStatus(paymentId, token);
+        if (dead) return;
+        if (s.status !== 'pending' || tries >= 20) { setPay(s); setPayWait(false); setReload((n) => n + 1); return; }
+      } catch { if (tries >= 20) { setPayWait(false); return; } }
+      tries++;
+      setTimeout(() => { void tick(); }, 1500);
+    };
+    void tick();
+    return () => { dead = true; };
+  }, [paymentId, token]);
+  const payNow = async () => {
+    if (!tk) return;
+    setPaying('busy');
+    try {
+      const { checkoutUrl } = await startCheckout(tk.refCode, token);
+      window.location.assign(checkoutUrl);
+    } catch { setPaying('error'); }
+  };
 
   useEffect(() => {
     let dead = false;
@@ -34,7 +71,7 @@ export default function TicketPage() {
       .then((v) => { if (!dead) setT(v); })
       .catch((e: Error & { status?: number }) => { if (!dead) setErr(e.status === 403 ? tr('This ticket link is not valid. Open the link from your confirmation e-mail or WhatsApp.') : e.status === 404 ? tr('We could not find this booking.') : tr('Could not load the ticket right now. Please try again.')); });
     return () => { dead = true; };
-  }, [ref, token]);
+  }, [ref, token, reload]);
 
   const share = tk ? `https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot} arrival', { ref: tk.refCode, date: fullDateFromIso(tk.visitDate) || tk.visitDate, slot: t(SLOT_WORDS[tk.slot] ?? tk.slot) }) + '\n' + tk.ticketUrl)}` : '';
 
@@ -85,10 +122,32 @@ export default function TicketPage() {
               <span>{t('Total')}</span>
               <span style={{ fontFamily: MONO }}>{mur(tk.total)}</span>
             </div>
+            {paymentId && (
+              <div data-testid="payment-outcome" data-status={payWait ? 'pending' : pay?.status ?? 'unknown'} role="status" style={{
+                marginTop: 14, borderRadius: 14, padding: '12px 14px', fontSize: 14, fontWeight: 700, textAlign: 'start',
+                background: payWait ? '#F7F3FF' : pay?.status === 'paid' ? '#E6FFEE' : '#FFE2E7',
+                border: `1.5px solid ${payWait ? '#D9C9F0' : pay?.status === 'paid' ? '#33FF74' : '#FF3358'}`,
+                color: payWait ? '#340057' : pay?.status === 'paid' ? '#1E9E4A' : '#D91E44',
+              }}>
+                {payWait
+                  ? t('Confirming your payment…')
+                  : pay?.status === 'paid'
+                  ? t('Payment received · {amount}. Your ticket is on its way by e-mail.', { amount: mur(pay.amount) })
+                  : t('Your payment did not go through. Nothing was charged: try again, or pay at the gate.')}
+              </div>
+            )}
             {tk.balance !== undefined && (
               <div data-testid="ticket-balance" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6, fontSize: 14, fontWeight: 700, color: tk.balance > 0 ? '#D91E44' : '#1E9E4A' }}>
                 <span>{tk.balance > 0 ? t('To pay on arrival') : t('Paid')}</span>
                 <span style={{ fontFamily: MONO }}>{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
+              </div>
+            )}
+            {canPayOnline && (tk.balance ?? 0) > 0 && tk.status !== 'cancelled' && !payWait && (
+              <div data-print-hide="" style={{ marginTop: 14 }}>
+                <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" style={{ ...btn('#33FF74', '#340057'), border: 0, cursor: 'pointer', font: 'inherit', fontWeight: 700 }}>
+                  {paying === 'busy' ? t('Opening secure payment…') : t('Pay {amount} online now', { amount: mur(tk.balance ?? 0) })}
+                </button>
+                {paying === 'error' && <div style={{ color: '#D91E44', fontSize: 13, marginTop: 6 }}>{t('Online payment is not available right now. You can pay at the gate.')}</div>}
               </div>
             )}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 22 }} data-print-hide="">

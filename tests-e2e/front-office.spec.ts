@@ -131,3 +131,41 @@ test.describe('front office', () => {
     expect(arrived.ok(), await arrived.text()).toBeTruthy();
   });
 });
+
+test.describe('online payment refunds', () => {
+  test.use({ storageState: STAFF_STATE });
+
+  test('the desk refunds part of an online payment through the provider, and the trail says so', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cfg = await (await page.request.get('/api/payments/config')).json() as { enabled: boolean; provider: string | null };
+    test.skip(cfg.provider !== 'sandbox', 'needs the sandbox provider');
+
+    // a guest books and pays online (the sandbox page reports "paid" like a webhook would)
+    const booked = await page.request.post('/api/bookings', {
+      data: { visitDate: tomorrow(), slot: 'afternoon', adults: 2, kids: 0, rate: 'rr', items: [{ id: 'zipline', adults: 2 }], name: 'Refund Guest', email: 'refund@example.mu', payMode: 'online' },
+    });
+    const b = (await booked.json()) as { refCode: string; total: number; checkoutUrl: string; paymentId: string };
+    expect(b.checkoutUrl).toMatch(/\/api\/payments\/sandbox\//);
+    const k = new URL(b.checkoutUrl).searchParams.get('k') || '';
+    const paid = await page.request.post(`/api/payments/sandbox/${b.paymentId}/complete`, { form: { outcome: 'paid', k }, maxRedirects: 0 });
+    expect(paid.status()).toBe(303);
+
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.getByPlaceholder(/search/i).first().fill(b.refCode).catch(() => {});
+    await expect(page.getByText(b.refCode).first()).toBeVisible({ timeout: 15000 });
+    await page.getByText(b.refCode).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Booking ' + b.refCode });
+    await expect(dialog.getByTestId('money-paid')).toContainText('online');
+    await expect(dialog.getByText('Fully paid')).toBeVisible();
+
+    await dialog.getByRole('button', { name: 'Refund online payment' }).click();
+    await dialog.getByTestId('refund-amount').fill('500');
+    await dialog.getByTestId('refund-reason').fill('rain day');
+    await dialog.getByRole('button', { name: 'Refund', exact: true }).click();
+    await expect(dialog.getByTestId('money-paid')).toContainText('Rs ' + (b.total - 500).toLocaleString('en-US'), { timeout: 10000 });
+    await expect(dialog.getByText('Balance to collect')).toBeVisible();
+    await expect(dialog.getByText(/rain day/)).toBeVisible();
+  });
+});

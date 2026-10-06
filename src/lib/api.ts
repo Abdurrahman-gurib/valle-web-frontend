@@ -86,6 +86,26 @@ export function createBooking(body: BookingRequest): Promise<BookingResponse> {
   return request<BookingResponse>('/bookings', { method: 'POST', body: JSON.stringify(body) });
 }
 
+// ---- online payment (hosted checkout through the configured provider) ----
+export interface PaymentConfig { enabled: boolean; provider: string | null }
+let paymentConfig: Promise<PaymentConfig> | null = null;
+/** Whether the API offers online payment right now; cached for the page's life, off when the API is away. */
+export function fetchPaymentConfig(): Promise<PaymentConfig> {
+  if (!paymentConfig) paymentConfig = request<PaymentConfig>('/payments/config').catch(() => ({ enabled: false, provider: null }));
+  return paymentConfig;
+}
+export interface PaymentStatus {
+  id: string; status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded'; amount: number; refundedAmount: number; provider: string; settledAt: string | null;
+  booking: { refCode: string; total: number; paidAmount: number; balance: number };
+}
+export function fetchPaymentStatus(id: string, token: string): Promise<PaymentStatus> {
+  return request<PaymentStatus>(`/payments/${encodeURIComponent(id)}/status?t=${encodeURIComponent(token)}`);
+}
+/** Opens a checkout for what the booking still owes (from the ticket page). */
+export function startCheckout(refCode: string, token: string): Promise<{ paymentId: string; checkoutUrl: string }> {
+  return request<{ paymentId: string; checkoutUrl: string }>('/payments/checkout', { method: 'POST', body: JSON.stringify({ refCode, t: token }) });
+}
+
 export function createQuote(body: QuoteRequest): Promise<{ id: string }> {
   return request<{ id: string }>('/quotes', { method: 'POST', body: JSON.stringify(body) });
 }

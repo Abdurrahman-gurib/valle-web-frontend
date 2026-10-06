@@ -274,6 +274,10 @@ export type PaymentMethod = 'cash' | 'card' | 'juice' | 'online' | 'other';
 export function recordPayment(refCode: string, body: { amount: number; method: PaymentMethod; receiptNo?: string }): Promise<BookingDetailFull> {
   return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/payment', { method: 'POST', body: JSON.stringify(body) });
 }
+/** Money back through the payment provider (online payments only). */
+export function refundPayment(refCode: string, body: { amount: number; reason?: string }): Promise<BookingDetailFull> {
+  return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/refund', { method: 'POST', body: JSON.stringify(body) });
+}
 export function postponeBooking(refCode: string, reason: string): Promise<BookingDetailFull> {
   return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/postpone', { method: 'POST', body: JSON.stringify({ reason }) });
 }
