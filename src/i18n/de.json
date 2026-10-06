@@ -1812,5 +1812,6 @@
  "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Einwohnertarif · Eintritt Erwachsene {adult}, Kinder {child}, unter 6 frei.",
  "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Besuchertarif · Eintritt Erwachsene {adult}, Kinder {child}, unter 6 frei.",
  "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "INKL. MWST. · 1. JULI 2026 BIS 30. JUNI 2027 · KOSTENLOS BUCHEN · ZAHLUNG AM EINGANG",
- "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Dieses Ankunftsfenster ist an diesem Tag ausgebucht. Wähle das andere Fenster oder einen anderen Tag."
+ "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Dieses Ankunftsfenster ist an diesem Tag ausgebucht. Wähle das andere Fenster oder einen anderen Tag.",
+ "This code has just been fully used. Remove it or try another.": "Dieser Code wurde gerade vollständig eingelöst. Entferne ihn oder probiere einen anderen."
 }

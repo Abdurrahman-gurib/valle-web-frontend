@@ -469,9 +469,15 @@ export default function BookingPage() {
       // booking, so no reference is shown: a guest turning up with a phantom VAL code
       // is worse than a retry.
       const status = (e as { status?: number }).status;
-      // 409: the slot filled up while the guest was typing; show the picker the truth.
-      if (status === 409) void refreshAvail(req.visitDate);
-      setApiErr(status === 409
+      // 409 is either the slot (filled up while the guest was typing: refresh the picker)
+      // or a limited promo code whose last use just went to someone else.
+      const msg = (e as Error).message || '';
+      const codeUsed = status === 409 && /code/i.test(msg);
+      if (status === 409 && !codeUsed) void refreshAvail(req.visitDate);
+      if (codeUsed) { setOffer(null); setCouponMsg(''); }
+      setApiErr(codeUsed
+        ? t('This code has just been fully used. Remove it or try another.')
+        : status === 409
         ? t('That arrival slot is fully booked on this date. Pick the other slot or another day.')
         : status
         ? ((e as Error).message || t('We could not confirm your booking. Please try again.'))

@@ -1812,5 +1812,6 @@
  "Resident rate · adults {adult} entry, kids {child}, under 6 free.": "Тариф для резидентов · вход для взрослых {adult}, для детей {child}, до 6 лет бесплатно.",
  "Visitor rate · adults {adult} entry, kids {child}, under 6 free.": "Тариф для гостей · вход для взрослых {adult}, для детей {child}, до 6 лет бесплатно.",
  "VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE": "С УЧЁТОМ НДС · С 1 ИЮЛЯ 2026 ПО 30 ИЮНЯ 2027 · БРОНИРОВАНИЕ БЕСПЛАТНО · ОПЛАТА НА ВХОДЕ",
- "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Это время прибытия полностью занято на выбранную дату. Выберите другое время или другой день."
+ "That arrival slot is fully booked on this date. Pick the other slot or another day.": "Это время прибытия полностью занято на выбранную дату. Выберите другое время или другой день.",
+ "This code has just been fully used. Remove it or try another.": "Этот код только что был полностью использован. Удалите его или попробуйте другой."
 }
