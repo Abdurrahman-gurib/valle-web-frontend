@@ -168,7 +168,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
               <div style={{ ...mono, fontSize: 13, fontWeight: 700, color: '#FF3358' }}>{view.refCode}</div>
               <div style={{ ...display, fontSize: 26, lineHeight: 1 }}>{view.guestName}</div>
               <div style={{ fontSize: 13, marginTop: 4, color: 'rgba(52,0,87,.7)' }}>
-                {shortDate(view.visitDate)} · {view.slot} · {view.adults} adult{view.adults === 1 ? '' : 's'}{view.kids ? ` · ${view.kids} child${view.kids === 1 ? '' : 'ren'}` : ''} · {view.payMode === 'online' ? 'paid online' : `to pay ${money(view.total)}`}
+                {shortDate(view.visitDate)} · {view.slot} · {view.adults} adult{view.adults === 1 ? '' : 's'}{view.kids ? ` · ${view.kids} child${view.kids === 1 ? '' : 'ren'}` : ''} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
               </div>
               {!view.isToday && <div style={{ ...mono, fontSize: 11, fontWeight: 700, color: '#D91E44', marginTop: 6 }}>NOT TODAY'S BOOKING</div>}
               <div data-testid="gate-balance" style={{ ...mono, fontSize: 12, fontWeight: 700, marginTop: 6, color: view.balance > 0 ? '#D91E44' : '#1E9E4A' }}>

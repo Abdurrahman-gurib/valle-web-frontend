@@ -99,7 +99,7 @@ function confirmationText(d: BookingDetailFull): string {
     `Guest: ${d.guestName} · ${partyLabel(d.adults, d.kids)} · ${rateLabel(d.rate)}`,
     `Visit: ${shortDate(d.visitDate)}, ${slotLabel(d.slot).toLowerCase()} arrival (${d.slot === 'morning' ? '09:00–12:00' : '12:00–15:30'})`,
     lines,
-    `Total: ${money(d.total)} · ${d.payMode === 'online' ? 'paid online' : 'to pay on arrival'}`,
+    `Total: ${money(d.total)} · ${(d.balance ?? d.total) > 0 ? `${money(d.balance ?? d.total)} to pay on arrival` : 'paid'}`,
     d.ticketUrl ? `Your ticket with QR code: ${d.ticketUrl}` : '',
     'Show it at the gate. B102, Mare Anguilles, Chamouny · +230 660 44 77',
   ].filter(Boolean).join('\n');

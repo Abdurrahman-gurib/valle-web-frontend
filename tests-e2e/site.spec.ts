@@ -272,6 +272,21 @@ test.describe('regressions', () => {
     await expect(page.getByText(/BOOKING REFERENCE/i)).toBeHidden();
   });
 
+  test('no "pay online" is offered and a fresh booking is never stamped as paid', async ({ page }) => {
+    // Nothing on the site takes money yet: the choice is hidden and the receipt says pay on arrival.
+    test.skip(!(await apiUp(page)), 'API not running');
+    await page.goto('/booking');
+    await expect(page.getByText(/Pay online now/i)).toHaveCount(0);
+    await expect(page.getByText(/HOW WOULD YOU LIKE TO PAY/i)).toHaveCount(0);
+    await expect(page.getByText(/PAY AT THE GATE/i).first()).toBeVisible();
+    await page.getByPlaceholder(/name/i).first().fill('Gate Payer');
+    await page.getByPlaceholder(/email/i).first().fill('gate@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
+    await expect(page.getByText(/BOOKING REFERENCE/i)).toBeVisible();
+    await expect(page.getByText('PAY ON ARRIVAL', { exact: true })).toBeVisible();
+    await expect(page.getByText(/PAID ✓|All paid|Total paid/)).toHaveCount(0);
+  });
+
   test('repeat clicks on a hash nav link scroll again', async ({ page }) => {
     await page.goto('/');
     const link = page.getByRole('button', { name: 'Plan your visit' })

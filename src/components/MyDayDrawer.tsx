@@ -182,7 +182,7 @@ export function MyDayDrawer() {
             {t('Check out')} {fwd()}
           </button>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', textAlign: 'center', marginTop: 9 }}>
-            {t('FREE TO BOOK · PAY ONLINE OR AT THE GATE')}
+            {t('FREE TO BOOK · PAY AT THE GATE')}
           </div>
         </div>
       </div>

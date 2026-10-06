@@ -25,6 +25,9 @@ function waiverHref(ticketUrl: string): string {
   }
 }
 
+/** "Pay online now" is offered only once a real payment gateway is connected. */
+const ONLINE_PAYMENT = import.meta.env.VITE_ONLINE_PAYMENT === '1';
+
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
 
@@ -301,7 +304,7 @@ function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) 
 
 export default function BookingPage() {
   const t = useT();
-  useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
+  useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: ONLINE_PAYMENT ? t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.') : t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
   const app = useApp();
@@ -390,6 +393,8 @@ export default function BookingPage() {
   const sumLine = (cartActs.length === 0 ? t('Park entry only') : (cartActs.length > 1 ? t('{n} experiences + entry', { n: cartActs.length }) : t('{n} experience + entry', { n: cartActs.length })))
     + ' · ' + mur(booking.total) + (inForeign ? ' (' + money(booking.total) + ')' : '');
   const payModeNote = payMode === 'online' ? t('E-RECEIPT BY EMAIL & SMS, INSTANTLY') : t('FREE · NO CANCELLATION FEE');
+  // Without a gateway the only honest option is the gate; the whole step is hidden.
+  const payOnline = ONLINE_PAYMENT && payMode === 'online';
   const confirmLabel = payMode === 'online' ? t('Pay {amount} now →', { amount: mur(booking.total) }) : t('Confirm and pay on arrival →');
 
   let dateSummary = dOpts[dateIdx] ? dOpts[dateIdx].full : '';
@@ -426,7 +431,7 @@ export default function BookingPage() {
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
       nationality: nat || undefined,
-      payMode,
+      payMode: ONLINE_PAYMENT ? payMode : 'gate',
       couponCode: offer ? offer.code : undefined,
     };
     let code: string;
@@ -468,11 +473,12 @@ export default function BookingPage() {
 
   // confirmation bits
   const guestLine = (name.trim() || t('Guest')) + (nat ? ' · ' + t(nat) : '');
-  const payStamp = payMode === 'online' ? t('PAID ✓') : t('PAY ON ARRIVAL');
-  const payStampBg = payMode === 'online' ? '#33FF74' : '#FFFC33';
-  const totalRowLabel = payMode === 'online' ? t('Total paid') : t('Total on arrival');
-  const receiptHint = payMode === 'online'
-    ? t('All paid. Just show this QR at the gate.')
+  // Nothing is charged on the site today, so the stamp never claims a payment.
+  const payStamp = payOnline ? t('PAYMENT PENDING') : t('PAY ON ARRIVAL');
+  const payStampBg = payOnline ? '#E2FFEB' : '#FFFC33';
+  const totalRowLabel = payOnline ? t('Total due') : t('Total on arrival');
+  const receiptHint = payOnline
+    ? t('Your online payment is being confirmed. Show this QR at the gate.')
     : t('Show this reference at the gate and pay there, cash or card.');
   const contactBits: string[] = [];
   if (email.trim()) contactBits.push(email.trim());
@@ -491,7 +497,7 @@ export default function BookingPage() {
             }}>{t('Build your day')}</h1>
             <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('BOOKING MADE SIMPLE')}</span>
           </div>
-          <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
+          <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{ONLINE_PAYMENT ? t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS') : t('FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
 
           {/* One column, top to bottom: the five steps read as a flow (1 pick, 2 your day, 3 when, 4 details, 5 pay). */}
           <div>
@@ -628,8 +634,8 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* 5 · PAYMENT */}
-              <div style={{ marginTop: '34px' }}>
+              {/* 5 · PAYMENT: shown once a payment gateway is wired up (VITE_ONLINE_PAYMENT=1) */}
+              {ONLINE_PAYMENT && <div style={{ marginTop: '34px' }}>
                 <div style={stepLabel}>{t('5 · HOW WOULD YOU LIKE TO PAY?')}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <PayCard
@@ -647,7 +653,7 @@ export default function BookingPage() {
                     onClick={() => setPayMode('online')}
                   />
                 </div>
-              </div>
+              </div>}
             </div>
           </div>
 
