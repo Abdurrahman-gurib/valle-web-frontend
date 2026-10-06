@@ -25,6 +25,7 @@ import BookingPage from './pages/Booking';
 import { OfflineStatus } from './components/InstallApp';
 import VacanciesPage from './pages/Vacancies';
 import StoryPage from './pages/Story';
+import LegalPage from './pages/Legal';
 import VacancyDetailPage from './pages/VacancyDetail';
 import StaffLogin from './pages/staff/Login';
 import StaffDashboard from './pages/staff/Dashboard';
@@ -101,6 +102,8 @@ function publicRoutes(prefix: string) {
     <Route key={prefix + 'dine'} path={prefix + '/dine/:id'} element={<RestaurantPage />} />,
     <Route key={prefix + 'book'} path={prefix + '/booking'} element={<BookingPage />} />,
     <Route key={prefix + 'story'} path={prefix + '/story'} element={<StoryPage />} />,
+    <Route key={prefix + 'privacy'} path={prefix + '/privacy'} element={<LegalPage kind="privacy" />} />,
+    <Route key={prefix + 'terms'} path={prefix + '/terms'} element={<LegalPage kind="terms" />} />,
     <Route key={prefix + 'vac'} path={prefix + '/vacancies'} element={<VacanciesPage />} />,
     <Route key={prefix + 'vacd'} path={prefix + '/vacancies/:slug'} element={<VacancyDetailPage />} />,
     <Route key={prefix + 'tk'} path={prefix + '/ticket/:ref'} element={<TicketPage />} />,

@@ -10,7 +10,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 const BASE = process.env.SEO_BASE_URL || process.env.E2E_BASE_URL || '';
 if (BASE) test.use({ baseURL: BASE });
 
-const PUBLIC_PAGES = ['/', '/explore', '/packages', '/booking', '/vacancies', '/story', '/activities/zipline', '/activities/quad', '/dine/chamouze', '/dine/citronelle'];
+const PUBLIC_PAGES = ['/', '/explore', '/packages', '/booking', '/vacancies', '/story', '/privacy', '/terms', '/activities/zipline', '/activities/quad', '/dine/chamouze', '/dine/citronelle'];
 
 async function fetchHtml(request: APIRequestContext, path: string) {
   const res = await request.get(path, { maxRedirects: 0 });
@@ -65,7 +65,7 @@ test.describe('prerendered head', () => {
     const hrefs = new Set([...html.matchAll(/href="(\/[^"]*)"/g)].map((m) => m[1]));
     const activities = [...hrefs].filter((h) => h.startsWith('/activities/'));
     expect(activities.length, 'crawlable activity links').toBeGreaterThanOrEqual(8);
-    for (const h of ['/explore', '/packages', '/booking', '/dine/chamouze', '/dine/citronelle', '/vacancies', '/story']) expect(hrefs, h).toContain(h);
+    for (const h of ['/explore', '/packages', '/booking', '/dine/chamouze', '/dine/citronelle', '/vacancies', '/story', '/privacy', '/terms']) expect(hrefs, h).toContain(h);
   });
 
   test('every image in the prerendered markup has alt text', async ({ request }) => {

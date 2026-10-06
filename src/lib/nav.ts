@@ -12,6 +12,7 @@ import { localizePath, useLang } from '../i18n';
  *   booking()         -> /booking
  *   plan()/dine()        -> /#plan /#dine (scrolls on the home page)
  *   story()              -> /story
+ *   privacy()/terms()    -> /privacy /terms
  */
 /** Route builders. Anchors use these for real hrefs; useGoto() navigates to the same paths. */
 // Every builder returns the path in the language of the page being rendered
@@ -35,6 +36,8 @@ export const paths = {
   story: () => L('/story'),
   team: () => L('/packages#team'),
   vacancies: () => L('/vacancies'),
+  privacy: () => L('/privacy'),
+  terms: () => L('/terms'),
   vacancy: (slug: string) => L('/vacancies/' + slug),
 };
 

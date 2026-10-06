@@ -415,3 +415,29 @@ test.describe('external links', () => {
     });
   }
 });
+
+test.describe('legal pages', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('the footer links to the privacy policy and the terms, which exist in every language', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'markup is the same on every viewport');
+    await page.goto('/');
+    await expect(page.getByText(/UX RESTRUCTURE CONCEPT/)).toHaveCount(0);
+    await page.getByRole('link', { name: 'PRIVACY POLICY' }).click();
+    await expect(page).toHaveURL(/\/privacy$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Privacy policy/i);
+    await expect(page.getByTestId('legal-privacy')).toContainText('Mare Anguilles Farms Ltd');
+    await expect(page.getByTestId('legal-privacy')).toContainText('Data Protection Act 2017');
+    await page.getByRole('link', { name: /Terms of use/ }).click();
+    await expect(page).toHaveURL(/\/terms$/);
+    await expect(page.getByTestId('legal-terms')).toContainText('nothing is charged online');
+
+    for (const p of ['/fr/privacy', '/de/terms', '/ar/privacy', '/hi/terms']) {
+      const res = await request.get(p);
+      expect(res.status(), p).toBe(200);
+      const html = await res.text();
+      expect(html, p).toContain('legal-');
+      expect(html, p).not.toContain('Privacy policy · VALLÉ');
+    }
+  });
+});

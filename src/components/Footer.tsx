@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
@@ -129,10 +130,10 @@ export function Footer() {
           borderTop: '1px solid rgba(255,255,255,.16)', display: 'flex', justifyContent: 'space-between',
           gap: 14, flexWrap: 'wrap', fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.6,
         }}>
-          <span>©2026 VALLÉ ADVENATURE™ PARK · {t('UX RESTRUCTURE CONCEPT')}</span>
+          <span>©2026 VALLÉ ADVENATURE™ PARK · {t('MARE ANGUILLES FARMS LTD')}</span>
           <span>
             <button onClick={openConsentSettings} style={{ border: 0, background: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>{t('COOKIE SETTINGS')}</button>
-            {' · ' + t('PRIVACY POLICY') + ' · ' + t('TERMS OF USE') + ' · '}
+            {' · '}<Link to={paths.privacy()} style={{ color: 'inherit', textDecoration: 'none' }}>{t('PRIVACY POLICY')}</Link>{' · '}<Link to={paths.terms()} style={{ color: 'inherit', textDecoration: 'none' }}>{t('TERMS OF USE')}</Link>{' · '}
             <InstallFooterLink />
             <FooterLangs />
           </span>

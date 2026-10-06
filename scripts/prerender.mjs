@@ -23,7 +23,7 @@ const { render, organizationScript } = await import(pathToFileURL(join(ssrDir, '
 const catalog = JSON.parse(readFileSync(join(root, 'src/data/fallback.json'), 'utf8'));
 
 const baseRoutes = [
-  '/', '/explore', '/packages', '/booking', '/vacancies', '/story',
+  '/', '/explore', '/packages', '/booking', '/vacancies', '/story', '/privacy', '/terms',
   ...catalog.ACTS.map((a) => `/activities/${a.id}`),
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];
