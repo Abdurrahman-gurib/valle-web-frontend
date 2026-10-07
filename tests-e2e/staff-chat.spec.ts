@@ -436,3 +436,23 @@ test.describe('public chat widget', () => {
     await expect(page.getByRole('button', { name: /open chat/i })).toHaveCount(0);
   });
 });
+
+test.describe('restaurant tables in the back office', () => {
+  test.use({ storageState: STAFF_STATE });
+  test('a requested table shows under Quotes and can be confirmed', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + 4);
+    const tag = Math.random().toString(36).slice(2, 7);
+    const made = await page.request.post('/api/restaurants/citronelle/reservations', { data: { name: `Desk Table ${tag}`, email: `t-${tag}@example.com`, visitDate: d.toISOString().slice(0, 10), visitTime: '12:30', party: 4, preorder: [{ item: 'Grilled fish', qty: 2 }] } });
+    test.skip(made.status() === 429, 'reservation budget used by a parallel project');
+    expect(made.status()).toBe(201);
+    await page.goto('/staff');
+    await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /^quotes$/i }).click();
+    const row = page.getByTestId('tables-list').locator('tr', { hasText: `Desk Table ${tag}` });
+    await expect(row).toContainText('REQUESTED', { timeout: 15000 });
+    await expect(row).toContainText('2 × Grilled fish');
+    await row.getByRole('button', { name: 'Confirm' }).click();
+    await expect(row).toContainText('CONFIRMED', { timeout: 10000 });
+  });
+});

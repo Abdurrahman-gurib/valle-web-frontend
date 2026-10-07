@@ -318,6 +318,15 @@ export function setBookingStatus(refCode: string, status: BookingStatus): Promis
 
 // ---- quotes & stats ----
 
+export interface ReservationRow {
+  id: string; restaurantId: string; restaurantName: string; guestName: string; email: string; phone: string;
+  visitDate: string; visitTime: string; party: number; preorder: { item: string; qty: number }[]; notes: string;
+  status: 'requested' | 'confirmed' | 'cancelled'; bookingRef: string; createdAt: string;
+}
+export const listReservations = (status?: string) => request<ReservationRow[]>('/staff/reservations' + (status ? qs({ status }) : ''));
+export function setReservationStatus(id: string, status: 'confirmed' | 'cancelled'): Promise<ReservationRow> {
+  return request<ReservationRow>('/staff/reservations/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify({ status }) });
+}
 export function listQuotes(page = 1, pageSize = 20): Promise<Paged<QuoteRow>> {
   return request<Paged<QuoteRow>>('/staff/quotes' + qs({ page, pageSize }));
 }

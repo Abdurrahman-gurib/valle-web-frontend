@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { QuoteRow } from '../../types';
-import { listQuotes } from '../../lib/staffApi';
+import { listQuotes, listReservations, setReservationStatus, type ReservationRow } from '../../lib/staffApi';
 import { Btn, EmptyState, Spinner, card, mono, relTime } from './ui';
 import { Panel, td, th } from './reportUi';
 
@@ -32,8 +32,49 @@ export default function QuotesPanel() {
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  // restaurant tables asked for on the site: soonest first, confirm or decline here
+  const [tables, setTables] = useState<ReservationRow[]>([]);
+  const [tableBusy, setTableBusy] = useState('');
+  const loadTables = () => listReservations().then(setTables).catch(() => { /* shown empty */ });
+  useEffect(() => { void loadTables(); }, []);
+  const decide = async (id: string, status: 'confirmed' | 'cancelled') => {
+    setTableBusy(id);
+    try { const row = await setReservationStatus(id, status); setTables((rows) => rows.map((r) => (r.id === id ? row : r))); } finally { setTableBusy(''); }
+  };
+
   return (
     <div data-testid="quotes-panel">
+      <Panel title={`RESTAURANT TABLES · ${tables.filter((r) => r.status === 'requested').length} TO CONFIRM`}>
+        {tables.length === 0 && <div style={{ padding: 14, fontSize: 13.5, color: 'rgba(52,0,87,.6)' }}>No table requests yet. Guests ask for one from the restaurant pages.</div>}
+        {tables.length > 0 && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }} data-testid="tables-list">
+              <thead><tr style={{ background: '#F7F3FF' }}><th style={th}>When</th><th style={th}>Restaurant</th><th style={th}>Guest</th><th style={th}>People</th><th style={th}>Pre-order</th><th style={th}>Notes</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+              <tbody>
+                {tables.map((r) => (
+                  <tr key={r.id} style={{ opacity: r.status === 'cancelled' ? 0.55 : 1 }}>
+                    <td style={{ ...td, ...mono, fontSize: 12.5 }}>{r.visitDate} {r.visitTime}</td>
+                    <td style={td}>{r.restaurantName}</td>
+                    <td style={{ ...td, fontWeight: 600 }}>{r.guestName}<div style={{ ...mono, fontSize: 10, fontWeight: 400, color: 'rgba(52,0,87,.6)' }}>{r.email}{r.phone ? ' · ' + r.phone : ''}{r.bookingRef ? ' · ' + r.bookingRef : ''}</div></td>
+                    <td style={td}>{r.party}</td>
+                    <td style={{ ...td, whiteSpace: 'normal', maxWidth: 260, fontSize: 12.5 }}>{r.preorder.length ? r.preorder.map((l) => `${l.qty} × ${l.item}`).join(', ') : '—'}</td>
+                    <td style={{ ...td, whiteSpace: 'normal', maxWidth: 220, fontSize: 12.5 }}>{r.notes || '—'}</td>
+                    <td style={{ ...td, ...mono, fontSize: 11, fontWeight: 700, color: r.status === 'confirmed' ? '#1E9E4A' : r.status === 'cancelled' ? '#D91E44' : '#8A6A00' }}>{r.status.toUpperCase()}</td>
+                    <td style={td}>
+                      {r.status === 'requested' && (
+                        <div style={{ display: 'inline-flex', gap: 6 }}>
+                          <Btn onClick={() => { void decide(r.id, 'confirmed'); }} disabled={tableBusy === r.id}>Confirm</Btn>
+                          <Btn variant="ghost" onClick={() => { void decide(r.id, 'cancelled'); }} disabled={tableBusy === r.id}>Decline</Btn>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
       {err && <div style={{ ...card, padding: 14, marginBottom: 14, color: '#D91E44', fontWeight: 600 }}>{err}</div>}
       {loading && rows.length === 0 && <div style={{ padding: 30, display: 'flex', justifyContent: 'center' }}><Spinner color="#7333FF" /></div>}
       {!loading && rows.length === 0 && !err && (

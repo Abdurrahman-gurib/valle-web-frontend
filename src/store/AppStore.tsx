@@ -56,6 +56,8 @@ interface AppState {
   setNat: (v: string) => void;
   payMode: 'gate' | 'online';
   setPayMode: (m: 'gate' | 'online') => void;
+  /** Restore a saved booking draft (cart, party, date, slot, details). */
+  loadDraft: (d: { sel?: Sel; adults?: number; kids?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => void;
 
   // My Day drawer
   dayOpen: boolean;
@@ -85,6 +87,20 @@ function readRate(): RateKey | null {
     if (saved === 'rr' || saved === 'nr') return saved;
   } catch { /* private mode */ }
   return null;
+}
+
+/** The guest's details and visit choice, kept for a day so a reload or a closed tab loses nothing. */
+const DRAFT_KEY = 'valle_draft';
+interface DraftFields { adults: number; kids: number; dateIdx: number; customDate: string; slot: number; name: string; phone: string; email: string; nat: string; at: number }
+function readDraft(): Partial<DraftFields> {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return {};
+    const d = JSON.parse(raw) as Partial<DraftFields>;
+    if (!d || typeof d !== 'object' || typeof d.at !== 'number' || Date.now() - d.at > 86_400_000) return {};
+    if (d.customDate && d.customDate < new Date().toISOString().slice(0, 10)) d.customDate = '';
+    return d;
+  } catch { return {}; }
 }
 
 /** Reads the saved cart, dropping anything that would price as NaN or count as a phantom line. */
@@ -119,17 +135,18 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [rate, setRateState] = useState<RateKey | null>(readRate);
   const [rateGate, setRateGate] = useState(false);
   const [sel, setSel] = useState<Sel>(readSel);
-  const [adults, setAdults] = useState(2);
-  const [kids, setKids] = useState(0);
-  const [dateIdx, setDateIdx] = useState(1);
-  const [customDate, setCustomDate] = useState('');
-  const [slot, setSlot] = useState(0);
+  const draft0 = readDraft();
+  const [adults, setAdults] = useState(draft0.adults ?? 2);
+  const [kids, setKids] = useState(draft0.kids ?? 0);
+  const [dateIdx, setDateIdx] = useState(draft0.dateIdx ?? 1);
+  const [customDate, setCustomDate] = useState(draft0.customDate ?? '');
+  const [slot, setSlot] = useState(draft0.slot ?? 0);
   const [dayOpen, setDayOpen] = useState(false);
   const [optionsFor, setOptionsFor] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [nat, setNat] = useState('');
+  const [name, setName] = useState(draft0.name ?? '');
+  const [phone, setPhone] = useState(draft0.phone ?? '');
+  const [email, setEmail] = useState(draft0.email ?? '');
+  const [nat, setNat] = useState(draft0.nat ?? '');
   const [payMode, setPayMode] = useState<'gate' | 'online'>('gate');
   const [currency, setCurrencyState] = useState<string>(readStoredCurrency);
   const [fx, setFx] = useState<FxTable>(FX_FALLBACK);
@@ -158,6 +175,23 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try { localStorage.setItem('valle_sel', JSON.stringify(sel)); } catch { /* ignore */ }
   }, [sel]);
+  useEffect(() => {
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ adults, kids, dateIdx, customDate, slot, name, phone, email, nat, at: Date.now() })); } catch { /* ignore */ }
+  }, [adults, kids, dateIdx, customDate, slot, name, phone, email, nat]);
+
+  /** A draft the guest saved by e-mail: the whole page state comes back. */
+  const loadDraft = useCallback((d: { sel?: Sel; adults?: number; kids?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => {
+    if (d.sel && typeof d.sel === 'object') setSel(d.sel);
+    if (typeof d.adults === 'number') setAdults(Math.max(0, Math.min(400, d.adults)));
+    if (typeof d.kids === 'number') setKids(Math.max(0, Math.min(400, d.kids)));
+    if (typeof d.customDate === 'string') setCustomDate(d.customDate);
+    if (typeof d.dateIdx === 'number') setDateIdx(d.dateIdx);
+    if (typeof d.slot === 'number') setSlot(d.slot);
+    if (typeof d.name === 'string') setName(d.name);
+    if (typeof d.phone === 'string') setPhone(d.phone);
+    if (typeof d.email === 'string') setEmail(d.email);
+    if (typeof d.nat === 'string') setNat(d.nat);
+  }, []);
 
   // Drop saved ids the live catalog no longer has, so the header badge can never
   // count a line the drawer and the cart cannot show. Same object when nothing is stale.
@@ -237,6 +271,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     hasSel: Object.keys(sel).length > 0,
     toggleSel,
     bumpSel,
+    loadDraft,
     clearSel,
     isSelected: (id: string, variant?: string) => (variant ? !!sel[selKey(id, variant)] : Object.keys(sel).some((k) => parseSelKey(k).id === id)),
 
@@ -281,7 +316,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     currency: isCurrency(currency, fx) ? currency : 'MUR',
     fx,
     setCurrency,
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang]);
+  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang, loadDraft]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

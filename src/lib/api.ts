@@ -116,6 +116,21 @@ export function createBooking(body: BookingRequest): Promise<BookingResponse> {
   return request<BookingResponse>('/bookings', { method: 'POST', body: JSON.stringify(body) });
 }
 
+// ---- restaurant tables ----
+export interface TableRequest { name: string; email?: string; phone?: string; visitDate: string; visitTime: string; party: number; preorder?: { item: string; qty: number }[]; notes?: string; bookingRef?: string }
+export function reserveTable(restaurantId: string, body: TableRequest): Promise<{ id: string; status: 'requested' }> {
+  return request<{ id: string; status: 'requested' }>(`/restaurants/${encodeURIComponent(restaurantId)}/reservations`, { method: 'POST', body: JSON.stringify(body) });
+}
+
+// ---- saved booking drafts ----
+export interface BookingDraftPayload { sel: Record<string, { a?: number; k?: number; u?: number }>; adults: number; kids: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }
+export function saveDraft(email: string, payload: BookingDraftPayload): Promise<{ id: string; sent: boolean }> {
+  return request<{ id: string; sent: boolean }>('/bookings/draft', { method: 'POST', body: JSON.stringify({ email, payload }) });
+}
+export function readDraft(id: string): Promise<BookingDraftPayload> {
+  return request<BookingDraftPayload>(`/bookings/draft/${encodeURIComponent(id)}`);
+}
+
 // ---- online payment (hosted checkout through the configured provider) ----
 export interface PaymentConfig { enabled: boolean; provider: string | null }
 let paymentConfig: Promise<PaymentConfig> | null = null;

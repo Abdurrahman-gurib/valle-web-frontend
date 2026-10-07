@@ -9,7 +9,7 @@ import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { productAmount } from '../types';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
-import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, releaseHold, type AvailabilityDay, type BusyLevel } from '../lib/api';
+import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, readDraft, releaseHold, saveDraft, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -349,6 +349,30 @@ export default function BookingPage() {
     name, setName, phone, setPhone, email, setEmail, nat, setNat, payMode, setPayMode,
   } = app;
 
+  // "Save and continue later": the page state goes to the API and a link comes back by e-mail;
+  // ?draft=<id> on this page restores it.
+  const [draftEmail, setDraftEmail] = useState('');
+  const [draftState, setDraftState] = useState<'idle' | 'ask' | 'busy' | 'sent' | 'error'>('idle');
+  const [draftLoaded, setDraftLoaded] = useState('');
+  useEffect(() => {
+    const id = new URLSearchParams(location.search).get('draft');
+    if (!id) return;
+    let dead = false;
+    readDraft(id)
+      .then((d) => { if (dead) return; app.loadDraft(d); setDraftLoaded(t('Welcome back: your saved day is restored. Nothing is reserved until you confirm.')); })
+      .catch(() => { if (!dead) setDraftLoaded(t('This saved booking has expired (links last 14 days). Build your day again below.')); });
+    return () => { dead = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+  const saveForLater = async () => {
+    const to = (draftEmail || email).trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) { setDraftState('ask'); return; }
+    setDraftState('busy');
+    try {
+      await saveDraft(to, { sel, adults, kids, customDate, dateIdx, slot, name, phone, email: email || to, nat });
+      setDraftState('sent');
+    } catch { setDraftState('error'); }
+  };
   // flow state (transient; unlike the contact fields it never outlives the page)
   const [formErr, setFormErr] = useState(false);
   const [apiErr, setApiErr] = useState('');
@@ -798,6 +822,19 @@ export default function BookingPage() {
             </div>
           </div>
 
+          {draftLoaded && <div role="status" data-testid="draft-loaded" style={{ marginTop: '18px', background: '#E6FFEE', border: '1.5px solid #33FF74', borderRadius: '14px', padding: '12px 18px', fontSize: '14px', fontWeight: 600, color: '#340057' }}>{draftLoaded}</div>}
+          <div data-testid="save-for-later" style={{ marginTop: '18px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', fontSize: '13.5px', color: 'rgba(52,0,87,.75)' }}>
+            {draftState === 'sent'
+              ? <span data-testid="draft-sent" style={{ color: '#1E9E4A', fontWeight: 700 }}>{t('Saved. A link to come back to this day is in your inbox (valid 14 days). Nothing is reserved yet.')}</span>
+              : <>
+                  <span>{t('Not finishing now?')}</span>
+                  {draftState === 'ask' && <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder={t('Your e-mail')} aria-label={t('Your e-mail')} data-testid="draft-email" style={{ ...inputStyle, flex: '1 1 200px', padding: '9px 12px' }} />}
+                  <button type="button" onClick={() => { void saveForLater(); }} disabled={draftState === 'busy'} data-testid="draft-save" style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '8px 14px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                    {draftState === 'busy' ? t('Saving…') : t('E-mail me a link to come back to this day')}
+                  </button>
+                  {draftState === 'error' && <span style={{ color: '#D91E44', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
+                </>}
+          </div>
           {formErr && (
             <div style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
               {t("Add your name and an email or contact number, that's where your confirmation & receipt go.")}

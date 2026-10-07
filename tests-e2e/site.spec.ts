@@ -795,3 +795,58 @@ test.describe('groups and schools', () => {
     expect(tiny.status()).toBe(400);
   });
 });
+
+test.describe('restaurant tables and saved drafts', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('a table is requested from the restaurant page with a pre-order, and the desk confirms it', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    await page.goto('/dine/chamouze');
+    await page.getByTestId('table-open').click();
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + 3);
+    await page.getByTestId('table-date').fill(d.toISOString().slice(0, 10));
+    await page.getByTestId('table-time').selectOption('13:00');
+    await page.getByTestId('table-party').fill('6');
+    await page.getByTestId('table-preorder').locator('summary').click();
+    await page.getByTestId('table-preorder').getByRole('button', { name: /\+$/ }).first().click();
+    await page.getByTestId('table-name').fill('Table Guest');
+    await page.getByTestId('table-email').fill('table@example.com');
+    await page.getByTestId('table-submit').click();
+    await expect(page.getByTestId('table-done')).toContainText('table of 6', { timeout: 15000 });
+
+    // the API refuses a request with no way to confirm, and an unknown restaurant
+    const noContact = await request.post('/api/restaurants/chamouze/reservations', { data: { name: 'X', visitDate: d.toISOString().slice(0, 10), visitTime: '12:00', party: 2 } });
+    expect(noContact.status()).toBe(400);
+    const unknown = await request.post('/api/restaurants/nowhere/reservations', { data: { name: 'X', email: 'x@example.com', visitDate: d.toISOString().slice(0, 10), visitTime: '12:00', party: 2 } });
+    expect(unknown.status()).toBe(404);
+  });
+
+  test('a guest saves the day by e-mail and comes back to it through the link', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    await page.addInitScript(() => { localStorage.setItem('valle_sel', JSON.stringify({ zipline: { a: 3 } })); });
+    await page.goto('/booking');
+    await page.getByPlaceholder(/name/i).first().fill('Draft Guest');
+    await page.getByPlaceholder(/email/i).first().fill('draft@example.com');
+    await page.getByTestId('draft-save').click();
+    await expect(page.getByTestId('draft-sent')).toBeVisible({ timeout: 15000 });
+    // details survive a plain reload
+    await page.reload();
+    await expect(page.getByPlaceholder(/name/i).first()).toHaveValue('Draft Guest');
+
+    // the link restores everything in a fresh browser state
+    const saved = await request.post('/api/bookings/draft', { data: { email: 'draft@example.com', payload: { sel: { quad: { a: 2 } }, adults: 2, kids: 1, slot: 1, name: 'Link Guest', email: 'draft@example.com' } } });
+    expect(saved.status()).toBe(201);
+    const { id } = (await saved.json()) as { id: string };
+    await page.context().clearCookies();
+    await page.addInitScript(() => { localStorage.removeItem('valle_sel'); localStorage.removeItem('valle_draft'); });
+    await page.goto('/booking?draft=' + id);
+    await expect(page.getByTestId('draft-loaded')).toContainText('Welcome back', { timeout: 15000 });
+    await expect(page.getByPlaceholder(/name/i).first()).toHaveValue('Link Guest');
+    await expect(page.getByText('Quad').nth(1)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
+    const gone = await request.get('/api/bookings/draft/11111111-1111-4111-8111-111111111111');
+    expect(gone.status()).toBe(404);
+  });
+});

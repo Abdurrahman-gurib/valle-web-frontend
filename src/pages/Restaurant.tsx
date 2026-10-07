@@ -9,6 +9,7 @@ import { useReveal } from '../hooks/useReveal';
 import { StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import { useT } from '../i18n';
+import { TableReservation } from '../components/TableReservation';
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -97,14 +98,7 @@ export default function RestaurantPage() {
               <Fact label={t('SETTING')} value={r.setting} />
             </div>
             <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
-            <a
-              href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener"
-              style={{
-                display: 'block', textAlign: 'center', background: '#FF3358', color: '#FFFFFF',
-                fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999,
-                boxShadow: '0 8px 20px rgba(255,51,88,.35)',
-              }}
-            >{t('Reserve on WhatsApp →')}</a>
+            <TableReservation restaurantId={id as string} restaurantName={r.name} menuGroups={rMenuGroups} />
             <a
               href="tel:+2306604477"
               style={{
