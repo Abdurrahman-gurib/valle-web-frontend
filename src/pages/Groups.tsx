@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom';
 import { Stripes } from '../components/Stripes';
 import { isRtl, useT } from '../i18n';
-import { createBooking, fetchAvailability, type AvailabilityDay } from '../lib/api';
+import { createBooking, fetchAvailability, newAttemptKey, type AvailabilityDay } from '../lib/api';
 import { money, mur, todayIso } from '../lib/format';
 import { paths } from '../lib/nav';
 import { breadcrumbs, useSeo } from '../lib/seo';
@@ -70,6 +70,7 @@ export default function GroupsPage() {
   const [done, setDone] = useState<(BookingResponse & { total: number }) | null>(null);
   const [avail, setAvail] = useState<AvailabilityDay | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const attemptKey = useRef(newAttemptKey());
 
   const rate = app.rate ?? 'rr';
   const students = useMemo(() => (catalog.PRODUCTS ?? []).filter((p) => p.family === 'student'), [catalog]);
@@ -132,6 +133,7 @@ export default function GroupsPage() {
       items: lines.map((l) => ({ id: l.id, adults, kids })),
       name: leader.trim(), email: email.trim() || undefined, phone: phone.trim() || undefined,
       payMode: 'gate',
+      idempotencyKey: attemptKey.current,
       group: { kind, organisation: org.trim(), leaderName: leader.trim(), participants },
     };
     try {

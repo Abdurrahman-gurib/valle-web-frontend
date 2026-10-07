@@ -1,5 +1,5 @@
 import { breadcrumbs, useSeo } from '../lib/seo';
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
@@ -9,7 +9,7 @@ import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
 import { productAmount } from '../types';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
-import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, readDraft, releaseHold, saveDraft, type AvailabilityDay, type BusyLevel } from '../lib/api';
+import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, newAttemptKey, readDraft, releaseHold, saveDraft, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
@@ -336,6 +336,8 @@ export default function BookingPage() {
     return () => { dead = true; };
   }, []);
   const [redirecting, setRedirecting] = useState(false);
+  // One key per attempt: kept across retries of the same submit, renewed once a booking is written.
+  const attemptKey = useRef(newAttemptKey());
   useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: ONLINE_PAYMENT ? t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.') : t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
@@ -547,6 +549,7 @@ export default function BookingPage() {
       payMode: ONLINE_PAYMENT ? payMode : 'gate',
       couponCode: offer ? offer.code : undefined,
       holdId: hold?.id,
+      idempotencyKey: attemptKey.current,
     };
     let code: string;
     try {
@@ -583,6 +586,7 @@ export default function BookingPage() {
       return;
     }
     setRefCode(code);
+    attemptKey.current = newAttemptKey();
     setHold(null);
     setSubmitting(false);
     setConfirmed(true);

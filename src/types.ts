@@ -189,6 +189,8 @@ export interface BookingRequest {
   items: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[];
   /** The hold taken while filling in the form; its places become this booking. */
   holdId?: string;
+  /** Made once per attempt: a double tap or a retry with the same key never books twice. */
+  idempotencyKey?: string;
   /** A school / company / club booking: bigger party, deposit, leader waiver pack. */
   group?: { kind: 'school' | 'company' | 'club' | 'other'; organisation: string; leaderName?: string; participants?: { name: string; age?: number }[] };
   name: string;

@@ -850,3 +850,26 @@ test.describe('restaurant tables and saved drafts', () => {
     expect(gone.status()).toBe(404);
   });
 });
+
+test.describe('idempotent booking submit', () => {
+  test('the same attempt sent twice makes one booking; a retry after a lost response gets the same reference', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'API only');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const key = '7f1c4d3e-2b5a-4c6d-9e8f-0a1b2c3d4e5f'.replace('7f1c', Math.random().toString(16).slice(2, 6).padEnd(4, '0'));
+    const body = { visitDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10), slot: 'afternoon', adults: 1, kids: 0, rate: 'rr', items: [], name: 'Twice Guest', email: 'twice@example.com', payMode: 'gate', idempotencyKey: key };
+    // a double tap: two requests in flight at once
+    const [a, b] = await Promise.all([request.post('/api/bookings', { data: body }), request.post('/api/bookings', { data: body })]);
+    expect(a.status()).toBe(201);
+    expect(b.status()).toBe(201);
+    const ra = (await a.json()) as { refCode: string; ticketUrl: string };
+    const rb = (await b.json()) as { refCode: string; ticketUrl: string };
+    expect(rb.refCode).toBe(ra.refCode);
+    expect(rb.ticketUrl).toBe(ra.ticketUrl);
+    // a later retry still answers with the same booking
+    const c = await request.post('/api/bookings', { data: body });
+    expect(((await c.json()) as { refCode: string }).refCode).toBe(ra.refCode);
+    // a different attempt is a different booking
+    const d = await request.post('/api/bookings', { data: { ...body, idempotencyKey: key.replace(/.$/, key.endsWith('f') ? '0' : 'f') } });
+    expect(((await d.json()) as { refCode: string }).refCode).not.toBe(ra.refCode);
+  });
+});

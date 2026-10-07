@@ -112,6 +112,10 @@ export function signWaiver(refCode: string, token: string, body: WaiverRequest):
   return request<WaiverView>(waiverPath(refCode, token), { method: 'POST', body: JSON.stringify(body) });
 }
 
+/** A fresh idempotency key for one booking attempt (UUID, as the API expects). */
+export function newAttemptKey(): string {
+  try { return crypto.randomUUID(); } catch { return `${Date.now().toString(16)}-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === 'x' ? r : (r & 3) | 8).toString(16); }).replace(/^([0-9a-f]+)-/, (m, p) => p.slice(-8).padStart(8, '0') + '-'); }
+}
 export function createBooking(body: BookingRequest): Promise<BookingResponse> {
   return request<BookingResponse>('/bookings', { method: 'POST', body: JSON.stringify(body) });
 }
