@@ -71,7 +71,9 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
       if (slot !== tk.slot) body.slot = slot;
       if (adults !== tk.adults) body.adults = adults;
       if (kids !== tk.kids) body.kids = kids;
-      const items = lines.map((l) => ({ id: l.id, variant: l.variant || undefined, adults: l.mode === 'pp' ? l.adults : undefined, kids: l.mode === 'pp' ? l.kids : undefined, units: l.mode === 'flat' ? l.units : undefined, time: l.time }));
+      // product lines (packages, combos, VIP, photo, cinematic) are kept as they are
+      const kept = tk.lines.filter((l) => l.productKey).map((l) => ({ id: 'product:' + l.productKey, adults: l.adults, kids: l.kids, units: l.units }));
+      const items = [...lines.map((l) => ({ id: l.id, variant: l.variant || undefined, adults: l.mode === 'pp' ? l.adults : undefined, kids: l.mode === 'pp' ? l.kids : undefined, units: l.mode === 'flat' ? l.units : undefined, time: l.time })), ...kept];
       const before = JSON.stringify(tk.lines.filter((l) => l.experienceId).map((l) => [l.experienceId, l.variant, l.adults, l.kids, l.units]));
       const after = JSON.stringify(lines.map((l) => [l.id, l.variant, l.mode === 'pp' ? l.adults : 0, l.mode === 'pp' ? l.kids : 0, l.mode === 'flat' ? l.units : 0]));
       if (before !== after) body.items = items;

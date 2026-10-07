@@ -107,7 +107,7 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   );
 }
 
-interface ComboView { name: string; color: string; items: { t: string }[]; single: string; dbl: string; }
+interface ComboView { key?: string; name: string; color: string; items: { t: string }[]; single: string; dbl: string; }
 
 function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactNode; badge: string; rows: { n: string; p: string }[]; foot: string; accent: string; image: string }) {
   const t = useT();
@@ -163,9 +163,10 @@ function ComboCard({ cb, rateTag, onBook }: { cb: ComboView; rateTag: string; on
   );
 }
 
-function PhotoCard({ ph }: { ph: PhotoTier }) {
+function PhotoCard({ ph, onBook }: { ph: PhotoTier; onBook?: () => void }) {
   const t = useT();
   const [hc, bindC] = useHover();
+  const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
       <div style={{ background: '#340057', padding: '13px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
@@ -183,6 +184,7 @@ function PhotoCard({ ph }: { ph: PhotoTier }) {
           <PriceCol label={t('SINGLE')} value={ph.single} valSize={21} />
           <PriceCol label={t('DOUBLE')} value={ph.dbl} valSize={21} />
         </div>
+        {onBook && <button {...bindB} type="button" data-testid="photo-book" onClick={onBook} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '12px 0', borderRadius: 999, width: '100%' }}>{t('Book this photo pack →')}</button>}
       </div>
     </div>
   );
@@ -293,6 +295,7 @@ export default function PackagesPage() {
   const catalog = useCatalog();
   const { rate, rateTag, setRate } = useApp();
   const goto = useGoto();
+  const app = useApp();
   const ref = useReveal<HTMLElement>();
   const [pk, setPk] = useState<PackModalData | null>(null);
 
@@ -320,15 +323,16 @@ export default function PackagesPage() {
     name: 'VIP Ultimate', badge: t('ALL INCLUSIVE'), color: '#33FF74', fg: '#340057',
     img: '/images/vip-ultimate-buggy-coloured-earth.avif',
     hero: t('Advenature Flight, private guide, butler service'),
+    productKey: (catalog.PRODUCTS ?? []).some((p) => p.key === 'vip') ? 'vip' : undefined,
     items: catalog.PACKS.vip, note: t('Add on: full-day cinematic video, Rs 20,000.'),
     single: 'Rs 49,225', dbl: 'Rs 75,175',
   };
   const openVip = () => setPk(vipPack);
 
   const comboPacks: ComboView[] = catalog.COMBO.map((c) => ({
-    name: c.name, color: c.color, items: c.items, single: money(c[rk][0]), dbl: money(c[rk][1]),
+    key: c.key, name: c.name, color: c.color, items: c.items, single: money(c[rk][0]), dbl: money(c[rk][1]),
   }));
-  const cinePacks = catalog.CINE.map((c) => ({ n: c.n, p: money(c.p) }));
+  const cinePacks = catalog.CINE.map((c) => ({ key: c.key, n: c.n, p: money(c.p) }));
   const photoTiers = catalog.PHOTO[rk].tiers;
   const photoAddons = catalog.PHOTO[rk].addons;
   const photoRateLabel = rk === 'rr' ? t('RESIDENT RATE (RR)') : t('NON-RESIDENT RATE (NR)');
@@ -376,7 +380,7 @@ export default function PackagesPage() {
         <SectionHead id="ls" title={t('Light & Standard')} tag={t('01 · START HERE')} marginTop="clamp(40px,6vw,64px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.PACKS.ls.map((p) => (
-            <LSCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+            <LSCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
 
@@ -384,7 +388,7 @@ export default function PackagesPage() {
         <SectionHead id="ex" title={t('Exclusive')} tag={t('02 · BRONZE TO PLATINUM')} marginTop="clamp(44px,6vw,72px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {catalog.PACKS.ex.map((p) => (
-            <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
@@ -430,7 +434,7 @@ export default function PackagesPage() {
         <SectionHead id="diamond" title={t('Diamond')} tag={t('04 · THE ULTIMATE DAY · NR')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {(catalog.PACKS.diamond || []).map((p) => (
-            <LSCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+            <LSCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
           <div style={{ background: '#340057', borderRadius: 18, padding: '22px 24px', color: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
             <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{t('Everything,')}<br /><span style={{ color: '#FFFC33' }}>{t('and then some')}</span></div>
@@ -444,7 +448,7 @@ export default function PackagesPage() {
         <SectionHead id="resident" title={t('Resident packages')} tag={t('05 · PER PERSON · MAURITIAN ID OR PERMIT')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.resident || []).map((p) => (
-            <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
         <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
@@ -453,7 +457,7 @@ export default function PackagesPage() {
         <SectionHead id="senior" title={t('Senior citizens')} tag={t('06 · AGES 55 AND ABOVE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.senior || []).map((p) => (
-            <ExCard key={p.name} pk={p} onOpen={() => setPk(p)} />
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
 
@@ -483,7 +487,7 @@ export default function PackagesPage() {
         <SectionHead id="combo" title={t('Combo packages')} tag={t('09 · QUAD + ZIPLINE, ONE PRICE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {comboPacks.map((cb) => (
-            <ComboCard key={cb.name} cb={cb} rateTag={rateTag} onBook={goto.booking} />
+            <ComboCard key={cb.name} cb={cb} rateTag={rateTag} onBook={() => { if (cb.key && !app.sel['product:' + cb.key]) app.toggleSel('product:' + cb.key); goto.booking(); }} />
           ))}
         </div>
 
@@ -497,7 +501,7 @@ export default function PackagesPage() {
                 {cinePacks.map((cn) => (
                   <div key={cn.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14, padding: '9px 0', borderBottom: '1px dashed rgba(52,0,87,.25)' }}>
                     <span style={{ fontSize: 14.5, fontWeight: 600, color: '#340057' }}>{t(cn.n)}</span>
-                    <span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13.5, color: '#D91E44', whiteSpace: 'nowrap' }}>{cn.p}</span>
+                    <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}><span style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13.5, color: '#D91E44', whiteSpace: 'nowrap' }}>{cn.p}</span>{cn.key && <button type="button" onClick={() => { if (!app.sel['product:' + cn.key]) app.toggleSel('product:' + cn.key); goto.booking(); }} style={{ border: '1.5px solid #340057', background: app.sel['product:' + cn.key] ? '#340057' : 'transparent', color: app.sel['product:' + cn.key] ? '#FFFC33' : '#340057', borderRadius: 999, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>{app.sel['product:' + cn.key] ? t('In my day') : t('Book')}</button>}</span>
                   </div>
                 ))}
               </div>
@@ -527,7 +531,7 @@ export default function PackagesPage() {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(215px,1fr))', gap: 14, marginTop: 20 }}>
           {photoTiers.map((ph) => (
-            <PhotoCard key={ph.name} ph={ph} />
+            <PhotoCard key={ph.name} ph={ph} onBook={ph.key ? () => { if (!app.sel['product:' + ph.key]) app.toggleSel('product:' + ph.key!); goto.booking(); } : undefined} />
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>

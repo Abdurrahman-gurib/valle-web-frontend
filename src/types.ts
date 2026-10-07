@@ -63,6 +63,8 @@ export interface Restaurant {
 export interface PackItem { t: string; }
 
 export interface PackTier {
+  /** Bookable product key (absent in the bundled fallback catalog). */
+  key?: string;
   name: string;
   badge?: string;
   color: string;
@@ -98,6 +100,7 @@ export interface Gallery {
 }
 
 export interface Combo {
+  key?: string;
   name: string;
   color: string;
   items: PackItem[];
@@ -105,16 +108,33 @@ export interface Combo {
   nr: [number, number];
 }
 
-export interface CineItem { n: string; p: number; }
+export interface CineItem { key?: string; n: string; p: number; }
 
 export interface PriceRow { n: string; rr: number; nr: number; }
 
-export interface PhotoTier { name: string; color: string; act: string; single: string; dbl: string; }
+export interface PhotoTier { key?: string; name: string; color: string; act: string; single: string; dbl: string; }
 export interface PhotoRate { tiers: PhotoTier[]; addons: { t: string; p: string }[]; }
 
 export interface TeamPack { img: string; items: PackItem[]; }
 
+/** A bookable product that is not an experience: package tier, combo, VIP, photo tier, cinematic item. */
+export interface Product {
+  key: string; family: string; name: string; mode: 'pp' | 'pair' | 'flat';
+  rr: number; nr: number; dblRr: number | null; dblNr: number | null; rateOnly: 'rr' | 'nr' | null; image: string; note: string;
+}
+export const PRODUCT_PREFIX = 'product:';
+/** What a product costs for a party: per person, per single/double, or per unit. */
+export function productAmount(p: Product, rate: RateKey | null, adults: number, kids: number, units: number): number {
+  const single = rate === 'nr' ? p.nr : p.rr;
+  const dbl = rate === 'nr' ? p.dblNr : p.dblRr;
+  if (p.mode === 'flat') return single * units;
+  const persons = adults + kids;
+  if (p.mode === 'pp' || dbl == null) return single * persons;
+  return Math.floor(persons / 2) * dbl + (persons % 2) * single;
+}
+
 export interface Catalog {
+  PRODUCTS?: Product[];
   CAT: Record<CatKey, Category>;
   ACTS: Activity[];
   PINS: Pin[];
@@ -141,6 +161,8 @@ export interface BookingLine { label: string; amt: string; }
 
 /** One priced "My Day" line: an experience, optionally one of its catalog.PL options. */
 export interface SelLine {
+  /** Set for a package / combo / VIP / photo / cinematic line. */
+  product?: Product;
   key: string;               // sel key (see lib/sel.ts)
   act: Activity;
   variant?: string;          // exact catalog.PL row label, when a specific option was chosen
@@ -263,6 +285,7 @@ export interface BookingDetailLine {
   kids: number;
   units: number;
   amount: number;
+  productKey?: string | null;
 }
 
 /** GET /api/staff/bookings/:refCode */

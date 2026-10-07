@@ -1855,5 +1855,13 @@
  "FULL": "भर गया",
  "FEW LEFT": "कुछ ही बचे",
  "No session for an afternoon arrival: choose the morning.": "दोपहर के आगमन के लिए कोई सत्र नहीं: सुबह चुनें।",
- "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "आपका दिन · हर शुरुआत से 15 मिनट पहले पहुँचें"
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "आपका दिन · हर शुरुआत से 15 मिनट पहले पहुँचें",
+ "In my day · book now": "मेरे दिन में · अभी बुक करें",
+ "Add to my day and book": "मेरे दिन में जोड़ें और बुक करें",
+ "In my day": "मेरे दिन में",
+ "Book this photo pack →": "यह फ़ोटो पैक बुक करें →",
+ "film": "फ़िल्म",
+ "FILM": "फ़िल्म",
+ "{single} /PERSON · {double} /2 PERSONS": "{single} /व्यक्ति · {double} /2 व्यक्ति",
+ "{price} /PERSON": "{price} /व्यक्ति"
 }

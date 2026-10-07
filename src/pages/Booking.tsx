@@ -7,6 +7,7 @@ import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
+import { productAmount } from '../types';
 import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
 import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, releaseHold, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
@@ -125,8 +126,18 @@ function CartLine({ line }: { line: SelLine }) {
   const c = line.qty;
   const price = line.price;
   const isFlat = a.mode === 'flat';
-  const amt = isFlat ? price * (c.u || 0) : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
-  const each = isFlat
+  const p = line.product;
+  const amt = p
+    ? productAmount(p, app.rate, c.a || 0, c.k || 0, c.u || 0)
+    : isFlat ? price * (c.u || 0) : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
+  const dbl = p ? (app.rate === 'nr' ? p.dblNr : p.dblRr) : null;
+  const each = p
+    ? p.mode === 'flat'
+      ? money(price) + ' / ' + t('FILM')
+      : p.mode === 'pair' && dbl != null
+      ? t('{single} /PERSON · {double} /2 PERSONS', { single: money(price), double: money(dbl) })
+      : t('{price} /PERSON', { price: money(price) })
+    : isFlat
     ? money(price) + ' ' + tr(a.flatLabel || '').toUpperCase()
     : t('{adult} /ADULT · {child} /CHILD', { adult: money(price), child: money(Math.round(price * 0.5)) });
   const key = a.flatLabel ? a.flatLabel.replace('/', '').trim().toLowerCase() : '';
@@ -134,7 +145,7 @@ function CartLine({ line }: { line: SelLine }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 18px', flexWrap: 'wrap', borderTop: '1px dashed #EBE2FF' }}>
       <div
-        onClick={() => goto.detail(a.id)}
+        onClick={() => (p ? goto.packages() : goto.detail(a.id))}
         style={{ width: '52px', height: '52px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', background: '#EBE2FF' }}
       >
         <img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

@@ -1855,5 +1855,13 @@
  "FULL": "مكتمل",
  "FEW LEFT": "أماكن قليلة",
  "No session for an afternoon arrival: choose the morning.": "لا توجد جلسة لوصول بعد الظهر: اختر الصباح.",
- "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "يومك · كن في كل بداية قبل 15 دقيقة"
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "يومك · كن في كل بداية قبل 15 دقيقة",
+ "In my day · book now": "في يومي · احجز الآن",
+ "Add to my day and book": "أضف إلى يومي واحجز",
+ "In my day": "في يومي",
+ "Book this photo pack →": "احجز باقة الصور هذه →",
+ "film": "فيلم",
+ "FILM": "فيلم",
+ "{single} /PERSON · {double} /2 PERSONS": "{single} /للشخص · {double} /لشخصين",
+ "{price} /PERSON": "{price} /للشخص"
 }

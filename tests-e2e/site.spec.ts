@@ -331,7 +331,8 @@ test.describe('packages', () => {
     await expect(page.getByRole('heading', { name: /Packages/i }).first()).toBeVisible();
     await page.getByText('MOST POPULAR', { exact: false }).first().click();
     await expect(page.getByText('WHAT IS INCLUDED', { exact: true })).toBeVisible();
-    await expect(page.getByText('Reserve this package →')).toBeVisible();
+    // bookable online when the API lists products; a WhatsApp reservation otherwise (bundled fallback catalog)
+    await expect(page.getByText(/Reserve this package →|Add to my day and book|In my day · book now/)).toBeVisible();
     await page.getByTitle('Close').first().click();
     await expect(page.getByText('WHAT IS INCLUDED', { exact: true })).toBeHidden();
     await expectNoHorizontalScroll(page);
@@ -700,5 +701,43 @@ test.describe('timed sessions on the booking page', () => {
     await picker.getByRole('button', { name: /10:30/ }).click();
     await expect(page.getByTestId('hold-note')).toBeVisible({ timeout: 10000 });
     expect(held?.items?.[0]).toMatchObject({ id: 'zipline', time: '10:30' });
+  });
+});
+
+test.describe('packages booked online', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+
+  test('a combo, a package tier and a cinematic item go into the day and are charged at their package price', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await (await request.get('/api/catalog')).json() as { PRODUCTS?: { key: string; mode: string; rr: number; dblRr: number | null }[]; COMBO: { key?: string; name: string; rr: [number, number] }[] };
+    test.skip(!cat.PRODUCTS?.length, 'no products on this server (migration 013 missing)');
+    const combo = cat.COMBO[0];
+    expect(combo.key).toBeTruthy();
+
+    await page.goto('/packages#combo');
+    await page.getByRole('button', { name: /Book this combo/ }).first().click();
+    await expect(page).toHaveURL(/\/booking$/);
+    await expect(page.getByText(combo.name).first()).toBeVisible();
+    // two adults on a "pair" product cost the double price
+    await expect(page.getByText('Rs ' + combo.rr[1].toLocaleString('en-US')).first()).toBeVisible();
+
+    // the server prices it the same way and writes a product line
+    const booked = await request.post('/api/bookings', {
+      data: { visitDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10), slot: 'afternoon', adults: 2, kids: 0, rate: 'rr', items: [{ id: 'product:' + combo.key, adults: 2, kids: 0 }], name: 'Combo Guest', email: 'combo@example.com', payMode: 'gate' },
+    });
+    expect(booked.status()).toBe(201);
+    const b = (await booked.json()) as { total: number; lines: { label: string; amount: number }[] };
+    const line = b.lines.find((l) => l.label.startsWith(combo.name));
+    expect(line?.amount).toBe(combo.rr[1]);
+
+    // a visitor-only product is refused for a resident, an unknown one too
+    const diamond = cat.PRODUCTS!.find((p) => p.key.startsWith('pkg:diamond'));
+    if (diamond) {
+      const refused = await request.post('/api/bookings', { data: { visitDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10), slot: 'afternoon', adults: 1, kids: 0, rate: 'rr', items: [{ id: 'product:' + diamond.key, adults: 1 }], name: 'Res', email: 'res@example.com', payMode: 'gate' } });
+      expect(refused.status()).toBe(400);
+    }
+    const unknown = await request.post('/api/bookings', { data: { visitDate: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10), slot: 'afternoon', adults: 1, kids: 0, rate: 'rr', items: [{ id: 'product:nope', adults: 1 }], name: 'X', email: 'x@example.com', payMode: 'gate' } });
+    expect(unknown.status()).toBe(400);
   });
 });

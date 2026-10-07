@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STAFF_STATE } from './auth-state';
 
+// The calendar tests save and restore the one shared calendar: never let two of them run at once.
+test.describe.configure({ mode: 'default' });
+
 /**
  * Front office: promo codes on the website, the cashier recording payments,
  * a top-up on the day, FOC / discounts, weather postponement, receipts, and
@@ -178,7 +181,9 @@ test.describe('calendar and capacity', () => {
     test.skip(info.project.name !== 'desktop', 'one viewport is enough');
     test.skip(!(await apiUp(page)), 'API not running');
     const original = await (await page.request.get('/api/staff/ops/calendar')).json() as { slotCapacity: number; closures: unknown[]; activityCapacity: Record<string, unknown> };
-    const closedDay = far(40), cappedDay = far(41);
+    // a fresh pair of far-off days each run, so bookings left by earlier runs never fill them
+    const base = 40 + Math.floor(Math.random() * 300);
+    const closedDay = far(base), cappedDay = far(base + 1);
     try {
       // 1. save a private-event closure and one buggy per morning
       // the local stack runs with a huge BOOKING_SLOT_CAPACITY; the setting itself is capped at 5000
@@ -236,7 +241,7 @@ test.describe('timed sessions', () => {
     test.skip(info.project.name !== 'desktop', 'one viewport is enough');
     test.skip(!(await apiUp(page)), 'API not running');
     const original = await (await page.request.get('/api/staff/ops/calendar')).json() as { slotCapacity: number; closures: unknown[]; activityCapacity: Record<string, unknown>; sessions: Record<string, unknown> };
-    const d = new Date(); d.setUTCDate(d.getUTCDate() + 42); const day = d.toISOString().slice(0, 10);
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + 40 + Math.floor(Math.random() * 300)); const day = d.toISOString().slice(0, 10);
     const base = { slotCapacity: original.slotCapacity <= 5000 ? original.slotCapacity : undefined, closures: original.closures, activityCapacity: original.activityCapacity };
     try {
       const saved = await page.request.put('/api/staff/ops/calendar', { data: { ...base, sessions: { ...original.sessions, zipline: { times: ['09:30', '10:30', '14:00'], capacity: 2, durationMin: 90 } } } });

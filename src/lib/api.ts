@@ -57,7 +57,7 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
 export interface TicketView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
   rate: string; payMode: string; status: string; total: number; ticketUrl: string; qrUrl: string;
-  lines: { label: string; amount: number; experienceId?: string | null; variant?: string; adults?: number; kids?: number; units?: number; time?: string | null }[];
+  lines: { label: string; amount: number; experienceId?: string | null; productKey?: string | null; variant?: string; adults?: number; kids?: number; units?: number; time?: string | null }[];
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
   paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;

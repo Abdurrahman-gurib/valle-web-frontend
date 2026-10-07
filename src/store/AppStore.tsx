@@ -166,6 +166,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const keys = Object.keys(s);
       const live = keys.filter((key) => {
         const { id, variant } = parseSelKey(key);
+        // products (packages, combos, VIP, photo, cinematic): kept while the catalog has not
+        // listed products yet (bundled fallback), dropped only once the live list lacks them
+        if (id.startsWith('product:')) return !catalog.PRODUCTS || catalog.PRODUCTS.some((pr) => 'product:' + pr.key === id);
         if (!catalog.ACTS.some((a) => a.id === id)) return false;
         return !variant || (catalog.PL[id] || []).some((r) => r.n === variant);
       });
@@ -190,7 +193,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         delete next[key];
       } else {
         const act = catalog.ACTS.find((x) => x.id === id);
-        next[key] = act && act.mode === 'flat' ? { u: 1 } : { a: Math.max(1, adults), k: kids };
+        const product = id.startsWith('product:') ? (catalog.PRODUCTS ?? []).find((p) => 'product:' + p.key === id) : undefined;
+        next[key] = (act && act.mode === 'flat') || product?.mode === 'flat' ? { u: 1 } : { a: Math.max(1, adults), k: kids };
       }
       return next;
     });

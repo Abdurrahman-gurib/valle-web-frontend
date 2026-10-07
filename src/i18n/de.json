@@ -1855,5 +1855,13 @@
  "FULL": "VOLL",
  "FEW LEFT": "WENIGE PLÄTZE",
  "No session for an afternoon arrival: choose the morning.": "Keine Session bei Ankunft am Nachmittag: wähle den Vormittag.",
- "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "DEIN TAG · SEI 15 MINUTEN VOR JEDEM START DA"
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "DEIN TAG · SEI 15 MINUTEN VOR JEDEM START DA",
+ "In my day · book now": "In meinem Tag · jetzt buchen",
+ "Add to my day and book": "Zu meinem Tag hinzufügen und buchen",
+ "In my day": "In meinem Tag",
+ "Book this photo pack →": "Dieses Fotopaket buchen →",
+ "film": "Film",
+ "FILM": "FILM",
+ "{single} /PERSON · {double} /2 PERSONS": "{single} /PERSON · {double} /2 PERSONEN",
+ "{price} /PERSON": "{price} /PERSON"
 }

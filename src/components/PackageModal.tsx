@@ -2,11 +2,15 @@ import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { useT, fwd } from '../i18n';
+import { useApp } from '../store/AppStore';
+import { useGoto } from '../lib/nav';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
 
 export interface PackModalData {
+  /** Bookable product key: shows "Add to my day" instead of the WhatsApp reservation. */
+  productKey?: string;
   name: string;
   badge?: string;
   color: string;
@@ -34,6 +38,26 @@ function CloseBtn({ onClose }: { onClose: () => void }) {
       }}
     >
       ×
+    </button>
+  );
+}
+
+function AddToDay({ productKey, onClose }: { productKey: string; onClose: () => void }) {
+  const t = useT();
+  const app = useApp();
+  const goto = useGoto();
+  const [h, bind] = useHover();
+  const id = 'product:' + productKey;
+  const inDay = !!app.sel[id];
+  return (
+    <button
+      {...bind}
+      type="button"
+      data-testid="pack-add"
+      onClick={() => { if (!inDay) app.toggleSel(id); onClose(); goto.booking(); }}
+      style={{ marginTop: 16, border: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999 }}
+    >
+      {inDay ? t('In my day · book now') : t('Add to my day and book')} {fwd()}
     </button>
   );
 }
@@ -151,7 +175,7 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.dbl}</div>
             </div>
           </div>
-          <ReserveLink href={whatsapp} />
+          {pack.productKey ? <AddToDay productKey={pack.productKey} onClose={onClose} /> : <ReserveLink href={whatsapp} />}
           <div style={{ display: 'flex', gap: 8, marginTop: 9 }}>
             <PillLink href={whatsapp} title={t('Chat with a park host')} label={t('CHAT')} blank />
             <PillLink href={mailto} title={t('Email the reservations team')} label={t('EMAIL')} />

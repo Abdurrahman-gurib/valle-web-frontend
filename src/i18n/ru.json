@@ -1855,5 +1855,13 @@
  "FULL": "НЕТ МЕСТ",
  "FEW LEFT": "МАЛО МЕСТ",
  "No session for an afternoon arrival: choose the morning.": "Для прибытия во второй половине дня сеансов нет: выберите утро.",
- "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "ВАШ ДЕНЬ · ПРИХОДИТЕ НА КАЖДЫЙ СТАРТ ЗА 15 МИНУТ"
+ "YOUR DAY · BE AT EACH START 15 MINUTES EARLY": "ВАШ ДЕНЬ · ПРИХОДИТЕ НА КАЖДЫЙ СТАРТ ЗА 15 МИНУТ",
+ "In my day · book now": "В моём дне · забронировать",
+ "Add to my day and book": "Добавить в мой день и забронировать",
+ "In my day": "В моём дне",
+ "Book this photo pack →": "Забронировать этот фотопакет →",
+ "film": "фильм",
+ "FILM": "ФИЛЬМ",
+ "{single} /PERSON · {double} /2 PERSONS": "{single} /ЧЕЛ. · {double} /2 ЧЕЛ.",
+ "{price} /PERSON": "{price} /ЧЕЛ."
 }

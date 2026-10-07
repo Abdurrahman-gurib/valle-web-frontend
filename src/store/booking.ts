@@ -1,4 +1,5 @@
 import type { Activity, BookingSummary, Catalog, RateKey, Sel, SelLine } from '../types';
+import { PRODUCT_PREFIX, productAmount } from '../types';
 import { money, partyLabel } from '../lib/format';
 import { parseSelKey } from '../lib/sel';
 import { tr } from '../i18n';
@@ -41,6 +42,17 @@ export function computeBooking(
   // Lines in catalog order (then key order), each priced by its option when one was chosen.
   const selLines: SelLine[] = [];
   const keys = Object.keys(sel);
+  // Products (packages, combos, VIP, photo, cinematic) ride in the same cart under "product:<key>",
+  // shown through a stand-in activity so the cart and the receipt can render them.
+  for (const p of catalog.PRODUCTS ?? []) {
+    const key = PRODUCT_PREFIX + p.key;
+    if (!sel[key]) continue;
+    const act = {
+      id: key, name: p.name, img: p.image || '/images/vip-ultimate-buggy-coloured-earth.avif', cat: 'package', mode: p.mode === 'flat' ? 'flat' : 'pp',
+      flatLabel: p.family === 'cine' ? '/ film' : null, price: rate === 'nr' ? p.nr : p.rr, blurb: p.note, thrill: 0, duration: '', age: '', detail: '', facts: [],
+    } as unknown as Activity;
+    selLines.push({ key, act, variant: '', price: rate === 'nr' ? p.nr : p.rr, qty: sel[key] || {}, product: p });
+  }
   for (const a of catalog.ACTS) {
     for (const key of keys) {
       const { id, variant } = parseSelKey(key);
@@ -64,7 +76,10 @@ export function computeBooking(
     const price = l.price;
     let amt = 0;
     let q = '';
-    if (a.mode === 'flat') {
+    if (l.product) {
+      amt = productAmount(l.product, rate, c.a || 0, c.k || 0, c.u || 0);
+      q = l.product.mode === 'flat' ? (c.u || 0) + ' × ' + tr('film') : partyLabel(c.a || 0, c.k || 0);
+    } else if (a.mode === 'flat') {
       amt = price * (c.u || 0);
       q = (c.u || 0) + ' × ' + (a.flatLabel ? tr(a.flatLabel).replace('/', '').trim() : tr('unit'));
     } else {
