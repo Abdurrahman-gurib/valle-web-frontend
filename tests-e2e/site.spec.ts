@@ -715,7 +715,10 @@ test.describe('packages booked online', () => {
     const combo = cat.COMBO[0];
     expect(combo.key).toBeTruthy();
 
+    // the prerendered page carries no product keys; they arrive with the live catalog
+    const catalogLoaded = page.waitForResponse((r) => r.url().includes('/api/catalog') && r.ok());
     await page.goto('/packages#combo');
+    await catalogLoaded;
     await page.getByRole('button', { name: /Book this combo/ }).first().click();
     await expect(page).toHaveURL(/\/booking$/);
     await expect(page.getByText(combo.name).first()).toBeVisible();
