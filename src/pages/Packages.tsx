@@ -1,8 +1,9 @@
+import { Link } from 'react-router-dom';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
-import { useGoto } from '../lib/nav';
+import { paths, useGoto } from '../lib/nav';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { money, todayIso } from '../lib/format';
@@ -484,6 +485,8 @@ export default function PackagesPage() {
         />
 
         {/* COMBO PACKAGES */}
+        <div style={{ marginTop: 16 }}><Link to={paths.groups()} data-testid="book-school" style={{ display: 'inline-block', background: '#340057', color: '#FFFFFF', borderRadius: 999, padding: '13px 22px', fontWeight: 700, textDecoration: 'none' }}>{t('Book a school visit online →')}</Link></div>
+
         <SectionHead id="combo" title={t('Combo packages')} tag={t('09 · QUAD + ZIPLINE, ONE PRICE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {comboPacks.map((cb) => (

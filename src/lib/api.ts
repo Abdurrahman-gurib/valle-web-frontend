@@ -61,6 +61,8 @@ export interface TicketView {
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
   paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;
+  /** School / company / club booking. */
+  group?: { kind: string; organisation: string; leaderName: string; participants: { name: string; age?: number | null }[]; depositAmount: number };
 }
 export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
@@ -88,6 +90,8 @@ export interface WaiverView {
   open: boolean; termsVersion: string; activities: WaiverActivity[];
   /** after signing: whether the guest's copy went out */
   copy?: { email: boolean; whatsapp: boolean };
+  /** a group booking: the leader signs one pack for these participants */
+  group?: { leaderName: string; participants: string[] } | null;
 }
 export interface WaiverRequest {
   participantName: string; birthDate: string; heightCm: number; weightKg: number; guardianName?: string;
@@ -95,6 +99,8 @@ export interface WaiverRequest {
   emergencyName: string; emergencyPhone: string; medicalNotes?: string;
   declarations: { terms: boolean; health: boolean; consent: boolean };
   signature: string; lang?: string;
+  /** group leader's pack: the participants this signature covers */
+  groupParticipants?: string[];
 }
 /** PDF copy of one signed waiver. */
 export const waiverPdfUrl = (refCode: string, id: string, token: string) => `${BASE}/tickets/${encodeURIComponent(refCode)}/waivers/${encodeURIComponent(id)}.pdf?t=${encodeURIComponent(token)}`;

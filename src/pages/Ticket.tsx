@@ -103,8 +103,16 @@ export default function TicketPage() {
               <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
             {tk.status === 'postponed' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#8A6A00', fontWeight: 700 }}>{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
+            {tk.group && (
+                <div data-testid="ticket-group" style={{ marginTop: 16, textAlign: 'start', background: '#F7F3FF', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
+                  <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</div>
+                  <div style={{ fontWeight: 800, fontSize: 15, marginTop: 4 }}>{tk.group.organisation}</div>
+                  <div>{t('Leader: {name} · {n} people · {listed} names listed', { name: tk.group.leaderName, n: tk.adults + tk.kids, listed: tk.group.participants.length })}</div>
+                  {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div style={{ color: '#D91E44', fontWeight: 700, marginTop: 4 }}>{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
+                </div>
+            )}
             {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && (
-              <WaiverBlock signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
+              <WaiverBlock group={!!tk.group} signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
             {tk.lines.some((l) => l.time) && (
@@ -181,16 +189,16 @@ export default function TicketPage() {
 }
 
 /** Waiver progress on the ticket, with the way to the form while anyone still has to sign. */
-function WaiverBlock({ signed, required, href }: { signed: number; required: number; href: string }) {
+function WaiverBlock({ signed, required, href, group }: { signed: number; required: number; href: string; group?: boolean }) {
   const t = useT();
   const all = signed >= required;
   return (
     <div data-testid="ticket-waivers" data-print-hide="" style={{ marginTop: 20, textAlign: 'start', background: all ? '#E6FFEE' : '#FFFDE0', border: `1.5px solid ${all ? '#33FF74' : '#FFE94D'}`, borderRadius: 14, padding: '14px 16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ fontWeight: 800, fontSize: 15 }}>{all ? t('Waivers signed') : t('Skip the queue: sign your waivers')}</div>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>{all ? t('Waivers signed') : group ? t('Leader: sign the waiver pack for the group') : t('Skip the queue: sign your waivers')}</div>
         <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13 }}>{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
       </div>
-      {!all && <p style={{ margin: '6px 0 10px', fontSize: 13.5, lineHeight: 1.5 }}>{t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
+      {!all && <p style={{ margin: '6px 0 10px', fontSize: 13.5, lineHeight: 1.5 }}>{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
       <a href={href} style={{ ...btn(all ? '#FFFFFF' : '#340057', all ? '#340057' : '#FFFFFF', all), padding: '9px 16px', fontSize: 13, marginTop: all ? 8 : 0 }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
     </div>
   );

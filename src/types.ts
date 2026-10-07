@@ -189,6 +189,8 @@ export interface BookingRequest {
   items: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[];
   /** The hold taken while filling in the form; its places become this booking. */
   holdId?: string;
+  /** A school / company / club booking: bigger party, deposit, leader waiver pack. */
+  group?: { kind: 'school' | 'company' | 'club' | 'other'; organisation: string; leaderName?: string; participants?: { name: string; age?: number }[] };
   name: string;
   phone?: string;
   email?: string;
@@ -213,6 +215,8 @@ export interface BookingResponse {
   /** Pay online: the hosted checkout to send the guest to; the ticket follows the payment. */
   checkoutUrl?: string;
   paymentId?: string;
+  /** Groups: rupees asked up front. */
+  depositAmount?: number;
 }
 
 export interface QuoteRequest {
@@ -273,6 +277,11 @@ export interface BookingRow {
   adjustmentNote?: string;
   couponCode?: string;
   postponedFrom?: string | null;
+  groupKind?: string | null;
+  organisation?: string;
+  leaderName?: string;
+  participants?: { name: string; age?: number | null }[];
+  depositAmount?: number;
   createdAt: string;          // ISO datetime
 }
 

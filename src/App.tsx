@@ -26,6 +26,7 @@ import { OfflineStatus } from './components/InstallApp';
 import VacanciesPage from './pages/Vacancies';
 import StoryPage from './pages/Story';
 import LegalPage from './pages/Legal';
+import GroupsPage from './pages/Groups';
 import VacancyDetailPage from './pages/VacancyDetail';
 import StaffLogin from './pages/staff/Login';
 import StaffDashboard from './pages/staff/Dashboard';
@@ -104,6 +105,7 @@ function publicRoutes(prefix: string) {
     <Route key={prefix + 'story'} path={prefix + '/story'} element={<StoryPage />} />,
     <Route key={prefix + 'privacy'} path={prefix + '/privacy'} element={<LegalPage kind="privacy" />} />,
     <Route key={prefix + 'terms'} path={prefix + '/terms'} element={<LegalPage kind="terms" />} />,
+    <Route key={prefix + 'groups'} path={prefix + '/groups'} element={<GroupsPage />} />,
     <Route key={prefix + 'vac'} path={prefix + '/vacancies'} element={<VacanciesPage />} />,
     <Route key={prefix + 'vacd'} path={prefix + '/vacancies/:slug'} element={<VacancyDetailPage />} />,
     <Route key={prefix + 'tk'} path={prefix + '/ticket/:ref'} element={<TicketPage />} />,

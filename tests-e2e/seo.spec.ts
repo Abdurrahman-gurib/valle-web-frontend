@@ -10,7 +10,7 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 const BASE = process.env.SEO_BASE_URL || process.env.E2E_BASE_URL || '';
 if (BASE) test.use({ baseURL: BASE });
 
-const PUBLIC_PAGES = ['/', '/explore', '/packages', '/booking', '/vacancies', '/story', '/privacy', '/terms', '/activities/zipline', '/activities/quad', '/dine/chamouze', '/dine/citronelle'];
+const PUBLIC_PAGES = ['/', '/explore', '/packages', '/booking', '/vacancies', '/story', '/privacy', '/terms', '/groups', '/activities/zipline', '/activities/quad', '/dine/chamouze', '/dine/citronelle'];
 
 async function fetchHtml(request: APIRequestContext, path: string) {
   const res = await request.get(path, { maxRedirects: 0 });

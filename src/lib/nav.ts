@@ -35,6 +35,7 @@ export const paths = {
   dine: () => L('/#dine'),
   story: () => L('/story'),
   team: () => L('/packages#team'),
+  groups: () => L('/groups'),
   vacancies: () => L('/vacancies'),
   privacy: () => L('/privacy'),
   terms: () => L('/terms'),

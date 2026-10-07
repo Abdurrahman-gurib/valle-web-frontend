@@ -809,6 +809,12 @@ function Drawer({ refCode, onClose, onPatched }: {
                     <a href={receiptPdfUrl(data.refCode)} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: 999, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, textDecoration: 'none' }}>Receipt PDF</a>
                   </span>
                 </div>
+                {data.groupKind && (
+                  <div data-testid="group-block" style={{ marginTop: 10, fontSize: 13, background: '#F0E8FF', border: '1.5px solid #D9C9F0', borderRadius: 10, padding: '8px 12px' }}>
+                    <strong>Group · {data.groupKind}</strong> · {data.organisation} · leader {data.leaderName} · {data.adults + data.kids} people · {(data.participants ?? []).length} names listed{(data.depositAmount ?? 0) > 0 ? ` · deposit ${money(data.depositAmount ?? 0)}${(data.paidAmount ?? 0) >= (data.depositAmount ?? 0) ? ' received' : ' due'}` : ''}
+                    {(data.participants ?? []).length > 0 && <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>Participant list</summary><div style={{ ...mono, fontSize: 12, marginTop: 4, whiteSpace: 'pre-wrap' }}>{(data.participants ?? []).map((p) => p.name + (p.age != null ? ` (${p.age})` : '')).join('\n')}</div></details>}
+                  </div>
+                )}
                 {data.status === 'postponed' && (
                   <div style={{ marginTop: 10, fontSize: 13, background: '#FFF4D6', border: '1.5px solid #FFD24D', borderRadius: 10, padding: '8px 12px' }}>
                     Postponed{data.postponedFrom ? ' from ' + shortDate(data.postponedFrom) : ''}. No refund; the payment stays on this booking. Use <strong>Edit</strong> to set the new date and status Confirmed.

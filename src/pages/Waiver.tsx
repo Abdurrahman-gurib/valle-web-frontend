@@ -100,13 +100,15 @@ export default function WaiverPage() {
   const [err, setErr] = useState('');
   const [done, setDone] = useState('');
   const [correcting, setCorrecting] = useState(false);
+  // group pack: the leader lists who they sign for (prefilled from the booking's participant list)
+  const [groupNames, setGroupNames] = useState('');
   const pad = useRef<SignaturePadHandle>(null);
   const formTop = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let dead = false;
     fetchWaivers(ref, token)
-      .then((v) => { if (!dead) setView(v); })
+      .then((v) => { if (!dead) { setView(v); if (v.group) { setGroupNames(v.group.participants.join('\n')); setName((n) => n || v.group?.leaderName || ''); } } })
       .catch((e: Error & { status?: number }) => {
         if (dead) return;
         setLoadErr(e.status === 403 ? tr('This waiver link is not valid. Open the link from your confirmation e-mail or WhatsApp.') : e.status === 404 ? tr('We could not find this booking.') : tr('Could not load the waiver right now. Please try again.'));
@@ -147,6 +149,7 @@ export default function WaiverPage() {
         phone: phone.trim(), nationality: nationality.trim(), idNumber: idNumber.trim() || undefined, marketingConsent: marketing,
         emergencyName: emName.trim(), emergencyPhone: emPhone.trim(),
         medicalNotes: medical.trim() || undefined, declarations: decl, signature, lang,
+        groupParticipants: view.group ? groupNames.split(/\r?\n/).map((x) => x.trim()).filter(Boolean) : undefined,
       });
       setView(next);
       const where = [next.copy?.email ? (email.trim() || t('your e-mail')) : '', next.copy?.whatsapp ? 'WhatsApp' : ''].filter(Boolean).join(' · ');
@@ -183,7 +186,7 @@ export default function WaiverPage() {
             {t('Sign before you arrive')}
           </h1>
           <p style={{ fontSize: 15, lineHeight: 1.55, margin: 0, color: 'rgba(52,0,87,.8)' }}>
-            {t('One Disclaimer Form per participant, about two minutes each. Signed forms go straight to the gate, so your party walks past the paperwork queue.')}
+            {view.group ? t('Group booking: the teacher or leader signs one Disclaimer Form for the whole party, listing every participant. Minors are covered by the leader’s signature as the responsible adult on the day.') : t('One Disclaimer Form per participant, about two minutes each. Signed forms go straight to the gate, so your party walks past the paperwork queue.')}
           </p>
 
           <section data-testid="waiver-progress" style={{ marginTop: 20, background: '#FFFFFF', borderRadius: 18, boxShadow: '0 0 0 1.5px #EBE2FF', overflow: 'hidden' }}>
@@ -260,6 +263,13 @@ export default function WaiverPage() {
               </Section>
 
               <Section n="2" title={t('Participant')}>
+                {view.group && (
+                  <label style={{ gridColumn: '1 / -1', display: 'grid', gap: 6 }}>
+                    <span style={{ fontWeight: 700, fontSize: 14 }}>{t('Participants covered by this signature (one per line)')}</span>
+                    <textarea value={groupNames} onChange={(e) => setGroupNames(e.target.value)} rows={6} data-testid="group-names" style={{ border: '1.5px solid #EBE2FF', background: '#F7F3FF', borderRadius: 12, padding: '10px 14px', fontFamily: "'Chivo Mono',monospace", fontSize: 13, color: '#340057' }} />
+                    <span style={{ fontSize: 12.5, color: 'rgba(52,0,87,.6)' }}>{t('{n} names · add or remove before signing', { n: groupNames.split(/\r?\n/).filter((x) => x.trim()).length })}</span>
+                  </label>
+                )}
                 <Field label={t('First and last name')}><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" style={input} data-testid="w-name" /></Field>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12 }}>
                   <Field label={t('Date of birth')}><input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} max={view.visitDate} style={input} data-testid="w-birth" /></Field>

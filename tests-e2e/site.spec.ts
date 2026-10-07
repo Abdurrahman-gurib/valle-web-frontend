@@ -744,3 +744,54 @@ test.describe('packages booked online', () => {
     expect(unknown.status()).toBe(400);
   });
 });
+
+test.describe('groups and schools', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+  const far = () => { const d = new Date(); d.setUTCDate(d.getUTCDate() + 20 + Math.floor(Math.random() * 30)); return d.toISOString().slice(0, 10); };
+
+  test('a school books 34 people per head with a list, gets a deposit, and the teacher signs one waiver pack', async ({ page, request }, info) => {
+    test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await (await request.get('/api/catalog')).json() as { PRODUCTS?: { key: string; family: string; rr: number }[] };
+    const student = cat.PRODUCTS?.filter((p) => p.family === 'student') ?? [];
+    test.skip(student.length === 0, 'no student products (migration 014 missing)');
+
+    await page.goto('/groups');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/whole group/i);
+    await page.getByTestId('group-org').fill('Loreto College e2e');
+    await page.getByTestId('group-leader').fill('Mrs Teacher');
+    await page.getByTestId('group-email').fill('teacher@example.mu');
+    await page.getByTestId('group-date').fill(far());
+    await page.getByTestId('group-adults').fill('4');
+    await page.getByTestId('group-kids').fill('30');
+    await page.getByTestId('group-items').getByRole('checkbox').first().check();
+    await page.getByTestId('group-list').fill('Ariane Léger, 11\nKabir Ramdhun, 10\nname,age\nSara Dupont');
+    await expect(page.getByTestId('group-list-count')).toContainText('3 NAMES');
+    // per head × 34 (student rows: kids pay the full student price, no half rate)
+    const perHead = student[0].rr;
+    await expect(page.getByTestId('group-total')).toContainText('Rs ' + (perHead * 34).toLocaleString('en-US'));
+    await expect(page.getByTestId('group-deposit')).toContainText('Rs ' + Math.round(perHead * 34 * 0.3).toLocaleString('en-US'));
+    await page.getByTestId('group-submit').click();
+    await expect(page.getByTestId('group-confirmed')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('group-confirmed')).toContainText('deposit Rs');
+
+    // the ticket shows the group and the leader pack; one signature covers the party
+    await page.getByTestId('group-ticket').click();
+    await expect(page.getByTestId('ticket-group')).toContainText('Loreto College e2e');
+    await expect(page.getByTestId('ticket-group')).toContainText('34 people');
+    await expect(page.getByTestId('ticket-waivers')).toContainText('0 of 1 signed');
+    await expect(page.getByTestId('ticket-waivers')).toContainText('waiver pack');
+    const ticketUrl = new URL(page.url());
+    const ref = ticketUrl.pathname.split('/').pop() as string;
+    const token = ticketUrl.searchParams.get('t') as string;
+    const view = await (await request.get(`/api/tickets/${ref}/waivers?t=${token}`)).json() as { required: number; group?: { participants: string[] } };
+    expect(view.required).toBe(1);
+    expect(view.group?.participants).toEqual(['Ariane Léger', 'Kabir Ramdhun', 'Sara Dupont']);
+
+    // a party over 12 without a group is refused; a group under 10 too
+    const noGroup = await request.post('/api/bookings', { data: { visitDate: far(), slot: 'afternoon', adults: 13, kids: 0, rate: 'rr', items: [], name: 'Big', email: 'big@example.com', payMode: 'gate' } });
+    expect(noGroup.status()).toBe(400);
+    const tiny = await request.post('/api/bookings', { data: { visitDate: far(), slot: 'afternoon', adults: 2, kids: 2, rate: 'rr', items: [], name: 'Small', email: 'small@example.com', payMode: 'gate', group: { kind: 'club', organisation: 'Tiny club' } } });
+    expect(tiny.status()).toBe(400);
+  });
+});
