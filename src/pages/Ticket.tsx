@@ -8,6 +8,7 @@ import { Stripes } from '../components/Stripes';
 import { localizePath, tr, useLang, useT, _t } from '../i18n';
 import { InstallCard } from '../components/InstallApp';
 import { ManageBooking } from './ManageBooking';
+import { DayForecast, useParkStatus } from '../components/WeatherCard';
 
 /** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
 const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
@@ -102,6 +103,8 @@ export default function TicketPage() {
               <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
               <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
+            <DayForecast date={tk.visitDate} style={{ marginTop: 12, justifyContent: 'center' }} />
+            <TicketParkNotice />
             {tk.status === 'postponed' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#8A6A00', fontWeight: 700 }}>{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
             {tk.group && (
                 <div data-testid="ticket-group" style={{ marginTop: 16, textAlign: 'start', background: '#F7F3FF', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
@@ -200,6 +203,20 @@ function WaiverBlock({ signed, required, href, group }: { signed: number; requir
       </div>
       {!all && <p style={{ margin: '6px 0 10px', fontSize: 13.5, lineHeight: 1.5 }}>{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
       <a href={href} style={{ ...btn(all ? '#FFFFFF' : '#340057', all ? '#340057' : '#FFFFFF', all), padding: '9px 16px', fontSize: 13, marginTop: all ? 8 : 0 }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
+    </div>
+  );
+}
+
+/** The desk's park status of the moment, only when it is not an ordinary open day. */
+function TicketParkNotice() {
+  const t = useT();
+  const status = useParkStatus();
+  if (!status || (status.state === 'open' && !status.message)) return null;
+  return (
+    <div data-testid="ticket-park-status" data-state={status.state} style={{ marginTop: 12, background: status.state === 'closed' ? '#FFE2E7' : '#FFFFE2', border: '1.5px solid ' + (status.state === 'closed' ? '#FF3358' : '#E6E000'), borderRadius: 12, padding: '10px 14px', fontSize: 13.5, lineHeight: 1.5 }}>
+      <strong style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.14em' }}>{status.state === 'closed' ? t('PARK CLOSED TODAY') : status.state === 'partial' ? t('PARTLY OPEN TODAY') : t('PARK NOTICE')}</strong>
+      {status.pausedNames.length > 0 && <div>{t('Paused right now: {names}', { names: status.pausedNames.join(', ') })}</div>}
+      {status.message && <div>{status.message}</div>}
     </div>
   );
 }

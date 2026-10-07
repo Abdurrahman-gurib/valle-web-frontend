@@ -23,6 +23,7 @@ import PackagesPage from './pages/Packages';
 import RestaurantPage from './pages/Restaurant';
 import BookingPage from './pages/Booking';
 import { OfflineStatus } from './components/InstallApp';
+import { ParkStatusBanner } from './components/ParkStatusBanner';
 import VacanciesPage from './pages/Vacancies';
 import StoryPage from './pages/Story';
 import LegalPage from './pages/Legal';
@@ -71,6 +72,7 @@ function PublicShell() {
       fontFamily: "'Work Sans',sans-serif", paddingBottom: isMobile ? 84 : 0,
     }}>
       <Header />
+      <ParkStatusBanner />
       <Outlet />
       <Footer />
       <MyDayDrawer />

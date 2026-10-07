@@ -197,6 +197,9 @@ export interface CalendarView {
   experiences: { id: string; name: string; priceMode: string }[];
 }
 export const getCalendar = () => request<CalendarView>('/staff/ops/calendar');
+export interface StaffParkStatus { state: 'open' | 'partial' | 'closed'; message: string; pausedActivities: string[]; pausedNames: string[]; updatedAt: string | null; updatedBy: string | null }
+export const getParkStatus = () => request<StaffParkStatus>('/staff/ops/park-status');
+export const setParkStatus = (body: { state: 'open' | 'partial' | 'closed'; message: string; pausedActivities: string[] }) => request<StaffParkStatus>('/staff/ops/park-status', { method: 'PUT', body: JSON.stringify(body) });
 export function saveCalendar(body: { slotCapacity?: number; closures: CalendarClosure[]; activityCapacity: Record<string, { morning: number | null; afternoon: number | null }>; sessions?: Record<string, { times: string[]; capacity: number | null; durationMin: number }> }): Promise<CalendarView> {
   return request<CalendarView>('/staff/ops/calendar', { method: 'PUT', body: JSON.stringify(body) });
 }

@@ -13,6 +13,7 @@ import { Spinner, card, display, mono } from './ui';
 import BookingsPanel from './BookingsPanel';
 import ChatConsole from './ChatConsole';
 import GatePanel from './GatePanel';
+import ParkStatusPanel from './ParkStatusPanel';
 import CouponsPanel from './CouponsPanel';
 import ReportsPanel from './ReportsPanel';
 import BackupsPanel from './BackupsPanel';
@@ -288,6 +289,7 @@ export default function StaffDashboard() {
         <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
           <BookingsPanel onChanged={reloadStats} openRef={jumpRef} onOpened={() => setJumpRef(null)} />
         </div>
+        {tab === 'gate' && <ParkStatusPanel />}
         {tab === 'gate' && <GatePanel onChanged={reloadStats} onOpenBooking={(ref) => { setJumpRef(ref); setTab('bookings'); }} />}
         {tab === 'offers' && <CouponsPanel />}
         {tab === 'reports' && <ReportsPanel />}

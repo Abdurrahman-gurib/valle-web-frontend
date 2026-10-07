@@ -13,6 +13,7 @@ import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import type { GalleryShot } from '../types';
 import { localizePath, useT, fwd } from '../i18n';
+import { useParkStatus } from '../components/WeatherCard';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -96,6 +97,8 @@ export default function DetailPage() {
   const act = catalog.ACTS.find((a) => a.id === id);
   const catName = act ? catalog.CAT[act.cat].name : '';
   const rp = act ? catalog.RATEP[act.id] : undefined;
+  const parkStatus = useParkStatus();
+  const paused = !!act && (parkStatus?.state === 'closed' || !!parkStatus?.pausedActivities.includes(act.id));
   useSeo(act ? {
     title: t('{name} · {category} at VALLÉ Advenature™ Park, Mauritius', { name: act.name, category: catName }),
     description: act.blurb,
@@ -242,6 +245,7 @@ export default function DetailPage() {
               <div>
                 <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PULSE')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4, color: '#FFFC33' }}>{d.pulseName}</div>
+                {paused && <div data-testid="activity-paused" style={{ marginTop: 6, display: 'inline-block', background: '#FF3358', color: '#FFFFFF', fontSize: 10, letterSpacing: '.14em', fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{t('PAUSED TODAY · WEATHER')}</div>}
               </div>
               <div>
                 <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PRICE')}</div>
