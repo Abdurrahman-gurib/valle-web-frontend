@@ -9,6 +9,8 @@ import { localizePath, tr, useLang, useT, _t } from '../i18n';
 import { InstallCard } from '../components/InstallApp';
 import { ManageBooking } from './ManageBooking';
 import { DayForecast, useParkStatus } from '../components/WeatherCard';
+import { TicketDay } from '../components/TicketDay';
+import { TicketPhotos } from '../components/TicketPhotos';
 
 /** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
 const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
@@ -118,6 +120,8 @@ export default function TicketPage() {
               <WaiverBlock group={!!tk.group} signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
+            {tk.status !== 'cancelled' && <TicketDay tk={tk} />}
+            {tk.status !== 'cancelled' && <TicketPhotos tk={tk} token={token} onChanged={(v) => setT(v)} />}
             {tk.lines.some((l) => l.time) && (
               <div data-testid="itinerary" style={{ margin: '14px 0 10px', textAlign: 'start', background: '#FFFDE0', border: '1.5px solid #FFE94D', borderRadius: 14, padding: '12px 16px' }}>
                 <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#8A6A00' }}>{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</div>

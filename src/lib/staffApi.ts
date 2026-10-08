@@ -199,6 +199,19 @@ export interface CalendarView {
 export const getCalendar = () => request<CalendarView>('/staff/ops/calendar');
 export interface StaffParkStatus { state: 'open' | 'partial' | 'closed'; message: string; pausedActivities: string[]; pausedNames: string[]; updatedAt: string | null; updatedBy: string | null }
 export const getParkStatus = () => request<StaffParkStatus>('/staff/ops/park-status');
+export interface LiveOpsView { updatedAt: string | null; updatedBy: string; activities: Record<string, { name: string; waitMin: number | null; meetingPoint: string; note: string; paused: boolean }> }
+export const getLiveOps = () => request<LiveOpsView>('/staff/ops/park-status/live');
+export const setLiveOps = (activities: Record<string, { waitMin: number | null; meetingPoint: string; note: string }>) => request<LiveOpsView>('/staff/ops/park-status/live', { method: 'PUT', body: JSON.stringify({ activities }) });
+export interface StaffPhotoSet { refCode: string; packageLabel: string | null; photosReadyAt: string | null; count: number; photos: { id: string; name: string; mime: string; size: number; caption: string; createdAt: string; url: string }[] }
+export const getPhotos = (refCode: string) => request<StaffPhotoSet>('/staff/bookings/' + encodeURIComponent(refCode) + '/photos');
+export function uploadPhoto(refCode: string, file: File, caption = ''): Promise<StaffPhotoSet> {
+  const form = new FormData();
+  form.append('file', file);
+  if (caption) form.append('caption', caption);
+  return upload<StaffPhotoSet>('/staff/bookings/' + encodeURIComponent(refCode) + '/photos', form);
+}
+export const deletePhoto = (refCode: string, id: string) => request<StaffPhotoSet>('/staff/bookings/' + encodeURIComponent(refCode) + '/photos/' + id, { method: 'DELETE' });
+export const photosReady = (refCode: string) => request<{ email: boolean; whatsapp: boolean; photosReadyAt: string }>('/staff/bookings/' + encodeURIComponent(refCode) + '/photos/ready', { method: 'POST' });
 export const setParkStatus = (body: { state: 'open' | 'partial' | 'closed'; message: string; pausedActivities: string[] }) => request<StaffParkStatus>('/staff/ops/park-status', { method: 'PUT', body: JSON.stringify(body) });
 export function saveCalendar(body: { slotCapacity?: number; closures: CalendarClosure[]; activityCapacity: Record<string, { morning: number | null; afternoon: number | null }>; sessions?: Record<string, { times: string[]; capacity: number | null; durationMin: number }> }): Promise<CalendarView> {
   return request<CalendarView>('/staff/ops/calendar', { method: 'PUT', body: JSON.stringify(body) });
@@ -417,12 +430,15 @@ export interface GateWaiver {
   isMinor: boolean; guardianName: string; address: string; email: string; phone: string; nationality: string; idNumber: string; marketingConsent: boolean;
   emergencyName: string; emergencyPhone: string; medicalNotes: string;
   photoConsent: boolean; signedBy: string; signature: string; lang: string; signedAt: string; flags: GateFlag[];
+  version: number;
 }
 export interface GateView {
   refCode: string; guestName: string; phone: string; visitDate: string; slot: SlotKey; adults: number; kids: number;
   status: BookingStatus; payMode: PayMode; total: number; paidAmount: number; balance: number; adjustmentAmount: number; adjustmentNote: string; isToday: boolean; lines: { label: string; amount: number }[];
   activities: { id: string; name: string; limits: Record<string, number> }[];
   required: number; signedCount: number; missing: number; stops: number; waivers: GateWaiver[]; waiverUrl: string;
+  /** Superseded signatures (a participant signed again), newest first. */
+  history: { id: string; participantName: string; version: number; signedAt: string; supersededAt: string }[];
 }
 export interface GateDayRow { refCode: string; guestName: string; slot: SlotKey; party: number; status: BookingStatus; signed: number; balance: number }
 

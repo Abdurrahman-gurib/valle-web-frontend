@@ -7,6 +7,7 @@ import {
 } from '../../lib/staffApi';
 import { NATC } from '../../lib/format';
 import NewBookingDrawer from './NewBookingDrawer';
+import { PhotosSection } from './PhotosSection';
 import { LineEditor, type EditableLine } from './LineEditor';
 import { ExportLink } from './reportUi';
 import { mur as money, partyLabel } from '../../lib/format';
@@ -821,6 +822,8 @@ function Drawer({ refCode, onClose, onPatched }: {
                   </div>
                 )}
               </div>
+
+              {data.status !== 'cancelled' && <PhotosSection refCode={refCode} />}
 
               {audit.length > 0 && (
                 <>

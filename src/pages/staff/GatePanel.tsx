@@ -216,7 +216,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
                 {openSig === w.id && (
                   <div style={{ marginTop: 8, display: 'grid', gap: 6, fontSize: 13 }}>
                     <img src={w.signature} alt={`Signature of ${w.signedBy}`} style={{ maxWidth: 320, width: '100%', border: '1px solid #EBE2FF', borderRadius: 10, background: '#FFFFFF' }} />
-                    <div>Signed by <strong>{w.signedBy}</strong>{w.isMinor ? ' (guardian)' : ''} · {shortDate(w.signedAt)} {clockTime(w.signedAt)} · read in {w.lang.toUpperCase()}</div>
+                    <div>Signed by <strong>{w.signedBy}</strong>{w.isMinor ? ' (guardian)' : ''} · {shortDate(w.signedAt)} {clockTime(w.signedAt)} · read in {w.lang.toUpperCase()}{w.version > 1 ? <span data-testid="waiver-version" style={{ marginInlineStart: 6, fontFamily: "'Chivo Mono',monospace", fontSize: 10, background: '#FFFDE0', border: '1px solid #FFE94D', borderRadius: 999, padding: '2px 7px' }}>signed {w.version}× · earlier versions kept</span> : null}</div>
                     <div>Born {shortDate(w.birthDate)} · {w.nationality || 'nationality not given'}{w.idNumber ? ` · ID/passport ${w.idNumber}` : ''}</div>
                     <div>{w.address ? `${w.address} · ` : ''}{w.phone}{w.email ? ` · ${w.email}` : ''}</div>
                     <div>Emergency: {w.emergencyName}, {w.emergencyPhone}</div>
