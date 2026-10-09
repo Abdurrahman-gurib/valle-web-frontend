@@ -327,7 +327,7 @@ test.describe('packages', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
   test('opens a package modal with prices', async ({ page }) => {
-    await page.goto('/packages');
+    await page.goto('/packages/exclusive');
     await expect(page.getByRole('heading', { name: /Packages/i }).first()).toBeVisible();
     await page.getByText('MOST POPULAR', { exact: false }).first().click();
     await expect(page.getByText('WHAT IS INCLUDED', { exact: true })).toBeVisible();
@@ -717,7 +717,7 @@ test.describe('packages booked online', () => {
 
     // the prerendered page carries no product keys; they arrive with the live catalog
     const catalogLoaded = page.waitForResponse((r) => r.url().includes('/api/catalog') && r.ok());
-    await page.goto('/packages#combo');
+    await page.goto('/packages/exclusive#combo');
     await catalogLoaded;
     await page.getByRole('button', { name: /Book this combo/ }).first().click();
     await expect(page).toHaveURL(/\/booking$/);

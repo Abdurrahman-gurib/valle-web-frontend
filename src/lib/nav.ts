@@ -1,3 +1,4 @@
+import { groupOfSection } from './packageGroups';
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo } from 'react';
 import { localizePath, useLang } from '../i18n';
@@ -7,7 +8,8 @@ import { localizePath, useLang } from '../i18n';
  *   home()            -> /
  *   explore(cat?, q?) -> /explore?cat=..&q=..
  *   detail(id)        -> /activities/:id
- *   packages(sect?)   -> /packages#sect   (ls | ex | vip | combo | cine | photo | team | quote)
+ *   packages(sect?)   -> /packages/<class>#sect (ls | ex | vip | combo | cine | photo | team), /packages#quote
+ *   packageGroup(slug) -> /packages/<class>
  *   resto(id)         -> /dine/:id        (chamouze | citronelle)
  *   booking()         -> /booking
  *   plan()/dine()        -> /#plan /#dine (scrolls on the home page)
@@ -28,13 +30,14 @@ export const paths = {
     return L('/explore' + (qs ? '?' + qs : ''));
   },
   detail: (id: string) => L('/activities/' + id),
-  packages: (section?: string) => L('/packages' + (section ? '#' + section : '')),
+  packages: (section?: string) => { const g = section ? groupOfSection(section) : ''; return L('/packages' + (g ? '/' + g : '') + (section ? '#' + section : '')); },
+  packageGroup: (slug: string) => L('/packages/' + slug),
   resto: (id: string) => L('/dine/' + id),
   booking: () => L('/booking'),
   plan: () => L('/#plan'),
   dine: () => L('/#dine'),
   story: () => L('/story'),
-  team: () => L('/packages#team'),
+  team: () => L('/packages/corporate#team'),
   groups: () => L('/groups'),
   vacancies: () => L('/vacancies'),
   privacy: () => L('/privacy'),

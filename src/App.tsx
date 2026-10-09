@@ -102,6 +102,7 @@ function publicRoutes(prefix: string) {
     <Route key={prefix + 'act'} path={prefix + '/activities/:id'} element={<DetailPage />} />,
     <Route key={prefix + 'exp'} path={prefix + '/experience/:id'} element={<LegacyExperienceRedirect />} />,
     <Route key={prefix + 'pk'} path={prefix + '/packages'} element={<PackagesPage />} />,
+    <Route key={prefix + 'pkg'} path={prefix + '/packages/:group'} element={<PackagesPage />} />,
     <Route key={prefix + 'dine'} path={prefix + '/dine/:id'} element={<RestaurantPage />} />,
     <Route key={prefix + 'book'} path={prefix + '/booking'} element={<BookingPage />} />,
     <Route key={prefix + 'story'} path={prefix + '/story'} element={<StoryPage />} />,

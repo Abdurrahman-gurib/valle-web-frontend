@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import NotFoundPage from './NotFound';
+import { PACKAGE_GROUPS, packageGroupOf, type PackageGroup } from '../lib/packageGroups';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useCatalog } from '../store/CatalogContext';
@@ -292,7 +294,10 @@ const rateBtn = (on: boolean): CSSProperties => ({
 
 export default function PackagesPage() {
   const t = useT();
-  useSeo({ title: t('Packages & 2026 pricelist · VALLÉ Advenature™ Park'), description: t('Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.'), canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
+  const seoGroup = packageGroupOf(useParams<{ group?: string }>().group);
+  useSeo(seoGroup
+    ? { title: t('{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park', { group: t(seoGroup.title) }), description: t(seoGroup.intro), canonicalPath: '/packages/' + seoGroup.slug, image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }, { name: seoGroup.title, path: '/packages/' + seoGroup.slug }])] }
+    : { title: t('Packages & 2026 pricelist · VALLÉ Advenature™ Park'), description: t('Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.'), canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
   const catalog = useCatalog();
   const { rate, rateTag, setRate } = useApp();
   const goto = useGoto();
@@ -366,18 +371,39 @@ export default function PackagesPage() {
     }
   };
   const quoteAgain = () => setQSent(false);
+  const { group: groupSlug } = useParams<{ group?: string }>();
+  const group: PackageGroup | undefined = groupSlug ? PACKAGE_GROUPS.find((g) => g.slug === groupSlug) : undefined;
+  /** A section shows on its own class page only; the index shows the classes. */
+  const show = (key: string) => !!group && group.keys.includes(key);
   const qReplyTo = qEmail.trim() || qPhone.trim() || t('your inbox');
+
+  if (groupSlug && !group) return <NotFoundPage />;
 
   return (
     <>
       <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <h1 style={{ ...BARLOW, fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Packages')}</h1>
+          <h1 style={{ ...BARLOW, fontSize: group ? 'clamp(34px,5vw,72px)' : 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{group ? t(group.title) : t('Packages')}</h1>
           <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('ALL PRICES VAT INCLUSIVE')}</span>
         </div>
-        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{t('Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.')}</p>
+        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{group ? t(group.intro) : t('Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.')}</p>
+
+        {/* the six classes, each on its own page; on a class page the strip doubles as the way to the others */}
+        <nav aria-label={t('Package classes')} data-testid="package-classes" style={{ display: 'grid', gridTemplateColumns: group ? 'repeat(auto-fit,minmax(150px,1fr))' : 'repeat(auto-fit,minmax(240px,1fr))', gap: group ? 8 : 14, marginTop: group ? 22 : 30 }}>
+          {PACKAGE_GROUPS.map((g) => {
+            const on = group?.slug === g.slug;
+            return (
+              <Link key={g.slug} to={paths.packageGroup(g.slug)} data-testid={`class-${g.slug}`} style={{ textDecoration: 'none', color: on ? '#FFFFFF' : '#340057', background: on ? '#340057' : '#FFFFFF', boxShadow: on ? 'none' : '0 0 0 1.5px #EBE2FF', borderRadius: group ? 999 : 18, padding: group ? '10px 14px' : '18px 20px', display: 'flex', flexDirection: 'column', gap: 6, textAlign: group ? 'center' : 'start' }}>
+                <span style={{ ...BARLOW, fontSize: group ? 14 : 22, textTransform: 'uppercase', lineHeight: 1 }}>{t(g.title)}</span>
+                {!group && <span style={{ fontSize: 13.5, lineHeight: 1.5, color: 'rgba(52,0,87,.72)' }}>{t(g.intro)}</span>}
+                {!group && <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', color: '#FF3358', marginTop: 'auto' }}>{t('SEE THE PRICES →')}</span>}
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* LIGHT & STANDARD */}
+        {show('ls') && (<>
         <SectionHead id="ls" title={t('Light & Standard')} tag={t('01 · START HERE')} marginTop="clamp(40px,6vw,64px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.PACKS.ls.map((p) => (
@@ -385,7 +411,9 @@ export default function PackagesPage() {
           ))}
         </div>
 
+        </>)}
         {/* EXCLUSIVE */}
+        {show('ex') && (<>
         <SectionHead id="ex" title={t('Exclusive')} tag={t('02 · BRONZE TO PLATINUM')} marginTop="clamp(44px,6vw,72px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {catalog.PACKS.ex.map((p) => (
@@ -401,7 +429,9 @@ export default function PackagesPage() {
           </div>
         </div>
 
+        </>)}
         {/* VIP */}
+        {show('vip') && (<>
         <div id="vip" style={{ marginTop: 'clamp(44px,6vw,72px)', background: '#340057', borderRadius: 22, overflow: 'hidden', display: 'flex', flexWrap: 'wrap' }}>
           <div style={{ flex: 1.5, minWidth: 'min(100%,340px)', padding: 'clamp(26px,4vw,44px)', color: '#FFFFFF' }}>
             <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{t('SOUVENIR GIFT OFFERED')}</span>
@@ -431,7 +461,9 @@ export default function PackagesPage() {
           <VipImage onOpen={openVip} />
         </div>
 
+        </>)}
         {/* DIAMOND */}
+        {show('diamond') && (<>
         <SectionHead id="diamond" title={t('Diamond')} tag={t('04 · THE ULTIMATE DAY · NR')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
           {(catalog.PACKS.diamond || []).map((p) => (
@@ -445,7 +477,9 @@ export default function PackagesPage() {
           </div>
         </div>
 
+        </>)}
         {/* RESIDENT PACKAGES */}
+        {show('resident') && (<>
         <SectionHead id="resident" title={t('Resident packages')} tag={t('05 · PER PERSON · MAURITIAN ID OR PERMIT')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.resident || []).map((p) => (
@@ -454,7 +488,9 @@ export default function PackagesPage() {
         </div>
         <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
 
+        </>)}
         {/* SENIOR CITIZENS */}
+        {show('senior') && (<>
         <SectionHead id="senior" title={t('Senior citizens')} tag={t('06 · AGES 55 AND ABOVE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.senior || []).map((p) => (
@@ -462,7 +498,9 @@ export default function PackagesPage() {
           ))}
         </div>
 
+        </>)}
         {/* STUDENT OFFER */}
+        {show('student') && (<>
         <SectionHead id="student" title={t('Student special offer')} tag={t('07 · PRE-PRIMARY, PRIMARY & SECONDARY')} marginTop="clamp(48px,7vw,80px)" />
         <PriceTable
           title={<>{t('Every great explorer')}<br /><span style={{ color: '#FFFC33' }}>{t('starts small')}</span></>}
@@ -473,7 +511,9 @@ export default function PackagesPage() {
           image="/images/map/zip-selfie-cheer.webp"
         />
 
+        </>)}
         {/* KIDS PARK PRICELIST */}
+        {show('kids') && (<>
         <SectionHead id="kids" title={t('Vallé Kids Park')} tag={t('08 · PAY WITH POINTS · 10 POINTS = RS 100')} marginTop="clamp(48px,7vw,80px)" />
         <PriceTable
           title={<>{t('Little feet')}<br /><span style={{ color: '#FFFC33' }}>{t('lead the way')}</span></>}
@@ -484,7 +524,9 @@ export default function PackagesPage() {
           image="/images/miniquad.avif"
         />
 
+        </>)}
         {/* COMBO PACKAGES */}
+        {show('combo') && (<>
         <div style={{ marginTop: 16 }}><Link to={paths.groups()} data-testid="book-school" style={{ display: 'inline-block', background: '#340057', color: '#FFFFFF', borderRadius: 999, padding: '13px 22px', fontWeight: 700, textDecoration: 'none' }}>{t('Book a school visit online →')}</Link></div>
 
         <SectionHead id="combo" title={t('Combo packages')} tag={t('09 · QUAD + ZIPLINE, ONE PRICE')} marginTop="clamp(48px,7vw,80px)" />
@@ -494,7 +536,9 @@ export default function PackagesPage() {
           ))}
         </div>
 
+        </>)}
         {/* CINEMATIC EXPERIENCE */}
+        {show('cine') && (<>
         <SectionHead id="cine" title={t('Cinematic experience')} tag={t('10 · SAME PRICE FOR EVERYONE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 26, alignItems: 'stretch' }}>
           <div style={{ flex: '1 1 320px', background: '#FFFC33', borderRadius: 20, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF' }}>
@@ -523,7 +567,9 @@ export default function PackagesPage() {
           </div>
         </div>
 
+        </>)}
         {/* PHOTO PRICELIST */}
+        {show('photo') && (<>
         <SectionHead id="photo" title={t('Photo pricelist')} tag={t('11 · 1 JULY 2026 TO 30 JUNE 2027')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 20 }}>
           <div style={{ display: 'flex', gap: 4, background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 999, padding: 4 }}>
@@ -547,7 +593,9 @@ export default function PackagesPage() {
           <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('ALL PRICES VAT INCLUSIVE · PHOTOS ARE NON REFUNDABLE · T&C APPLY')}</div>
         </div>
 
+        </>)}
         {/* TEAM BUILDING */}
+        {show('team') && (<>
         <SectionHead id="team" title={t('Team building')} tag={t('12 · FROM RS 2,850 PER PERSON')} marginTop="clamp(48px,7vw,80px)" />
         <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16, marginTop: 26 }}>
@@ -563,6 +611,7 @@ export default function PackagesPage() {
           <span style={teamPill}>{t('TAILORED MENUS & LOGISTICS')}</span>
         </div>
 
+        </>)}
         {/* QUOTE FORM */}
         <div id="quote" ref={quoteEl} style={{ marginTop: 'clamp(36px,5vw,56px)', background: '#FFFFFF', borderRadius: 20, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF' }}>
           <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
