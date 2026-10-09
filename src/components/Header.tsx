@@ -154,11 +154,14 @@ export function Header() {
 
   const go = (fn: () => void) => () => { closeAll(); fn(); };
 
-  const pkgLinks: [string, string][] = [
-    [t('Light & Standard'), 'ls'], [t('Exclusive tiers'), 'ex'], [t('VIP Ultimate'), 'vip'], [t('Diamond'), 'diamond'],
-    [t('Resident packages'), 'resident'], [t('Senior citizens 55+'), 'senior'], [t('Student offer'), 'student'], [t('Kids Park pricelist'), 'kids'],
-    [t('Combo packages'), 'combo'], [t('Cinematic experience'), 'cine'], [t('Photo pricelist'), 'photo'],
-    [t('Team building'), 'team'],
+  /** The packages menu, classified the way the park sells them. */
+  const pkgGroups: { title: string; links: [string, string][] }[] = [
+    { title: t('EXCLUSIVE PACKAGE'), links: [[t('Light & Standard'), 'ls'], [t('Exclusive tiers'), 'ex'], [t('VIP Ultimate'), 'vip'], [t('Diamond'), 'diamond'], [t('Combo packages'), 'combo']] },
+    { title: t('RESIDENT PACKAGE'), links: [[t('Resident packages'), 'resident'], [t('Kids Park pricelist'), 'kids']] },
+    { title: t('SENIOR CITIZEN'), links: [[t('Senior citizens 55+'), 'senior']] },
+    { title: t('STUDENT PACKAGE'), links: [[t('Student offer'), 'student']] },
+    { title: t('CORPORATE PACKAGE'), links: [[t('Team building'), 'team']] },
+    { title: t('PHOTO & VIDEO PACKAGE'), links: [[t('Photo pricelist'), 'photo'], [t('Cinematic experience'), 'cine']] },
   ];
 
   const searchGo = () => { closeAll(); goto.explore('all', searchQ.trim() || undefined); };
@@ -317,9 +320,14 @@ export function Header() {
                 <div onClick={go(() => goto.packages())} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14 }}>
                   {t('ALL PACKAGES')} {fwd()}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '2px 24px' }}>
-                  {pkgLinks.map(([name, key]) => (
-                    <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '18px 24px' }} data-testid="packages-menu">
+                  {pkgGroups.map((g) => (
+                    <div key={g.title}>
+                      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF', marginBottom: 6 }}>{g.title}</div>
+                      {g.links.map(([name, key]) => (
+                        <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>
