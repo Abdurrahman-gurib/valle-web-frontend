@@ -18,8 +18,8 @@ function MarqueeLine() {
 export function SlopeMarquee() {
   return (
     <div style={{ position: 'relative', zIndex: 4, marginTop: -96, overflow: 'hidden' }}>
-      {/* one band, 7° slope, with the caution stripe above it and its mirror below */}
-      <div style={{ margin: '5vw -4vw', transform: 'rotate(-7deg)' }}>
+      {/* one band on the original 4° slope, with the caution stripe above it and its mirror below */}
+      <div style={{ margin: '3.6vw -3vw', transform: 'rotate(-4deg)' }}>
         <Stripes height={12} />
         <div style={{ background: '#340057', padding: '14px 0', overflow: 'hidden', whiteSpace: 'nowrap', boxShadow: '0 16px 36px -14px rgba(38,0,64,.5)' }}>
           <div style={{ display: 'inline-flex', animation: 'vmarq 42s linear infinite', willChange: 'transform' }}>
