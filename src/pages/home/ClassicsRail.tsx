@@ -1,3 +1,4 @@
+import { showsDuration } from '../../types';
 import { useEffect, useRef } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
@@ -54,7 +55,7 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
         </div>
         <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40 }}>{a.blurb}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)' }}>{a.dur} · {a.age}</span>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</span>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>{t('Details →')}</span>
         </div>
       </div>

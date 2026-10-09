@@ -41,7 +41,7 @@ export function Hero() {
         />
       ))}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.88) 0%, rgba(52,0,87,.2) 48%, rgba(31,0,51,.4) 100%)' }} />
-      <div style={{ position: 'relative', maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', paddingBottom: 'clamp(130px,19vh,220px)' }}>
+      <div style={{ position: 'relative', maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: 'clamp(120px,18vh,200px)' }}>
         <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>
           <h1 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(48px,8.4vw,132px)', lineHeight: 0.82, letterSpacing: '-0.01em', color: '#FFFFFF', margin: 0, textTransform: 'uppercase' }}>
             {t('Feel the')}<br /><span style={{ color: '#FFFC33' }}>{t('colours.')}</span>

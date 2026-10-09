@@ -11,7 +11,7 @@ import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
-import type { GalleryShot } from '../types';
+import { showsDuration, type GalleryShot } from '../types';
 import { localizePath, useT, fwd } from '../i18n';
 import { useParkStatus } from '../components/WeatherCard';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
@@ -72,7 +72,7 @@ function RelatedCard({ a }: { a: CardModel }) {
       <div style={{ padding: '13px 15px 15px' }}>
         <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 17, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: MONO, fontSize: 11, color: 'rgba(52,0,87,.6)' }}>
-          <span>{a.dur}</span>
+          <span>{showsDuration(a.id) ? a.dur : ''}</span>
           <span style={{ fontWeight: 700, color: '#340057' }}>{a.priceLabel}</span>
         </div>
       </div>
@@ -235,10 +235,12 @@ export default function DetailPage() {
           <StripesSm height={8} />
           <div style={{ padding: '22px 26px 0' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: MONO }}>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('DURATION')}</div>
-                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.dur}</div>
-              </div>
+              {showsDuration(act.id) && (
+                <div>
+                  <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('DURATION')}</div>
+                  <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.dur}</div>
+                </div>
+              )}
               <div>
                 <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('MIN AGE')}</div>
                 <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.age}</div>

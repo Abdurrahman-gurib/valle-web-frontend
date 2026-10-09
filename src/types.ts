@@ -123,6 +123,8 @@ export interface Product {
   rr: number; nr: number; dblRr: number | null; dblNr: number | null; rateOnly: 'rr' | 'nr' | null; image: string; note: string;
 }
 export const PRODUCT_PREFIX = 'product:';
+/** Only the motorised loops advertise a duration; everything else runs at the guest's pace. */
+export const showsDuration = (id: string) => id === 'quad' || id === 'buggy';
 /** What a product costs for a party: per person, per single/double, or per unit. */
 export function productAmount(p: Product, rate: RateKey | null, adults: number, kids: number, units: number): number {
   const single = rate === 'nr' ? p.nr : p.rr;

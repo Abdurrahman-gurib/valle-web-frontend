@@ -1,3 +1,4 @@
+import { showsDuration } from '../types';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -121,7 +122,7 @@ function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
         <div style={{
           fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)',
           marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 11,
-        }}>{a.dur} · {a.age}</div>
+        }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
         {a.hasAdd && (
           <button
             {...bindAdd}
