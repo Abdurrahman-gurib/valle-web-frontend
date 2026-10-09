@@ -11,7 +11,7 @@ import { STAFF_STATE } from './auth-state';
 test.describe('weather and park status', () => {
   // every project shares one park status in the API, so the tests run one at a time
   test.describe.configure({ mode: 'serial' });
-  test.skip(({ browserName }, info) => info.project.name !== 'desktop', 'same flow on every viewport');
+  test.beforeEach(({ }, info) => { test.skip(info.project.name !== 'desktop', 'same flow on every viewport'); });
   test.use({ storageState: STAFF_STATE });
 
   test('GET /api/weather returns now, the next hours and the week for the park', async ({ page }) => {
