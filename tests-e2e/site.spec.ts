@@ -201,7 +201,7 @@ test.describe('explore', () => {
   test('lists all 21 experiences and filters by search', async ({ page }) => {
     await page.goto('/explore');
     await expect(page.getByText('21 OF 21')).toBeVisible();
-    await page.getByPlaceholder(/Search/i).fill('zip');
+    await page.goto('/explore?q=zip'); // the header search lands here; the page itself has no search box
     await expect(page.getByText(/\d+ OF 21/)).toBeVisible();
     const count = await page.getByText(/^\d+ OF 21$/).textContent();
     expect(Number(count!.split(' ')[0])).toBeLessThan(21);

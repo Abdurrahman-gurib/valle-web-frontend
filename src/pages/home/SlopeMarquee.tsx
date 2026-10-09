@@ -18,7 +18,7 @@ function MarqueeLine() {
 export function SlopeMarquee() {
   return (
     <div style={{ position: 'relative', zIndex: 4, marginTop: -96, overflow: 'hidden' }}>
-      <div style={{ margin: '3.6vw -3vw', transform: 'rotate(-4deg)' }}>
+      <div style={{ margin: '3.6vw -3vw', transform: 'rotate(-4deg)', position: 'relative', zIndex: 1 }}>
         <Stripes height={12} />
         <div style={{ background: '#340057', padding: '14px 0', overflow: 'hidden', whiteSpace: 'nowrap', boxShadow: '0 16px 36px -14px rgba(38,0,64,.5)' }}>
           <div style={{ display: 'inline-flex', animation: 'vmarq 42s linear infinite', willChange: 'transform' }}>
@@ -26,6 +26,16 @@ export function SlopeMarquee() {
             <MarqueeLine />
           </div>
         </div>
+      </div>
+      {/* the mirror band: tilted the other way, scrolling the other way, so the two cross under the hero */}
+      <div style={{ margin: '-5vw -3vw 3.6vw', transform: 'rotate(4deg)' }} data-testid="slope-marquee-2">
+        <div style={{ background: '#340057', padding: '14px 0', overflow: 'hidden', whiteSpace: 'nowrap', boxShadow: '0 16px 36px -14px rgba(38,0,64,.5)' }}>
+          <div style={{ display: 'inline-flex', animation: 'vmarq 42s linear infinite reverse', willChange: 'transform' }}>
+            <MarqueeLine />
+            <MarqueeLine />
+          </div>
+        </div>
+        <Stripes height={12} />
       </div>
     </div>
   );

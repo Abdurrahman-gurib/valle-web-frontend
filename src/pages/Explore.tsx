@@ -1,6 +1,6 @@
 import { showsDuration } from '../types';
 import { breadcrumbs, useSeo } from '../lib/seo';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
@@ -184,6 +184,9 @@ export default function ExplorePage() {
   }, [params]);
 
   const [searchFocus, setSearchFocus] = useState(false);
+  const railRef = useRef<HTMLDivElement>(null);
+  const scrollRail = (dir: 1 | -1) => railRef.current?.scrollBy({ left: dir * Math.max(280, railRef.current.clientWidth * 0.8), behavior: 'smooth' });
+  const arrowStyle: CSSProperties = { width: 44, height: 44, borderRadius: 999, border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', fontSize: 26, lineHeight: 1, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
   const [hRate, bindRate] = useHover();
   const [hClear, bindClear] = useHover();
   const [hCta, bindCta] = useHover();
@@ -247,7 +250,7 @@ export default function ExplorePage() {
           fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
           fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em',
           margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
-        }}>{t('Explore Vallé')}</h1>
+        }}>{cat === 'nature' ? t('Already included in entrance admission fees') : t('Explore Vallé')}</h1>
         <span style={{
           fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600,
           letterSpacing: '.16em', color: 'rgba(52,0,87,.55)',
@@ -301,32 +304,8 @@ export default function ExplorePage() {
         </div>
       </div>
 
+      {/* the search box and category chips went: categories come from the Explore menu, the search from the header */}
       <div style={{ margin: '22px 0 0', padding: '14px 0', borderBottom: '1px solid #EBE2FF' }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            value={q}
-            onChange={(e) => setParam('q', e.target.value, true)}
-            onFocus={() => setSearchFocus(true)}
-            onBlur={() => setSearchFocus(false)}
-            placeholder={t('Search ziplines, tortoises, waterfalls…')}
-            style={searchStyle}
-          />
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {CAT_CHIPS.map((c) => {
-              const cc = chipColors(cat === c.key, c.c, c.f);
-              return (
-                <Chip
-                  key={c.key}
-                  label={t(c.label)}
-                  onClick={() => setParam('cat', c.key)}
-                  bg={cc.bg}
-                  fg={cc.fg}
-                  bd={cc.bd}
-                />
-              );
-            })}
-          </div>
-        </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
           <span style={{
             fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 600,
@@ -352,13 +331,31 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 16, marginTop: 24,
-      }}>
-        {cards.map((a) => (
-          <ResultCard key={a.id} a={a} rateTag={app.rateTag} />
-        ))}
-      </div>
+      {cat === 'nature' ? (
+        <div style={{ position: 'relative', marginTop: 24 }} data-testid="nature-carousel">
+          <div ref={railRef} style={{ display: 'flex', gap: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', paddingBottom: 6 }}>
+            {cards.map((a) => (
+              <div key={a.id} style={{ flex: '0 0 min(300px, 82vw)', scrollSnapAlign: 'start' }}>
+                <ResultCard a={a} rateTag={app.rateTag} />
+              </div>
+            ))}
+          </div>
+          {cards.length > 1 && (
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+              <button type="button" onClick={() => scrollRail(-1)} aria-label={t('Previous')} data-testid="carousel-prev" style={arrowStyle}>&lsaquo;</button>
+              <button type="button" onClick={() => scrollRail(1)} aria-label={t('Next')} data-testid="carousel-next" style={arrowStyle}>&rsaquo;</button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 16, marginTop: 24,
+        }}>
+          {cards.map((a) => (
+            <ResultCard key={a.id} a={a} rateTag={app.rateTag} />
+          ))}
+        </div>
+      )}
 
       {noResults && (
         <div style={{ textAlign: 'center', padding: '70px 20px', color: 'rgba(52,0,87,.6)' }}>
