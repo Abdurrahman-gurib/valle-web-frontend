@@ -248,8 +248,9 @@ export default function ExplorePage() {
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <h1 style={{
           fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
-          fontSize: 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em',
-          margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
+          // the nature title is a sentence, so it runs smaller, level and with room under the header
+          fontSize: cat === 'nature' ? 'clamp(26px,3.4vw,48px)' : 'clamp(42px,6.4vw,90px)', lineHeight: cat === 'nature' ? 0.95 : 0.82, letterSpacing: '-0.01em',
+          margin: cat === 'nature' ? '14px 0 0' : 0, maxWidth: '18ch', textTransform: 'uppercase', transform: cat === 'nature' ? 'none' : 'rotate(-4deg)', transformOrigin: 'left bottom',
         }}>{cat === 'nature' ? t('Already included in entrance admission fees') : t('Explore Vallé')}</h1>
         <span style={{
           fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600,
