@@ -320,10 +320,11 @@ export function Header() {
                 <div onClick={go(() => goto.packages())} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14 }}>
                   {t('ALL PACKAGES')} {fwd()}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: '18px 24px' }} data-testid="packages-menu">
+                {/* CSS columns pack the groups top to bottom, so a short group never leaves a gap under it */}
+                <div style={{ columnWidth: 170, columnGap: 24 }} data-testid="packages-menu">
                   {pkgGroups.map((g) => (
-                    <div key={g.title}>
-                      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF', marginBottom: 6 }}>{g.title}</div>
+                    <div key={g.title} style={{ breakInside: 'avoid', marginBottom: 16 }}>
+                      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF', marginBottom: 6 }}>{g.title}</div>
                       {g.links.map(([name, key]) => (
                         <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
                       ))}
