@@ -1,4 +1,3 @@
-import { WeatherCard } from '../../components/WeatherCard';
 import { useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { useGoto } from '../../lib/nav';
@@ -141,10 +140,7 @@ export function ParkMap() {
         <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 15.5, lineHeight: 1.55, maxWidth: '56ch', margin: '18px 0 0' }}>
           {t('The official park sitemap, live. Ten lettered stops loop 1.8 km through the valley, plus the Green Zone wildlife and the Chamouzé falls. Tap any pin to preview a stop.')}
         </p>
-        <div data-reveal="1" style={{ marginTop: 30 }}>
-          <WeatherCard dark />
-        </div>
-        <div data-reveal="1" style={{ marginTop: 24 }}>
+        <div data-reveal="1" style={{ marginTop: 38 }}>
           <div>
             <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
               <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>

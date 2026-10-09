@@ -9,6 +9,9 @@ import { STAFF_STATE } from './auth-state';
  */
 
 test.describe('weather and park status', () => {
+  // every project shares one park status in the API, so the tests run one at a time
+  test.describe.configure({ mode: 'serial' });
+  test.skip(({ browserName }, info) => info.project.name !== 'desktop', 'same flow on every viewport');
   test.use({ storageState: STAFF_STATE });
 
   test('GET /api/weather returns now, the next hours and the week for the park', async ({ page }) => {
@@ -24,17 +27,13 @@ test.describe('weather and park status', () => {
     expect(w.days[0].sunrise).toMatch(/^\d{2}:\d{2}$/);
   });
 
-  test('the home map shows live weather and the park status; a partial status reaches the banner, the activity page and the status API', async ({ page }) => {
+  test('a partial park status reaches the banner, the activity page and the status API', async ({ page }) => {
     // a clean, open park to start
     const reset = () => page.request.put('/api/staff/ops/park-status', { data: { state: 'open', message: '', pausedActivities: [] } });
     expect((await reset()).ok()).toBeTruthy();
     try {
       await page.goto('/');
-      const card = page.getByTestId('weather-card');
-      await card.scrollIntoViewIfNeeded();
-      await expect(page.getByTestId('weather-temp')).toContainText('°C', { timeout: 20_000 });
-      await expect(page.getByTestId('weather-days').locator('> div')).toHaveCount(7);
-      await expect(page.getByTestId('park-state')).toHaveAttribute('data-state', 'open');
+      await expect(page.getByTestId('weather-card')).toHaveCount(0); // the home map no longer carries the weather
       await expect(page.getByTestId('park-status-banner')).toHaveCount(0);
 
       // the desk pauses the zipline for wind
