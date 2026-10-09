@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { useLocation } from 'react-router-dom';
 import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
+import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
@@ -691,6 +692,10 @@ export default function BookingPage() {
                   )}
                 </div>
               </div>
+
+              {/* the route maps of what is in the cart, so the day can be pictured while booking */}
+              {cartActs.some((l) => l.act.id === 'quad' || l.act.id === 'buggy') && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><QuadMap /></div>}
+              {cartActs.some((l) => l.act.id === 'zipline') && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><ZiplineMap /></div>}
 
               {/* 3 · WHEN */}
               <div style={{ marginTop: '34px' }}>

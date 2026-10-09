@@ -87,6 +87,7 @@ export function Footer() {
           <div>
             <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>{t('EXPLORE')}</div>
             <div style={{ marginTop: 10 }}>
+              <FootLink label={t('All 21 experiences')} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
               <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
               <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
               <FootLink label={t('Kids Park')} href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />

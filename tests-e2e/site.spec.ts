@@ -233,7 +233,7 @@ test.describe('experience detail', () => {
     await page.goto('/experience/does-not-exist');
     await expect(page).toHaveURL(/\/activities\/does-not-exist$/);
     await expect(page.getByRole('heading', { name: /Off the/i })).toBeVisible();
-    await page.getByRole('link', { name: /All 21 experiences/i }).click();
+    await page.getByRole('main').getByRole('link', { name: /All 21 experiences/i }).click();
     await expect(page).toHaveURL(/\/explore$/);
   });
 });

@@ -14,6 +14,7 @@ import { Img } from '../components/Img';
 import type { GalleryShot } from '../types';
 import { localizePath, useT, fwd } from '../i18n';
 import { useParkStatus } from '../components/WeatherCard';
+import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -330,6 +331,10 @@ export default function DetailPage() {
           </div>
         </div>
       )}
+
+      {/* the route map of this activity: the two quad & buggy loops, the zipline stations */}
+      {(act.id === 'quad' || act.id === 'buggy') && <div data-testid="activity-route-map" style={{ marginTop: 'clamp(36px,5vw,56px)' }}><QuadMap /></div>}
+      {act.id === 'zipline' && <div data-testid="activity-route-map" style={{ marginTop: 'clamp(36px,5vw,56px)' }}><ZiplineMap /></div>}
 
       <nav aria-label={t('Related pages')} style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('SEE ALSO')}</span>

@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
-import { paths, useGoto } from '../../lib/nav';
-import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
-import { useT, fwd } from '../../i18n';
+import { useT } from '../../i18n';
 
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
   const t = useT();
   const { HERO } = useCatalog();
-  const goto = useGoto();
   const [heroIdx, setHeroIdx] = useState(0);
-  const [h1, bind1] = useHover();
-  const [h2, bind2] = useHover();
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -55,35 +50,6 @@ export function Hero() {
         <p style={{ color: 'rgba(255,255,255,.88)', fontSize: 'clamp(15px,1.6vw,18px)', lineHeight: 1.55, maxWidth: '52ch', margin: '22px 0 0' }}>
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
-        <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap', alignItems: 'center' }}>
-          <a
-            href={paths.booking()}
-            {...bind1}
-            onClick={(e) => { e.preventDefault(); goto.booking(); }}
-            style={{
-              textDecoration: 'none', background: '#FF3358', cursor: 'pointer', fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
-              fontSize: 17.5, letterSpacing: '.04em', textTransform: 'uppercase', color: '#FFFFFF', padding: '17px 30px', borderRadius: 14,
-              display: 'flex', alignItems: 'center', gap: 12, transform: 'rotate(-2deg)', boxShadow: '0 10px 28px rgba(255,51,88,.45)',
-              ...(h1 ? { transform: 'rotate(0deg) translateY(-2px)', background: '#D91E44' } : undefined),
-            }}
-          >
-            {t('Start your adventure')}
-            <span style={{ background: '#FFFC33', color: '#340057', width: 28, height: 28, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontStyle: 'normal' }}>{fwd()}</span>
-          </a>
-          <a
-            href={paths.explore('all')}
-            {...bind2}
-            onClick={(e) => { e.preventDefault(); goto.explore('all'); }}
-            style={{
-              display: 'inline-block', textDecoration: 'none', border: '2px solid #FFFC33', background: 'rgba(52,0,87,.35)', backdropFilter: 'blur(6px)', cursor: 'pointer',
-              fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 17.5, letterSpacing: '.04em',
-              textTransform: 'uppercase', color: '#FFFC33', padding: '16px 28px', borderRadius: 14, transform: 'rotate(-2deg)',
-              ...(h2 ? { background: '#FFFC33', color: '#340057', transform: 'rotate(0deg) translateY(-2px)' } : undefined),
-            }}
-          >
-            {t('{n} experiences', { n: 21 })}
-          </a>
-        </div>
       </div>
       <div style={{ position: 'absolute', right: 'clamp(16px,3.5vw,40px)', bottom: 120, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {HERO.map((src, i) => (
