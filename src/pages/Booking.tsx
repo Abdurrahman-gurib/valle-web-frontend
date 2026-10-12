@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
+import { CurrencyPicker } from '../components/CurrencyPicker';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
@@ -860,7 +861,10 @@ export default function BookingPage() {
             boxShadow: '0 18px 40px -12px rgba(38,0,64,.5)',
           }}>
             <div style={{ flex: 1, minWidth: '170px' }}>
-              <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
+                <CurrencyPicker fg="#FFFFFF" compact />
+              </div>
               <div style={{ fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: '3px' }}>{payModeNote}</div>
             </div>
             {redirecting

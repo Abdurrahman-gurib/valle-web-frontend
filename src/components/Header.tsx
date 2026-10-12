@@ -8,7 +8,6 @@ import { useHover } from '../hooks/useHover';
 import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
-import { CurrencyPicker } from './CurrencyPicker';
 import { LanguagePicker, LanguageSuggest } from './LanguagePicker';
 import { useLang, useT, _t, fwd } from '../i18n';
 
@@ -176,7 +175,9 @@ export function Header() {
         <LanguageSuggest />
         <div style={{
           maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', height: 70,
-          display: 'flex', alignItems: 'center', gap: 'clamp(12px,2.5vw,32px)',
+          // desktop: three columns so the menu sits in the true centre between logo and actions
+          ...(isMobile ? { display: 'flex' } : { display: 'grid', gridTemplateColumns: '1fr auto 1fr' }),
+          alignItems: 'center', gap: 'clamp(12px,2.5vw,32px)',
         }}>
           <a
             href="/"
@@ -184,7 +185,7 @@ export function Header() {
             onClick={(e) => { e.preventDefault(); go(goto.home)(); }}
             style={{
               textDecoration: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', lineHeight: 1,
-              userSelect: 'none', transform: 'rotate(-4deg)', flexShrink: 0,
+              userSelect: 'none', transform: 'rotate(-4deg)', flexShrink: 0, justifySelf: 'start',
             }}
           >
             <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 27, letterSpacing: '-0.01em', color: headerFg }}>VALLÉ</span>
@@ -193,7 +194,7 @@ export function Header() {
 
           {!isMobile && (
             <>
-              <nav ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, minWidth: 0, justifyContent: 'center', overflow: 'hidden' }}>
+              <nav ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, justifyContent: 'center', overflow: 'hidden' }}>
                 <NavBtn snug={lang !== 'en'} label={t('Explore')} chev={megaOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaOpen(!megaOpen); setMegaPkgOpen(false); }} />
                 <NavBtn snug={lang !== 'en'} label={t('Packages')} chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaPkgOpen(!megaPkgOpen); setMegaOpen(false); }} />
                 <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
@@ -201,7 +202,7 @@ export function Header() {
                 <NavBtn snug={lang !== 'en'} label={menu('Our story')} href={paths.story()} color={headerFg} onClick={go(goto.story)} />
                 <NavBtn snug={lang !== 'en'} label={menu('Vacancies')} href={paths.vacancies()} color={headerFg} onClick={go(gotoVacancies)} />
               </nav>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifySelf: 'end' }}>
                 <button
                   {...bindRate}
                   onClick={app.openRateGate}
@@ -217,7 +218,6 @@ export function Header() {
                   {app.rateTag} ⇄
                 </button>
                 <LanguagePicker fg={headerFg} />
-                <CurrencyPicker fg={headerFg} />
                 <button
                   {...bindDay}
                   onClick={() => { setMegaOpen(false); setMegaPkgOpen(false); app.openDay(); }}
@@ -269,7 +269,6 @@ export function Header() {
                 {app.rateTag}
               </button>
               <LanguagePicker fg={headerFg} compact />
-              <CurrencyPicker fg={headerFg} compact />
               {app.hasSel && (
                 <button
                   onClick={app.openDay}
