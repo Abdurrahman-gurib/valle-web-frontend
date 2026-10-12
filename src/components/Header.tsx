@@ -174,7 +174,8 @@ export function Header() {
         {/* The language offer rides on top of the fixed header so nothing covers it. */}
         <LanguageSuggest />
         <div style={{
-          maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', height: 70,
+          // full width: the logo hugs the left edge and the actions the right
+          margin: '0 auto', padding: '0 clamp(16px,2.5vw,40px)', height: 70,
           // desktop: three columns so the menu sits in the true centre between logo and actions
           ...(isMobile ? { display: 'flex' } : { display: 'grid', gridTemplateColumns: '1fr auto 1fr' }),
           alignItems: 'center', gap: 'clamp(12px,2.5vw,32px)',
