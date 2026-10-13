@@ -1,4 +1,8 @@
 import { Fwd } from '@/components/ui/arrows';
+import { motion } from 'motion/react';
+import { Check, Plus } from 'lucide-react';
+import { ValleButton, ValleCard } from '@/components/ui/valle';
+import { cn } from '@/lib/utils';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import NotFoundPage from './NotFound';
 import { abs, breadcrumbs, useSeo } from '../lib/seo';
@@ -41,44 +45,30 @@ function GalRestShot({ g }: { g: GalleryShot }) {
 }
 
 function RelatedCard({ a }: { a: CardModel }) {
-  const [h, hb] = useHover();
-  const [th, tb] = useHover();
   return (
-    <div
-      onClick={a.open}
-      {...hb}
-      style={{
-        cursor: 'pointer', background: '#FFFFFF', borderRadius: 16, overflow: 'hidden',
-        boxShadow: '0 0 0 1.5px #EBE2FF', transition: 'transform .25s ease, box-shadow .25s ease',
-        ...(h ? { transform: 'translateY(-4px)', boxShadow: '0 18px 36px -16px rgba(52,0,87,.4)' } : undefined),
-      }}
-    >
-      <div style={{ position: 'relative', height: 150, background: '#EBE2FF' }}>
+    <ValleCard onClick={a.open} className="cursor-pointer rounded-2xl" data-testid="related-card">
+      <div className="relative h-[150px] bg-valle-lilac">
         <Img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {a.hasAdd && (
-          <button
+          <motion.button
+            type="button"
             onClick={a.add}
             title={a.addLabel}
-            {...tb}
-            style={{
-              position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: 999,
-              border: '2px solid #FFFFFF', background: a.selOn ? '#33FF74' : 'rgba(52,0,87,.5)',
-              color: a.selOn ? '#340057' : '#FFFFFF', fontSize: 15, fontWeight: 800, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 10px rgba(0,0,0,.3)', padding: 0, lineHeight: 1,
-              ...(th ? { transform: 'scale(1.15)' } : undefined),
-            }}
-          >{a.selOn ? '✓' : '+'}</button>
+            aria-label={a.addLabel}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
+            className={cn('absolute top-2.5 right-2.5 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-white p-0 shadow-[0_4px_10px_rgba(0,0,0,.3)]', a.selOn ? 'bg-valle-green text-valle-purple' : 'bg-valle-purple/50 text-white')}
+          >{a.selOn ? <Check size={16} strokeWidth={3} aria-hidden /> : <Plus size={16} strokeWidth={3} aria-hidden />}</motion.button>
         )}
       </div>
-      <div style={{ padding: '13px 15px 15px' }}>
-        <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 17, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: MONO, fontSize: 11, color: 'rgba(52,0,87,.6)' }}>
+      <div className="px-[15px] pt-[13px] pb-[15px]">
+        <div className="font-display text-[17px] font-extrabold uppercase italic"><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
+        <div className="mt-1.5 flex justify-between font-mono text-[11px] text-valle-purple/60">
           <span>{showsDuration(a.id) ? a.dur : ''}</span>
-          <span style={{ fontWeight: 700, color: '#340057' }}>{a.priceLabel}</span>
+          <span className="font-bold text-valle-purple">{a.priceLabel}</span>
         </div>
       </div>
-    </div>
+    </ValleCard>
   );
 }
 
@@ -265,28 +255,9 @@ export default function DetailPage() {
             </div>
             <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
             {d.hasAdd && (
-              <button
-                onClick={() => d.add()}
-                {...bAdd}
-                style={{
-                  width: '100%', border: '1.5px solid rgba(255,255,255,.5)',
-                  background: d.selOn ? 'rgba(51,255,116,.25)' : 'transparent',
-                  color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700,
-                  padding: '14px 0', borderRadius: 999, transition: 'all .15s',
-                  ...(hAdd ? { transform: 'translateY(-1px)', background: 'rgba(255,255,255,.16)' } : undefined),
-                }}
-              >{d.addLabel}</button>
+              <ValleButton onClick={() => d.add()} size="md" className={cn('border-[1.5px] border-white/50 py-3.5 text-[15px] text-white hover:bg-white/15', d.selOn ? 'bg-valle-green/25' : 'bg-transparent')}>{d.addLabel}</ValleButton>
             )}
-            <button
-              onClick={bookThisNow}
-              {...bBook}
-              style={{
-                width: '100%', marginTop: 10, border: 0, background: hBook ? '#D91E44' : '#FF3358',
-                cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF',
-                padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
-                ...(hBook ? { transform: 'translateY(-1px)' } : undefined),
-              }}
-            >{t('Book this now →')}</button>
+            <ValleButton variant="primary" onClick={bookThisNow} className="mt-2.5 py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>
             <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
           </div>
         </div>

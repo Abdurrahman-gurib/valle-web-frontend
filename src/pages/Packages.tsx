@@ -12,6 +12,7 @@ import { money, todayIso } from '../lib/format';
 import { createQuote } from '../lib/api';
 import { PackageModal, type PackModalData } from '../components/PackageModal';
 import { Img } from '../components/Img';
+import { BulletList, CardImage, CardTitle, PhotoPill, PriceCol, PriceRow, ValleButton, ValleCard, valleButton } from '../components/ui/valle';
 import { CurrencyPicker } from '../components/CurrencyPicker';
 import type { PackTier, PhotoTier, RateKey, TeamPack } from '../types';
 import { useT } from '../i18n';
@@ -19,11 +20,6 @@ import { useT } from '../i18n';
 const MONO = "'Chivo Mono',monospace";
 const BARLOW: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
 
-const cardBase: CSSProperties = {
-  background: '#FFFFFF', borderRadius: 18, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF',
-  display: 'flex', flexDirection: 'column', transition: 'transform .25s ease, box-shadow .25s ease',
-};
-const cardHov: CSSProperties = { transform: 'translateY(-5px)', boxShadow: '0 24px 46px -18px rgba(52,0,87,.4)' };
 
 function SectionHead({ id, title, tag, marginTop }: { id?: string; title: ReactNode; tag: string; marginTop: string }) {
   return (
@@ -34,80 +30,51 @@ function SectionHead({ id, title, tag, marginTop }: { id?: string; title: ReactN
   );
 }
 
-function PriceCol({ label, value, valSize }: { label: string; value: string; valSize: number }) {
-  return (
-    <div style={{ flex: 1 }}>
-      <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{label}</div>
-      <div style={{ ...BARLOW, fontSize: valSize, marginTop: 2 }}>{value}</div>
-    </div>
-  );
-}
-
 function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const t = useT();
-  const [hc, bindC] = useHover();
-  const [hi, bindI] = useHover();
-  const [hb, bindB] = useHover();
   return (
-    <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div {...bindI} onClick={onOpen} style={{ position: 'relative', aspectRatio: '16 / 10', background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
-        <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
-        <span style={{ position: 'absolute', top: 12, left: 12, background: pk.color, color: pk.fg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)' }}>{pk.badge}</span>
-        <span style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>{t('VIEW DETAILS ↗')}</span>
+    <ValleCard data-testid="pack-card">
+      <CardImage src={pk.img} alt={t('{name} package', { name: pk.name })} onClick={onOpen}>
+        <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: pk.color, color: pk.fg }}>{pk.badge}</span>
+        <PhotoPill>{t('VIEW DETAILS ↗')}</PhotoPill>
+      </CardImage>
+      <div className="flex flex-1 flex-col px-[22px] pt-[18px] pb-[22px]">
+        <CardTitle>{pk.name}</CardTitle>
+        <BulletList items={pk.items} color={pk.color} className="mt-2.5 flex-1" />
+        <div className="mt-2 text-xs text-valle-purple/55">{pk.note}</div>
+        <PriceRow>
+          <PriceCol label={t('SINGLE')} value={pk.single} />
+          <PriceCol label={t('DOUBLE')} value={pk.dbl} />
+        </PriceRow>
+        <ValleButton onClick={onOpen} className="mt-3">{t('See what is included →')}</ValleButton>
       </div>
-      <div style={{ padding: '18px 22px 22px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ ...BARLOW, fontSize: 26, textTransform: 'uppercase' }}>{pk.name}</div>
-        <div style={{ marginTop: 10, flex: 1 }}>
-          {pk.items.map((pi) => (
-            <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '5px 0', fontSize: 14, color: 'rgba(52,0,87,.82)' }}>
-              <span style={{ color: pk.color, fontWeight: 800, flexShrink: 0 }}>●</span><span>{pi.t}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 8 }}>{pk.note}</div>
-        <div style={{ display: 'flex', gap: 14, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 14 }}>
-          <PriceCol label={t('SINGLE')} value={pk.single} valSize={23} />
-          <PriceCol label={t('DOUBLE')} value={pk.dbl} valSize={23} />
-        </div>
-        <button {...bindB} onClick={onOpen} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('See what is included →')}</button>
-      </div>
-    </div>
+    </ValleCard>
   );
 }
 
 function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const t = useT();
-  const [hc, bindC] = useHover();
-  const [hi, bindI] = useHover();
-  const [hb, bindB] = useHover();
   return (
-    <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div {...bindI} onClick={onOpen} style={{ position: 'relative', aspectRatio: '16 / 10', background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
-        <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
-        <span style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px' }}>{t('VIEW DETAILS ↗')}</span>
+    <ValleCard data-testid="pack-card">
+      <CardImage src={pk.img} alt={t('{name} package', { name: pk.name })} onClick={onOpen}>
+        <PhotoPill className="right-2.5 bottom-2.5 text-[9.5px]">{t('VIEW DETAILS ↗')}</PhotoPill>
+      </CardImage>
+      <div className="h-[7px]" style={{ background: pk.color }} />
+      <div className="flex flex-1 flex-col px-5 pt-[18px] pb-5">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle size={24}>{pk.name}</CardTitle>
+          <span className="size-3.5 shrink-0 rounded-full" style={{ background: pk.color }} />
+        </div>
+        <div className="mt-1 text-[13px] font-bold text-valle-violet">{pk.hero}</div>
+        <BulletList items={pk.items} color={pk.color} className="mt-2 flex-1 [&_li]:py-1 [&_li]:text-[13.5px]" />
+        <PriceRow className="gap-3 pt-3">
+          {pk.dbl ? <PriceCol label={t('SINGLE')} value={pk.single} size={20} /> : <PriceCol label={t('PER PERSON')} value={pk.single} size={22} />}
+          {pk.dbl && <PriceCol label={t('DOUBLE')} value={pk.dbl} size={20} />}
+        </PriceRow>
+        {pk.note && <div className="mt-2 text-xs text-valle-purple/55">{pk.note}</div>}
+        <ValleButton variant="outline" size="sm" onClick={onOpen} className="mt-[11px]">{t('View details →')}</ValleButton>
       </div>
-      <div style={{ height: 7, background: pk.color }} />
-      <div style={{ padding: '18px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <div style={{ ...BARLOW, fontSize: 24, textTransform: 'uppercase' }}>{pk.name}</div>
-          <span style={{ width: 14, height: 14, borderRadius: 999, background: pk.color, flexShrink: 0 }} />
-        </div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#7333FF', marginTop: 4 }}>{pk.hero}</div>
-        <div style={{ marginTop: 8, flex: 1 }}>
-          {pk.items.map((pi) => (
-            <div key={pi.t} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '4px 0', fontSize: 13.5, color: 'rgba(52,0,87,.8)' }}>
-              <span style={{ color: pk.color, fontWeight: 800, flexShrink: 0 }}>●</span><span>{pi.t}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          {pk.dbl ? <PriceCol label={t('SINGLE')} value={pk.single} valSize={20} /> : <PriceCol label={t('PER PERSON')} value={pk.single} valSize={22} />}
-          {pk.dbl && <PriceCol label={t('DOUBLE')} value={pk.dbl} valSize={20} />}
-        </div>
-        {pk.note && <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 8 }}>{pk.note}</div>}
-        <button {...bindB} onClick={onOpen} style={{ marginTop: 11, border: '1.5px solid #340057', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center', background: hb ? '#340057' : 'transparent', color: hb ? '#FFFFFF' : '#340057', fontSize: 13.5, fontWeight: 700, padding: '11px 0', borderRadius: 999, width: '100%' }}>{t('View details →')}</button>
-      </div>
-    </div>
+    </ValleCard>
   );
 }
 
@@ -143,87 +110,64 @@ function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactN
 
 function ComboCard({ cb, rateTag, onBook }: { cb: ComboView; rateTag: string; onBook: () => void }) {
   const t = useT();
-  const [hc, bindC] = useHover();
-  const [hb, bindB] = useHover();
   return (
-    <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div style={{ height: 7, background: cb.color }} />
-      <div style={{ padding: '18px 22px 22px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ ...BARLOW, fontSize: 26, textTransform: 'uppercase' }}>{cb.name}</div>
-        <div style={{ marginTop: 10, flex: 1 }}>
-          {cb.items.map((ci) => (
-            <div key={ci.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '6px 0', fontSize: 14.5, color: 'rgba(52,0,87,.82)' }}>
-              <span style={{ color: cb.color, fontWeight: 800, flexShrink: 0 }}>●</span><span>{ci.t}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 14, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 14 }}>
-          <PriceCol label={t('SINGLE · {rate}', { rate: rateTag })} value={cb.single} valSize={23} />
-          <PriceCol label={t('DOUBLE · {rate}', { rate: rateTag })} value={cb.dbl} valSize={23} />
-        </div>
-        <button {...bindB} onClick={onBook} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('Book this combo →')}</button>
+    <ValleCard data-testid="combo-card">
+      <div className="h-[7px]" style={{ background: cb.color }} />
+      <div className="flex flex-1 flex-col px-[22px] pt-[18px] pb-[22px]">
+        <CardTitle>{cb.name}</CardTitle>
+        <BulletList items={cb.items} color={cb.color} className="mt-2.5 flex-1 [&_li]:py-1.5 [&_li]:text-[14.5px]" />
+        <PriceRow>
+          <PriceCol label={t('SINGLE · {rate}', { rate: rateTag })} value={cb.single} />
+          <PriceCol label={t('DOUBLE · {rate}', { rate: rateTag })} value={cb.dbl} />
+        </PriceRow>
+        <ValleButton onClick={onBook} className="mt-3">{t('Book this combo →')}</ValleButton>
       </div>
-    </div>
+    </ValleCard>
   );
 }
 
 function PhotoCard({ ph, onBook }: { ph: PhotoTier; onBook?: () => void }) {
   const t = useT();
-  const [hc, bindC] = useHover();
-  const [hb, bindB] = useHover();
   return (
-    <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div style={{ background: '#340057', padding: '13px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-        <span style={{ ...BARLOW, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>{ph.name}</span>
-        <span style={{ width: 12, height: 12, borderRadius: 999, background: ph.color, flexShrink: 0 }} />
+    <ValleCard>
+      <div className="flex items-center justify-between gap-2 bg-valle-purple px-[18px] py-[13px]">
+        <CardTitle size={20} className="text-valle-yellow">{ph.name}</CardTitle>
+        <span className="size-3 shrink-0 rounded-full" style={{ background: ph.color }} />
       </div>
-      <div style={{ padding: '16px 18px 18px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ background: '#FF3358', color: '#FFFFFF', borderRadius: 10, padding: '11px 14px', textAlign: 'center' }}>
-          <div style={{ ...BARLOW, fontWeight: 800, fontSize: 15, textTransform: 'uppercase' }}>{ph.act}</div>
-          <div style={{ fontSize: 12.5, opacity: 0.9 }}>{t('All captured photos')}</div>
+      <div className="flex flex-1 flex-col px-[18px] pt-4 pb-[18px]">
+        <div className="rounded-[10px] bg-valle-red px-3.5 py-[11px] text-center text-white">
+          <div className="font-display text-[15px] font-extrabold uppercase italic">{ph.act}</div>
+          <div className="text-[12.5px] opacity-90">{t('All captured photos')}</div>
         </div>
-        <div style={{ background: '#FFE2E7', color: '#340057', borderRadius: 10, padding: '9px 14px', textAlign: 'center', marginTop: 8, ...BARLOW, fontWeight: 800, fontSize: 14, textTransform: 'uppercase' }}>{t('1 print included')}</div>
-        <div style={{ flex: 1 }} />
-        <div style={{ display: 'flex', gap: 12, marginTop: 14, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          <PriceCol label={t('SINGLE')} value={ph.single} valSize={21} />
-          <PriceCol label={t('DOUBLE')} value={ph.dbl} valSize={21} />
-        </div>
-        {onBook && <button {...bindB} type="button" data-testid="photo-book" onClick={onBook} style={{ marginTop: 12, border: 0, cursor: 'pointer', fontFamily: 'inherit', background: hb ? '#7333FF' : '#340057', color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '12px 0', borderRadius: 999, width: '100%' }}>{t('Book this photo pack →')}</button>}
+        <div className="mt-2 rounded-[10px] bg-[#FFE2E7] px-3.5 py-[9px] text-center font-display text-sm font-extrabold uppercase italic">{t('1 print included')}</div>
+        <div className="flex-1" />
+        <PriceRow className="gap-3 pt-3">
+          <PriceCol label={t('SINGLE')} value={ph.single} size={21} />
+          <PriceCol label={t('DOUBLE')} value={ph.dbl} size={21} />
+        </PriceRow>
+        {onBook && <ValleButton data-testid="photo-book" onClick={onBook} className="mt-3 py-3">{t('Book this photo pack →')}</ValleButton>}
       </div>
-    </div>
+    </ValleCard>
   );
 }
 
 function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
   const t = useT();
-  const [hc, bindC] = useHover();
-  const [hb, bindB] = useHover();
   return (
-    <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div style={{ aspectRatio: '16 / 10', background: '#EBE2FF', overflow: 'hidden' }}>
-        <Img src={tp.img} alt={t('Team building day at Vallé Advenature™ Park')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <ValleCard>
+      <CardImage src={tp.img} alt={t('Team building day at Vallé Advenature™ Park')} />
+      <div className="flex flex-1 flex-col px-5 pt-4 pb-5">
+        <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/55">{t('YOU WILL GET')}</div>
+        <BulletList items={tp.items} color="#33FF74" className="mt-2 flex-1 [&_li]:py-1" />
+        <ValleButton onClick={onQuote} className="mt-3">{t('Request a quote')}</ValleButton>
       </div>
-      <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('YOU WILL GET')}</div>
-        <div style={{ marginTop: 8, flex: 1 }}>
-          {tp.items.map((pi) => (
-            <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '4px 0', fontSize: 14, color: 'rgba(52,0,87,.82)' }}>
-              <span style={{ color: '#33FF74', fontWeight: 800, flexShrink: 0 }}>●</span><span>{pi.t}</span>
-            </div>
-          ))}
-        </div>
-        <button {...bindB} onClick={onQuote} style={{ marginTop: 12, border: 0, background: hb ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 999, width: '100%' }}>{t('Request a quote')}</button>
-      </div>
-    </div>
+    </ValleCard>
   );
 }
 
 function VipButton({ onOpen }: { onOpen: () => void }) {
   const t = useT();
-  const [h, bind] = useHover();
-  return (
-    <button {...bind} onClick={onOpen} style={{ marginLeft: 'auto', alignSelf: 'center', border: 0, cursor: 'pointer', fontFamily: 'inherit', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 28px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.4)' }}>{t('See the full VIP day →')}</button>
-  );
+  return <ValleButton variant="primary" size="lg" onClick={onOpen} className="ms-auto self-center">{t('See the full VIP day →')}</ValleButton>;
 }
 
 function VipImage({ onOpen }: { onOpen: () => void }) {
@@ -470,11 +414,15 @@ export default function PackagesPage() {
           {(catalog.PACKS.diamond || []).map((p) => (
             <LSCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
-          <div style={{ background: '#340057', borderRadius: 18, padding: '22px 24px', color: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{t('Everything,')}<br /><span style={{ color: '#FFFC33' }}>{t('and then some')}</span></div>
-            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '14px 0 0' }}>{t('The full VIP day plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit. Butler, transfers and a souvenir gift included.')}</p>
-            <div style={{ flex: 1, minHeight: 14 }} />
-            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.6 }}>{t('NON-RESIDENT RATE · ENQUIRE TO RESERVE')}</div>
+          {/* the day in one picture: drone over the expedition country, the story on top */}
+          <div className="relative flex min-h-[380px] flex-col justify-end overflow-hidden rounded-[18px] bg-valle-purple p-6 text-white">
+            <Img src="/images/shoot/group-02.webp" alt="" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,0,51,.94)] via-[rgba(31,0,51,.55)] to-[rgba(31,0,51,.1)]" />
+            <div className="relative">
+              <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{t('Everything,')}<br /><span style={{ color: '#FFFC33' }}>{t('and then some')}</span></div>
+              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.88)', margin: '14px 0 0' }}>{t('The full VIP day plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit. Butler, transfers and a souvenir gift included.')}</p>
+              <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.7, marginTop: 16 }}>{t('NON-RESIDENT RATE · ENQUIRE TO RESERVE')}</div>
+            </div>
           </div>
         </div>
 
@@ -511,6 +459,7 @@ export default function PackagesPage() {
           accent="#33FF74"
           image="/images/map/zip-selfie-cheer.webp"
         />
+        <div className="mt-4"><Link to={paths.groups()} data-testid="book-school" className={valleButton({ variant: 'dark', size: 'lg' })} style={{ textDecoration: 'none' }}>{t('Book a school visit online →')}</Link></div>
 
         </>)}
         {/* KIDS PARK PRICELIST */}
@@ -528,7 +477,6 @@ export default function PackagesPage() {
         </>)}
         {/* COMBO PACKAGES */}
         {show('combo') && (<>
-        <div style={{ marginTop: 16 }}><Link to={paths.groups()} data-testid="book-school" style={{ display: 'inline-block', background: '#340057', color: '#FFFFFF', borderRadius: 999, padding: '13px 22px', fontWeight: 700, textDecoration: 'none' }}>{t('Book a school visit online →')}</Link></div>
 
         <SectionHead id="combo" title={t('Combo packages')} tag={t('09 · QUAD + ZIPLINE, ONE PRICE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
