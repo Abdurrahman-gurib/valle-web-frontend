@@ -50,7 +50,7 @@ function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div {...bindI} onClick={onOpen} style={{ position: 'relative', height: 215, background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
+      <div {...bindI} onClick={onOpen} style={{ position: 'relative', aspectRatio: '16 / 10', background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
         <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
         <span style={{ position: 'absolute', top: 12, left: 12, background: pk.color, color: pk.fg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)' }}>{pk.badge}</span>
         <span style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 12px' }}>{t('VIEW DETAILS ↗')}</span>
@@ -82,7 +82,7 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div {...bindI} onClick={onOpen} style={{ position: 'relative', height: 135, background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
+      <div {...bindI} onClick={onOpen} style={{ position: 'relative', aspectRatio: '16 / 10', background: '#EBE2FF', cursor: 'zoom-in', overflow: 'hidden' }}>
         <Img src={pk.img} alt={t('{name} package', { name: pk.name })} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s ease', ...(hi ? { transform: 'scale(1.06)' } : undefined) }} />
         <span style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,.92)', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px' }}>{t('VIEW DETAILS ↗')}</span>
       </div>
@@ -132,7 +132,7 @@ function PriceTable({ title, badge, rows, foot, accent, image }: { title: ReactN
           <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{foot}</div>
         </div>
       </div>
-      <div style={{ flex: '1 1 280px', minHeight: 260, borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#EBE2FF' }}>
+      <div style={{ flex: '1 1 280px', minHeight: 260, maxHeight: 460, borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#EBE2FF' }}>
         <Img src={image} alt="" surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
         <div style={{ position: 'absolute', left: 20, right: 20, bottom: 18, color: '#FFFFFF', ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{title}</div>
@@ -200,7 +200,7 @@ function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
   const [hb, bindB] = useHover();
   return (
     <div {...bindC} style={{ ...cardBase, ...(hc ? cardHov : undefined) }}>
-      <div style={{ height: 190, background: '#EBE2FF' }}>
+      <div style={{ aspectRatio: '16 / 10', background: '#EBE2FF', overflow: 'hidden' }}>
         <Img src={tp.img} alt={t('Team building day at Vallé Advenature™ Park')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -567,6 +567,14 @@ export default function PackagesPage() {
             <CineBookLink />
           </div>
         </div>
+        {/* stills from a real cinematic shoot in the park: the swing at the falls, portraits by the water */}
+        <div data-testid="cine-gallery" className="grid-4" style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <div key={n} style={{ aspectRatio: '4 / 3', borderRadius: 16, overflow: 'hidden', background: '#EBE2FF' }}>
+              <Img src={`/images/shoot/cine-${String(n).padStart(2, '0')}.webp`} alt={t('Cinematic shoot at Vallé: the swing by the waterfall')} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }} />
+            </div>
+          ))}
+        </div>
 
         </>)}
         {/* PHOTO PRICELIST */}
@@ -618,8 +626,8 @@ export default function PackagesPage() {
           <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
           {!qSent && (
             <div style={{ padding: '26px clamp(20px,3vw,34px) 30px' }}>
-              <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom' }}>{t('Ready to strengthen your team?')}</div>
-              <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 8 }}>{t('Tell us about your group and we will send a tailored quote.')}</div>
+              <div style={{ ...BARLOW, fontSize: 'clamp(24px,3vw,34px)', textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom' }}>{group?.slug === 'corporate' ? t('Ready to strengthen your team?') : t('Plan it with us')}</div>
+              <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 8 }}>{group?.slug === 'corporate' ? t('Tell us about your group and we will send a tailored quote.') : t('Tell us your date and party; the team sends a tailored quote within one working day.')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginTop: 18 }}>
                 <QInput value={qName} onChange={(v) => { setQName(v); setQErr(false); }} placeholder={t('Name *')} />
                 <QInput value={qCompany} onChange={setQCompany} placeholder={t('Company')} />

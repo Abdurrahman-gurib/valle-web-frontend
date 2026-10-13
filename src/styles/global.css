@@ -119,3 +119,8 @@ img { max-width: 100%; }
 /* Tracking pulls Arabic letters apart and breaks their joins; the decorative
    letter-spacing on labels is for Latin capitals only. */
 html[dir="rtl"] body *, html[lang="hi"] body * { letter-spacing: normal !important; }
+
+/* even 4-up photo grids that drop to 2 on tablets and phones */
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.gal-rest { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+@media (max-width: 900px) { .grid-4, .gal-rest { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }

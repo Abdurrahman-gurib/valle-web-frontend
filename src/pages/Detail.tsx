@@ -22,13 +22,13 @@ const BARLOW = "'Barlow',sans-serif";
 function GalRestShot({ g }: { g: GalleryShot }) {
   const [h, hb] = useHover();
   return (
-    <div style={{ position: 'relative', flex: '1 1 210px', minWidth: 0, aspectRatio: '4 / 3', borderRadius: 18, overflow: 'hidden' }}>
+    <div style={{ position: 'relative', minWidth: 0, aspectRatio: '4 / 3', borderRadius: 18, overflow: 'hidden' }}>
       <Img
         src={g.src}
         alt={`${g.tag}: ${g.cap}`}
         surface="dark"
         {...hb}
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 26%', transition: 'transform .7s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 32%', transition: 'transform .7s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }}
       />
       <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 16px', background: 'linear-gradient(to top,rgba(31,0,51,.82),transparent)' }}>
         <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '5px 10px' }}>{g.tag}</span>
@@ -120,9 +120,12 @@ export default function DetailPage() {
   const d = card(act);
   const related = catalog.ACTS.filter((a) => a.cat === act.cat && a.id !== act.id).slice(0, 4).map(card);
   const gal = catalog.GAL[act.id];
-  const galLead = gal?.shots[0];
+  // never repeat the page's cover photo inside its own gallery
+  const galShots = gal ? gal.shots.filter((s) => s.src !== act.img) : [];
+  const galLead = galShots[0];
   const galLeadPos = (galLead && galLead.pos) || '50% 18%';
-  const galRest = gal ? gal.shots.slice(1) : [];
+  // a lead photo and up to eight more: enough to sell the activity without a wall of pictures
+  const galRest = galShots.slice(1, 9);
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const pl = catalog.PL[act.id] || [];
   const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
@@ -153,8 +156,9 @@ export default function DetailPage() {
         style={{ border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: hBack ? '#FF3358' : '#7333FF', padding: '8px 0' }}
       >{t('← All experiences')}</button>
 
-      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(58vh,540px)', minHeight: 320, background: '#EBE2FF', marginTop: 12 }}>
-        <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12 }}>
+        {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
+        <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.8), rgba(31,0,51,0) 55%)' }} />
         <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(18px,3vw,30px)', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
           <div>
@@ -313,8 +317,9 @@ export default function DetailPage() {
                   <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{galLead.cap}</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12 }}>
-                {galRest.map((g) => <GalRestShot key={g.src} g={g} />)}
+              {/* an even grid: 4 across on desktop, 2 on a phone, so no row is left half empty */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,calc(50% - 6px)),1fr))', gap: 12, marginTop: 12 }} className="gal-rest">
+                {galRest.slice(0, galRest.length >= 4 ? galRest.length - (galRest.length % 4) : galRest.length).map((g) => <GalRestShot key={g.src} g={g} />)}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 20 }}>
@@ -353,7 +358,7 @@ export default function DetailPage() {
 
       <div style={{ marginTop: 'clamp(44px,6vw,72px)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>
-          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,3.6vw,46px)', letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Pairs well with')}</h2>
+          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.4vw,58px)', letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Pairs well with')}</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 14 }}>
           {related.map((a) => <RelatedCard key={a.id} a={a} />)}

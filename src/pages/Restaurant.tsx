@@ -123,7 +123,7 @@ export default function RestaurantPage() {
         </div>
         <div id="vgal" className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '18px 2px 14px', scrollbarWidth: 'none' }}>
           {rGallery.map((g) => (
-            <Img key={g.src} src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', borderRadius: 14, flex: '0 0 auto', objectFit: 'cover', aspectRatio: '3 / 2', width: 'auto' }} />
+            <Img key={g.src} src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: 'clamp(255px,36vw,375px)', borderRadius: 14, flex: '0 0 auto', objectFit: 'cover' }} />
           ))}
         </div>
       </div>
