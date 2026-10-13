@@ -1,48 +1,63 @@
+import { useEffect, useRef, useState } from 'react';
+import { animate, useInView, useReducedMotion } from 'motion/react';
 import { Fwd } from '@/components/ui/arrows';
 import { Img } from '../../components/Img';
-import { fwd, useT } from '../../i18n';
+import { useT } from '../../i18n';
 import { paths, useGoto } from '../../lib/nav';
 
-/** "Our story": formerly La Vallée des Couleurs narrative + stats (markup: Story section). */
+/** A figure that counts up from zero the first time it scrolls into view (instant for reduced motion). */
+function CountUp({ to, decimals = 0, suffix = '' }: { to: number; decimals?: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const seen = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
+  const reduce = useReducedMotion();
+  const [v, setV] = useState(to); // the prerendered page shows the real figure
+  // in the browser, park the figure at zero while it is still below the fold
+  useEffect(() => { if (!reduce && !seen) setV(0); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!seen || reduce) return;
+    const c = animate(0, to, { duration: 1.4, ease: [0.2, 0.7, 0.2, 1], onUpdate: setV });
+    return () => c.stop();
+  }, [seen, reduce, to]);
+  return <span ref={ref}>{v.toFixed(decimals)}{suffix}</span>;
+}
+
+function Stat({ value, label, color, rule }: { value: React.ReactNode; label: string; color: string; rule: string }) {
+  return (
+    <div>
+      <div className="font-display text-[40px] font-black italic" style={{ color }}>{value}</div>
+      <div className="mt-0.5 pt-1.5 font-mono text-[11px] text-valle-purple/65" style={{ borderTop: `3px solid ${rule}` }}>{label}</div>
+    </div>
+  );
+}
+
+/** "Our story": formerly La Vallée des Couleurs narrative + stats. */
 export function StorySection() {
   const t = useT();
   const goto = useGoto();
   return (
-    <section
-      id="story"
-      data-screen-label="Our story"
-      style={{ maxWidth: 1320, margin: '0 auto', padding: 'clamp(56px,8vw,104px) clamp(16px,3.5vw,40px) 0' }}
-    >
-      <div data-reveal-kids="1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(24px,4vw,60px)', alignItems: 'center' }}>
-        <div style={{ borderRadius: 20, overflow: 'hidden', height: 'min(520px,68vw)', background: '#EBE2FF', transform: 'rotate(-2deg)' }}>
+    <section id="story" data-screen-label="Our story" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
+      <div data-reveal-kids="1" className="grid items-center gap-[clamp(24px,4vw,60px)] [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
+        <div className="h-[min(520px,68vw)] -rotate-2 overflow-hidden rounded-[20px] bg-valle-lilac">
           <Img src="/images/home-overview.avif" alt={t('Aerial overview of the Vallé valley')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('05 · BORN OF NATURE, PURE ADVENTURE')}</span>
-          <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(34px,4.4vw,58px)', lineHeight: 0.88, letterSpacing: '-0.01em', margin: '16px 0 0', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>
-            {t('Formerly La Vallée des Couleurs.')} <span style={{ color: '#7333FF' }}>{t('Forever Vallé.')}</span>
+          <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('05 · BORN OF NATURE, PURE ADVENTURE')}</span>
+          <h2 className="mt-4 mb-0 origin-bottom-left -rotate-4 font-display text-[clamp(34px,4.4vw,58px)] leading-[0.88] font-black tracking-[-0.01em] uppercase italic">
+            {t('Formerly La Vallée des Couleurs.')} <span className="text-valle-violet">{t('Forever Vallé.')}</span>
           </h2>
-          <p style={{ fontSize: 16, lineHeight: 1.65, color: 'rgba(52,0,87,.75)', margin: '20px 0 0' }}>{t("We unearth the true colours of Maurice, so you live the pulse of every breath. Twenty-three hues of volcanic earth, centuries-old ebony trees, free-roaming giant tortoises, and strung above it all, some of the island's wildest ziplines.")}</p>
+          <p className="mt-5 mb-0 text-base leading-[1.65] text-valle-purple/75">{t("We unearth the true colours of Maurice, so you live the pulse of every breath. Twenty-three hues of volcanic earth, centuries-old ebony trees, free-roaming giant tortoises, and strung above it all, some of the island's wildest ziplines.")}</p>
           <a
             href={paths.story()}
             onClick={(e) => { e.preventDefault(); goto.story(); }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 18, fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FF3358', textDecoration: 'none', borderBottom: '2px solid #FF3358', paddingBottom: 3 }}
+            className="mt-[18px] inline-flex items-center gap-2 pb-[3px] font-mono text-xs font-bold tracking-[.14em] text-valle-red"
+            style={{ textDecoration: 'none', borderBottom: '2px solid #FF3358' }}
           >
             {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden><Fwd /></span>
           </a>
-          <div style={{ display: 'flex', gap: 30, marginTop: 28, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 40, color: '#FF3358' }}>23</div>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.65)', marginTop: 2, borderTop: '3px solid #FF3358', paddingTop: 6 }}>{t('COLOURS OF EARTH')}</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 40, color: '#7333FF' }}>5.5 KM</div>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.65)', marginTop: 2, borderTop: '3px solid #33FF74', paddingTop: 6 }}>{t('LONGEST ZIPLINE')}</div>
-            </div>
-            <div>
-              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 40, color: '#340057' }}>21</div>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.65)', marginTop: 2, borderTop: '3px solid #FFFC33', paddingTop: 6 }}>{t('EXPERIENCES')}</div>
-            </div>
+          <div className="mt-7 flex flex-wrap gap-[30px]">
+            <Stat value={<CountUp to={23} />} label={t('COLOURS OF EARTH')} color="#FF3358" rule="#FF3358" />
+            <Stat value={<CountUp to={5.5} decimals={1} suffix=" KM" />} label={t('LONGEST ZIPLINE')} color="#7333FF" rule="#33FF74" />
+            <Stat value={<CountUp to={21} />} label={t('EXPERIENCES')} color="#340057" rule="#FFFC33" />
           </div>
         </div>
       </div>

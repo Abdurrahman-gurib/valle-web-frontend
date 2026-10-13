@@ -128,7 +128,7 @@ export default function RestaurantPage() {
           <CarouselTrack viewportRef={gal.viewportRef} label={t('Inside the restaurant')} gap="gap-3" onKeyDown={carouselKeys(gal.prev, gal.next, isRtl(lang))}>
             {rGallery.map((g) => (
               <div key={g.src} className="shrink-0 grow-0 basis-[clamp(255px,36vw,375px)]">
-                <Img src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
+                <Img eager src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
               </div>
             ))}
           </CarouselTrack>

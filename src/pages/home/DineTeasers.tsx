@@ -1,79 +1,51 @@
+import { motion } from 'motion/react';
 import { useCatalog } from '../../store/CatalogContext';
 import { paths, useGoto } from '../../lib/nav';
-import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
 
-/** "Taste the soul": the two restaurant teaser cards (markup: Restaurants section). */
+function RestoTeaser({ href, onGo, img, alt, badge, name, blurb }: { href: string; onGo: () => void; img: string; alt: string; badge: string; name: string; blurb: string }) {
+  const t = useT();
+  return (
+    <motion.a
+      href={href}
+      onClick={(e) => { e.preventDefault(); onGo(); }}
+      whileHover={{ y: -5, boxShadow: '0 26px 50px -18px rgba(52,0,87,.45)' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+      className="group relative block min-h-[400px] cursor-pointer overflow-hidden rounded-[20px] bg-valle-deep text-inherit"
+      style={{ textDecoration: 'none' }}
+    >
+      <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+        <Img src={img} alt={alt} surface="dark" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,0,51,.92)] to-[rgba(31,0,51,.05)] to-55%" />
+      <span className="absolute top-4 left-4 -rotate-4 rounded-full bg-valle-yellow px-[13px] py-[7px] font-mono text-[10px] font-bold tracking-[.1em] text-valle-purple">{badge}</span>
+      <div className="absolute right-6 bottom-[22px] left-6 text-white">
+        <div className="origin-bottom-left -rotate-4 font-display text-4xl font-black uppercase italic">{name}</div>
+        <div className="mt-2 max-w-[44ch] text-sm leading-normal opacity-90">{blurb}</div>
+        <div className="mt-2.5 font-mono text-[11px] font-bold tracking-[.08em] text-valle-yellow">{t('SEE THE RESTAURANT →')}</div>
+      </div>
+    </motion.a>
+  );
+}
+
+/** "Taste the soul": the two restaurant teaser cards. */
 export function DineTeasers() {
   const t = useT();
   const catalog = useCatalog();
   const goto = useGoto();
-  const [chamH, chamBind] = useHover();
-  const [citH, citBind] = useHover();
-
   const cham = catalog.RESTOS['chamouze'];
   const cit = catalog.RESTOS['citronelle'];
   if (!cham || !cit) return null;
-
-  const cardBase = {
-    cursor: 'pointer',
-    display: 'block',
-    color: 'inherit',
-    textDecoration: 'none',
-    position: 'relative',
-    borderRadius: 20,
-    overflow: 'hidden',
-    minHeight: 400,
-    background: '#260040',
-    transition: 'transform .25s ease, box-shadow .25s ease',
-  } as const;
-  const cardHover = {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 26px 50px -18px rgba(52,0,87,.45)',
-  } as const;
-
   return (
-    <section
-      id="dine"
-      data-screen-label="Restaurants"
-      style={{ maxWidth: 1320, margin: '0 auto', padding: 'clamp(56px,8vw,104px) clamp(16px,3.5vw,40px) 0' }}
-    >
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 28, marginBottom: 28 }}>
-        <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Taste the soul')}</h2>
-        <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('04 · DINE IN THE VALLEY')}</span>
+    <section id="dine" data-screen-label="Restaurants" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
+      <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
+        <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Taste the soul')}</h2>
+        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('04 · DINE IN THE VALLEY')}</span>
       </div>
-      <div data-reveal-kids="1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16 }}>
-        <a
-          href={paths.resto('chamouze')}
-          {...chamBind}
-          onClick={(e) => { e.preventDefault(); goto.resto('chamouze'); }}
-          style={{ ...cardBase, ...(chamH ? cardHover : {}) }}
-        >
-          <Img src={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.92), rgba(31,0,51,.05) 55%)' }} />
-          <span style={{ position: 'absolute', top: 16, left: 16, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', transform: 'rotate(-4deg)' }}>{t('WATERFALL DINING')}</span>
-          <div style={{ position: 'absolute', left: 24, right: 24, bottom: 22, color: '#FFFFFF' }}>
-            <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 36, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>Le Chamouzé</div>
-            <div style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5, marginTop: 8, maxWidth: '44ch' }}>{t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · menus Rs 700 – 4,250.')}</div>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: '#FFFC33', marginTop: 10 }}>{t('SEE THE RESTAURANT →')}</div>
-          </div>
-        </a>
-        <a
-          href={paths.resto('citronelle')}
-          {...citBind}
-          onClick={(e) => { e.preventDefault(); goto.resto('citronelle'); }}
-          style={{ ...cardBase, ...(citH ? cardHover : {}) }}
-        >
-          <Img src={cit.img} alt={t('La Citronelle riverside restaurant')} surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.92), rgba(31,0,51,.05) 55%)' }} />
-          <span style={{ position: 'absolute', top: 16, left: 16, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', transform: 'rotate(-4deg)' }}>{t('RIVERSIDE · EVENTS TO 400')}</span>
-          <div style={{ position: 'absolute', left: 24, right: 24, bottom: 22, color: '#FFFFFF' }}>
-            <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 36, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>La Citronelle</div>
-            <div style={{ fontSize: 14, opacity: 0.9, lineHeight: 1.5, marginTop: 8, maxWidth: '44ch' }}>{t('Refined Indian cuisine in a rustic lakeside setting. 11:30 – 16:30 · à la carte from Rs 600.')}</div>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: '#FFFC33', marginTop: 10 }}>{t('SEE THE RESTAURANT →')}</div>
-          </div>
-        </a>
+      <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
+        <RestoTeaser href={paths.resto('chamouze')} onGo={() => goto.resto('chamouze')} img={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} badge={t('WATERFALL DINING')} name="Le Chamouzé" blurb={t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · menus Rs 700 – 4,250.')} />
+        <RestoTeaser href={paths.resto('citronelle')} onGo={() => goto.resto('citronelle')} img={cit.img} alt={t('La Citronelle riverside restaurant')} badge={t('RIVERSIDE · EVENTS TO 400')} name="La Citronelle" blurb={t('Refined Indian cuisine in a rustic lakeside setting. 11:30 – 16:30 · à la carte from Rs 600.')} />
       </div>
     </section>
   );

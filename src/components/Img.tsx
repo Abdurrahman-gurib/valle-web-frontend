@@ -11,6 +11,8 @@ export interface ImgProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'loa
   alt: string;
   /** Above-the-fold art: loads eagerly at high fetch priority instead of lazily. */
   priority?: boolean;
+  /** Load as soon as the page does, at normal priority: for carousel slides that sit off screen sideways. */
+  eager?: boolean;
   /** Brand placeholder tint shown while the image loads (default 'light' = #EBE2FF). */
   surface?: ImgSurface;
   /** Explicit placeholder colour, overrides `surface`. Use 'transparent' to opt out. */
@@ -24,7 +26,7 @@ export interface ImgProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'loa
  * drops the src so the browser never paints a broken-image glyph; the placeholder stays.
  */
 export const Img = forwardRef<HTMLImageElement, ImgProps>(function Img(
-  { src, alt, priority, surface = 'light', placeholder, style, onLoad, onError, draggable, ...rest },
+  { src, alt, priority, eager, surface = 'light', placeholder, style, onLoad, onError, draggable, ...rest },
   ref,
 ) {
   const [state, setState] = useState<'loading' | 'loaded' | 'error'>('loading');
@@ -60,7 +62,7 @@ export const Img = forwardRef<HTMLImageElement, ImgProps>(function Img(
       ref={setRef}
       src={state === 'error' ? undefined : src}
       alt={alt}
-      loading={priority ? 'eager' : 'lazy'}
+      loading={priority || eager ? 'eager' : 'lazy'}
       {...(priority ? ({ fetchpriority: 'high' } as Record<string, string>) : {})}
       decoding="async"
       draggable={draggable ?? false}

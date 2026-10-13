@@ -29,7 +29,7 @@ function GalRestShot({ g }: { g: GalleryShot }) {
   const [h, hb] = useHover();
   return (
     <div style={{ position: 'relative', minWidth: 0, aspectRatio: '4 / 3', borderRadius: 18, overflow: 'hidden' }}>
-      <Img
+      <Img eager
         src={g.src}
         alt={`${g.tag}: ${g.cap}`}
         surface="dark"

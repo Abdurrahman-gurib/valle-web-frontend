@@ -257,7 +257,7 @@ export default function ExplorePage() {
           <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in entrance admission fees')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
             {cards.map((a) => (
               <div key={a.id} className="min-w-0 shrink-0 grow-0 basis-[min(300px,82vw)] py-2">
-                <ResultCard a={a} rateTag={app.rateTag} />
+                <ResultCard a={a} rateTag={app.rateTag} eager />
               </div>
             ))}
           </CarouselTrack>

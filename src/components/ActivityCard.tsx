@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
  * and the add-to-day button. Tailwind with the VALLÉ tokens; Motion lifts it
  * on hover (reduced motion follows the app-wide MotionConfig).
  */
-export function ActivityCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
+export function ActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string; eager?: boolean }) {
   const t = useT();
   return (
     <motion.div
@@ -23,7 +23,7 @@ export function ActivityCard({ a, rateTag }: { a: CardModel; rateTag: string }) 
       data-testid="activity-card"
     >
       <div className="relative h-[195px] bg-valle-lilac">
-        <Img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img eager={eager} src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: a.catColor, color: a.catFg }}>{a.catBadge}</span>
         <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-valle-yellow px-2.5 py-1.5 font-mono text-[11px] font-bold text-valle-purple shadow-[0_6px_16px_-6px_rgba(0,0,0,.5)]">
           {a.priceLabel}
