@@ -5,6 +5,10 @@ import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 import { CurrencyPicker } from '../components/CurrencyPicker';
+import { motion } from 'motion/react';
+import { Check, Minus, Plus } from 'lucide-react';
+import { ValleButton } from '@/components/ui/valle';
+import { cn } from '@/lib/utils';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
@@ -55,66 +59,55 @@ const inputStyle: CSSProperties = {
 };
 
 /* Stepper +/− button with hover background (style-hover="background:#EBE2FF") */
-function StepBtn({ onClick, bg, children }: { onClick: () => void; bg: string; children: ReactNode }) {
-  const [h, bind] = useHover();
+function StepBtn({ onClick, bg, label, children }: { onClick: () => void; bg: string; label: string; children: ReactNode }) {
   return (
-    <button
-      onClick={onClick}
-      {...bind}
-      style={{
-        border: 0, background: h ? '#EBE2FF' : bg, borderRadius: '7px', width: '26px', height: '26px',
-        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#340057', lineHeight: 1,
-      }}
-    >
+    <motion.button type="button" onClick={onClick} aria-label={label} whileTap={{ scale: 0.88 }}
+      className="inline-flex size-[26px] cursor-pointer items-center justify-center rounded-[7px] border-0 text-valle-purple transition-colors hover:!bg-valle-lilac focus-visible:outline-2 focus-visible:outline-valle-violet"
+      style={{ background: bg }}>
       {children}
-    </button>
+    </motion.button>
   );
 }
 
-/* ADULTS / CHILD 6–11 / UNITS stepper group */
+/* ADULTS / CHILD 6-11 / UNITS stepper group */
 function Stepper({ tag, val, inc, dec, boxBg, btnBg }: {
   tag: string; val: number; inc: () => void; dec: () => void; boxBg: string; btnBg: string;
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: boxBg, borderRadius: '10px', padding: '4px 7px' }}>
+    <div className="flex items-center gap-[5px] rounded-[10px] px-[7px] py-1" style={{ background: boxBg }}>
       <span style={stepperTag}>{tag}</span>
-      <StepBtn onClick={dec} bg={btnBg}>−</StepBtn>
-      <span style={{ fontSize: '14px', fontWeight: 700, minWidth: '16px', textAlign: 'center' }}>{val}</span>
-      <StepBtn onClick={inc} bg={btnBg}>+</StepBtn>
+      <StepBtn onClick={dec} bg={btnBg} label={'− ' + tag}><Minus size={14} strokeWidth={3} aria-hidden /></StepBtn>
+      <span className="min-w-4 text-center text-sm font-bold" aria-live="polite">{val}</span>
+      <StepBtn onClick={inc} bg={btnBg} label={'+ ' + tag}><Plus size={14} strokeWidth={3} aria-hidden /></StepBtn>
     </div>
   );
 }
 
 /* 1 · TAP TO ADD EXPERIENCES: pick card */
 function BookCard({ m }: { m: CardModel }) {
-  const [h, bind] = useHover();
   const on = m.selOn;
   return (
-    <div
+    <motion.div
       onClick={m.add}
-      {...bind}
-      style={{
-        cursor: 'pointer',
-        background: on ? 'rgba(115,51,255,.08)' : '#FFFFFF',
-        border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
-        borderRadius: '14px', overflow: 'hidden', transition: 'all .15s',
-        ...(h ? { transform: 'translateY(-3px)' } : undefined),
-      }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={on}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); m.add(); } }}
+      whileHover={{ y: -3 }}
+      whileTap={{ scale: 0.98 }}
+      className={cn('cursor-pointer overflow-hidden rounded-[14px] border-[1.5px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', on ? 'border-valle-violet bg-valle-violet/[.08]' : 'border-valle-lilac bg-white')}
     >
-      <div style={{ position: 'relative', height: '86px', background: '#EBE2FF' }}>
-        <img src={m.img} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <span style={{
-          position: 'absolute', top: '8px', right: '8px',
-          background: on ? '#33FF74' : 'rgba(52,0,87,.5)', color: on ? '#340057' : '#FFFFFF',
-          border: '1.5px solid #FFFFFF', width: '24px', height: '24px', borderRadius: '999px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800,
-        }}>{on ? '✓' : '+'}</span>
+      <div className="relative h-[86px] bg-valle-lilac">
+        <img src={m.img} alt={m.name} className="block size-full object-cover" />
+        <span className={cn('absolute top-2 right-2 flex size-6 items-center justify-center rounded-full border-[1.5px] border-white', on ? 'bg-valle-green text-valle-purple' : 'bg-valle-purple/50 text-white')}>
+          {on ? <Check size={13} strokeWidth={3} aria-hidden /> : <Plus size={13} strokeWidth={3} aria-hidden />}
+        </span>
       </div>
-      <div style={{ padding: '9px 11px 11px' }}>
-        <div style={{ fontWeight: 700, fontSize: '12.5px', lineHeight: 1.25 }}>{m.name}</div>
-        <div style={{ marginTop: '4px', fontFamily: MONO, fontSize: '9px', fontWeight: 700, color: 'rgba(52,0,87,.6)' }}>{m.priceLabel}</div>
+      <div className="px-[11px] pt-[9px] pb-[11px]">
+        <div className="text-[12.5px] leading-tight font-bold">{m.name}</div>
+        <div className="mt-1 font-mono text-[9px] font-bold text-valle-purple/60">{m.priceLabel}</div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -208,125 +201,95 @@ function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
 
 /* 3 · WHEN: date chip */
 function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: () => void; load?: AvailabilityDay }) {
-  const [h, bind] = useHover();
   const out = (l: BusyLevel) => l === 'full' || l === 'closed';
   const full = !!load && out(load.morning.level) && out(load.afternoon.level);
   return (
-    <button
+    <motion.button
+      type="button"
       onClick={onClick}
-      {...bind}
       aria-pressed={on}
       data-full={full || undefined}
-      style={{
-        opacity: full ? 0.45 : 1,
-        border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
-        background: on ? '#7333FF' : '#FFFFFF',
-        color: on ? '#FFFFFF' : '#340057',
-        cursor: 'pointer', fontFamily: 'inherit', padding: '12px 6px', borderRadius: '14px',
-        textAlign: 'center', transition: 'all .15s',
-        ...(h ? { transform: 'translateY(-1px)' } : undefined),
-      }}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.96 }}
+      className={cn('cursor-pointer rounded-[14px] border-[1.5px] px-1.5 py-3 text-center font-sans transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', on ? 'border-valle-violet bg-valle-violet text-white' : 'border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50', full && 'opacity-45')}
     >
-      <div style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 600, letterSpacing: '.08em', opacity: 0.7 }}>{o.dow}</div>
-      <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: '22px', marginTop: '2px' }}>{o.dd}</div>
-      <div style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 600, opacity: 0.7 }}>{o.mm}</div>
+      <div className="font-mono text-[9.5px] font-semibold tracking-[.08em] opacity-70">{o.dow}</div>
+      <div className="mt-0.5 font-display text-[22px] font-black italic">{o.dd}</div>
+      <div className="font-mono text-[9.5px] font-semibold opacity-70">{o.mm}</div>
       <LoadDots load={load} on={on} />
-    </button>
+    </motion.button>
   );
 }
 
 /* 3 · WHEN: slot chip */
 function SlotChip({ label, sub, on, onClick, level, closure }: { label: string; sub: string; on: boolean; onClick: () => void; level?: BusyLevel; closure?: { kind: 'closed' | 'maintenance' | 'private'; reason: string } }) {
   const t = useT();
-  const [h, bind] = useHover();
   const full = level === 'full' || level === 'closed';
   return (
-    <button
+    <motion.button
+      type="button"
       onClick={onClick}
-      {...bind}
       aria-pressed={on}
       disabled={full}
       data-testid={level === 'closed' ? 'slot-closed' : full ? 'slot-full' : undefined}
-      style={{
-        border: '1.5px solid ' + (on ? '#7333FF' : '#EBE2FF'),
-        background: on ? '#7333FF' : full ? '#F7F3FF' : '#FFFFFF',
-        color: on ? '#FFFFFF' : '#340057',
-        opacity: full ? 0.6 : 1,
-        cursor: full ? 'not-allowed' : 'pointer', fontFamily: 'inherit', padding: '13px 20px', borderRadius: '14px',
-        textAlign: 'left', transition: 'all .15s',
-        ...(h ? { transform: 'translateY(-1px)' } : undefined),
-      }}
+      whileHover={full ? undefined : { y: -1 }}
+      whileTap={full ? undefined : { scale: 0.97 }}
+      className={cn('rounded-[14px] border-[1.5px] px-5 py-[13px] text-start font-sans transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet',
+        on ? 'border-valle-violet bg-valle-violet text-white' : full ? 'cursor-not-allowed border-valle-lilac bg-[#F7F3FF] text-valle-purple opacity-60' : 'cursor-pointer border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50')}
     >
-      <div style={{ fontWeight: 700, fontSize: '15px' }}>{label}</div>
-      <div style={{ fontFamily: MONO, fontSize: '10.5px', opacity: 0.7, marginTop: '2px' }}>{sub}</div>
+      <div className="text-[15px] font-bold">{label}</div>
+      <div className="mt-0.5 font-mono text-[10.5px] opacity-70">{sub}</div>
       {level && (
-        <div data-testid="slot-level" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.08em', marginTop: '7px', color: on ? '#FFFFFF' : '#340057' }}>
-          <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[level], display: 'inline-block' }} />
+        <div data-testid="slot-level" className={cn('mt-[7px] inline-flex items-center gap-[5px] font-mono text-[9.5px] font-bold tracking-[.08em]', on ? 'text-white' : 'text-valle-purple')}>
+          <span className="inline-block size-[7px] rounded-full" style={{ background: LEVEL_COLOR[level] }} />
           {closure ? t(CLOSURE_LABEL[closure.kind]) + (closure.reason ? ' · ' + closure.reason : '') : t(LEVEL_LABEL[level])}
         </div>
       )}
-    </button>
+    </motion.button>
   );
 }
 
 /* 4 · DETAILS: text input with focus border (style-focus="border-color:#7333FF") */
 function Field({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
-  const [f, setF] = useState(false);
   return (
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      onFocus={() => setF(true)}
-      onBlur={() => setF(false)}
       placeholder={placeholder}
-      style={{ ...inputStyle, ...(f ? { borderColor: '#7333FF' } : undefined) }}
+      aria-label={placeholder}
+      className="transition-colors focus:!border-valle-violet focus:outline-none"
+      style={inputStyle}
     />
   );
 }
 
 /* 5 · PAYMENT: pay mode card */
 function PayCard({ on, bgOn, title, note, onClick }: { on: boolean; bgOn: string; title: string; note: string; onClick: () => void }) {
-  const [h, bind] = useHover();
   return (
-    <div
+    <motion.div
+      role="radio"
+      aria-checked={on}
+      tabIndex={0}
       onClick={onClick}
-      {...bind}
-      style={{
-        cursor: 'pointer',
-        border: '2px solid ' + (on ? '#340057' : '#EBE2FF'),
-        background: on ? bgOn : '#FFFFFF',
-        borderRadius: '16px', padding: '16px 18px', transition: 'all .15s',
-        ...(h ? { transform: 'translateY(-2px)' } : undefined),
-      }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      whileHover={{ y: -2 }}
+      className={cn('cursor-pointer rounded-2xl border-2 px-[18px] py-4 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', on ? 'border-valle-purple' : 'border-valle-lilac bg-white')}
+      style={on ? { background: bgOn } : undefined}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ width: '18px', height: '18px', borderRadius: '999px', border: '2px solid #340057', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ width: '9px', height: '9px', borderRadius: '999px', background: on ? '#340057' : 'transparent' }} />
+      <div className="flex items-center gap-2.5">
+        <span className="inline-flex size-[18px] shrink-0 items-center justify-center rounded-full border-2 border-valle-purple">
+          <span className={cn('size-[9px] rounded-full', on ? 'bg-valle-purple' : 'bg-transparent')} />
         </span>
-        <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: '18px', textTransform: 'uppercase' }}>{title}</span>
+        <span className="font-display text-lg font-extrabold uppercase italic">{title}</span>
       </div>
-      <div style={{ fontSize: '13px', color: 'rgba(52,0,87,.7)', marginTop: '8px', lineHeight: 1.5 }}>{note}</div>
-    </div>
+      <div className="mt-2 text-[13px] leading-normal text-valle-purple/70">{note}</div>
+    </motion.div>
   );
 }
 
 /* Confirm button in the sticky summary bar */
 function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) {
-  const [h, bind] = useHover();
-  return (
-    <button
-      onClick={onClick}
-      {...bind}
-      style={{
-        border: 0, background: h ? '#D91E44' : '#FF3358', cursor: 'pointer', fontFamily: 'inherit',
-        fontSize: '14.5px', fontWeight: 700, color: '#FFFFFF', padding: '14px 26px', borderRadius: '999px',
-        boxShadow: '0 8px 20px rgba(255,51,88,.4)',
-        ...(h ? { transform: 'translateY(-1px)' } : undefined),
-      }}
-    >
-      {label}
-    </button>
-  );
+  return <ValleButton variant="primary" size="lg" onClick={onClick} className="px-[26px] py-3.5 text-[14.5px]">{label}</ValleButton>;
 }
 
 export default function BookingPage() {
@@ -812,7 +775,7 @@ export default function BookingPage() {
               {/* 5 · PAYMENT: shown when the API has a payment provider (or VITE_ONLINE_PAYMENT=1) */}
               {ONLINE_PAYMENT && <div style={{ marginTop: '34px' }}>
                 <div style={stepLabel}>{t('5 · HOW WOULD YOU LIKE TO PAY?')}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
+                <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <PayCard
                     on={payMode === 'gate'}
                     bgOn="#FFFFE2"
