@@ -1,5 +1,6 @@
 import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { fileURLToPath } from 'node:url';
 import { nginxLikeRoutes } from './scripts/preview-routes';
@@ -25,7 +26,7 @@ const proxy = {
 const sentryUpload = Boolean(process.env.SENTRY_AUTH_TOKEN);
 // nginxLikeRoutes makes `vite preview` behave like production nginx (prerendered
 // pages, redirects, real 404s) so the e2e suite checks what crawlers see.
-const plugins: PluginOption[] = [react(), nginxLikeRoutes()];
+const plugins: PluginOption[] = [react(), tailwindcss(), nginxLikeRoutes()];
 if (sentryUpload) {
   plugins.push(
     sentryVitePlugin({

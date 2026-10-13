@@ -1,0 +1,39 @@
+/*
+ * Tailwind v4 for 21st.dev / shadcn components. Theme and utilities only:
+ * no preflight reset, so the existing inline-styled pages render exactly as
+ * before; utilities sit in their own layer and never override them.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@source '../';
+
+/* VALLÉ brand tokens, available as bg-valle-purple, text-valle-red, font-display… */
+@theme {
+  --color-valle-purple: #340057;
+  --color-valle-deep: #260040;
+  --color-valle-violet: #7333FF;
+  --color-valle-red: #FF3358;
+  --color-valle-green: #33FF74;
+  --color-valle-yellow: #FFFC33;
+  --color-valle-lilac: #EBE2FF;
+  --font-display: 'Barlow', sans-serif;
+  --font-mono: 'Chivo Mono', monospace;
+  --font-sans: 'Work Sans', sans-serif;
+  /* shadcn semantic tokens mapped to the brand */
+  --color-background: #FFFFFF;
+  --color-foreground: #340057;
+  --color-primary: #FF3358;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #EBE2FF;
+  --color-secondary-foreground: #340057;
+  --color-muted: #F7F3FF;
+  --color-muted-foreground: rgba(52, 0, 87, .6);
+  --color-accent: #33FF74;
+  --color-accent-foreground: #340057;
+  --color-border: #EBE2FF;
+  --color-ring: #7333FF;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+}

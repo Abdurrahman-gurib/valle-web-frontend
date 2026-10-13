@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { animate } from 'motion';
 
 /**
  * Scroll-reveal effect, ported from the template runtime:
@@ -20,9 +21,10 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
       ents.forEach((en) => {
         if (en.isIntersecting) {
           const el = en.target as HTMLElement;
-          el.style.opacity = '1';
-          el.style.transform = 'none';
           el.dataset.fxshown = '1';
+          // Motion (motion.dev): a soft spring rather than a fixed CSS curve
+          animate(el, { opacity: [0, 1], y: [30, 0], rotate: [-1, 0] }, { type: 'spring', stiffness: 120, damping: 20, mass: 0.9, delay: +(el.dataset.fxdelay || 0) / 1000 })
+            .then(() => { el.style.transform = 'none'; });
           io.unobserve(el);
         }
       });
@@ -34,8 +36,7 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
         el.dataset.fxdone = '1';
         el.style.opacity = '0';
         el.style.transform = 'translateY(30px) rotate(-1deg)';
-        el.style.transition =
-          `opacity .7s cubic-bezier(.2,.7,.2,1) ${delay}ms, transform .7s cubic-bezier(.2,.7,.2,1) ${delay}ms`;
+        el.dataset.fxdelay = String(delay);
       }
       io.observe(el);
     };
