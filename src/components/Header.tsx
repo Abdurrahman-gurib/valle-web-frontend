@@ -1,3 +1,5 @@
+import { motion } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
@@ -42,7 +44,7 @@ function NavBtn({ label, onClick, color, chev, href, snug }: { label: string; on
   return (
     <button {...bind} onClick={onClick} aria-expanded={chev === '▲'} style={style}>
       {label}
-      {chev && <span style={{ fontSize: 9, opacity: 0.7 }}>{chev}</span>}
+      {chev && <motion.span aria-hidden animate={{ rotate: chev === '▲' ? 180 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} style={{ display: 'inline-flex', opacity: 0.75 }}><ChevronDown size={14} strokeWidth={2.5} /></motion.span>}
     </button>
   );
 }

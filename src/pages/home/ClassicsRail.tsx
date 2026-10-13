@@ -1,12 +1,13 @@
 import { showsDuration } from '../../types';
-import { useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
+import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { useCardModel, type CardModel } from '../../lib/card';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
-import { useT, fwd, back, isRtl } from '../../i18n';
+import { useT, fwd, isRtl, useLang } from '../../i18n';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
@@ -15,13 +16,14 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
   const [h, bind] = useHover();
   const [hTick, bindTick] = useHover();
   return (
-    <div
+    <motion.div
       {...bind}
       onClick={() => a.open()}
+      whileHover={{ y: -6, boxShadow: '0 26px 50px -20px rgba(52,0,87,.4)' }}
+      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       style={{
-        cursor: 'pointer', flex: '0 0 auto', width: 'min(330px,80vw)', scrollSnapAlign: 'start', background: '#FFFFFF',
-        borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF', transition: 'transform .25s ease, box-shadow .25s ease',
-        ...(h ? { transform: 'translateY(-6px)', boxShadow: '0 26px 50px -20px rgba(52,0,87,.4)' } : undefined),
+        cursor: 'pointer', flex: '0 0 auto', width: 'min(330px,80vw)', background: '#FFFFFF',
+        borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF', margin: '8px 0 24px',
       }}
     >
       <div style={{ position: 'relative', height: 225, background: '#EBE2FF' }}>
@@ -59,68 +61,24 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
           <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>{t('Details →')}</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ArrowBtn({ label, onClick, children }: { label: string; onClick: () => void; children: string }) {
-  const [h, bind] = useHover();
-  return (
-    <button
-      {...bind}
-      onClick={onClick}
-      aria-label={label}
-      style={{
-        border: '2px solid #340057', background: h ? '#340057' : 'transparent', cursor: 'pointer',
-        color: h ? '#FFFFFF' : '#340057', width: 46, height: 46, borderRadius: 999, fontSize: 17,
-      }}
-    >
-      {children}
-    </button>
+    </motion.div>
   );
 }
 
 /** "Go big. Go wild.": auto-advancing horizontal rail of the park classics. */
 export function ClassicsRail() {
   const t = useT();
+  const lang = useLang();
   const { ACTS } = useCatalog();
   const { rateTag } = useApp();
   const card = useCardModel();
-  const railRef = useRef<HTMLDivElement | null>(null);
-  const pausedRef = useRef(false);
+  const c = useCarousel({ autoplayMs: 3500, loop: true });
 
   const items = RAIL_IDS
     .map((id) => ACTS.find((a) => a.id === id))
     .filter((a): a is NonNullable<typeof a> => !!a)
     .map((a) => card(a));
 
-  useEffect(() => {
-    const r = railRef.current;
-    if (!r) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const pause = () => { pausedRef.current = true; };
-    const resume = () => { pausedRef.current = false; };
-    r.addEventListener('pointerenter', pause);
-    r.addEventListener('pointerleave', resume);
-    r.addEventListener('touchstart', pause, { passive: true });
-    r.addEventListener('touchend', resume, { passive: true });
-    const t = setInterval(() => {
-      if (pausedRef.current) return;
-      // right-to-left pages scroll towards negative scrollLeft
-      const sign = getComputedStyle(r).direction === 'rtl' ? -1 : 1;
-      if (Math.abs(r.scrollLeft) + r.clientWidth >= r.scrollWidth - 24) r.scrollTo({ left: 0, behavior: 'smooth' });
-      else r.scrollBy({ left: sign * 348, behavior: 'smooth' });
-    }, 3500);
-    return () => {
-      clearInterval(t);
-      r.removeEventListener('pointerenter', pause);
-      r.removeEventListener('pointerleave', resume);
-      r.removeEventListener('touchstart', pause);
-      r.removeEventListener('touchend', resume);
-    };
-  }, []);
-
-  const dirSign = isRtl() ? -1 : 1;
   return (
     <section style={{ padding: 'clamp(56px,8vw,104px) 0 0' }}>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 28, marginBottom: 28 }}>
@@ -129,22 +87,13 @@ export function ClassicsRail() {
         </h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)', marginRight: 10 }}>{t('03 · FAVOURITES')}</span>
-          <ArrowBtn label={t('Scroll back')} onClick={() => railRef.current?.scrollBy({ left: -370 * dirSign, behavior: 'smooth' })}>{back()}</ArrowBtn>
-          <ArrowBtn label={t('Scroll forward')} onClick={() => railRef.current?.scrollBy({ left: 370 * dirSign, behavior: 'smooth' })}>{fwd()}</ArrowBtn>
+          <CarouselArrows prev={c.prev} next={c.next} canPrev={c.canPrev} canNext={c.canNext} labels={{ prev: t('Scroll back'), next: t('Scroll forward') }} />
         </div>
       </div>
-      <div
-        id="vrail"
-        data-reveal="1"
-        ref={railRef}
-        className="no-scrollbar"
-        style={{
-          display: 'flex', gap: 18, overflowX: 'auto', scrollSnapType: 'x mandatory',
-          padding: '8px clamp(16px,calc((100vw - 1320px)/2 + 40px),calc((100vw - 1320px)/2 + 40px)) 24px',
-          scrollbarWidth: 'none',
-        }}
-      >
-        {items.map((a) => <RailCard key={a.id} a={a} rateTag={rateTag} />)}
+      <div id="vrail" data-reveal="1" style={{ padding: '0 clamp(16px,calc((100vw - 1320px)/2 + 40px),calc((100vw - 1320px)/2 + 40px))' }}>
+        <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[18px]" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
+          {items.map((a) => <RailCard key={a.id} a={a} rateTag={rateTag} />)}
+        </CarouselTrack>
       </div>
     </section>
   );

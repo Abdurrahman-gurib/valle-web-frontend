@@ -8,7 +8,8 @@ import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
-import { useT } from '../i18n';
+import { isRtl, useLang, useT } from '../i18n';
+import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { TableReservation } from '../components/TableReservation';
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -22,6 +23,8 @@ function Fact({ label, value }: { label: string; value: string }) {
 
 export default function RestaurantPage() {
   const t = useT();
+  const lang = useLang();
+  const gal = useCarousel();
   const ref = useReveal<HTMLElement>();
   const goto = useGoto();
   const { RESTOS } = useCatalog();
@@ -119,12 +122,16 @@ export default function RestaurantPage() {
             fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
             textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
           }}>{t('Inside the restaurant')}</h2>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('PHOTOS')}</span>
+          <CarouselArrows prev={gal.prev} next={gal.next} canPrev={gal.canPrev} canNext={gal.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />
         </div>
-        <div id="vgal" className="no-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '18px 2px 14px', scrollbarWidth: 'none' }}>
-          {rGallery.map((g) => (
-            <Img key={g.src} src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: 'clamp(255px,36vw,375px)', borderRadius: 14, flex: '0 0 auto', objectFit: 'cover' }} />
-          ))}
+        <div id="vgal" className="pt-[18px] pb-[14px]">
+          <CarouselTrack viewportRef={gal.viewportRef} label={t('Inside the restaurant')} gap="gap-3" onKeyDown={carouselKeys(gal.prev, gal.next, isRtl(lang))}>
+            {rGallery.map((g) => (
+              <div key={g.src} className="shrink-0 grow-0 basis-[clamp(255px,36vw,375px)]">
+                <Img src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
+              </div>
+            ))}
+          </CarouselTrack>
         </div>
       </div>
 

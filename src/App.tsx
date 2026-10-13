@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { MotionConfig } from 'motion/react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import NotFoundPage from './pages/NotFound';
 import TicketPage from './pages/Ticket';
@@ -30,8 +31,10 @@ import LegalPage from './pages/Legal';
 import GroupsPage from './pages/Groups';
 import VacancyDetailPage from './pages/VacancyDetail';
 import StaffLogin from './pages/staff/Login';
-import StaffDashboard from './pages/staff/Dashboard';
-import HrDashboard from './pages/hr/Dashboard';
+// the back office (charts, QR scanner, chat console) loads only when staff open it
+const StaffDashboard = lazy(() => import('./pages/staff/Dashboard'));
+const HrDashboard = lazy(() => import('./pages/hr/Dashboard'));
+const backOffice = (el: ReactNode) => <Suspense fallback={<div style={{ minHeight: '100vh', background: '#F7F3FF' }} />}>{el}</Suspense>;
 
 /** The first version of this site used /experience/:id; nginx 301s those, this covers client-side links. */
 function LegacyExperienceRedirect() {
@@ -118,6 +121,8 @@ function publicRoutes(prefix: string) {
 
 export default function App() {
   return (
+    // every Motion animation in the app follows the visitor's reduced-motion setting
+    <MotionConfig reducedMotion="user">
     <LangProvider>
     <CatalogProvider>
       <AppStoreProvider>
@@ -128,11 +133,11 @@ export default function App() {
               moving between them does not refetch the session. */}
           <Route element={<StaffShell />}>
             <Route path="/staff">
-              <Route index element={<StaffDashboard />} />
+              <Route index element={backOffice(<StaffDashboard />)} />
               <Route path="login" element={<StaffLogin />} />
               <Route path="*" element={<Navigate to="/staff" replace />} />
             </Route>
-            <Route path="/hr" element={<HrDashboard />} />
+            <Route path="/hr" element={backOffice(<HrDashboard />)} />
           </Route>
 
           {/* Public site. */}
@@ -144,5 +149,6 @@ export default function App() {
       </AppStoreProvider>
     </CatalogProvider>
     </LangProvider>
+    </MotionConfig>
   );
 }

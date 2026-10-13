@@ -1,6 +1,7 @@
 import { showsDuration } from '../types';
 import { breadcrumbs, useSeo } from '../lib/seo';
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useSearchParams } from 'react-router-dom';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
@@ -10,7 +11,7 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { Img } from '../components/Img';
-import { _t, useT } from '../i18n';
+import { _t, isRtl, useLang, useT } from '../i18n';
 
 const PULSE_RANGES: Record<string, [number, number]> = {
   any: [1, 5], serene: [1, 2], moderate: [3, 3], extreme: [4, 5],
@@ -184,9 +185,8 @@ export default function ExplorePage() {
   }, [params]);
 
   const [searchFocus, setSearchFocus] = useState(false);
-  const railRef = useRef<HTMLDivElement>(null);
-  const scrollRail = (dir: 1 | -1) => railRef.current?.scrollBy({ left: dir * Math.max(280, railRef.current.clientWidth * 0.8), behavior: 'smooth' });
-  const arrowStyle: CSSProperties = { width: 44, height: 44, borderRadius: 999, border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', fontSize: 26, lineHeight: 1, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
+  const nature = useCarousel();
+  const lang = useLang();
   const [hRate, bindRate] = useHover();
   const [hClear, bindClear] = useHover();
   const [hCta, bindCta] = useHover();
@@ -333,20 +333,15 @@ export default function ExplorePage() {
       </div>
 
       {cat === 'nature' ? (
-        <div style={{ position: 'relative', marginTop: 24 }} data-testid="nature-carousel">
-          <div ref={railRef} style={{ display: 'flex', gap: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', paddingBottom: 6 }}>
+        <div style={{ marginTop: 24 }} data-testid="nature-carousel">
+          <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in entrance admission fees')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
             {cards.map((a) => (
-              <div key={a.id} style={{ flex: '0 0 min(300px, 82vw)', scrollSnapAlign: 'start' }}>
+              <div key={a.id} className="min-w-0 shrink-0 grow-0 basis-[min(300px,82vw)] py-2">
                 <ResultCard a={a} rateTag={app.rateTag} />
               </div>
             ))}
-          </div>
-          {cards.length > 1 && (
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
-              <button type="button" onClick={() => scrollRail(-1)} aria-label={t('Previous')} data-testid="carousel-prev" style={arrowStyle}>&lsaquo;</button>
-              <button type="button" onClick={() => scrollRail(1)} aria-label={t('Next')} data-testid="carousel-next" style={arrowStyle}>&rsaquo;</button>
-            </div>
-          )}
+          </CarouselTrack>
+          {cards.length > 1 && <CarouselArrows className="mt-3 justify-end" prev={nature.prev} next={nature.next} canPrev={nature.canPrev} canNext={nature.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />}
         </div>
       ) : (
         <div style={{
