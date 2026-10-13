@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import NotFoundPage from './NotFound';
 import { abs, breadcrumbs, useSeo } from '../lib/seo';
@@ -12,7 +13,8 @@ import { useReveal } from '../hooks/useReveal';
 import { Stripes, StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
 import { showsDuration, type GalleryShot } from '../types';
-import { localizePath, useT, fwd } from '../i18n';
+import { isRtl, localizePath, useLang, useT, fwd } from '../i18n';
+import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useParkStatus } from '../components/WeatherCard';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 
@@ -82,6 +84,8 @@ function RelatedCard({ a }: { a: CardModel }) {
 
 export default function DetailPage() {
   const t = useT();
+  const lang = useLang();
+  const galCar = useCarousel();
   const { id } = useParams();
   const catalog = useCatalog();
   const app = useApp();
@@ -124,8 +128,8 @@ export default function DetailPage() {
   const galShots = gal ? gal.shots.filter((s) => s.src !== act.img) : [];
   const galLead = galShots[0];
   const galLeadPos = (galLead && galLead.pos) || '50% 18%';
-  // a lead photo and up to eight more: enough to sell the activity without a wall of pictures
-  const galRest = galShots.slice(1, 9);
+  // a lead photo, then every other shot in a carousel
+  const galRest = galShots.slice(1);
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const pl = catalog.PL[act.id] || [];
   const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
@@ -317,9 +321,12 @@ export default function DetailPage() {
                   <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{galLead.cap}</div>
                 </div>
               </div>
-              {/* an even grid: 4 across on desktop, 2 on a phone, so no row is left half empty */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,calc(50% - 6px)),1fr))', gap: 12, marginTop: 12 }} className="gal-rest">
-                {galRest.slice(0, galRest.length >= 4 ? galRest.length - (galRest.length % 4) : galRest.length).map((g) => <GalRestShot key={g.src} g={g} />)}
+              {/* the rest of the shoot: 4 across on desktop, 2 on a phone, swipe or arrows for more */}
+              <div style={{ marginTop: 12 }} data-testid="gallery-carousel">
+                <CarouselTrack viewportRef={galCar.viewportRef} label={act.name} gap="gap-3" onKeyDown={carouselKeys(galCar.prev, galCar.next, isRtl(lang))}>
+                  {galRest.map((g) => <div key={g.src} className="min-w-0 shrink-0 grow-0 basis-[calc(50%-6px)] md:basis-[calc(25%-9px)]"><GalRestShot g={g} /></div>)}
+                </CarouselTrack>
+                {galRest.length > 2 && <CarouselArrows tone="dark" className="mt-3 justify-end" prev={galCar.prev} next={galCar.next} canPrev={galCar.canPrev} canNext={galCar.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 20 }}>
@@ -352,7 +359,7 @@ export default function DetailPage() {
           [t('Plan your visit'), paths.plan()],
           [t('Lunch at Le Chamouzé'), paths.resto('chamouze')],
         ] as [string, string][]).map(([label, href]) => (
-          <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} {fwd()}</Link>
+          <Link key={href} to={href} style={{ border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#340057', textDecoration: 'none', background: '#FFFFFF' }}>{label} <Fwd /></Link>
         ))}
       </nav>
 

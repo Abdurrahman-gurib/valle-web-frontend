@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
@@ -57,7 +58,7 @@ function AddToDay({ productKey, onClose }: { productKey: string; onClose: () => 
       onClick={() => { if (!inDay) app.toggleSel(id); onClose(); goto.booking(); }}
       style={{ marginTop: 16, border: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999 }}
     >
-      {inDay ? t('In my day · book now') : t('Add to my day and book')} {fwd()}
+      {inDay ? t('In my day · book now') : t('Add to my day and book')} <Fwd />
     </button>
   );
 }
@@ -78,7 +79,7 @@ function ReserveLink({ href }: { href: string }) {
         transform: h ? 'translateY(-1px)' : undefined,
       }}
     >
-      {t('Reserve this package')} {fwd()}
+      {t('Reserve this package')} <Fwd />
     </a>
   );
 }

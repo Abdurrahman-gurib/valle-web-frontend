@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 // @ts-expect-error plain ESM script without types
 import { collectKeys } from '../../scripts/i18n-keys.mjs';
-import { LANGS, dictionaries, localizeData, localizePath, stripLang, tr, type Lang } from './index';
+import { LANGS, dictionaries, loadAllDicts, localizeData, localizePath, stripLang, tr, type Lang } from './index';
+
+beforeAll(async () => { await loadAllDicts(); });
 
 const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 

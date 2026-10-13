@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import { Link } from 'react-router-dom';
 import { useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
@@ -33,7 +34,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
       </p>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
         {links.map(([label, href]) => (
-          <Link key={href} to={href} style={{ border: '1.5px solid #340057', borderRadius: 999, padding: '11px 18px', fontWeight: 700, fontSize: 14, color: '#340057', textDecoration: 'none' }}>{label} {fwd()}</Link>
+          <Link key={href} to={href} style={{ border: '1.5px solid #340057', borderRadius: 999, padding: '11px 18px', fontWeight: 700, fontSize: 14, color: '#340057', textDecoration: 'none' }}>{label} <Fwd /></Link>
         ))}
       </div>
       <p style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)', marginTop: 40 }}>

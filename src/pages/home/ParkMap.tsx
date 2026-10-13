@@ -1,3 +1,4 @@
+import { ValleyMist } from '../../components/ValleyMist';
 import { useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { useGoto } from '../../lib/nav';
@@ -132,6 +133,7 @@ export function ParkMap() {
     <section style={{ background: '#260040', marginTop: 'clamp(56px,8vw,104px)', padding: 'clamp(56px,8vw,104px) 0 clamp(48px,7vw,88px)', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: 0, left: '-2%', right: '-2%', height: 10, background: 'repeating-linear-gradient(-45deg,#33FF74 0 14px,#340057 14px 28px)', transform: 'rotate(-.6deg)' }} />
       <div style={{ position: 'absolute', left: '50%', top: '30%', width: 1400, height: 1400, marginLeft: -700, borderRadius: 999, background: 'radial-gradient(circle, rgba(115,51,255,.22), rgba(31,0,51,0) 55%)', pointerEvents: 'none' }} />
+      <ValleyMist />
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid rgba(255,255,255,.25)', paddingBottom: 28 }}>
           <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, color: '#FFFFFF', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('The walking trail')}</h2>

@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
@@ -160,7 +161,7 @@ export function MyDayDrawer() {
                   color: hBrowse ? '#FFFFFF' : '#340057', padding: '11px 22px', borderRadius: 999,
                 }}
               >
-                {t('Explore experiences')} {fwd()}
+                {t('Explore experiences')} <Fwd />
               </button>
             </div>
           )}
@@ -179,7 +180,7 @@ export function MyDayDrawer() {
               padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
             }}
           >
-            {t('Check out')} {fwd()}
+            {t('Check out')} <Fwd />
           </button>
           <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', textAlign: 'center', marginTop: 9 }}>
             {t('FREE TO BOOK · PAY AT THE GATE')}

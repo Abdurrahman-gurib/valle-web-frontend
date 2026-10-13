@@ -37,3 +37,12 @@
   --radius-md: 14px;
   --radius-sm: 10px;
 }
+
+/*
+ * Without preflight a border utility would draw "medium" borders on every
+ * side. These two rules restore Tailwind's border model for elements that use
+ * border utilities, and nothing else on the page.
+ */
+@layer base {
+  [class*='border'] { border-width: 0; border-style: solid; }
+}

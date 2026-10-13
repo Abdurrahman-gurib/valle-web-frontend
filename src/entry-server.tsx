@@ -3,7 +3,10 @@ import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 import App from './App';
 import { ORGANIZATION, SeoProvider, headTags, type SeoCollector } from './lib/seo';
-import { LangProvider, langFromPath, stripLang } from './i18n';
+import { LangProvider, langFromPath, loadAllDicts, stripLang } from './i18n';
+
+/** The prerender awaits this once: every language's dictionary in memory before rendering. */
+export async function prepare(): Promise<void> { await loadAllDicts(); }
 
 /**
  * Static generation entry (scripts/prerender.mjs). Renders one public route to

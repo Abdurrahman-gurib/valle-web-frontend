@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
@@ -8,6 +8,27 @@ export function Hero() {
   const t = useT();
   const { HERO } = useCatalog();
   const [heroIdx, setHeroIdx] = useState(0);
+  const copyRef = useRef<HTMLDivElement>(null);
+
+  // GSAP entrance timeline: the two headline lines rise in, then the copy and the slide dots.
+  // GSAP loads on demand and skips the whole thing for reduced-motion visitors.
+  useEffect(() => {
+    const root = copyRef.current;
+    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let revert: (() => void) | undefined;
+    let cancelled = false;
+    void import('gsap').then(({ gsap }) => {
+      if (cancelled) return;
+      const ctx = gsap.context(() => {
+        gsap.timeline({ defaults: { ease: 'power3.out' } })
+          .from('[data-hero-line]', { yPercent: 60, opacity: 0, rotate: 2, duration: 0.9, stagger: 0.14 })
+          .from('[data-hero-copy]', { y: 18, opacity: 0, duration: 0.7 }, '-=0.45')
+          .from('[data-hero-dot]', { x: 16, opacity: 0, duration: 0.4, stagger: 0.06 }, '-=0.5');
+      }, root.parentElement ?? root);
+      revert = () => ctx.revert();
+    });
+    return () => { cancelled = true; revert?.(); };
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -41,13 +62,13 @@ export function Hero() {
         />
       ))}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.88) 0%, rgba(52,0,87,.2) 48%, rgba(31,0,51,.4) 100%)' }} />
-      <div style={{ position: 'relative', margin: '0 auto', padding: '0 clamp(16px,2.5vw,40px)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: 'clamp(96px,12vh,130px)' }}>
+      <div ref={copyRef} style={{ position: 'relative', margin: '0 auto', padding: '0 clamp(16px,2.5vw,40px)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: 'clamp(96px,12vh,130px)' }}>
         <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>
           <h1 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(48px,8.4vw,132px)', lineHeight: 0.82, letterSpacing: '-0.01em', color: '#FFFFFF', margin: 0, textTransform: 'uppercase' }}>
-            {t('Feel the')}<br /><span style={{ color: '#FFFC33' }}>{t('colours.')}</span>
+            <span data-hero-line style={{ display: 'inline-block' }}>{t('Feel the')}</span><br /><span data-hero-line style={{ color: '#FFFC33', display: 'inline-block' }}>{t('colours.')}</span>
           </h1>
         </div>
-        <p style={{ color: 'rgba(255,255,255,.88)', fontSize: 'clamp(15px,1.6vw,18px)', lineHeight: 1.55, maxWidth: '52ch', margin: '22px 0 0' }}>
+        <p data-hero-copy style={{ color: 'rgba(255,255,255,.88)', fontSize: 'clamp(15px,1.6vw,18px)', lineHeight: 1.55, maxWidth: '52ch', margin: '22px 0 0' }}>
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
       </div>
@@ -55,6 +76,7 @@ export function Hero() {
         {HERO.map((src, i) => (
           <button
             key={src}
+            data-hero-dot
             onClick={() => setHeroIdx(i)}
             aria-label={t('Show slide {n}', { n: i + 1 })}
             aria-current={i === heroIdx ? 'true' : undefined}

@@ -1,12 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import fr from './fr.json';
-import de from './de.json';
-import it from './it.json';
-import ar from './ar.json';
-import ru from './ru.json';
-import es from './es.json';
-import hi from './hi.json';
 
 /**
  * Languages of the public site. English lives at the root (/explore), every
@@ -36,16 +29,23 @@ export const LANG_META: Record<Lang, { name: string; short: string; locale: stri
   hi: { name: 'हिन्दी', short: 'HI', locale: 'hi-IN', og: 'hi_IN', dir: 'ltr' },
 };
 
-const DICTS: Record<Lang, Record<string, string>> = {
-  en: {},
-  fr: fr as Record<string, string>,
-  de: de as Record<string, string>,
-  it: it as Record<string, string>,
-  ar: ar as Record<string, string>,
-  ru: ru as Record<string, string>,
-  es: es as Record<string, string>,
-  hi: hi as Record<string, string>,
-};
+/**
+ * Dictionaries load on demand, one per language (each is ~200-300 kB): a
+ * visitor downloads only the language they read. main.tsx loads the page's
+ * language before the first render; LangProvider loads another on a switch;
+ * the prerender and the tests load them all.
+ */
+const LOADERS = import.meta.glob<{ default: Record<string, string> }>(['./fr.json', './de.json', './it.json', './ar.json', './ru.json', './es.json', './hi.json']);
+const DICTS: Record<Lang, Record<string, string>> = { en: {}, fr: {}, de: {}, it: {}, ar: {}, ru: {}, es: {}, hi: {} };
+const loaded = new Set<Lang>(['en']);
+export const isDictLoaded = (lang: Lang): boolean => loaded.has(lang);
+export async function loadDict(lang: Lang): Promise<void> {
+  if (loaded.has(lang)) return;
+  const mod = await LOADERS[`./${lang}.json`]();
+  DICTS[lang] = mod.default;
+  loaded.add(lang);
+}
+export const loadAllDicts = (): Promise<void[]> => Promise.all(LANGS.map(loadDict));
 
 export const isLang = (v: unknown): v is Lang => typeof v === 'string' && (LANGS as readonly string[]).includes(v);
 
@@ -107,7 +107,15 @@ const Ctx = createContext<Lang>('en');
  */
 export function LangProvider({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const lang = langFromPath(pathname);
+  const wanted = langFromPath(pathname);
+  // until a newly chosen language's dictionary arrives, keep showing the last loaded one
+  const [ready, setReady] = useState<Lang>(() => (isDictLoaded(wanted) ? wanted : 'en'));
+  useEffect(() => {
+    let alive = true;
+    loadDict(wanted).then(() => { if (alive) setReady(wanted); }).catch(() => { /* offline: stay on the loaded language */ });
+    return () => { alive = false; };
+  }, [wanted]);
+  const lang = isDictLoaded(wanted) ? wanted : ready;
   setCurrentLang(lang);
   useEffect(() => {
     document.documentElement.lang = lang;

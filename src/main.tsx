@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { langFromPath, loadDict } from './i18n';
 import './styles/tailwind.css';
 import './styles/global.css';
 import { registerServiceWorker } from './lib/pwa';
@@ -30,6 +31,9 @@ const tree = (
   </StrictMode>
 );
 
-createRoot(document.getElementById('root')!).render(
-  sentryEnabled ? <Sentry.ErrorBoundary fallback={<CrashScreen />}>{tree}</Sentry.ErrorBoundary> : tree,
-);
+// the prerendered HTML stays on screen while the page's own language dictionary loads
+void loadDict(langFromPath(location.pathname)).catch(() => undefined).finally(() => {
+  createRoot(document.getElementById('root')!).render(
+    sentryEnabled ? <Sentry.ErrorBoundary fallback={<CrashScreen />}>{tree}</Sentry.ErrorBoundary> : tree,
+  );
+});

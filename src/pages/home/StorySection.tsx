@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import { Img } from '../../components/Img';
 import { fwd, useT } from '../../i18n';
 import { paths, useGoto } from '../../lib/nav';
@@ -27,7 +28,7 @@ export function StorySection() {
             onClick={(e) => { e.preventDefault(); goto.story(); }}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 18, fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FF3358', textDecoration: 'none', borderBottom: '2px solid #FF3358', paddingBottom: 3 }}
           >
-            {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden>{fwd()}</span>
+            {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden><Fwd /></span>
           </a>
           <div style={{ display: 'flex', gap: 30, marginTop: 28, flexWrap: 'wrap' }}>
             <div>

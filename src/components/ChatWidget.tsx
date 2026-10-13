@@ -1,3 +1,4 @@
+import { Fwd } from '@/components/ui/arrows';
 import {
   useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent,
 } from 'react';
@@ -547,7 +548,7 @@ export function ChatWidget() {
                 borderRadius: radius.pill, boxShadow: shadow.pink,
               }}
             >
-              {t('Start chat')} {fwd()}
+              {t('Start chat')} <Fwd />
             </button>
           </div>
         </div>

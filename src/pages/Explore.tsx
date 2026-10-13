@@ -1,6 +1,7 @@
 import { showsDuration } from '../types';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { ActivityCard } from '../components/ActivityCard';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useSearchParams } from 'react-router-dom';
 import { useCatalog } from '../store/CatalogContext';
@@ -68,89 +69,8 @@ function Chip({ label, onClick, bg, fg, bd, small }: {
   );
 }
 
-function ResultCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
-  const t = useT();
-  const [h, bind] = useHover();
-  const [hAdd, bindAdd] = useHover();
-  return (
-    <div
-      {...bind}
-      onClick={a.open}
-      style={{
-        cursor: 'pointer',
-        background: '#FFFFFF',
-        borderRadius: 16,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 0 0 1.5px #EBE2FF',
-        transition: 'transform .25s ease, box-shadow .25s ease',
-        ...(h ? { transform: 'translateY(-6px)', boxShadow: '0 26px 50px -20px rgba(52,0,87,.4)' } : undefined),
-      }}
-    >
-      <div style={{ position: 'relative', height: 195, background: '#EBE2FF' }}>
-        <Img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <span style={{
-          position: 'absolute', top: 12, left: 12, background: a.catColor, color: a.catFg,
-          fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-          borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)',
-        }}>{a.catBadge}</span>
-        <span style={{
-          position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11,
-          fontWeight: 700, borderRadius: 8, padding: '6px 10px', boxShadow: '0 6px 16px -6px rgba(0,0,0,.5)',
-        }}>
-          {a.priceLabel}
-          <span style={{
-            background: '#340057', color: '#FFFC33', borderRadius: 4, padding: '2px 5px',
-            fontSize: 9, letterSpacing: '.06em',
-          }}>{rateTag}</span>
-        </span>
-      </div>
-      <div style={{ padding: '15px 17px 17px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-          <div style={{
-            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
-            fontSize: 20, textTransform: 'uppercase',
-          }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
-          <div title={t('Pulse level')} style={{
-            fontSize: '10.5px', fontWeight: 700, letterSpacing: '.13em', color: a.pulseColor, whiteSpace: 'nowrap',
-          }}>{a.pulseStr}</div>
-        </div>
-        <div style={{ fontSize: '13.5px', color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, flex: 1 }}>
-          {a.blurb}
-        </div>
-        <div style={{
-          fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)',
-          marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 11,
-        }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
-        {a.hasAdd && (
-          <button
-            {...bindAdd}
-            onClick={a.add}
-            style={{
-              marginTop: 11,
-              border: `1.5px solid ${a.selOn ? '#340057' : '#C9B3E8'}`,
-              background: a.selOn ? '#340057' : 'transparent',
-              color: a.selOn ? '#FFFFFF' : '#340057',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontSize: '13.5px',
-              fontWeight: 700,
-              padding: '11px 0',
-              borderRadius: 999,
-              width: '100%',
-              transition: 'all .15s',
-              ...(hAdd ? { transform: 'translateY(-1px)' } : undefined),
-            }}
-          >
-            {a.addLabel}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+/** Explore uses the site-wide activity card. */
+const ResultCard = ActivityCard;
 
 export default function ExplorePage() {
   const t = useT();

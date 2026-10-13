@@ -19,7 +19,8 @@ const ssrDir = join(root, 'dist-ssr');
 const origin = (process.env.VITE_SITE_URL || '').replace(/\/+$/, '');
 
 execSync('npx vite build --ssr src/entry-server.tsx --outDir dist-ssr --emptyOutDir', { cwd: root, stdio: 'inherit' });
-const { render, organizationScript } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
+const { render, organizationScript, prepare } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
+await prepare();
 const catalog = JSON.parse(readFileSync(join(root, 'src/data/fallback.json'), 'utf8'));
 
 const baseRoutes = [
