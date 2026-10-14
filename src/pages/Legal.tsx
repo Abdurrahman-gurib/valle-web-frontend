@@ -36,7 +36,7 @@ const PRIVACY: Section[] = [
     _t('Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.'),
   ] },
   { h: _t('How long we keep it'), p: [
-    _t('Bookings and waivers are kept for as long as we need them for safety, insurance and accounting, then deleted. Chat conversations, quote requests and applications are kept until they have been dealt with and for a reasonable time after. Ask us and we will tell you what we hold about you, correct it, or delete it where the law allows.'),
+    _t('Bookings and waivers are kept for seven years after your visit for safety, insurance and accounting; after that your name, contact details and signature are removed and only the amounts and dates stay in our books. Chat conversations, quote and table requests, job applications and visit photos are kept on record. Ask us and we will tell you what we hold about you, correct it, or delete it where the law allows.'),
   ] },
   { h: _t('Your rights'), p: [
     _t('Under the Data Protection Act 2017 of Mauritius you can ask to see the personal data we hold about you, have it corrected or deleted, and object to its use. Write to sales@vallepark.com; we answer within one month. You may also complain to the Data Protection Office of Mauritius.'),
