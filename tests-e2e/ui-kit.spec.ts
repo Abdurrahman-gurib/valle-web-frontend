@@ -14,6 +14,7 @@ test.describe('carousels', () => {
 
   test('the home rail moves forward and back with its arrows and the keyboard', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     const section = page.locator('#vrail').locator('..');
     const track = page.locator('#vrail [data-testid="carousel"] > div');
     await track.scrollIntoViewIfNeeded();
@@ -33,6 +34,7 @@ test.describe('carousels', () => {
 
   test('the Nature category shows its cards in a carousel with arrows, no page overflow', async ({ page }) => {
     await page.goto('/explore?cat=nature');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     const c = page.getByTestId('nature-carousel');
     await expect(c).toBeVisible();
     await expect(c.locator('[data-testid="carousel"] > div > div').first()).toBeVisible();
@@ -42,6 +44,7 @@ test.describe('carousels', () => {
 
   test('the restaurant photo strip is a carousel with working arrows', async ({ page }) => {
     await page.goto('/dine/chamouze');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     const strip = page.locator('#vgal');
     await strip.scrollIntoViewIfNeeded();
     await expect(strip.getByTestId('carousel')).toBeVisible();
@@ -51,6 +54,7 @@ test.describe('carousels', () => {
 
   test('the Arabic page flips the carousel to right-to-left', async ({ page }) => {
     await page.goto('/ar');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     await page.locator('#vrail').scrollIntoViewIfNeeded();
     expect(await page.locator('#vrail [data-testid="carousel"]').evaluate((el) => getComputedStyle(el).direction)).toBe('rtl');
   });
@@ -61,6 +65,7 @@ test.describe('reduced motion', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.addInitScript(rate);
     await page.goto('/');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     const track = page.locator('#vrail [data-testid="carousel"] > div');
     await track.scrollIntoViewIfNeeded();
     await page.waitForTimeout(1500); // let the looping layout settle once images have sized the slides
@@ -76,6 +81,7 @@ test.describe('back office chart', () => {
   test('reports show the Recharts revenue chart', async ({ page }, info) => {
     test.skip(info.project.name !== 'desktop', 'same chart on every viewport');
     await page.goto('/staff');
+    await page.waitForLoadState('networkidle'); // the prerendered page is swapped for the live app on load
     await page.getByRole('button', { name: /reports/i }).first().click();
     const chart = page.getByTestId('revenue-chart');
     await expect(chart).toBeVisible({ timeout: 15000 });
