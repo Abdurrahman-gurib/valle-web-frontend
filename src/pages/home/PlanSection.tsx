@@ -6,7 +6,7 @@ import { Accordion } from '@/components/ui/accordion';
 function InfoTile({ bg, tag, head, children, caps = true }: { bg: string; tag: string; head: string; children: ReactNode; caps?: boolean }) {
   return (
     <div className="rounded-[18px] px-6 py-[22px]" style={{ background: bg }}>
-      <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/55">{tag}</div>
+      <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70">{tag}</div>
       <div className={'mt-2 font-display text-[27px] font-black italic ' + (caps ? 'uppercase' : '')}>{head}</div>
       <div className="mt-1.5 text-sm leading-normal text-valle-purple/70">{children}</div>
     </div>
@@ -20,7 +20,7 @@ export function PlanSection() {
     <section id="plan" data-screen-label="Plan your visit" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
         <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Plan your visit')}</h2>
-        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('06 · GOOD TO KNOW')}</span>
+        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('06 · GOOD TO KNOW')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
         <InfoTile bg="#E2FFEB" tag={t('HOURS')} head="09:00–17:30">{t('Open every day of the week. Last activity departures around 16:00.')}</InfoTile>
@@ -34,7 +34,7 @@ export function PlanSection() {
       </div>
       {/* the questions the desk hears most, answered from the park rules (21st.dev accordion) */}
       <div className="mt-4" data-testid="faq">
-        <div className="mb-3 font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/55 uppercase">{t('Questions before you come')}</div>
+        <div className="mb-3 font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70 uppercase">{t('Questions before you come')}</div>
         <Accordion defaultOpen={['pay']} items={[
           { id: 'pay', title: t('Do I pay when I book?'), content: t('Book free online, no cancellation fee. Nature trails included with park entry.') },
           { id: 'kids', title: t('How much do children pay?'), content: t('Children aged 6 to 11 pay the child rate; under 6 enter free. The Explorer Pass discount applies automatically when three or more different adventure experiences are booked for the same day. Promo and partner codes are applied as shown on the booking page and cannot be combined with another code.') },

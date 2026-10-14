@@ -1,3 +1,4 @@
+import { useEscape } from '../hooks/useEscape';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
@@ -38,13 +39,15 @@ export function RateGate() {
   const t = useT();
   const [hKeep, bindKeep] = useHover();
   const { pathname } = useLocation();
+  // Escape closes the rate question once a rate is already chosen (the first visit has to pick one)
+  useEscape(app.rateGateOpen && app.rateGateDismissable, app.closeRateGate);
   if (!app.rateGateOpen) return null;
   // A guest opening their ticket or waiver from the e-mail has already booked:
   // the first-visit rate question would only stand between them and the form.
   if (!app.rateGateDismissable && /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname)) return null;
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label={t('Choose your rate')} style={{
       position: 'fixed', inset: 0, zIndex: 130, background: 'rgba(38,0,64,.62)',
       backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -84,7 +87,7 @@ export function RateGate() {
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>
+            <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.7)' }}>
               {t('YOU CAN SWITCH ANY TIME FROM THE MENU')}
             </span>
             {app.rateGateDismissable && (

@@ -23,7 +23,7 @@ export function CtaBanner() {
             <motion.a
               href={paths.booking()}
               onClick={(e) => { e.preventDefault(); goto.booking(); }}
-              whileHover={{ y: -2, boxShadow: '0 14px 30px rgba(0,0,0,.3)' }}
+              whileHover={{ y: -2}}
               whileTap={{ scale: 0.97 }}
               className="inline-block cursor-pointer rounded-full bg-valle-purple px-[38px] py-[18px] text-base font-bold text-white"
               style={{ textDecoration: 'none' }}

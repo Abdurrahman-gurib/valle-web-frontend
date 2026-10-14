@@ -10,7 +10,7 @@ function RestoTeaser({ href, onGo, img, alt, badge, name, blurb }: { href: strin
     <motion.a
       href={href}
       onClick={(e) => { e.preventDefault(); onGo(); }}
-      whileHover={{ y: -5, boxShadow: '0 26px 50px -18px rgba(52,0,87,.45)' }}
+      whileHover={{ y: -5}}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       className="group relative block min-h-[400px] cursor-pointer overflow-hidden rounded-[20px] bg-valle-deep text-inherit"
       style={{ textDecoration: 'none' }}
@@ -41,7 +41,7 @@ export function DineTeasers() {
     <section id="dine" data-screen-label="Restaurants" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
         <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Taste the soul')}</h2>
-        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('04 · DINE IN THE VALLEY')}</span>
+        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('04 · DINE IN THE VALLEY')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
         <RestoTeaser href={paths.resto('chamouze')} onGo={() => goto.resto('chamouze')} img={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} badge={t('WATERFALL DINING')} name="Le Chamouzé" blurb={t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · menus Rs 700 – 4,250.')} />

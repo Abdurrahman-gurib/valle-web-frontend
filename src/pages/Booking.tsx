@@ -48,11 +48,11 @@ const NATIONALITY_KEYS = [_t('Mauritius'), _t('Réunion / France'), _t('United K
 void NATIONALITY_KEYS;
 
 const stepLabel: CSSProperties = {
-  fontFamily: MONO, fontSize: '11.5px', fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)',
+  fontFamily: MONO, fontSize: '11.5px', fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)',
 };
 
 const stepperTag: CSSProperties = {
-  fontFamily: MONO, fontSize: '8.5px', letterSpacing: '.05em', color: 'rgba(52,0,87,.55)',
+  fontFamily: MONO, fontSize: '8.5px', letterSpacing: '.05em', color: 'rgba(52,0,87,.7)',
 };
 
 const inputStyle: CSSProperties = {
@@ -168,7 +168,7 @@ function CartLine({ line }: { line: SelLine }) {
         {...bindX}
         style={{
           border: '1.5px solid ' + (hx ? '#FF3358' : '#EBE2FF'), background: 'transparent',
-          color: hx ? '#FF3358' : 'rgba(52,0,87,.55)', width: '28px', height: '28px', borderRadius: '999px',
+          color: hx ? '#FF3358' : 'rgba(52,0,87,.7)', width: '28px', height: '28px', borderRadius: '999px',
           cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: 0,
         }}
       >×</button>
@@ -598,7 +598,7 @@ export default function BookingPage() {
               lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase',
               transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
             }}>{t('Build your day')}</h1>
-            <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('BOOKING MADE SIMPLE')}</span>
+            <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('BOOKING MADE SIMPLE')}</span>
           </div>
           <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{ONLINE_PAYMENT ? t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS') : t('FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
 
@@ -653,7 +653,7 @@ export default function BookingPage() {
                     </div>
                   ))}
                   {cartActs.length === 0 && (
-                    <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.55)' }}>
+                    <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.7)' }}>
                       {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
                     </div>
                   )}
@@ -679,7 +679,7 @@ export default function BookingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
+                  <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.7)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
                   <Popover open={calOpen} onOpenChange={setCalOpen}>
                     <PopoverTrigger asChild>
                       <button
@@ -741,7 +741,7 @@ export default function BookingPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder={t('Full name')} />
                   <div style={{ position: 'relative' }}>
-                    <select
+                    <select aria-label={t('Nationality')}
                       value={nat}
                       onChange={(e) => setNatAndPrefill(e.target.value)}
                       onFocus={() => setNatFocus(true)}
@@ -767,7 +767,7 @@ export default function BookingPage() {
                       <option value="USA">{t('USA')}</option>
                       <option value="Other">{t('Other')}</option>
                     </select>
-                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '11px', color: 'rgba(52,0,87,.55)' }}>▾</span>
+                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '11px', color: 'rgba(52,0,87,.7)' }}>▾</span>
                   </div>
                   <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder={t('Contact number (SMS / WhatsApp)')} />
                   <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder={t('Email')} />
@@ -870,7 +870,7 @@ export default function BookingPage() {
             <div style={{ height: '8px', background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)', margin: '0 -24px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginTop: '18px' }}>
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('BOOKING REFERENCE')}</div>
+                <div style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('BOOKING REFERENCE')}</div>
                 <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '28px', letterSpacing: '.04em', marginTop: '6px', color: '#FF3358' }}>{refCode}</div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(52,0,87,.75)', marginTop: '6px' }}>{guestLine}</div>
               </div>

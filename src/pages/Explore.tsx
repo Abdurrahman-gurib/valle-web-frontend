@@ -174,7 +174,7 @@ export default function ExplorePage() {
         }}>{cat === 'nature' ? t('Already included in entrance admission fees') : t('Explore Vallé')}</h1>
         <span style={{
           fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600,
-          letterSpacing: '.16em', color: 'rgba(52,0,87,.55)',
+          letterSpacing: '.16em', color: 'rgba(52,0,87,.7)',
         }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
       </div>
 
@@ -230,7 +230,7 @@ export default function ExplorePage() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
           <span style={{
             fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 600,
-            letterSpacing: '.12em', color: 'rgba(52,0,87,.55)', marginRight: 4,
+            letterSpacing: '.12em', color: 'rgba(52,0,87,.7)', marginRight: 4,
           }}>{t('PULSE LEVEL')}</span>
           {PULSE_CHIPS.map((c) => {
             const cc = chipColors(pulseLvl === c.key);
@@ -247,7 +247,7 @@ export default function ExplorePage() {
             );
           })}
           <span style={{
-            marginLeft: 'auto', fontFamily: "'Chivo Mono',monospace", fontSize: 12, color: 'rgba(52,0,87,.55)',
+            marginLeft: 'auto', fontFamily: "'Chivo Mono',monospace", fontSize: 12, color: 'rgba(52,0,87,.7)',
           }}>{resultCount}</span>
         </div>
       </div>

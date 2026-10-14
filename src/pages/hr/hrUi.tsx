@@ -1,8 +1,7 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { color, motion, radius, shadow, statusColor } from '../../styles/theme';
-import { useHover } from '../../hooks/useHover';
+import { useEffect, useState, type ReactNode } from 'react';
+import { color, statusColor } from '../../styles/theme';
 import { Stripes } from '../../components/Stripes';
-import { display, mono } from '../staff/ui';
+import { cn } from '@/lib/utils';
 
 /**
  * Shared chrome for the careers back office.
@@ -10,22 +9,24 @@ import { display, mono } from '../staff/ui';
  * Deliberately thin: the reservations desk already owns the product's visual
  * language in `pages/staff/ui.tsx` (Btn, StatusChip, EmptyState, Spinner), and
  * this file only adds the pieces HR needs on top (form fields, a drawer shell,
- * a copy-to-clipboard control) using the tokens in `styles/theme.ts`.
+ * a copy-to-clipboard control) using the brand tokens.
  */
 
 /** Below this the drawer goes full width and every two-column grid stacks. */
 export const NARROW = 900;
 
-export const labelStyle: CSSProperties = {
-  ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.13em', color: color.violet,
-  textTransform: 'uppercase', display: 'block',
-};
+/** Mono uppercase field label. */
+export const labelCls =
+  'block font-mono text-[10px] font-bold tracking-[.13em] text-valle-violet uppercase';
 
-export const fieldStyle: CSSProperties = {
-  width: '100%', border: '1.5px solid ' + color.border, background: color.tint,
-  borderRadius: radius.md, padding: '11px 14px', fontFamily: 'inherit', fontSize: 14.5,
-  outline: 'none', color: color.purple, transition: 'border-color ' + motion.fast,
-};
+/** Lilac-tinted input / select / textarea skin. */
+export const fieldCls =
+  'w-full border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] py-[11px] px-[14px] ' +
+  '[font-family:inherit] text-[14.5px] outline-none text-valle-purple ' +
+  'transition-[border-color] duration-[180ms] ease-[cubic-bezier(.2,.7,.2,1)]';
+
+const fieldBorder = (error?: string, focused?: boolean) =>
+  error ? 'border-[#D91E44]' : focused ? 'border-valle-violet' : 'border-valle-lilac';
 
 /** Status chip for vacancies and applications, coloured from the shared token map. */
 export function Pill({ value, title }: { value: string; title?: string }) {
@@ -33,11 +34,8 @@ export function Pill({ value, title }: { value: string; title?: string }) {
   return (
     <span
       title={title}
-      style={{
-        ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase',
-        background: skin.bg, color: skin.fg, borderRadius: radius.pill, padding: '4px 9px',
-        whiteSpace: 'nowrap', display: 'inline-block',
-      }}
+      className="inline-block font-mono text-[9.5px] font-bold tracking-[.1em] uppercase rounded-[999px] py-[4px] px-[9px] whitespace-nowrap"
+      style={{ background: skin.bg, color: skin.fg }}
     >
       {value}
     </span>
@@ -47,11 +45,7 @@ export function Pill({ value, title }: { value: string; title?: string }) {
 /** Quiet outline chip for facts that are not a status (employment, counts). */
 export function MetaPill({ children }: { children: ReactNode }) {
   return (
-    <span style={{
-      ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase',
-      border: '1.5px solid ' + color.border, color: 'rgba(52,0,87,.7)', borderRadius: radius.pill,
-      padding: '3px 9px', whiteSpace: 'nowrap', display: 'inline-block',
-    }}>
+    <span className="inline-block font-mono text-[9.5px] font-bold tracking-[.1em] uppercase border-[1.5px] border-solid border-valle-lilac text-[rgba(52,0,87,.7)] rounded-[999px] py-[3px] px-[9px] whitespace-nowrap">
       {children}
     </span>
   );
@@ -59,7 +53,7 @@ export function MetaPill({ children }: { children: ReactNode }) {
 
 export function FieldError({ id, text }: { id: string; text: string }) {
   return (
-    <div id={id} role="alert" style={{ fontSize: 12.5, fontWeight: 600, color: color.pinkDark, marginTop: 5 }}>
+    <div id={id} role="alert" className="text-[12.5px] font-semibold text-[#D91E44] mt-[5px]">
       {text}
     </div>
   );
@@ -80,17 +74,17 @@ function Shell({ id, label, error, hint, children, counter }: {
   id: string; label: string; error?: string; hint?: string; children: ReactNode; counter?: string;
 }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <label htmlFor={id} style={labelStyle}>{label}</label>
-        <span style={{ flex: 1 }} />
+    <div className="min-w-0">
+      <div className="flex items-baseline gap-[8px]">
+        <label htmlFor={id} className={labelCls}>{label}</label>
+        <span className="flex-1" />
         {counter && (
-          <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.45)' }}>{counter}</span>
+          <span className="font-mono text-[9.5px] tracking-[.1em] text-[rgba(52,0,87,.45)]">{counter}</span>
         )}
       </div>
-      <div style={{ marginTop: 6 }}>{children}</div>
+      <div className="mt-[6px]">{children}</div>
       {hint && !error && (
-        <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 5, lineHeight: 1.4 }}>{hint}</div>
+        <div className="text-[12px] text-[rgba(52,0,87,.7)] mt-[5px] leading-[1.4]">{hint}</div>
       )}
       {error && <FieldError id={id + '-error'} text={error} />}
     </div>
@@ -116,11 +110,7 @@ export function TextField({
         required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? id + '-error' : undefined}
-        style={{
-          ...fieldStyle,
-          borderColor: error ? color.pinkDark : f ? color.violet : color.border,
-          opacity: disabled ? 0.6 : 1,
-        }}
+        className={cn(fieldCls, fieldBorder(error, f), disabled ? 'opacity-60' : 'opacity-100')}
       />
     </Shell>
   );
@@ -144,11 +134,10 @@ export function TextArea({
         disabled={disabled}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? id + '-error' : undefined}
-        style={{
-          ...fieldStyle, resize: 'vertical', lineHeight: 1.5, minHeight: 44,
-          borderColor: error ? color.pinkDark : f ? color.violet : color.border,
-          opacity: disabled ? 0.6 : 1,
-        }}
+        className={cn(
+          fieldCls, 'resize-y leading-[1.5] min-h-[44px]', fieldBorder(error, f),
+          disabled ? 'opacity-60' : 'opacity-100',
+        )}
       />
     </Shell>
   );
@@ -165,10 +154,7 @@ export function SelectField({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         aria-invalid={error ? true : undefined}
-        style={{
-          ...fieldStyle, cursor: disabled ? 'default' : 'pointer', appearance: 'auto',
-          borderColor: error ? color.pinkDark : color.border,
-        }}
+        className={cn(fieldCls, 'appearance-auto', disabled ? 'cursor-default' : 'cursor-pointer', fieldBorder(error))}
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
@@ -189,7 +175,8 @@ export function FilterSelect({ value, onChange, ariaLabel, options, width }: {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       aria-label={ariaLabel}
-      style={{ ...fieldStyle, width: width ?? 'auto', cursor: 'pointer', appearance: 'auto' }}
+      className={cn(fieldCls, 'cursor-pointer appearance-auto')}
+      style={{ width: width ?? 'auto' }}
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
@@ -206,10 +193,7 @@ export function Segmented({ value, onChange, options, disabled }: {
   return (
     <div
       role="radiogroup"
-      style={{
-        display: 'inline-flex', gap: 4, padding: 4, background: color.white,
-        border: '1.5px solid ' + color.border, borderRadius: radius.pill,
-      }}
+      className="inline-flex gap-[4px] p-[4px] bg-white border-[1.5px] border-solid border-valle-lilac rounded-[999px]"
     >
       {options.map((o) => (
         <SegBtn
@@ -227,24 +211,19 @@ export function Segmented({ value, onChange, options, disabled }: {
 function SegBtn({ on, onClick, label, disabled }: {
   on: boolean; onClick: () => void; label: string; disabled?: boolean;
 }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       type="button"
       role="radio"
       aria-checked={on}
       disabled={disabled}
       onClick={onClick}
-      className="press"
-      style={{
-        border: 0, cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 13,
-        fontWeight: 700, padding: '8px 18px', borderRadius: radius.pill, whiteSpace: 'nowrap',
-        background: on ? color.purple : (h && !disabled ? color.border : 'transparent'),
-        color: on ? color.white : color.purple,
-        opacity: disabled ? 0.6 : 1,
-        transition: 'background ' + motion.fast + ', color ' + motion.fast,
-      }}
+      className={cn(
+        'press border-0 [font-family:inherit] text-[13px] font-bold py-[8px] px-[18px] rounded-[999px] whitespace-nowrap',
+        'transition-[background,color] duration-[180ms] ease-[cubic-bezier(.2,.7,.2,1)]',
+        disabled ? 'cursor-default opacity-60' : 'cursor-pointer opacity-100',
+        on ? 'bg-valle-purple text-white' : cn('bg-transparent text-valle-purple', !disabled && 'hover:bg-valle-lilac'),
+      )}
     >
       {label}
     </button>
@@ -259,7 +238,6 @@ function SegBtn({ on, onClick, label, disabled }: {
 export function CopyButton({ value, label = 'Copy email', copiedLabel = 'Copied' }: {
   value: string; label?: string; copiedLabel?: string;
 }) {
-  const [h, bind] = useHover();
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -292,19 +270,16 @@ export function CopyButton({ value, label = 'Copy email', copiedLabel = 'Copied'
 
   return (
     <button
-      {...bind}
       type="button"
       onClick={() => { void copy(); }}
-      className="press"
+      className={cn(
+        'press border-[1.5px] border-solid cursor-pointer [font-family:inherit] text-[12.5px] font-bold py-[7px] px-[14px] rounded-[999px] whitespace-nowrap',
+        'transition-[background,border-color] duration-[180ms] ease-[cubic-bezier(.2,.7,.2,1)]',
+        done
+          ? 'border-[#12B54A] bg-[#E2FFEB] text-[#12B54A]'
+          : 'border-valle-lilac bg-transparent hover:bg-[#F7F3FF] text-valle-purple',
+      )}
       aria-live="polite"
-      style={{
-        border: '1.5px solid ' + (done ? color.greenDeep : color.border),
-        background: done ? color.okFill : (h ? color.tint : 'transparent'),
-        color: done ? color.greenDeep : color.purple,
-        cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700,
-        padding: '7px 14px', borderRadius: radius.pill, whiteSpace: 'nowrap',
-        transition: 'background ' + motion.fast + ', border-color ' + motion.fast,
-      }}
     >
       {done ? copiedLabel + ' ✓' : label}
     </button>
@@ -334,56 +309,38 @@ export function Drawer({ eyebrow, title, onClose, children, footer, width = 480,
     <>
       <div
         onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(31,0,51,.55)',
-          backdropFilter: 'blur(3px)', animation: 'vfade .2s ease both',
-        }}
+        className="fixed inset-0 z-[95] bg-[rgba(31,0,51,.55)] backdrop-blur-[3px] animate-[vfade_.2s_ease_both]"
       />
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 96,
-          width: narrow ? '100vw' : 'min(100vw,' + width + 'px)',
-          background: color.white, display: 'flex', flexDirection: 'column',
-          boxShadow: shadow.panel, animation: 'vfade .2s ease both',
-        }}
+        className="fixed top-0 right-0 bottom-0 z-[96] bg-white flex flex-col shadow-[0_40px_90px_-20px_rgba(0,0,0,.6)] animate-[vfade_.2s_ease_both]"
+        style={{ width: narrow ? '100vw' : 'min(100vw,' + width + 'px)' }}
       >
-        <div style={{
-          background: color.purple, color: color.white, padding: '16px 20px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: 'rgba(255,255,255,.6)' }}>
+        <div className="bg-valle-purple text-white py-[16px] px-[20px] flex items-center gap-[12px]">
+          <div className="min-w-0">
+            <div className="font-mono text-[9.5px] font-bold tracking-[.14em] text-[rgba(255,255,255,.6)]">
               {eyebrow}
             </div>
-            <div style={{ ...display, fontSize: 24, lineHeight: 1.05, wordBreak: 'break-word' }}>{title}</div>
+            <div className="font-display italic font-black uppercase text-[24px] leading-[1.05] [word-break:break-word]">{title}</div>
           </div>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           <button
             onClick={onClose}
             aria-label="Close"
-            className="press"
+            className="press border-[1.5px] border-solid border-[rgba(255,255,255,.32)] bg-transparent text-white w-[34px] h-[34px] rounded-[999px] cursor-pointer text-[16px] leading-none shrink-0"
             type="button"
-            style={{
-              border: '1.5px solid rgba(255,255,255,.32)', background: 'transparent', color: color.white,
-              width: 34, height: 34, borderRadius: radius.pill, cursor: 'pointer', fontSize: 16,
-              lineHeight: 1, flexShrink: 0,
-            }}
           >
             ×
           </button>
         </div>
         <Stripes height={6} />
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>{children}</div>
+        <div className="flex-1 overflow-y-auto p-[20px]">{children}</div>
 
         {footer && (
-          <div style={{
-            borderTop: '1.5px solid ' + color.border, padding: 16, background: color.white,
-            display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center',
-          }}>
+          <div className="border-t-[1.5px] border-solid border-valle-lilac p-[16px] bg-white flex gap-[10px] flex-wrap items-center">
             {footer}
           </div>
         )}
@@ -397,9 +354,9 @@ export function DetailLine({ tag, value, children }: {
   tag: string; value?: string; children?: ReactNode;
 }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={labelStyle}>{tag}</div>
-      <div style={{ fontSize: 14, marginTop: 3, wordBreak: 'break-word', lineHeight: 1.45 }}>
+    <div className="min-w-0">
+      <div className={labelCls}>{tag}</div>
+      <div className="text-[14px] mt-[3px] [word-break:break-word] leading-[1.45]">
         {children !== undefined ? children : (value && value.trim() ? value : 'Not given')}
       </div>
     </div>
@@ -407,7 +364,7 @@ export function DetailLine({ tag, value, children }: {
 }
 
 export function SectionTitle({ children }: { children: ReactNode }) {
-  return <div style={{ ...labelStyle, margin: '20px 0 8px' }}>{children}</div>;
+  return <div className={cn(labelCls, 'mt-[20px] mx-0 mb-[8px]')}>{children}</div>;
 }
 
 /** Inline error / notice strip in the pink used by the login card. */
@@ -416,12 +373,12 @@ export function Notice({ tone = 'error', children }: { tone?: 'error' | 'ok'; ch
   return (
     <div
       role="alert"
-      style={{
-        background: err ? 'rgba(217,30,68,.1)' : color.okFill,
-        border: '1.5px solid ' + (err ? 'rgba(217,30,68,.35)' : color.greenDeep),
-        borderRadius: radius.md, padding: '10px 14px', fontSize: 13.5, fontWeight: 600,
-        color: err ? color.pinkDark : color.greenDeep, animation: 'vfade .2s ease both',
-      }}
+      className={cn(
+        'border-[1.5px] border-solid rounded-[12px] py-[10px] px-[14px] text-[13.5px] font-semibold animate-[vfade_.2s_ease_both]',
+        err
+          ? 'bg-[rgba(217,30,68,.1)] border-[rgba(217,30,68,.35)] text-[#D91E44]'
+          : 'bg-[#E2FFEB] border-[#12B54A] text-[#12B54A]',
+      )}
     >
       {children}
     </div>

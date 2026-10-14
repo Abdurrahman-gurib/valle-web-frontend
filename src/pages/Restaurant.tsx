@@ -142,7 +142,7 @@ export default function RestaurantPage() {
             </div>
           ))}
         </div>
-        <div className="mt-3.5 font-mono text-[11px] text-valle-purple/55">{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
+        <div className="mt-3.5 font-mono text-[11px] text-valle-purple/70">{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
       </div>
 
       {/* Also in the valley */}

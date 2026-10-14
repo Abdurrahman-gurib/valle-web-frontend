@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getBackupStatus, type BackupRun, type BackupStatus } from '../../lib/staffApi';
-import { Spinner, mono } from './ui';
-import { Kpi, Panel, td, tdNum, th } from './reportUi';
+import { cn } from '../../lib/utils';
+import { Spinner } from './ui';
+import { Kpi, Panel } from './reportUi';
+
+const TH = 'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left px-[12px] py-[10px] whitespace-nowrap';
+const TD = 'px-[12px] py-[10px] text-[13.5px] border-t border-valle-lilac whitespace-nowrap';
+const TDNUM = cn(TD, 'font-mono text-right text-[12.5px]');
 
 /**
  * Backup check for managers: last night's database backup, this month's test
@@ -66,17 +71,17 @@ export default function BackupsPanel() {
       <Panel
         title="DATABASE BACKUPS · NIGHTLY BACKUP, MONTHLY TEST RESTORE"
         action={state && (
-          <span data-testid="backup-state" style={{ ...mono, fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', background: state.bg, color: state.fg, padding: '5px 10px', borderRadius: 999 }}>
+          <span data-testid="backup-state" className="font-mono text-[10.5px] font-bold tracking-[.12em] px-[10px] py-[5px] rounded-[999px]" style={{ background: state.bg, color: state.fg }}>
             {state.label}
           </span>
         )}
       >
-        <div style={{ padding: 14 }}>
-          {err && <div role="alert" style={{ color: '#D91E44', fontSize: 13.5 }}>{err}</div>}
+        <div className="p-[14px]">
+          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
           {!data && !err && <Spinner />}
           {data && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-[12px]">
                 <Kpi
                   tag="LAST GOOD BACKUP"
                   value={data.lastGoodBackup ? ago(data.lastGoodBackup.finishedAt) : 'none'}
@@ -91,16 +96,16 @@ export default function BackupsPanel() {
                 />
               </div>
               {data.lastBackup && offsite(data.lastBackup) && (
-                <p data-testid="backup-offsite" style={{ fontSize: 13.5, fontWeight: 700, margin: '14px 0 0', color: offsite(data.lastBackup)!.color }}>
+                <p data-testid="backup-offsite" className="text-[13.5px] font-bold mt-[14px] mx-0 mb-0" style={{ color: offsite(data.lastBackup)!.color }}>
                   {offsite(data.lastBackup)!.text}
                 </p>
               )}
               {data.problems.length > 0 && (
-                <ul data-testid="backup-problems" style={{ margin: '14px 0 0', paddingLeft: 18, fontSize: 13.5, lineHeight: 1.55, color: data.state === 'failing' ? '#D91E44' : '#8A7A00' }}>
+                <ul data-testid="backup-problems" className={cn('mt-[14px] mx-0 mb-0 pl-[18px] text-[13.5px] leading-[1.55]', data.state === 'failing' ? 'text-[#D91E44]' : 'text-[#8A7A00]')}>
                   {data.problems.map((p) => <li key={p}>{p}</li>)}
                 </ul>
               )}
-              <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.65)', margin: '14px 0 0' }}>
+              <p className="text-[12.5px] leading-[1.55] text-[rgba(52,0,87,.65)] mt-[14px] mx-0 mb-0">
                 Every night at 02:00 the database is copied to separate storage (14 nightly and 12 monthly copies are kept). Once a month the newest copy is
                 restored into a scratch database and compared table by table with the original. If this panel is not green, tell the website administrator.
               </p>
@@ -108,24 +113,24 @@ export default function BackupsPanel() {
           )}
         </div>
         {data && data.recent.length > 0 && (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th style={th}>WHEN</th><th style={th}>RUN</th><th style={th}>RESULT</th><th style={{ ...th, textAlign: 'right' }}>SIZE</th><th style={{ ...th, textAlign: 'right' }}>ROWS</th><th style={th}>DETAIL</th>
+                  <th className={TH}>WHEN</th><th className={TH}>RUN</th><th className={TH}>RESULT</th><th className={cn(TH, 'text-right')}>SIZE</th><th className={cn(TH, 'text-right')}>ROWS</th><th className={TH}>DETAIL</th>
                 </tr>
               </thead>
               <tbody>
                 {data.recent.map((r) => (
                   <tr key={r.id}>
-                    <td style={td}>{when(r.finishedAt)}</td>
-                    <td style={td}>{KIND[r.kind]}</td>
-                    <td style={{ ...td, fontWeight: 700, color: r.ok ? '#12B54A' : '#D91E44' }}>{r.ok ? 'Passed' : 'Failed'}</td>
-                    <td style={tdNum}>{size(r.bytes)}</td>
-                    <td style={tdNum}>{r.rows ? r.rows.toLocaleString('en') : ''}</td>
-                    <td style={{ ...td, whiteSpace: 'normal', minWidth: 220, color: 'rgba(52,0,87,.7)' }}>
+                    <td className={TD}>{when(r.finishedAt)}</td>
+                    <td className={TD}>{KIND[r.kind]}</td>
+                    <td className={cn(TD, 'font-bold', r.ok ? 'text-[#12B54A]' : 'text-[#D91E44]')}>{r.ok ? 'Passed' : 'Failed'}</td>
+                    <td className={TDNUM}>{size(r.bytes)}</td>
+                    <td className={TDNUM}>{r.rows ? r.rows.toLocaleString('en') : ''}</td>
+                    <td className={cn(TD, 'whitespace-normal min-w-[220px] text-[rgba(52,0,87,.7)]')}>
                       {r.detail}
-                      {offsite(r) && <div style={{ color: offsite(r)!.color, marginTop: 2 }}>{offsite(r)!.text}</div>}
+                      {offsite(r) && <div className="mt-[2px]" style={{ color: offsite(r)!.color }}>{offsite(r)!.text}</div>}
                     </td>
                   </tr>
                 ))}

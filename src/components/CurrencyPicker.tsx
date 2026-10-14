@@ -84,7 +84,7 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
               </button>
             );
           })}
-          <div style={{ fontFamily: MONO, fontSize: 9.5, lineHeight: 1.5, letterSpacing: '.04em', color: 'rgba(52,0,87,.55)', padding: '8px 10px 4px', borderTop: '1px dashed #EBE2FF', marginTop: 6 }}>
+          <div style={{ fontFamily: MONO, fontSize: 9.5, lineHeight: 1.5, letterSpacing: '.04em', color: 'rgba(52,0,87,.7)', padding: '8px 10px 4px', borderTop: '1px dashed #EBE2FF', marginTop: 6 }}>
             {t('YOU PAY IN RUPEES. OTHER CURRENCIES ARE INDICATIVE, BANK OF MAURITIUS RATES OF {date}.', { date: app.fx.asOf.split('-').reverse().join('/') })}
           </div>
         </div>

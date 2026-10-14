@@ -4,11 +4,11 @@ import {
 } from '../../lib/staffApi';
 import { roleLabel } from '../../lib/hrApi';
 import { ValleButton } from '../../components/ui/valle';
-import { Panel, td, th } from './reportUi';
-import { Spinner, inputStyle, mono, shortDate } from './ui';
+import { cn } from '../../lib/utils';
+import { Panel, tdCls, thCls } from './reportUi';
+import { Spinner, fieldLabelCls, inputCls, shortDate } from './ui';
 
 const ROLES: TeamRole[] = ['agent', 'hr', 'manager'];
-const fieldLabel = { ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' } as const;
 
 /** Managers only (the API enforces it): staff accounts, roles, access and resets. */
 export default function TeamPanel({ currentUserId }: { currentUserId: string }) {
@@ -54,16 +54,16 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
       <Panel title="ADD A TEAM MEMBER">
         <form onSubmit={create} className="grid gap-3 p-3.5 sm:grid-cols-[1fr_1fr_160px_auto] sm:items-end">
           <div>
-            <label htmlFor="team-name" style={fieldLabel}>NAME</label>
-            <input id="team-name" required maxLength={120} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+            <label htmlFor="team-name" className={fieldLabelCls}>NAME</label>
+            <input id="team-name" required maxLength={120} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={cn(inputCls, 'mt-[6px]')} />
           </div>
           <div>
-            <label htmlFor="team-email" style={fieldLabel}>WORK E-MAIL</label>
-            <input id="team-email" type="email" required maxLength={160} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+            <label htmlFor="team-email" className={fieldLabelCls}>WORK E-MAIL</label>
+            <input id="team-email" type="email" required maxLength={160} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={cn(inputCls, 'mt-[6px]')} />
           </div>
           <div>
-            <label htmlFor="team-role" style={fieldLabel}>ROLE</label>
-            <select id="team-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as TeamRole })} style={{ ...inputStyle, marginTop: 6 }}>
+            <label htmlFor="team-role" className={fieldLabelCls}>ROLE</label>
+            <select id="team-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as TeamRole })} className={cn(inputCls, 'mt-[6px]')}>
               {ROLES.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
             </select>
           </div>
@@ -87,8 +87,8 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
             <table className="w-full border-collapse text-valle-purple">
               <thead>
                 <tr>
-                  <th style={th}>Name</th><th style={th}>E-mail</th><th style={th}>Role</th>
-                  <th style={th}>Two-step</th><th style={th}>Last sign-in</th><th style={th}>Actions</th>
+                  <th className={thCls}>Name</th><th className={thCls}>E-mail</th><th className={thCls}>Role</th>
+                  <th className={thCls}>Two-step</th><th className={thCls}>Last sign-in</th><th className={thCls}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,13 +97,13 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
                   const busy = busyId === u.id;
                   return (
                     <tr key={u.id} className={u.active ? '' : 'opacity-55'}>
-                      <td style={td}>
+                      <td className={tdCls}>
                         <span className="font-semibold">{u.name}</span>
                         {self && <span className="ml-1.5 font-mono text-[10px] tracking-widest text-valle-violet">YOU</span>}
                         {!u.active && <span className="ml-1.5 font-mono text-[10px] tracking-widest text-[#D91E44]">INACTIVE</span>}
                       </td>
-                      <td style={td}>{u.email}</td>
-                      <td style={td}>
+                      <td className={tdCls}>{u.email}</td>
+                      <td className={tdCls}>
                         <label className="sr-only" htmlFor={`role-${u.id}`}>Role for {u.name}</label>
                         <select
                           id={`role-${u.id}`}
@@ -111,14 +111,14 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
                           disabled={busy || self}
                           title={self ? 'You cannot change your own role' : undefined}
                           onChange={(e) => void act(u.id, () => updateTeamMember(u.id, { role: e.target.value as TeamRole }), `${u.name} is now ${roleLabel(e.target.value)}.`)}
-                          style={{ ...inputStyle, padding: '6px 10px', width: 'auto', fontSize: 13 }}
+                          className={cn(inputCls, 'w-auto px-[10px] py-[6px] text-[13px]')}
                         >
                           {ROLES.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
                         </select>
                       </td>
-                      <td style={td}>{u.twoFactorEnabled ? <span className="font-bold text-[#0A8F3C]">On</span> : <span className="text-valle-purple/55">Off</span>}</td>
-                      <td style={td}>{u.lastLoginAt ? shortDate(u.lastLoginAt) : 'Never'}</td>
-                      <td style={td}>
+                      <td className={tdCls}>{u.twoFactorEnabled ? <span className="font-bold text-[#0A8F3C]">On</span> : <span className="text-valle-purple/70">Off</span>}</td>
+                      <td className={tdCls}>{u.lastLoginAt ? shortDate(u.lastLoginAt) : 'Never'}</td>
+                      <td className={tdCls}>
                         <div className="flex gap-2">
                           <ValleButton
                             variant="outline" size="sm" className="w-auto px-3.5 py-1.5 text-[12.5px]"

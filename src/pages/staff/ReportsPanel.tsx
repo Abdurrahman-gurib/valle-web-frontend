@@ -5,11 +5,18 @@ import {
   type ExperienceRow, type NationalityRow, type SalesSummary,
 } from '../../lib/staffApi';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { Btn, Spinner, card, inputStyle, mono } from './ui';
+import { cn } from '../../lib/utils';
+import { Btn, Spinner } from './ui';
 import {
   BarChart, BreakdownTable, ExportLink, Kpi, PAY_LABEL, Panel, RATE_LABEL, SLOT_LABEL, STATUS_LABEL,
-  addDays, monthEnd, monthStart, prevMonth, td, tdNum, th, todayIsoPark,
+  addDays, monthEnd, monthStart, prevMonth, todayIsoPark,
 } from './reportUi';
+
+const CARD = 'bg-white border-[1.5px] border-valle-lilac rounded-[18px]';
+const DATE_INPUT = 'w-auto border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[14px] py-[11px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
+const TH = 'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left px-[12px] py-[10px] whitespace-nowrap';
+const TD = 'px-[12px] py-[10px] text-[13.5px] border-t border-valle-lilac whitespace-nowrap';
+const TDNUM = cn(TD, 'font-mono text-right text-[12.5px]');
 
 type Preset = 'today' | 'week' | 'month' | 'last-month' | 'quarter' | 'custom';
 
@@ -64,26 +71,26 @@ export default function ReportsPanel() {
   return (
     <div data-testid="reports-panel">
       {/* ---- period ---- */}
-      <div style={{ ...card, padding: 12, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+      <div className={cn(CARD, 'p-[12px] mb-[14px] flex flex-wrap gap-[8px] items-center')}>
         {PRESETS.map((p) => (
           <Btn key={p.key} variant={preset === p.key ? 'solid' : 'ghost'} onClick={() => setPreset(p.key)}>{p.label}</Btn>
         ))}
         {preset === 'custom' && (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: isMobile ? '1 1 100%' : '0 0 auto' }}>
-            <input type="date" value={custom[0]} max={custom[1]} onChange={(e) => setCustom([e.target.value, custom[1]])} aria-label="From date" style={{ ...inputStyle, width: 'auto' }} />
-            <span style={{ ...mono, fontSize: 9.5, color: '#7333FF' }}>TO</span>
-            <input type="date" value={custom[1]} min={custom[0]} onChange={(e) => setCustom([custom[0], e.target.value])} aria-label="To date" style={{ ...inputStyle, width: 'auto' }} />
+          <div className={cn('flex gap-[8px] items-center', isMobile ? 'flex-[1_1_100%]' : 'flex-none')}>
+            <input type="date" value={custom[0]} max={custom[1]} onChange={(e) => setCustom([e.target.value, custom[1]])} aria-label="From date" className={DATE_INPUT} />
+            <span className="font-mono text-[9.5px] text-valle-violet">TO</span>
+            <input type="date" value={custom[1]} min={custom[0]} onChange={(e) => setCustom([custom[0], e.target.value])} aria-label="To date" className={DATE_INPUT} />
           </div>
         )}
-        <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.55)', marginLeft: 'auto' }}>VISITS {from} → {to}</span>
+        <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] ml-auto">VISITS {from} → {to}</span>
       </div>
 
-      {err && <div style={{ ...card, padding: 14, marginBottom: 14, color: '#D91E44', fontWeight: 600 }}>{err}</div>}
-      {loading && !summary && <div style={{ padding: 30, display: 'flex', justifyContent: 'center' }}><Spinner color="#7333FF" /></div>}
+      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {loading && !summary && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
 
       {t && (
         <>
-          <div style={{ display: 'grid', gap: 12, marginBottom: 14, gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', opacity: loading ? 0.6 : 1 }}>
+          <div className={cn('grid gap-[12px] mb-[14px] grid-cols-[repeat(auto-fit,minmax(150px,1fr))]', loading ? 'opacity-[.6]' : 'opacity-100')}>
             <Kpi tag="REVENUE" value={mur(t.revenue)} sub={`${mur(t.entryRevenue)} entry · ${mur(t.experienceRevenue)} experiences`} accent="#7333FF" />
             <Kpi tag="BOOKINGS" value={String(t.bookings)} sub={`${t.cancelled} cancelled`} />
             <Kpi tag="GUESTS" value={String(t.guests)} sub={`${t.adults} adults · ${t.kids} children`} />
@@ -96,7 +103,7 @@ export default function ReportsPanel() {
             <BarChart points={chart} />
           </Panel>
 
-          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
+          <div className={cn('grid gap-[14px]', isMobile ? 'grid-cols-[1fr]' : 'grid-cols-[1fr_1fr]')}>
             <Panel title="BY PAYMENT"><BreakdownTable rows={summary!.byPayMode} label={(k) => PAY_LABEL[k] ?? k} total={t.revenue} /></Panel>
             <Panel title="BY RATE"><BreakdownTable rows={summary!.byRate} label={(k) => RATE_LABEL[k] ?? k} total={t.revenue} /></Panel>
             <Panel title="BY ARRIVAL SLOT"><BreakdownTable rows={summary!.bySlot} label={(k) => SLOT_LABEL[k] ?? k} total={t.revenue} /></Panel>
@@ -104,51 +111,51 @@ export default function ReportsPanel() {
           </div>
 
           <Panel title="WHERE GUESTS COME FROM" action={<ExportLink href={exportUrl('nationalities', from, to)} label="Nationalities CSV" />}>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
-                <thead><tr style={{ background: '#F7F3FF' }}><th style={th}>Nationality</th><th style={{ ...th, textAlign: 'right' }}>Bookings</th><th style={{ ...th, textAlign: 'right' }}>Guests</th><th style={{ ...th, textAlign: 'right' }}>Share</th><th style={{ ...th, textAlign: 'right' }}>Revenue</th><th style={th}></th></tr></thead>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[520px]">
+                <thead><tr className="bg-[#F7F3FF]"><th className={TH}>Nationality</th><th className={cn(TH, 'text-right')}>Bookings</th><th className={cn(TH, 'text-right')}>Guests</th><th className={cn(TH, 'text-right')}>Share</th><th className={cn(TH, 'text-right')}>Revenue</th><th className={TH}></th></tr></thead>
                 <tbody>
                   {nats.map((r) => (
                     <tr key={r.nationality}>
-                      <td style={{ ...td, fontWeight: 600 }}>{r.nationality}</td>
-                      <td style={tdNum}>{r.bookings}</td>
-                      <td style={tdNum}>{r.guests}</td>
-                      <td style={tdNum}>{r.share}%</td>
-                      <td style={tdNum}>{mur(r.revenue)}</td>
-                      <td style={{ ...td, width: '30%' }}><div style={{ height: 8, borderRadius: 999, background: '#EBE2FF' }}><div style={{ width: `${Math.min(100, r.share)}%`, height: '100%', borderRadius: 999, background: '#7333FF' }} /></div></td>
+                      <td className={cn(TD, 'font-semibold')}>{r.nationality}</td>
+                      <td className={TDNUM}>{r.bookings}</td>
+                      <td className={TDNUM}>{r.guests}</td>
+                      <td className={TDNUM}>{r.share}%</td>
+                      <td className={TDNUM}>{mur(r.revenue)}</td>
+                      <td className={cn(TD, 'w-[30%]')}><div className="h-[8px] rounded-[999px] bg-valle-lilac"><div className="h-full rounded-[999px] bg-valle-violet" style={{ width: `${Math.min(100, r.share)}%` }} /></div></td>
                     </tr>
                   ))}
-                  {nats.length === 0 && <tr><td style={{ ...td, color: 'rgba(52,0,87,.5)' }} colSpan={6}>No bookings in this period.</td></tr>}
+                  {nats.length === 0 && <tr><td className={cn(TD, 'text-[rgba(52,0,87,.5)]')} colSpan={6}>No bookings in this period.</td></tr>}
                 </tbody>
               </table>
             </div>
           </Panel>
 
           <Panel title="WHAT SELLS" action={<ExportLink href={exportUrl('experiences', from, to)} label="Experiences CSV" />}>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
-                <thead><tr style={{ background: '#F7F3FF' }}><th style={th}>Experience</th><th style={th}>Option</th><th style={{ ...th, textAlign: 'right' }}>Bookings</th><th style={{ ...th, textAlign: 'right' }}>Adults</th><th style={{ ...th, textAlign: 'right' }}>Children</th><th style={{ ...th, textAlign: 'right' }}>Units</th><th style={{ ...th, textAlign: 'right' }}>Revenue</th></tr></thead>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[620px]">
+                <thead><tr className="bg-[#F7F3FF]"><th className={TH}>Experience</th><th className={TH}>Option</th><th className={cn(TH, 'text-right')}>Bookings</th><th className={cn(TH, 'text-right')}>Adults</th><th className={cn(TH, 'text-right')}>Children</th><th className={cn(TH, 'text-right')}>Units</th><th className={cn(TH, 'text-right')}>Revenue</th></tr></thead>
                 <tbody>
                   {exps.map((r, i) => (
                     <tr key={i}>
-                      <td style={{ ...td, fontWeight: 600 }}>{r.experienceId}</td>
-                      <td style={{ ...td, whiteSpace: 'normal' }}>{r.label}</td>
-                      <td style={tdNum}>{r.bookings}</td>
-                      <td style={tdNum}>{r.adults}</td>
-                      <td style={tdNum}>{r.kids}</td>
-                      <td style={tdNum}>{r.units}</td>
-                      <td style={tdNum}>{mur(r.revenue)}</td>
+                      <td className={cn(TD, 'font-semibold')}>{r.experienceId}</td>
+                      <td className={cn(TD, 'whitespace-normal')}>{r.label}</td>
+                      <td className={TDNUM}>{r.bookings}</td>
+                      <td className={TDNUM}>{r.adults}</td>
+                      <td className={TDNUM}>{r.kids}</td>
+                      <td className={TDNUM}>{r.units}</td>
+                      <td className={TDNUM}>{mur(r.revenue)}</td>
                     </tr>
                   ))}
-                  {exps.length === 0 && <tr><td style={{ ...td, color: 'rgba(52,0,87,.5)' }} colSpan={7}>No experiences sold in this period.</td></tr>}
+                  {exps.length === 0 && <tr><td className={cn(TD, 'text-[rgba(52,0,87,.5)]')} colSpan={7}>No experiences sold in this period.</td></tr>}
                 </tbody>
               </table>
             </div>
           </Panel>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div className="flex gap-[10px] flex-wrap items-center">
             <ExportLink href={exportUrl('bookings', from, to)} label="All bookings in this period (CSV)" />
-            <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>OPENS IN EXCEL / GOOGLE SHEETS · FIGURES BY VISIT DATE, CANCELLED EXCLUDED FROM REVENUE</span>
+            <span className="font-mono text-[9.5px] tracking-[.08em] text-[rgba(52,0,87,.7)]">OPENS IN EXCEL / GOOGLE SHEETS · FIGURES BY VISIT DATE, CANCELLED EXCLUDED FROM REVENUE</span>
           </div>
         </>
       )}

@@ -193,7 +193,7 @@ export default function GroupsPage() {
               {slotLevel === 'closed' ? t('The park is closed for that arrival slot. Pick another day.') : t('That arrival slot is fully booked on this date. Pick the other slot or another day.')}
             </div>
           )}
-          <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.55)] mt-2">{t('HEADCOUNT {n} · GROUPS ARE 10 OR MORE · SECONDARY STUDENTS OVER 11 COUNT AS ADULTS AT THE STUDENT RATE', { n: headcount })}</div>
+          <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)] mt-2">{t('HEADCOUNT {n} · GROUPS ARE 10 OR MORE · SECONDARY STUDENTS OVER 11 COUNT AS ADULTS AT THE STUDENT RATE', { n: headcount })}</div>
 
           <div className={stepLabel}>{school ? t('3 · STUDENT PRICELIST · PER STUDENT, ENTRANCE INCLUDED') : t('3 · EXPERIENCES · PER PERSON')}</div>
           <div className="grid [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))] gap-[10px] mt-3" data-testid="group-items">
@@ -212,7 +212,7 @@ export default function GroupsPage() {
           <textarea value={list} onChange={(e) => setList(e.target.value)} rows={6} placeholder={'Ariane Léger, 12\nKabir Ramdhun, 11'} className={cn(input, 'mt-[10px] font-mono text-[13px]')} data-testid="group-list" />
           <div className="flex gap-[10px] items-center mt-2 flex-wrap">
             <input ref={fileRef} type="file" accept=".csv,text/csv,text/plain" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); }} aria-label={t('Upload a CSV')} className="text-[13px]" />
-            <span className={cn('font-mono text-[10.5px]', participants.length > headcount ? 'text-[#D91E44]' : 'text-[rgba(52,0,87,.55)]')} data-testid="group-list-count">{t('{n} NAMES', { n: participants.length })}</span>
+            <span className={cn('font-mono text-[10.5px]', participants.length > headcount ? 'text-[#D91E44]' : 'text-[rgba(52,0,87,.7)]')} data-testid="group-list-count">{t('{n} NAMES', { n: participants.length })}</span>
           </div>
 
           <div className={stepLabel}>{t('5 · YOUR QUOTE')}</div>
@@ -234,7 +234,7 @@ export default function GroupsPage() {
             <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="group-submit" className={cn('border-0 text-white [font-family:inherit] text-[15px] font-bold py-[15px] px-[30px] rounded-[999px]', busy ? 'bg-[#B98AA7] cursor-wait' : 'bg-valle-red cursor-pointer')}>
               {busy ? t('Booking…') : t('Book the group →')}
             </button>
-            <span className="font-mono text-[10.5px] text-[rgba(52,0,87,.55)]">{t('FREE TO BOOK · DEPOSIT WITHIN 7 DAYS · ONE WAIVER PACK FOR THE LEADER')}</span>
+            <span className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)]">{t('FREE TO BOOK · DEPOSIT WITHIN 7 DAYS · ONE WAIVER PACK FOR THE LEADER')}</span>
           </div>
         </>
       )}

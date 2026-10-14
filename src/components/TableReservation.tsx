@@ -82,7 +82,7 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
                     <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: '#7333FF', margin: '6px 0 4px' }}>{g.title}</div>
                     {g.items.map((it) => (
                       <div key={it.n} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, padding: '3px 0' }}>
-                        <span style={{ flex: 1 }}>{it.n}<span style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(52,0,87,.55)' }}> · {it.p}</span></span>
+                        <span style={{ flex: 1 }}>{it.n}<span style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(52,0,87,.7)' }}> · {it.p}</span></span>
                         <button type="button" aria-label={`${it.n} −`} onClick={() => setPre((p) => ({ ...p, [it.n]: Math.max(0, (p[it.n] || 0) - 1) }))} style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid #D9C9F0', background: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit' }}>−</button>
                         <span style={{ fontFamily: MONO, minWidth: 14, textAlign: 'center' }}>{pre[it.n] || 0}</span>
                         <button type="button" aria-label={`${it.n} +`} onClick={() => setPre((p) => ({ ...p, [it.n]: Math.min(60, (p[it.n] || 0) + 1) }))} style={{ width: 26, height: 26, borderRadius: 999, border: '1.5px solid #D9C9F0', background: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
@@ -104,7 +104,7 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
             <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="table-submit" style={{ border: 0, background: busy ? '#B98AA7' : '#FF3358', color: '#FFFFFF', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, padding: '13px 24px', borderRadius: 999, cursor: busy ? 'wait' : 'pointer' }}>{busy ? t('Sending…') : t('Request the table →')}</button>
             <button type="button" onClick={() => setOpen(false)} style={{ border: '1.5px solid #340057', background: 'transparent', color: '#340057', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, cursor: 'pointer' }}>{t('Close')}</button>
           </div>
-          <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.55)' }}>{t('OPEN DAILY 11:30 – 16:30 · CONFIRMED BY THE TEAM, USUALLY WITHIN THE HOUR')}</div>
+          <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.7)' }}>{t('OPEN DAILY 11:30 – 16:30 · CONFIRMED BY THE TEAM, USUALLY WITHIN THE HOUR')}</div>
         </div>
       )}
     </div>

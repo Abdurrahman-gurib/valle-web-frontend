@@ -1,15 +1,15 @@
 import { useSeo } from '../../lib/seo';
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { StaffStats } from '../../types';
 import { useStaffAuth } from '../../store/StaffAuth';
 import { getStats } from '../../lib/staffApi';
 import { canAccessHr, canAccessReservations, roleLabel } from '../../lib/hrApi';
 import { mur as money } from '../../lib/format';
-import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { cn } from '../../lib/utils';
 import { Stripes } from '../../components/Stripes';
-import { Spinner, card, display, mono } from './ui';
+import { Spinner, cardCls, displayCls, monoCls } from './ui';
 import BookingsPanel from './BookingsPanel';
 import ChatConsole from './ChatConsole';
 import GatePanel from './GatePanel';
@@ -29,19 +29,14 @@ type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'fore
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       onClick={onClick}
-      className="press"
-      style={{
-        border: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700,
-        padding: '9px 20px', borderRadius: 999, whiteSpace: 'nowrap',
-        background: on ? '#340057' : (h ? '#EBE2FF' : 'transparent'),
-        color: on ? '#FFFFFF' : '#340057',
-        transition: 'background .15s ease, color .15s ease',
-      }}
+      className={cn(
+        'press cursor-pointer whitespace-nowrap rounded-[999px] border-0 px-[20px] py-[9px] [font-family:inherit] text-[13.5px] font-bold',
+        '[transition:background_.15s_ease,color_.15s_ease]',
+        on ? 'bg-valle-purple text-white' : 'bg-transparent text-valle-purple hover:bg-valle-lilac',
+      )}
     >
       {children}
     </button>
@@ -50,9 +45,9 @@ function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; c
 
 function StatCard({ tag, value }: { tag: string; value: string }) {
   return (
-    <div style={{ ...card, padding: '13px 16px', minWidth: 0 }}>
-      <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{tag}</div>
-      <div style={{ ...display, fontSize: 'clamp(22px,3vw,28px)', lineHeight: 1.1, marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+    <div className={cn(cardCls, 'min-w-0 px-[16px] py-[13px]')}>
+      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>{tag}</div>
+      <div className={cn(displayCls, 'mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[length:clamp(22px,3vw,28px)] leading-[1.1]')}>
         {value}
       </div>
     </div>
@@ -60,18 +55,14 @@ function StatCard({ tag, value }: { tag: string; value: string }) {
 }
 
 function SignOutBtn({ onClick, busy }: { onClick: () => void; busy: boolean }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       onClick={onClick}
       disabled={busy}
-      className="press"
-      style={{
-        border: '1.5px solid rgba(255,255,255,.32)', background: h ? 'rgba(255,255,255,.14)' : 'transparent',
-        color: '#FFFFFF', cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 12.5,
-        fontWeight: 700, padding: '7px 15px', borderRadius: 999, whiteSpace: 'nowrap', opacity: busy ? 0.6 : 1,
-      }}
+      className={cn(
+        'press whitespace-nowrap rounded-[999px] border-[1.5px] border-[rgba(255,255,255,.32)] bg-transparent px-[15px] py-[7px] [font-family:inherit] text-[12.5px] font-bold text-white hover:bg-[rgba(255,255,255,.14)]',
+        busy ? 'cursor-default opacity-60' : 'cursor-pointer',
+      )}
     >
       Sign out
     </button>
@@ -141,45 +132,33 @@ export default function StaffDashboard() {
 
   if (auth.loading || !auth.user) {
     return (
-      <main style={{
-        minHeight: '100vh', background: '#340057', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontFamily: "'Work Sans',sans-serif",
-      }}>
+      <main className="flex min-h-screen items-center justify-center bg-valle-purple font-sans">
         <Spinner size={9} />
       </main>
     );
   }
 
-  const barSide: CSSProperties = { padding: '0 clamp(14px,3vw,28px)' };
+  const barSide = 'px-[clamp(14px,3vw,28px)] py-0';
 
   return (
-    <main style={{
-      minHeight: '100vh', background: '#F7F3FF', color: '#340057',
-      fontFamily: "'Work Sans',sans-serif",
-    }}>
+    <main className="min-h-screen bg-[#F7F3FF] font-sans text-valle-purple">
       {/* ---- slim top bar ---- */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40 }} data-print-hide="">
-        <div style={{
-          ...barSide, background: '#340057', color: '#FFFFFF', height: 60,
-          display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <span style={{
-            ...display, fontSize: 25, letterSpacing: '-0.01em', lineHeight: 1,
-            transform: 'rotate(-4deg)', display: 'inline-block', flexShrink: 0,
-          }}>
+      <div className="sticky top-0 z-40" data-print-hide="">
+        <div className={cn(barSide, 'flex h-[60px] items-center gap-[14px] bg-valle-purple text-white')}>
+          <span className={cn(displayCls, 'inline-block shrink-0 text-[25px] leading-none tracking-[-0.01em] [transform:rotate(-4deg)]')}>
             VALLÉ
           </span>
           {!narrow && (
             <>
-              <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,.25)', flexShrink: 0 }} />
-              <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.18em', color: 'rgba(255,255,255,.72)' }}>
+              <span className="h-[22px] w-[1px] shrink-0 bg-[rgba(255,255,255,.25)]" />
+              <span className={cn(monoCls, 'text-[10px] font-bold tracking-[.18em] text-[rgba(255,255,255,.72)]')}>
                 SALES &amp; RESERVATIONS
               </span>
             </>
           )}
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           {!narrow && (
-            <span style={{ ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '.06em', color: 'rgba(255,255,255,.75)', whiteSpace: 'nowrap' }}>
+            <span className={cn(monoCls, 'whitespace-nowrap text-[11px] font-semibold tracking-[.06em] text-[rgba(255,255,255,.75)]')}>
               {auth.user.name}
             </span>
           )}
@@ -187,11 +166,8 @@ export default function StaffDashboard() {
           {canAccessHr(auth.user.role) && (
             <Link
               to="/hr"
-              style={{
-                ...mono, fontSize: 11, fontWeight: 700, letterSpacing: '.1em',
-                color: 'rgba(255,255,255,.85)', textDecoration: 'none', whiteSpace: 'nowrap',
-                border: '1.5px solid rgba(255,255,255,.32)', borderRadius: 999, padding: '7px 14px',
-              }}
+              className={cn(monoCls, 'whitespace-nowrap rounded-[999px] border-[1.5px] border-[rgba(255,255,255,.32)] px-[14px] py-[7px] text-[11px] font-bold tracking-[.1em]')}
+              style={{ color: 'rgba(255,255,255,.85)', textDecoration: 'none' }}
             >
               CAREERS
             </Link>
@@ -206,31 +182,24 @@ export default function StaffDashboard() {
           already refuses it with 403, this makes the refusal legible. */}
       {!canAccessReservations(auth.user.role) ? (
         <>
-        <div style={{
-          ...card, maxWidth: 560, margin: '6vh auto 0', overflow: 'hidden',
-          animation: 'vfadeup .35s ease both',
-        }}>
+        <div className={cn(cardCls, 'mx-auto mt-[6vh] mb-0 max-w-[560px] overflow-hidden [animation:vfadeup_.35s_ease_both]')}>
           <Stripes />
-          <div style={{ padding: 'clamp(22px,4vw,32px)' }}>
-            <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>
+          <div className="p-[clamp(22px,4vw,32px)]">
+            <span className={cn(monoCls, 'text-[10px] font-bold tracking-[.14em] text-valle-violet')}>
               RESTRICTED AREA
             </span>
-            <h1 style={{ ...display, fontSize: 'clamp(24px,4vw,32px)', lineHeight: 0.95, margin: '10px 0 0' }}>
+            <h1 className={cn(displayCls, 'mx-0 mt-[10px] mb-0 text-[length:clamp(24px,4vw,32px)] leading-[0.95]')}>
               You do not have access to reservations
             </h1>
-            <p style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(52,0,87,.7)', margin: '14px 0 0' }}>
+            <p className="mx-0 mt-[14px] mb-0 text-[14.5px] leading-[1.55] text-[rgba(52,0,87,.7)]">
               You are signed in as {auth.user.name} ({roleLabel(auth.user.role)}). Guest bookings and
               visitor chats are limited to the reservations and manager accounts.
             </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
+            <div className="mt-[20px] flex flex-wrap gap-[10px]">
               <Link
                 to="/hr"
-                className="press"
-                style={{
-                  background: '#FF3358', color: '#FFFFFF', borderRadius: 999,
-                  padding: '11px 20px', fontSize: 13.5, fontWeight: 700, textDecoration: 'none',
-                  display: 'inline-flex', alignItems: 'center',
-                }}
+                className="press inline-flex items-center rounded-[999px] bg-valle-red px-[20px] py-[11px] text-[13.5px] font-bold"
+                style={{ color: '#FFFFFF', textDecoration: 'none' }}
               >
                 Go to careers →
               </Link>
@@ -238,27 +207,22 @@ export default function StaffDashboard() {
                 type="button"
                 onClick={() => { void signOut(); }}
                 disabled={signingOut}
-                className="press"
-                style={{
-                  border: '1.5px solid #340057', background: 'transparent', color: '#340057',
-                  borderRadius: 999, padding: '11px 20px', fontSize: 13.5, fontWeight: 700,
-                  cursor: signingOut ? 'default' : 'pointer',
-                }}
+                className={cn(
+                  'press rounded-[999px] border-[1.5px] border-valle-purple bg-transparent px-[20px] py-[11px] text-[13.5px] font-bold text-valle-purple',
+                  signingOut ? 'cursor-default' : 'cursor-pointer',
+                )}
               >
                 Sign out
               </button>
             </div>
           </div>
         </div>
-        <div style={{ maxWidth: 560, margin: '14px auto 40px', padding: '0 14px' }}><SecurityPanel /></div>
+        <div className="mx-auto mt-[14px] mb-[40px] max-w-[560px] px-[14px] py-0"><SecurityPanel /></div>
         </>
       ) : (
-      <div style={{ padding: 'clamp(16px,3vw,26px) clamp(14px,3vw,28px) 40px', maxWidth: 1440, margin: '0 auto' }}>
+      <div className="mx-auto my-0 max-w-[1440px] px-[clamp(14px,3vw,28px)] pt-[clamp(16px,3vw,26px)] pb-[40px]">
         {/* ---- stat strip ---- */}
-        <div data-print-hide="" style={{
-          display: 'grid', gap: 12, marginBottom: 18,
-          gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
-        }}>
+        <div data-print-hide="" className="mb-[18px] grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[12px]">
           <StatCard tag="BOOKINGS TODAY" value={stats ? String(stats.bookingsToday) : '…'} />
           <StatCard tag="ARRIVALS TODAY" value={stats ? `${stats.arrivalsToday} · ${stats.guestsToday ?? 0} guests` : '…'} />
           <StatCard tag="REVENUE TODAY" value={stats ? money(stats.revenueToday ?? 0) : '…'} />
@@ -267,10 +231,7 @@ export default function StaffDashboard() {
         </div>
 
         {/* ---- tabs ---- */}
-        <div data-print-hide="" style={{
-          display: 'inline-flex', gap: 4, padding: 4, marginBottom: 14, flexWrap: 'wrap',
-          background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 24,
-        }}>
+        <div data-print-hide="" className="mb-[14px] inline-flex flex-wrap gap-[4px] rounded-[24px] border-[1.5px] border-valle-lilac bg-white p-[4px]">
           <TabBtn on={tab === 'bookings'} onClick={() => setTab('bookings')}>Bookings</TabBtn>
           <TabBtn on={tab === 'gate'} onClick={() => setTab('gate')}>Gate & waivers</TabBtn>
           <TabBtn on={tab === 'offers'} onClick={() => setTab('offers')}>Offers & codes</TabBtn>
@@ -285,16 +246,13 @@ export default function StaffDashboard() {
         </div>
 
         {toast && (
-          <div role="status" data-testid="booking-toast" style={{
-            position: 'fixed', right: 16, bottom: 16, zIndex: 90, background: '#340057', color: '#FFFFFF', borderRadius: 14,
-            padding: '12px 16px', boxShadow: '0 18px 40px -12px rgba(38,0,64,.6)', fontWeight: 700, fontSize: 14, maxWidth: 'min(420px, calc(100vw - 32px))',
-          }}>
-            <span style={{ color: '#33FF74', marginRight: 8 }}>●</span>{toast}
+          <div role="status" data-testid="booking-toast" className="fixed right-[16px] bottom-[16px] z-90 max-w-[min(420px,calc(100vw_-_32px))] rounded-[14px] bg-valle-purple px-[16px] py-[12px] text-[14px] font-bold text-white shadow-[0_18px_40px_-12px_rgba(38,0,64,.6)]">
+            <span className="mr-[8px] text-valle-green">●</span>{toast}
           </div>
         )}
 
         {/* Both panels stay mounted so the chat socket survives a tab switch. */}
-        <div style={{ display: tab === 'bookings' ? 'block' : 'none' }}>
+        <div className={tab === 'bookings' ? 'block' : 'hidden'}>
           <BookingsPanel onChanged={reloadStats} openRef={jumpRef} onOpened={() => setJumpRef(null)} />
         </div>
         {tab === 'gate' && <ParkStatusPanel />}
@@ -310,7 +268,7 @@ export default function StaffDashboard() {
         {tab === 'calendar' && String(auth.user.role) === 'manager' && <CalendarPanel />}
         {tab === 'team' && String(auth.user.role) === 'manager' && <TeamPanel currentUserId={auth.user.id} />}
         {tab === 'security' && <SecurityPanel />}
-        <div style={{ display: tab === 'chat' ? 'block' : 'none' }}>
+        <div className={tab === 'chat' ? 'block' : 'hidden'}>
           <ChatConsole active={tab === 'chat'} onChanged={reloadStats} />
         </div>
       </div>

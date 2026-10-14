@@ -11,27 +11,27 @@ import { PhotosSection } from './PhotosSection';
 import { LineEditor, type EditableLine } from './LineEditor';
 import { ExportLink } from './reportUi';
 import { mur as money, partyLabel } from '../../lib/format';
-import { useHover } from '../../hooks/useHover';
+import { cn } from '../../lib/utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Stripes } from '../../components/Stripes';
-import { color, radius } from '../../styles/theme';
 import {
   Btn, EmptyState, Field, RatePill, SectionLabel, Spinner, StatusChip, TotalTag,
-  card, clockTimeSec, dateTimeSec, display, inputStyle, mono, shortDate, textareaStyle, usePrefersReducedMotion,
+  clockTimeSec, dateTimeSec, inputStyle, shortDate, textareaStyle, usePrefersReducedMotion,
 } from './ui';
 
 const PAGE_SIZE = 20;
 
 const COLS = ['Ref', 'Booked at', 'Date', 'Slot', 'Guest', 'Party', 'Rate', 'Pay', 'Total', 'Status'];
 
-const th: CSSProperties = {
-  ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', textTransform: 'uppercase',
-  color: '#7333FF', textAlign: 'left', padding: '10px 12px', whiteSpace: 'nowrap',
-};
+const th = 'whitespace-nowrap px-3 py-2.5 text-left font-mono text-[9.5px] font-bold uppercase tracking-[.13em] text-valle-violet';
 
-const td: CSSProperties = {
-  padding: '11px 12px', fontSize: 13.5, borderTop: '1px solid #EBE2FF', whiteSpace: 'nowrap',
-};
+const td = 'whitespace-nowrap border-t border-solid border-valle-lilac px-3 py-[11px] text-[13.5px]';
+
+/** The shared card surface (ui.tsx `card`) as classes, so a fill can override it. */
+const cardCls = 'rounded-[18px] border-[1.5px] border-solid border-valle-lilac bg-white';
+/** The shared field look (ui.tsx `inputStyle`) as classes, so a width can override it. */
+const inputCls = 'w-full rounded-[12px] border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] px-3.5 py-[11px] [font-family:inherit] text-[14.5px] text-valle-purple outline-none';
+const tagCls = 'font-mono text-[9.5px] font-bold tracking-[.13em] text-valle-violet';
 
 const slotLabel = (s: string) => (s === 'morning' ? 'Morning' : s === 'afternoon' ? 'Afternoon' : s);
 const rateLabel = (r: string) => (r === 'rr' ? 'Resident (RR)' : 'Visitor (NR)');
@@ -57,7 +57,8 @@ function Select({ value, onChange, children, width, id, ariaLabel }: {
       aria-label={ariaLabel}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      style={{ ...inputStyle, width: width ?? 'auto', cursor: 'pointer', appearance: 'auto' }}
+      className="cursor-pointer appearance-auto"
+      style={{ ...inputStyle, width: width ?? 'auto' }}
     >
       {children}
     </select>
@@ -65,26 +66,24 @@ function Select({ value, onChange, children, width, id, ariaLabel }: {
 }
 
 function TableRow({ row, onOpen }: { row: BookingRow; onOpen: (ref: string) => void }) {
-  const [h, bind] = useHover();
   return (
     <tr
-      {...bind}
       onClick={() => onOpen(row.refCode)}
-      style={{ cursor: 'pointer', background: h ? '#F7F3FF' : '#FFFFFF', transition: 'background .12s ease' }}
+      className="cursor-pointer bg-white transition-[background] duration-[120ms] ease-[ease] hover:bg-[#F7F3FF]"
     >
-      <td style={{ ...td, ...mono, fontWeight: 700, fontSize: 12.5 }}>{row.refCode}</td>
-      <td style={td} data-testid="booked-at">
-        <div style={{ fontSize: 12.5 }}>{shortDate(row.createdAt)}</div>
-        <div style={{ ...mono, fontSize: 11, color: '#7333FF', fontWeight: 700 }}>{clockTimeSec(row.createdAt)}</div>
+      <td className={cn(td, 'font-mono text-[12.5px] font-bold')}>{row.refCode}</td>
+      <td className={td} data-testid="booked-at">
+        <div className="text-[12.5px]">{shortDate(row.createdAt)}</div>
+        <div className="font-mono text-[11px] font-bold text-valle-violet">{clockTimeSec(row.createdAt)}</div>
       </td>
-      <td style={td}>{shortDate(row.visitDate)}</td>
-      <td style={td}>{slotLabel(row.slot)}</td>
-      <td style={{ ...td, fontWeight: 600 }}>{row.guestName}</td>
-      <td style={td}>{partyLabel(row.adults, row.kids)}</td>
-      <td style={td}><RatePill rate={row.rate} size="sm" /></td>
-      <td style={td}>{payLabel(row.payMode)}</td>
-      <td style={{ ...td, ...display, fontSize: 17, letterSpacing: '-0.01em' }}>{money(row.total)}</td>
-      <td style={td}><StatusChip status={row.status} /></td>
+      <td className={td}>{shortDate(row.visitDate)}</td>
+      <td className={td}>{slotLabel(row.slot)}</td>
+      <td className={cn(td, 'font-semibold')}>{row.guestName}</td>
+      <td className={td}>{partyLabel(row.adults, row.kids)}</td>
+      <td className={td}><RatePill rate={row.rate} size="sm" /></td>
+      <td className={td}>{payLabel(row.payMode)}</td>
+      <td className={cn(td, 'font-display text-[17px] font-black uppercase italic tracking-[-0.01em]')}>{money(row.total)}</td>
+      <td className={td}><StatusChip status={row.status} /></td>
     </tr>
   );
 }
@@ -144,26 +143,29 @@ function ContactActions({ data }: { data: BookingDetailFull }) {
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked */ }
   };
-  const a: CSSProperties = { border: '1.5px solid #340057', color: '#340057', borderRadius: 999, padding: '7px 12px', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', background: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit' };
+  const a = 'cursor-pointer whitespace-nowrap rounded-full border-[1.5px] border-solid border-valle-purple bg-white px-3 py-[7px] [font-family:inherit] text-[12px] font-bold';
+  const btn = cn(a, 'text-valle-purple no-underline');
+  // global a{color} rules beat utilities, so link colour stays inline
+  const link: CSSProperties = { color: '#340057', textDecoration: 'none' };
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }} data-testid="contact-actions">
-      {wa && <a href={`https://wa.me/${wa}?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" style={a}>WhatsApp</a>}
-      {data.phone && <a href={`tel:${data.phone.replace(/\s+/g, '')}`} style={a}>Call</a>}
-      {data.email && <a href={`mailto:${data.email}?subject=${encodeURIComponent('Your VALLÉ booking ' + data.refCode)}&body=${encodeURIComponent(text)}`} style={a}>E-mail</a>}
-      <button type="button" onClick={() => { void copy(); }} style={{ ...a, background: copied ? '#E2FFEB' : '#FFFFFF' }}>{copied ? 'Copied ✓' : 'Copy confirmation'}</button>
-      {data.ticketUrl && <a href={data.ticketUrl} target="_blank" rel="noopener noreferrer" style={a}>Ticket</a>}
-      <button type="button" onClick={() => { void resend(); }} disabled={resent === '…'} data-testid="resend-ticket" style={{ ...a, background: resent && resent !== '…' ? '#E2FFEB' : '#FFFFFF' }}>{resent || 'Resend ticket'}</button>
+    <div className="mb-4 flex flex-wrap gap-1.5" data-testid="contact-actions">
+      {wa && <a href={`https://wa.me/${wa}?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" className={a} style={link}>WhatsApp</a>}
+      {data.phone && <a href={`tel:${data.phone.replace(/\s+/g, '')}`} className={a} style={link}>Call</a>}
+      {data.email && <a href={`mailto:${data.email}?subject=${encodeURIComponent('Your VALLÉ booking ' + data.refCode)}&body=${encodeURIComponent(text)}`} className={a} style={link}>E-mail</a>}
+      <button type="button" onClick={() => { void copy(); }} className={cn(btn, copied && 'bg-[#E2FFEB]')}>{copied ? 'Copied ✓' : 'Copy confirmation'}</button>
+      {data.ticketUrl && <a href={data.ticketUrl} target="_blank" rel="noopener noreferrer" className={a} style={link}>Ticket</a>}
+      <button type="button" onClick={() => { void resend(); }} disabled={resent === '…'} data-testid="resend-ticket" className={cn(btn, resent && resent !== '…' && 'bg-[#E2FFEB]')}>{resent || 'Resend ticket'}</button>
       {waivers && (
-        <a href={waivers.url} target="_blank" rel="noopener noreferrer" data-testid="drawer-waivers" title="Waiver form for this booking (send it to the guest)" style={{ ...a, borderColor: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44', color: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44' }}>
+        <a href={waivers.url} target="_blank" rel="noopener noreferrer" data-testid="drawer-waivers" title="Waiver form for this booking (send it to the guest)" className={a} style={{ ...link, borderColor: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44', color: waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44' }}>
           Waivers {Math.min(waivers.signed, waivers.required)}/{waivers.required}
         </a>
       )}
       {waivers && waivers.signed < waivers.required && data.status !== 'cancelled' && (
-        <button type="button" onClick={() => { void sendWaiver(); }} disabled={waiverSent === '…'} data-testid="resend-waiver" title="E-mail (and WhatsApp when possible) the link to sign the waivers" style={{ ...a, background: waiverSent && waiverSent !== '…' ? '#E2FFEB' : '#FFFFFF' }}>
+        <button type="button" onClick={() => { void sendWaiver(); }} disabled={waiverSent === '…'} data-testid="resend-waiver" title="E-mail (and WhatsApp when possible) the link to sign the waivers" className={cn(btn, waiverSent && waiverSent !== '…' && 'bg-[#E2FFEB]')}>
           {waiverSent || 'Resend waiver form'}
         </button>
       )}
-      {data.ticketSentAt && <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', alignSelf: 'center' }}>TICKET SENT {dateTimeSec(data.ticketSentAt).toUpperCase()}</span>}
+      {data.ticketSentAt && <span className="self-center font-mono text-[9.5px] tracking-[.08em] text-valle-purple/50">TICKET SENT {dateTimeSec(data.ticketSentAt).toUpperCase()}</span>}
     </div>
   );
 }
@@ -182,9 +184,9 @@ function adjustmentLabel(d: BookingDetailFull): string {
 
 function DetailLine({ tag, value }: { tag: string; value: string }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>{tag}</div>
-      <div style={{ fontSize: 14, marginTop: 3, wordBreak: 'break-word' }}>{value || 'N/A'}</div>
+    <div className="min-w-0">
+      <div className={tagCls}>{tag}</div>
+      <div className="mt-[3px] text-[14px] [word-break:break-word]">{value || 'N/A'}</div>
     </div>
   );
 }
@@ -295,32 +297,32 @@ function auditValue(field: string, v: unknown): string {
 
 function AuditTrail({ entries }: { entries: BookingAuditEntry[] }) {
   return (
-    <div style={{ ...card, overflow: 'hidden' }}>
+    <div className={cn(cardCls, 'overflow-hidden')}>
       {entries.map((e, i) => {
         const changes = Object.entries(e.changes || {});
         return (
-          <div key={e.at + '-' + i} style={{ padding: '12px 14px', borderTop: i === 0 ? 0 : '1px solid ' + color.border }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', color: color.violet, textTransform: 'uppercase' }}>
+          <div key={e.at + '-' + i} className={cn('px-3.5 py-3', i !== 0 && 'border-t border-solid border-valle-lilac')}>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[.1em] text-valle-violet">
                 {e.action || 'update'}
               </span>
-              <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.06em', color: 'rgba(52,0,87,.5)' }}>
+              <span className="font-mono text-[9.5px] tracking-[.06em] text-valle-purple/50">
                 {shortDate(e.at)}
               </span>
-              <span style={{ flex: 1 }} />
-              <span style={{ fontSize: 12, color: 'rgba(52,0,87,.7)', wordBreak: 'break-all' }}>{e.staffEmail}</span>
+              <span className="flex-1" />
+              <span className="text-[12px] break-all text-valle-purple/70">{e.staffEmail}</span>
             </div>
             {changes.length === 0 ? (
-              <div style={{ fontSize: 12.5, color: 'rgba(52,0,87,.55)', marginTop: 5 }}>No field detail recorded.</div>
+              <div className="mt-[5px] text-[12.5px] text-valle-purple/70">No field detail recorded.</div>
             ) : (
-              <ul style={{ margin: '7px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 4 }}>
+              <ul className="mt-[7px] mr-0 mb-0 ml-0 grid list-none gap-1 p-0">
                 {changes.map(([k, c]) => (
-                  <li key={k} style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
-                    <span style={{ fontWeight: 700 }}>{FIELD_LABEL[k] || k}</span>
+                  <li key={k} className="text-[12.5px] leading-[1.5] text-valle-purple/80">
+                    <span className="font-bold">{FIELD_LABEL[k] || k}</span>
                     {': '}
-                    <span style={{ opacity: 0.7 }}>{auditValue(k, c?.from)}</span>
+                    <span className="opacity-70">{auditValue(k, c?.from)}</span>
                     {' → '}
-                    <span style={{ fontWeight: 600 }}>{auditValue(k, c?.to)}</span>
+                    <span className="font-semibold">{auditValue(k, c?.to)}</span>
                   </li>
                 ))}
               </ul>
@@ -517,9 +519,7 @@ function Drawer({ refCode, onClose, onPatched }: {
 
   const set = (k: keyof Draft) => (v: string) => setForm((p) => (p ? { ...p, [k]: v } : p));
 
-  const grid: CSSProperties = {
-    display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
-  };
+  const grid = 'grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3';
 
   const audit = data?.audit ?? [];
   // Defensive: an API that has not shipped the richer payload could omit these.
@@ -529,69 +529,60 @@ function Drawer({ refCode, onClose, onPatched }: {
     <>
       <div
         onClick={onClose}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(31,0,51,.55)',
-          backdropFilter: 'blur(3px)', animation: 'vfade .2s ease both',
-        }}
+        className="fixed inset-0 z-[95] bg-[rgba(31,0,51,.55)] backdrop-blur-[3px] [animation:vfade_.2s_ease_both]"
       />
       <aside
         role="dialog"
         aria-label={'Booking ' + refCode}
-        style={{
-          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 96,
-          width: 'min(100vw - 24px, 620px)', maxHeight: 'min(100vh - 24px, 920px)',
-          background: '#FFFFFF', display: 'flex', flexDirection: 'column', borderRadius: 22, overflow: 'hidden',
-          boxShadow: '0 40px 90px -30px rgba(38,0,64,.6)',
-          animation: reduced ? 'vfade .2s ease both' : 'vcenterpop .25s cubic-bezier(.2,.7,.2,1) both',
-        }}
+        className={cn(
+          'fixed top-1/2 left-1/2 z-[96] flex max-h-[min(100vh_-_24px,920px)] w-[min(100vw_-_24px,620px)] flex-col overflow-hidden rounded-[22px] bg-white',
+          '[transform:translate(-50%,-50%)] shadow-[0_40px_90px_-30px_rgba(38,0,64,.6)]',
+          reduced ? '[animation:vfade_.2s_ease_both]' : '[animation:vcenterpop_.25s_cubic-bezier(.2,.7,.2,1)_both]',
+        )}
       >
-        <div style={{ background: '#340057', color: '#FFFFFF', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: 'rgba(255,255,255,.6)' }}>
+        <div className="flex items-center gap-3 bg-valle-purple px-5 py-4 text-white">
+          <div className="min-w-0">
+            <div className="font-mono text-[9.5px] font-bold tracking-[.14em] text-white/60">
               {editing ? 'EDITING BOOKING' : 'BOOKING'}
             </div>
-            <div style={{ ...display, fontSize: 26, lineHeight: 1.05 }}>{refCode}</div>
+            <div className="font-display text-[26px] leading-[1.05] font-black uppercase italic">{refCode}</div>
           </div>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           {data && (
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ ...mono, fontSize: 9, fontWeight: 700, letterSpacing: '.14em', color: 'rgba(255,255,255,.55)' }}>
+            <div className="shrink-0 text-right">
+              <div className="font-mono text-[9px] font-bold tracking-[.14em] text-white/55">
                 TOTAL
               </div>
-              <div style={{ ...display, fontSize: 24, lineHeight: 1.1, color: color.yellow }}>{money(data.total)}</div>
+              <div className="font-display text-[24px] leading-[1.1] font-black uppercase italic text-valle-yellow">{money(data.total)}</div>
             </div>
           )}
           <button
             onClick={onClose}
             aria-label="Close"
-            className="press"
-            style={{
-              border: '1.5px solid rgba(255,255,255,.32)', background: 'transparent', color: '#FFFFFF',
-              width: 34, height: 34, borderRadius: 999, cursor: 'pointer', fontSize: 16, lineHeight: 1, flexShrink: 0,
-            }}
+            className="press h-[34px] w-[34px] shrink-0 cursor-pointer rounded-full border-[1.5px] border-solid border-white/32 bg-transparent text-[16px] leading-none text-white"
           >
             ×
           </button>
         </div>
         <Stripes height={6} />
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
+        <div className="flex-1 overflow-y-auto p-5">
           {loading && (
-            <div style={{ padding: '40px 0', display: 'flex', justifyContent: 'center' }}>
+            <div className="flex justify-center px-0 py-10">
               <Spinner color="#7333FF" size={9} />
             </div>
           )}
 
           {!loading && err && !data && (
-            <div style={{ fontSize: 14, color: '#D91E44', fontWeight: 600 }}>{err}</div>
+            <div className="text-[14px] font-semibold text-[#D91E44]">{err}</div>
           )}
 
           {data && (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 16, flexWrap: 'wrap' }}>
+              <div className="mb-4 flex flex-wrap items-center gap-[9px]">
                 <StatusChip status={data.status} />
                 <RatePill rate={data.rate} />
-                <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)' }} data-testid="drawer-booked-at">
+                <span className="font-mono text-[10px] tracking-[.1em] text-valle-purple/50" data-testid="drawer-booked-at">
                   BOOKED {dateTimeSec(data.createdAt).toUpperCase()}
                 </span>
               </div>
@@ -599,8 +590,8 @@ function Drawer({ refCode, onClose, onPatched }: {
 
               {editing && form ? (
                 /* ------------------------------------------------------ edit -- */
-                <div style={{ display: 'grid', gap: 14 }}>
-                  <div style={grid}>
+                <div className="grid gap-3.5">
+                  <div className={grid}>
                     <Field id="bk-date" tag="VISIT DATE" hint={fieldErr.visitDate}>
                       <input
                         id="bk-date" type="date" value={form.visitDate}
@@ -616,7 +607,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                     </Field>
                   </div>
 
-                  <div style={{ ...grid, gridTemplateColumns: 'repeat(auto-fit,minmax(118px,1fr))' }}>
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(118px,1fr))] gap-3">
                     <Field id="bk-adults" tag="ADULTS" hint={fieldErr.adults}>
                       <input
                         id="bk-adults" type="number" min={1} max={12} value={form.adults}
@@ -639,11 +630,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                     </Field>
                   </div>
 
-                  <div style={{
-                    ...mono, fontSize: 10, letterSpacing: '.06em', lineHeight: 1.5,
-                    color: 'rgba(52,0,87,.6)', background: color.tint,
-                    border: '1.5px solid ' + color.border, borderRadius: radius.md, padding: '9px 12px',
-                  }}>
+                  <div className="rounded-[12px] border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] px-3 py-[9px] font-mono text-[10px] leading-[1.5] tracking-[.06em] text-valle-purple/60">
                     CHANGING THE PARTY OR THE RATE RE-PRICES THE BOOKING ON THE SERVER.
                   </div>
 
@@ -651,7 +638,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                     <input id="bk-name" value={form.guestName} onChange={(e) => set('guestName')(e.target.value)} style={inputStyle} />
                   </Field>
 
-                  <div style={grid}>
+                  <div className={grid}>
                     <Field id="bk-phone" tag="PHONE" hint={fieldErr.phone}>
                       <input id="bk-phone" value={form.phone} onChange={(e) => set('phone')(e.target.value)} style={inputStyle} />
                     </Field>
@@ -660,7 +647,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                     </Field>
                   </div>
 
-                  <div style={grid}>
+                  <div className={grid}>
                     <Field id="bk-nat" tag="NATIONALITY" hint={fieldErr.nationality}>
                       <input id="bk-nat" value={form.nationality} onChange={(e) => set('nationality')(e.target.value)} style={inputStyle} />
                     </Field>
@@ -690,7 +677,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                   />
 
                   <SectionLabel>FOC PASS · DISCOUNT · CODE</SectionLabel>
-                  <div style={grid}>
+                  <div className={grid}>
                     <Field id="bk-adj" tag="ADJUSTMENT">
                       <Select id="bk-adj" value={form.adjustmentKind} onChange={(v) => { set('adjustmentKind')(v); set('couponCode')(''); }} width="100%">
                         <option value="none">None</option>
@@ -709,7 +696,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                       <input id="bk-adjn" value={form.adjustmentNote} onChange={(e) => set('adjustmentNote')(e.target.value)} placeholder="FOC pass #12 · hotel partner" style={inputStyle} data-testid="adj-note" />
                     </Field>
                     <Field id="bk-coupon" tag="OR A CODE" hint="A code replaces the manual adjustment">
-                      <input id="bk-coupon" value={form.couponCode} onChange={(e) => set('couponCode')(e.target.value.toUpperCase())} placeholder="HOTEL10" style={{ ...inputStyle, ...mono, textTransform: 'uppercase' }} data-testid="adj-coupon" />
+                      <input id="bk-coupon" value={form.couponCode} onChange={(e) => set('couponCode')(e.target.value.toUpperCase())} placeholder="HOTEL10" className={cn(inputCls, 'font-mono uppercase')} data-testid="adj-coupon" />
                     </Field>
                   </div>
 
@@ -726,7 +713,7 @@ function Drawer({ refCode, onClose, onPatched }: {
                 </div>
               ) : (
                 /* ------------------------------------------------------ read -- */
-                <div style={{ ...card, background: '#F7F3FF', padding: 16, display: 'grid', gap: 14, gridTemplateColumns: '1fr 1fr' }}>
+                <div className={cn(cardCls, 'grid grid-cols-[1fr_1fr] gap-3.5 bg-[#F7F3FF] p-4')}>
                   <DetailLine tag="GUEST" value={data.guestName} />
                   <DetailLine tag="PARTY" value={partyLabel(data.adults, data.kids)} />
                   <DetailLine tag="EMAIL" value={data.email || ''} />
@@ -743,31 +730,25 @@ function Drawer({ refCode, onClose, onPatched }: {
               {!editing && data.staffNote && (
                 <>
                   <SectionLabel>INTERNAL NOTE</SectionLabel>
-                  <div style={{
-                    ...card, background: '#FFFFE2', borderColor: 'rgba(138,122,0,.25)', padding: 14,
-                    fontSize: 13.5, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                  }}>
+                  <div className={cn(cardCls, 'border-[rgba(138,122,0,.25)] bg-[#FFFFE2] p-3.5 text-[13.5px] leading-[1.55] whitespace-pre-wrap [word-break:break-word]')}>
                     {data.staffNote}
                   </div>
                 </>
               )}
 
               <SectionLabel>LINE ITEMS</SectionLabel>
-              <div style={{ ...card, overflow: 'hidden' }}>
+              <div className={cn(cardCls, 'overflow-hidden')}>
                 {lines.length === 0 && (
-                  <div style={{ padding: 14, fontSize: 13.5, color: 'rgba(52,0,87,.6)' }}>Park entry only.</div>
+                  <div className="p-3.5 text-[13.5px] text-valle-purple/60">Park entry only.</div>
                 )}
                 {lines.map((l, i) => (
                   <div
                     key={l.label + i}
-                    style={{
-                      display: 'flex', alignItems: 'baseline', gap: 12, padding: '11px 14px',
-                      borderTop: i === 0 ? 0 : '1px solid #EBE2FF',
-                    }}
+                    className={cn('flex items-baseline gap-3 px-3.5 py-[11px]', i !== 0 && 'border-t border-solid border-valle-lilac')}
                   >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>{l.label}</div>
-                      <div style={{ ...mono, fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)', marginTop: 2 }}>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[14px] font-semibold">{l.label}</div>
+                      <div className="mt-0.5 font-mono text-[10px] tracking-[.08em] text-valle-purple/70">
                         {[
                           l.adults ? l.adults + ' ADULT' + (l.adults > 1 ? 'S' : '') : '',
                           l.kids ? l.kids + ' CHILD' + (l.kids > 1 ? 'REN' : '') : '',
@@ -775,49 +756,49 @@ function Drawer({ refCode, onClose, onPatched }: {
                         ].filter(Boolean).join(' · ') || 'N/A'}
                       </div>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>{money(l.amount)}</div>
+                    <div className="text-[14px] font-bold whitespace-nowrap">{money(l.amount)}</div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ ...card, background: '#F7F3FF', padding: 16, marginTop: 14 }}>
+              <div className={cn(cardCls, 'mt-3.5 bg-[#F7F3FF] p-4')}>
                 {[
                   ['Park entry', money(data.entryAmount)],
                   ['Subtotal', money(data.subtotal)],
                   ...(data.discount > 0 ? [['Explorer Pass discount', '− ' + money(data.discount)]] : []),
                   ...((data.adjustmentAmount ?? 0) > 0 ? [[adjustmentLabel(data), '− ' + money(data.adjustmentAmount ?? 0)]] : []),
                 ].map(([k, v]) => (
-                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13.5, marginBottom: 7 }}>
-                    <span style={{ color: 'rgba(52,0,87,.7)' }}>{k}</span>
-                    <span style={{ fontWeight: 600 }}>{v}</span>
+                  <div key={k} className="mb-[7px] flex justify-between gap-3 text-[13.5px]">
+                    <span className="text-valle-purple/70">{k}</span>
+                    <span className="font-semibold">{v}</span>
                   </div>
                 ))}
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline', borderTop: '1.5px solid #EBE2FF', paddingTop: 10, marginTop: 4 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>TOTAL</span>
+                <div className="mt-1 flex items-baseline justify-between gap-3 border-t-[1.5px] border-solid border-valle-lilac pt-2.5">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">TOTAL</span>
                     <RatePill rate={data.rate} size="sm" />
                   </span>
                   <TotalTag amount={money(data.total)} size={28} />
                 </div>
-                <div data-testid="money-paid" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13.5, marginTop: 10, paddingTop: 10, borderTop: '1px dashed #D9CCF2' }}>
-                  <span style={{ color: 'rgba(52,0,87,.7)' }}>Paid{data.paymentMethod ? ' · ' + data.paymentMethod : ''}{data.receiptNo ? ' · receipt ' + data.receiptNo : ''}</span>
-                  <span style={{ fontWeight: 600 }}>{money(data.paidAmount ?? 0)}</span>
+                <div data-testid="money-paid" className="mt-2.5 flex justify-between gap-3 pt-2.5 text-[13.5px]" style={{ borderTop: '1px dashed #D9CCF2' }}>
+                  <span className="text-valle-purple/70">Paid{data.paymentMethod ? ' · ' + data.paymentMethod : ''}{data.receiptNo ? ' · receipt ' + data.receiptNo : ''}</span>
+                  <span className="font-semibold">{money(data.paidAmount ?? 0)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 14, marginTop: 6, alignItems: 'center' }}>
-                  <span style={{ fontWeight: 800, color: (data.balance ?? data.total) > 0 ? '#D91E44' : '#1E9E4A' }}>{(data.balance ?? data.total) > 0 ? 'Balance to collect' : 'Fully paid'}</span>
-                  <span style={{ display: 'inline-flex', gap: 10, alignItems: 'center' }}>
-                    <span style={{ fontWeight: 800, ...mono }}>{money(data.balance ?? data.total)}</span>
-                    <a href={receiptPdfUrl(data.refCode)} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: 999, padding: '5px 10px', fontSize: 11.5, fontWeight: 700, textDecoration: 'none' }}>Receipt PDF</a>
+                <div className="mt-1.5 flex items-center justify-between gap-3 text-[14px]">
+                  <span className="font-extrabold" style={{ color: (data.balance ?? data.total) > 0 ? '#D91E44' : '#1E9E4A' }}>{(data.balance ?? data.total) > 0 ? 'Balance to collect' : 'Fully paid'}</span>
+                  <span className="inline-flex items-center gap-2.5">
+                    <span className="font-mono font-extrabold">{money(data.balance ?? data.total)}</span>
+                    <a href={receiptPdfUrl(data.refCode)} target="_blank" rel="noopener noreferrer" className="rounded-full border-[1.5px] border-solid border-valle-purple px-2.5 py-[5px] text-[11.5px] font-bold" style={{ color: '#340057', textDecoration: 'none' }}>Receipt PDF</a>
                   </span>
                 </div>
                 {data.groupKind && (
-                  <div data-testid="group-block" style={{ marginTop: 10, fontSize: 13, background: '#F0E8FF', border: '1.5px solid #D9C9F0', borderRadius: 10, padding: '8px 12px' }}>
+                  <div data-testid="group-block" className="mt-2.5 rounded-[10px] border-[1.5px] border-solid border-[#D9C9F0] bg-[#F0E8FF] px-3 py-2 text-[13px]">
                     <strong>Group · {data.groupKind}</strong> · {data.organisation} · leader {data.leaderName} · {data.adults + data.kids} people · {(data.participants ?? []).length} names listed{(data.depositAmount ?? 0) > 0 ? ` · deposit ${money(data.depositAmount ?? 0)}${(data.paidAmount ?? 0) >= (data.depositAmount ?? 0) ? ' received' : ' due'}` : ''}
-                    {(data.participants ?? []).length > 0 && <details style={{ marginTop: 4 }}><summary style={{ cursor: 'pointer' }}>Participant list</summary><div style={{ ...mono, fontSize: 12, marginTop: 4, whiteSpace: 'pre-wrap' }}>{(data.participants ?? []).map((p) => p.name + (p.age != null ? ` (${p.age})` : '')).join('\n')}</div></details>}
+                    {(data.participants ?? []).length > 0 && <details className="mt-1"><summary className="cursor-pointer">Participant list</summary><div className="mt-1 font-mono text-[12px] whitespace-pre-wrap">{(data.participants ?? []).map((p) => p.name + (p.age != null ? ` (${p.age})` : '')).join('\n')}</div></details>}
                   </div>
                 )}
                 {data.status === 'postponed' && (
-                  <div style={{ marginTop: 10, fontSize: 13, background: '#FFF4D6', border: '1.5px solid #FFD24D', borderRadius: 10, padding: '8px 12px' }}>
+                  <div className="mt-2.5 rounded-[10px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2 text-[13px]">
                     Postponed{data.postponedFrom ? ' from ' + shortDate(data.postponedFrom) : ''}. No refund; the payment stays on this booking. Use <strong>Edit</strong> to set the new date and status Confirmed.
                   </div>
                 )}
@@ -833,16 +814,13 @@ function Drawer({ refCode, onClose, onPatched }: {
               )}
 
               {saved && !err && (
-                <div role="status" style={{
-                  marginTop: 14, ...mono, fontSize: 10, letterSpacing: '.1em',
-                  color: '#12B54A', textTransform: 'uppercase',
-                }}>
+                <div role="status" className="mt-3.5 font-mono text-[10px] uppercase tracking-[.1em] text-[#12B54A]">
                   {saved}
                 </div>
               )}
 
               {err && (
-                <div role="alert" style={{ marginTop: 14, fontSize: 13.5, fontWeight: 600, color: '#D91E44', lineHeight: 1.5 }}>
+                <div role="alert" className="mt-3.5 text-[13.5px] leading-[1.5] font-semibold text-[#D91E44]">
                   {err}
                 </div>
               )}
@@ -851,10 +829,7 @@ function Drawer({ refCode, onClose, onPatched }: {
         </div>
 
         {data && (
-          <div style={{
-            borderTop: '1.5px solid #EBE2FF', padding: 16, display: 'flex', gap: 10,
-            background: '#FFFFFF', flexWrap: 'wrap',
-          }}>
+          <div className="flex flex-wrap gap-2.5 border-t-[1.5px] border-solid border-valle-lilac bg-white p-4">
             {editing ? (
               <>
                 <Btn variant="ghost" onClick={cancelEdit} disabled={saving} style={{ flex: 1 }}>Cancel</Btn>
@@ -865,22 +840,22 @@ function Drawer({ refCode, onClose, onPatched }: {
             ) : (
               <>
                 {payOpen && (
-                  <div data-testid="pay-form" style={{ flexBasis: '100%', display: 'flex', gap: 8, alignItems: 'end', flexWrap: 'wrap', background: '#F7F3FF', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '10px 12px' }}>
-                    <Field id="pay-amt" tag="AMOUNT TAKEN (RS)"><input id="pay-amt" type="number" min={1} value={payAmount} onChange={(e) => setPayAmount(e.target.value)} style={{ ...inputStyle, width: 130 }} data-testid="pay-amount" /></Field>
+                  <div data-testid="pay-form" className="flex basis-full flex-wrap items-end gap-2 rounded-[14px] border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] px-3 py-2.5">
+                    <Field id="pay-amt" tag="AMOUNT TAKEN (RS)"><input id="pay-amt" type="number" min={1} value={payAmount} onChange={(e) => setPayAmount(e.target.value)} className={cn(inputCls, 'w-[130px]')} data-testid="pay-amount" /></Field>
                     <Field id="pay-how" tag="HOW">
-                      <select id="pay-how" value={payMethod} onChange={(e) => setPayMethod(e.target.value as PaymentMethod)} style={{ ...inputStyle, cursor: 'pointer', appearance: 'auto', width: 130 }}>
+                      <select id="pay-how" value={payMethod} onChange={(e) => setPayMethod(e.target.value as PaymentMethod)} className={cn(inputCls, 'w-[130px] cursor-pointer appearance-auto')}>
                         <option value="cash">Cash</option><option value="card">Card</option><option value="juice">Juice</option><option value="online">Online</option><option value="other">Other</option>
                       </select>
                     </Field>
-                    <Field id="pay-rc" tag="TILL RECEIPT NO."><input id="pay-rc" value={payReceipt} onChange={(e) => setPayReceipt(e.target.value)} placeholder="optional" style={{ ...inputStyle, width: 140 }} /></Field>
+                    <Field id="pay-rc" tag="TILL RECEIPT NO."><input id="pay-rc" value={payReceipt} onChange={(e) => setPayReceipt(e.target.value)} placeholder="optional" className={cn(inputCls, 'w-[140px]')} /></Field>
                     <Btn onClick={() => { void takePayment(); }} disabled={busy !== null} data-testid="pay-confirm">Record</Btn>
                     <Btn variant="ghost" onClick={() => setPayOpen(false)}>Close</Btn>
                   </div>
                 )}
                 {postponeOpen && (
-                  <div data-testid="postpone-form" style={{ flexBasis: '100%', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', background: '#FFF4D6', border: '1.5px solid #FFD24D', borderRadius: 14, padding: '10px 12px' }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, flex: '1 1 100%' }}>Weather day: the visit is postponed, nothing is refunded, the guest picks a new date later (Edit → date + status Confirmed).</span>
-                    <input value={postponeReason} onChange={(e) => setPostponeReason(e.target.value)} placeholder="Reason, e.g. heavy rain, park closed 11:00" style={{ ...inputStyle, flex: '1 1 220px' }} data-testid="postpone-reason" />
+                  <div data-testid="postpone-form" className="flex basis-full flex-wrap items-center gap-2 rounded-[14px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2.5">
+                    <span className="flex-[1_1_100%] text-[13px] font-semibold">Weather day: the visit is postponed, nothing is refunded, the guest picks a new date later (Edit → date + status Confirmed).</span>
+                    <input value={postponeReason} onChange={(e) => setPostponeReason(e.target.value)} placeholder="Reason, e.g. heavy rain, park closed 11:00" style={inputStyle} className="flex-[1_1_220px]" data-testid="postpone-reason" />
                     <Btn variant="dark" onClick={() => { void postpone(); }} disabled={busy !== null} data-testid="postpone-confirm">Postpone</Btn>
                     <Btn variant="ghost" onClick={() => setPostponeOpen(false)}>Close</Btn>
                   </div>
@@ -893,10 +868,10 @@ function Drawer({ refCode, onClose, onPatched }: {
                   <Btn variant="ghost" onClick={() => { setRefundOpen((v) => !v); setRefundAmount(String(data.paidAmount ?? 0)); }} disabled={busy !== null} style={{ flex: 1 }} data-testid="refund-open">Refund online payment</Btn>
                 )}
                 {refundOpen && (
-                  <div data-testid="refund-form" style={{ flexBasis: '100%', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', background: '#FFF1F3', border: '1.5px solid #FF3358', borderRadius: 14, padding: '10px 14px' }}>
-                    <span style={{ fontWeight: 700, fontSize: 13.5, flex: '1 1 100%' }}>Send money back through the payment provider. Up to {money(data.paidAmount ?? 0)} on this booking.</span>
-                    <input value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="Amount (Rs)" aria-label="Refund amount" style={{ ...inputStyle, width: 130 }} data-testid="refund-amount" />
-                    <input value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Reason (shown in the trail)" aria-label="Refund reason" style={{ ...inputStyle, flex: '1 1 200px' }} data-testid="refund-reason" />
+                  <div data-testid="refund-form" className="flex basis-full flex-wrap items-center gap-2.5 rounded-[14px] border-[1.5px] border-solid border-valle-red bg-[#FFF1F3] px-3.5 py-2.5">
+                    <span className="flex-[1_1_100%] text-[13.5px] font-bold">Send money back through the payment provider. Up to {money(data.paidAmount ?? 0)} on this booking.</span>
+                    <input value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="Amount (Rs)" aria-label="Refund amount" className={cn(inputCls, 'w-[130px]')} data-testid="refund-amount" />
+                    <input value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Reason (shown in the trail)" aria-label="Refund reason" style={inputStyle} className="flex-[1_1_200px]" data-testid="refund-reason" />
                     <Btn variant="danger" onClick={() => { void refund(); }} disabled={busy !== null} data-testid="refund-submit">{busy === 'arrived' ? <Spinner color="#D91E44" /> : 'Refund'}</Btn>
                     <Btn variant="ghost" onClick={() => setRefundOpen(false)}>Close</Btn>
                   </div>
@@ -912,8 +887,8 @@ function Drawer({ refCode, onClose, onPatched }: {
                   {busy === 'arrived' ? <Spinner /> : 'Mark arrived'}
                 </Btn>
                 {confirmCancel ? (
-                  <div data-testid="cancel-confirm" style={{ flexBasis: '100%', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', background: '#FFF1F3', border: '1.5px solid #FF3358', borderRadius: 14, padding: '10px 14px' }}>
-                    <span style={{ fontWeight: 700, fontSize: 13.5, flex: '1 1 200px' }}>Cancel booking {data.refCode}? The guest keeps their e-mail but the reservation is released.</span>
+                  <div data-testid="cancel-confirm" className="flex basis-full flex-wrap items-center gap-2.5 rounded-[14px] border-[1.5px] border-solid border-valle-red bg-[#FFF1F3] px-3.5 py-2.5">
+                    <span className="flex-[1_1_200px] text-[13.5px] font-bold">Cancel booking {data.refCode}? The guest keeps their e-mail but the reservation is released.</span>
                     <Btn variant="danger" onClick={() => { setConfirmCancel(false); void quickStatus('cancelled'); }} disabled={busy !== null}>
                       {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Yes, cancel booking'}
                     </Btn>
@@ -1032,22 +1007,22 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
         <div
           role="status"
           data-testid="fresh-booking"
-          style={{ ...card, padding: '12px 16px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: '#E2FFEB', borderColor: '#33FF74' }}
+          className={cn(cardCls, 'mb-3.5 flex flex-wrap items-center gap-3 border-valle-green bg-[#E2FFEB] px-4 py-3')}
         >
-          <span style={{ fontWeight: 700 }}>New booking just came in: {fresh.refCode} · {fresh.guestName} · {fresh.visitDate} {fresh.slot}</span>
-          <button onClick={() => { setOpenRef(fresh.refCode); setFresh(null); }} style={{ border: 0, background: '#340057', color: '#FFFFFF', fontFamily: 'inherit', fontWeight: 700, fontSize: 13, padding: '8px 14px', borderRadius: 999, cursor: 'pointer' }}>Open</button>
-          <button onClick={() => setFresh(null)} aria-label="Dismiss" style={{ border: 0, background: 'transparent', cursor: 'pointer', fontSize: 16, color: '#340057', marginLeft: 'auto' }}>×</button>
+          <span className="font-bold">New booking just came in: {fresh.refCode} · {fresh.guestName} · {fresh.visitDate} {fresh.slot}</span>
+          <button onClick={() => { setOpenRef(fresh.refCode); setFresh(null); }} className="cursor-pointer rounded-full border-0 bg-valle-purple px-3.5 py-2 [font-family:inherit] text-[13px] font-bold text-white">Open</button>
+          <button onClick={() => setFresh(null)} aria-label="Dismiss" className="ml-auto cursor-pointer border-0 bg-transparent text-[16px] text-valle-purple">×</button>
         </div>
       )}
       {/* ---- filter bar ---- */}
-      <div style={{ ...card, padding: 14, marginBottom: 14, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+      <div className={cn(cardCls, 'mb-3.5 flex flex-wrap items-center gap-2.5 p-3.5')}>
         <input
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search ref, name, email or phone"
           aria-label="Search bookings"
-          style={{ ...inputStyle, flex: '1 1 240px', width: 'auto', minWidth: 180 }}
+          className={cn(inputCls, 'w-auto min-w-[180px] flex-[1_1_240px]')}
         />
         <Select value={status} onChange={setStatus} width={isMobile ? '100%' : 160} ariaLabel="Filter by status">
           <option value="all">All statuses</option>
@@ -1055,11 +1030,11 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
           <option value="arrived">Arrived</option>
           <option value="cancelled">Cancelled</option>
         </Select>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: isMobile ? '1 1 100%' : '0 0 auto' }}>
-          <span style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>FROM</span>
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" style={{ ...inputStyle, width: 'auto', flex: 1 }} />
-          <span style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>TO</span>
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" style={{ ...inputStyle, width: 'auto', flex: 1 }} />
+        <div className={cn('flex items-center gap-2', isMobile ? 'flex-[1_1_100%]' : 'flex-[0_0_auto]')}>
+          <span className={tagCls}>FROM</span>
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" className={cn(inputCls, 'w-auto flex-1')} />
+          <span className={tagCls}>TO</span>
+          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" className={cn(inputCls, 'w-auto flex-1')} />
         </div>
         <Select value={slot} onChange={setSlot} width={isMobile ? '100%' : 130} ariaLabel="Filter by slot">
           <option value="all">Any slot</option>
@@ -1097,7 +1072,7 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
             Clear
           </Btn>
         )}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <ExportLink href={exportUrl('bookings', from || undefined, to || undefined)} label={from || to ? 'Export range' : 'Export month'} />
           <Btn onClick={() => setCreating(true)}>+ New booking</Btn>
         </div>
@@ -1116,12 +1091,12 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
       )}
 
       {/* ---- table ---- */}
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }}>
+      <div className={cn(cardCls, 'overflow-hidden')}>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] border-collapse">
             <thead>
-              <tr style={{ background: '#F7F3FF' }}>
-                {COLS.map((c) => <th key={c} style={th}>{c}</th>)}
+              <tr className="bg-[#F7F3FF]">
+                {COLS.map((c) => <th key={c} className={th}>{c}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -1131,7 +1106,7 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
         </div>
 
         {loading && (
-          <div style={{ padding: '34px 0', display: 'flex', justifyContent: 'center' }}>
+          <div className="flex justify-center px-0 py-[34px]">
             <Spinner color="#7333FF" size={9} />
           </div>
         )}
@@ -1147,26 +1122,23 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
         )}
 
         {!loading && !err && rows.length > 0 && (
-          <div style={{
-            borderTop: '1.5px solid #EBE2FF', background: '#F7F3FF', padding: '10px 14px',
-            display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap',
-          }}>
-            <span style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>
+          <div className="flex flex-wrap items-baseline gap-2.5 border-t-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] px-3.5 py-2.5">
+            <span className={tagCls}>
               VALUE ON THIS PAGE
             </span>
-            <span style={{ flex: 1 }} />
-            <span style={{ ...display, fontSize: 20, letterSpacing: '-0.01em' }}>{money(pageValue)}</span>
+            <span className="flex-1" />
+            <span className="font-display text-[20px] font-black uppercase italic tracking-[-0.01em]">{money(pageValue)}</span>
           </div>
         )}
       </div>
 
       {/* ---- pagination ---- */}
       {total > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-          <span style={{ ...mono, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)' }}>
+        <div className="mt-3.5 flex flex-wrap items-center gap-3">
+          <span className="font-mono text-[10.5px] tracking-[.1em] text-valle-purple/60">
             PAGE {page} OF {pages} · {total} BOOKING{total === 1 ? '' : 'S'}
           </span>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           <Btn variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading}>
             ← Previous
           </Btn>

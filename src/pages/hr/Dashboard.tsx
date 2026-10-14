@@ -1,13 +1,13 @@
 import { useSeo } from '../../lib/seo';
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStaffAuth } from '../../store/StaffAuth';
 import { canAccessHr, canAccessReservations, getHrStats, roleLabel, type HrStats } from '../../lib/hrApi';
-import { color, radius } from '../../styles/theme';
-import { useHover } from '../../hooks/useHover';
+import { color } from '../../styles/theme';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Stripes } from '../../components/Stripes';
-import { Spinner, display, mono } from '../staff/ui';
+import { Spinner } from '../staff/ui';
+import { cn } from '@/lib/utils';
 import { NARROW } from './hrUi';
 import VacanciesPanel from './VacanciesPanel';
 import ApplicantsPanel from './ApplicantsPanel';
@@ -23,25 +23,18 @@ import ApplicantsPanel from './ApplicantsPanel';
 
 type Tab = 'vacancies' | 'applicants';
 
-const cardStyle: CSSProperties = {
-  background: color.white, border: '1.5px solid ' + color.border, borderRadius: radius.lg,
-};
+const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
 
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       type="button"
       onClick={onClick}
-      className="press"
-      style={{
-        border: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700,
-        padding: '9px 20px', borderRadius: radius.pill, whiteSpace: 'nowrap',
-        background: on ? color.purple : (h ? color.border : 'transparent'),
-        color: on ? color.white : color.purple,
-        transition: 'background .15s ease, color .15s ease',
-      }}
+      className={cn(
+        'press border-0 cursor-pointer [font-family:inherit] text-[13.5px] font-bold py-[9px] px-[20px] rounded-[999px] whitespace-nowrap',
+        'transition-[background,color] duration-[.15s] ease-[ease]',
+        on ? 'bg-valle-purple text-white' : 'bg-transparent hover:bg-valle-lilac text-valle-purple',
+      )}
     >
       {children}
     </button>
@@ -50,12 +43,9 @@ function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; c
 
 function StatCard({ tag, value }: { tag: string; value: string }) {
   return (
-    <div style={{ ...cardStyle, padding: '13px 16px', minWidth: 0 }}>
-      <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>{tag}</div>
-      <div style={{
-        ...display, fontSize: 'clamp(22px,3vw,28px)', lineHeight: 1.1, marginTop: 4,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>
+    <div className={cn(cardCls, 'py-[13px] px-[16px] min-w-0')}>
+      <div className="font-mono text-[9.5px] font-bold tracking-[.14em] text-valle-violet">{tag}</div>
+      <div className="font-display italic font-black uppercase text-[clamp(22px,3vw,28px)] leading-[1.1] mt-[4px] whitespace-nowrap overflow-hidden text-ellipsis">
         {value}
       </div>
     </div>
@@ -66,52 +56,41 @@ function StatCard({ tag, value }: { tag: string; value: string }) {
 function BarBtn({ children, onClick, to, disabled }: {
   children: string; onClick?: () => void; to?: string; disabled?: boolean;
 }) {
-  const [h, bind] = useHover();
-  const skin: CSSProperties = {
-    border: '1.5px solid rgba(255,255,255,.32)',
-    background: h && !disabled ? 'rgba(255,255,255,.14)' : 'transparent',
-    color: color.white, cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
-    fontSize: 12.5, fontWeight: 700, padding: '7px 15px', borderRadius: radius.pill,
-    whiteSpace: 'nowrap', opacity: disabled ? 0.6 : 1, textDecoration: 'none',
-    display: 'inline-flex', alignItems: 'center',
-  };
-  if (to) return <Link {...bind} to={to} className="press" style={skin}>{children}</Link>;
-  return <button {...bind} type="button" onClick={onClick} disabled={disabled} className="press" style={skin}>{children}</button>;
+  const skin = cn(
+    'press border-[1.5px] border-solid border-[rgba(255,255,255,.32)] bg-transparent [font-family:inherit]',
+    'text-[12.5px] font-bold py-[7px] px-[15px] rounded-[999px] whitespace-nowrap inline-flex items-center',
+    disabled ? 'cursor-default opacity-60' : 'cursor-pointer opacity-100 hover:bg-[rgba(255,255,255,.14)]',
+  );
+  // Link colour stays inline: the global unlayered `a { color }` rule beats utilities.
+  const linkInline = { color: color.white, textDecoration: 'none' };
+  if (to) return <Link to={to} className={skin} style={linkInline}>{children}</Link>;
+  return <button type="button" onClick={onClick} disabled={disabled} className={cn(skin, 'text-white no-underline')}>{children}</button>;
 }
 
 function Shell({ children, right, subtitle, narrow }: {
   children: ReactNode; right: ReactNode; subtitle: string; narrow: boolean;
 }) {
   return (
-    <main style={{
-      minHeight: '100vh', background: color.tint, color: color.purple,
-      fontFamily: "'Work Sans',sans-serif",
-    }}>
-      <div style={{ position: 'sticky', top: 0, zIndex: 40 }}>
-        <div style={{
-          padding: '0 clamp(14px,3vw,28px)', background: color.purple, color: color.white, height: 60,
-          display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <span style={{
-            ...display, fontSize: 25, letterSpacing: '-0.01em', lineHeight: 1,
-            transform: 'rotate(-4deg)', display: 'inline-block', flexShrink: 0,
-          }}>
+    <main className="min-h-screen bg-[#F7F3FF] text-valle-purple font-sans">
+      <div className="sticky top-0 z-40">
+        <div className="px-[clamp(14px,3vw,28px)] py-0 bg-valle-purple text-white h-[60px] flex items-center gap-[14px]">
+          <span className="font-display italic font-black uppercase text-[25px] tracking-[-0.01em] leading-none -rotate-4 inline-block shrink-0">
             VALLÉ
           </span>
           {!narrow && (
             <>
-              <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,.25)', flexShrink: 0 }} />
-              <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.18em', color: 'rgba(255,255,255,.72)' }}>
+              <span className="w-px h-[22px] bg-[rgba(255,255,255,.25)] shrink-0" />
+              <span className="font-mono text-[10px] font-bold tracking-[.18em] text-[rgba(255,255,255,.72)]">
                 {subtitle}
               </span>
             </>
           )}
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           {right}
         </div>
         <Stripes height={6} />
       </div>
-      <div style={{ padding: 'clamp(16px,3vw,26px) clamp(14px,3vw,28px) 40px', maxWidth: 1440, margin: '0 auto' }}>
+      <div className="pt-[clamp(16px,3vw,26px)] px-[clamp(14px,3vw,28px)] pb-[40px] max-w-[1440px] my-0 mx-auto">
         {children}
       </div>
     </main>
@@ -154,10 +133,7 @@ export default function HrDashboard() {
 
   if (auth.loading || !auth.user) {
     return (
-      <main style={{
-        minHeight: '100vh', background: color.purple, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontFamily: "'Work Sans',sans-serif",
-      }}>
+      <main className="min-h-screen bg-valle-purple flex items-center justify-center font-sans">
         <Spinner size={9} />
       </main>
     );
@@ -166,10 +142,7 @@ export default function HrDashboard() {
   const barRight = (
     <>
       {!barNarrow && (
-        <span style={{
-          ...mono, fontSize: 11, fontWeight: 600, letterSpacing: '.06em',
-          color: 'rgba(255,255,255,.75)', whiteSpace: 'nowrap',
-        }}>
+        <span className="font-mono text-[11px] font-semibold tracking-[.06em] text-[rgba(255,255,255,.75)] whitespace-nowrap">
           {auth.user.name} · {roleLabel(auth.user.role)}
         </span>
       )}
@@ -182,31 +155,24 @@ export default function HrDashboard() {
   if (!allowed) {
     return (
       <Shell right={barRight} subtitle="CAREERS & PEOPLE" narrow={barNarrow}>
-        <div style={{
-          ...cardStyle, maxWidth: 560, margin: '6vh auto 0', overflow: 'hidden',
-          animation: 'vfadeup .35s ease both',
-        }}>
+        <div className={cn(cardCls, 'max-w-[560px] mt-[6vh] mx-auto mb-0 overflow-hidden animate-[vfadeup_.35s_ease_both]')}>
           <Stripes />
-          <div style={{ padding: 'clamp(22px,4vw,32px)' }}>
-            <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>
+          <div className="p-[clamp(22px,4vw,32px)]">
+            <span className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">
               RESTRICTED AREA
             </span>
-            <h1 style={{ ...display, fontSize: 'clamp(24px,4vw,32px)', lineHeight: 0.95, margin: '10px 0 0' }}>
+            <h1 className="font-display italic font-black uppercase text-[clamp(24px,4vw,32px)] leading-[0.95] mt-[10px] mx-0 mb-0">
               You do not have access to the careers back office
             </h1>
-            <p style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(52,0,87,.7)', margin: '14px 0 0' }}>
+            <p className="text-[14.5px] leading-[1.55] text-[rgba(52,0,87,.7)] mt-[14px] mx-0 mb-0">
               You are signed in as {auth.user.name} ({roleLabel(auth.user.role)}). Hiring is limited to
               the people and manager accounts. Ask a manager if you need it opened up.
             </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
+            <div className="flex gap-[10px] flex-wrap mt-[20px]">
               <Link
                 to="/staff"
-                className="press"
-                style={{
-                  background: color.pink, color: color.white, borderRadius: radius.pill,
-                  padding: '11px 20px', fontSize: 13.5, fontWeight: 700, textDecoration: 'none',
-                  display: 'inline-flex', alignItems: 'center',
-                }}
+                className="press bg-valle-red rounded-[999px] py-[11px] px-[20px] text-[13.5px] font-bold inline-flex items-center"
+                style={{ color: color.white, textDecoration: 'none' }}
               >
                 Back to reservations →
               </Link>
@@ -214,12 +180,11 @@ export default function HrDashboard() {
                 type="button"
                 onClick={() => { void signOut(); }}
                 disabled={signingOut}
-                className="press"
-                style={{
-                  border: '1.5px solid ' + color.border, background: 'transparent', color: color.purple,
-                  borderRadius: radius.pill, padding: '11px 20px', fontSize: 13.5, fontWeight: 700,
-                  cursor: signingOut ? 'default' : 'pointer', fontFamily: 'inherit',
-                }}
+                className={cn(
+                  'press border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple rounded-[999px]',
+                  'py-[11px] px-[20px] text-[13.5px] font-bold [font-family:inherit]',
+                  signingOut ? 'cursor-default' : 'cursor-pointer',
+                )}
               >
                 Sign out
               </button>
@@ -233,10 +198,7 @@ export default function HrDashboard() {
   return (
     <Shell right={barRight} subtitle="CAREERS & PEOPLE" narrow={barNarrow}>
       {/* ---- stat strip ---- */}
-      <div style={{
-        display: 'grid', gap: 12, marginBottom: 18,
-        gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))',
-      }}>
+      <div className="grid gap-[12px] mb-[18px] grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
         <StatCard tag="OPEN ROLES" value={stats ? String(stats.openVacancies) : '…'} />
         <StatCard tag="DRAFTS" value={stats ? String(stats.draftVacancies) : '…'} />
         <StatCard tag="NEW APPLICATIONS" value={stats ? String(stats.newApplications) : '…'} />
@@ -244,19 +206,16 @@ export default function HrDashboard() {
       </div>
 
       {/* ---- tabs ---- */}
-      <div style={{
-        display: 'inline-flex', gap: 4, padding: 4, marginBottom: 14,
-        background: color.white, border: '1.5px solid ' + color.border, borderRadius: radius.pill,
-      }}>
+      <div className="inline-flex gap-[4px] p-[4px] mb-[14px] bg-white border-[1.5px] border-solid border-valle-lilac rounded-[999px]">
         <TabBtn on={tab === 'vacancies'} onClick={() => setTab('vacancies')}>Vacancies</TabBtn>
         <TabBtn on={tab === 'applicants'} onClick={() => setTab('applicants')}>Applicants</TabBtn>
       </div>
 
       {/* Both stay mounted so filters and the search box survive a tab switch. */}
-      <div style={{ display: tab === 'vacancies' ? 'block' : 'none' }}>
+      <div className={tab === 'vacancies' ? 'block' : 'hidden'}>
         <VacanciesPanel narrow={narrow} onChanged={reloadStats} />
       </div>
-      <div style={{ display: tab === 'applicants' ? 'block' : 'none' }}>
+      <div className={tab === 'applicants' ? 'block' : 'hidden'}>
         <ApplicantsPanel narrow={narrow} onChanged={reloadStats} />
       </div>
     </Shell>

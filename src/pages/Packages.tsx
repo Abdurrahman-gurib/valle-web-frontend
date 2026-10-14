@@ -25,7 +25,7 @@ function SectionHead({ id, title, tag, marginTop }: { id?: string; title: ReactN
   return (
     <div id={id} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 28, marginTop }}>
       <h2 style={{ ...BARLOW, fontSize: 'clamp(30px,4.6vw,54px)', lineHeight: 0.85, margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{title}</h2>
-      <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{tag}</span>
+      <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{tag}</span>
     </div>
   );
 }
@@ -41,7 +41,7 @@ function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
       <div className="flex flex-1 flex-col px-[22px] pt-[18px] pb-[22px]">
         <CardTitle>{pk.name}</CardTitle>
         <BulletList items={pk.items} color={pk.color} className="mt-2.5 flex-1" />
-        <div className="mt-2 text-xs text-valle-purple/55">{pk.note}</div>
+        <div className="mt-2 text-xs text-valle-purple/70">{pk.note}</div>
         <PriceRow>
           <PriceCol label={t('SINGLE')} value={pk.single} />
           <PriceCol label={t('DOUBLE')} value={pk.dbl} />
@@ -71,7 +71,7 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
           {pk.dbl ? <PriceCol label={t('SINGLE')} value={pk.single} size={20} /> : <PriceCol label={t('PER PERSON')} value={pk.single} size={22} />}
           {pk.dbl && <PriceCol label={t('DOUBLE')} value={pk.dbl} size={20} />}
         </PriceRow>
-        {pk.note && <div className="mt-2 text-xs text-valle-purple/55">{pk.note}</div>}
+        {pk.note && <div className="mt-2 text-xs text-valle-purple/70">{pk.note}</div>}
         <ValleButton variant="outline" size="sm" onClick={onOpen} className="mt-[11px]">{t('View details →')}</ValleButton>
       </div>
     </ValleCard>
@@ -157,7 +157,7 @@ function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
     <ValleCard>
       <CardImage src={tp.img} alt={t('Team building day at Vallé Advenature™ Park')} />
       <div className="flex flex-1 flex-col px-5 pt-4 pb-5">
-        <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/55">{t('YOU WILL GET')}</div>
+        <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70">{t('YOU WILL GET')}</div>
         <BulletList items={tp.items} color="#33FF74" className="mt-2 flex-1 [&_li]:py-1" />
         <ValleButton onClick={onQuote} className="mt-3">{t('Request a quote')}</ValleButton>
       </div>
@@ -329,7 +329,7 @@ export default function PackagesPage() {
       <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <h1 style={{ ...BARLOW, fontSize: group ? 'clamp(34px,5vw,72px)' : 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{group ? t(group.title) : t('Packages')}</h1>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)' }}>{t('ALL PRICES VAT INCLUSIVE')}<CurrencyPicker fg="#340057" /></span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('ALL PRICES VAT INCLUSIVE')}<CurrencyPicker fg="#340057" /></span>
         </div>
         <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{group ? t(group.intro) : t('Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.')}</p>
 
@@ -366,7 +366,7 @@ export default function PackagesPage() {
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
-          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('ADD-ONS')}</span>
+          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)' }}>{t('ADD-ONS')}</span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
             {catalog.PACKS.addons.map((ad) => (
               <span key={ad.t} style={addonPill}>{ad.t} <span style={{ fontFamily: MONO, fontWeight: 700, color: '#7333FF' }}>{ad.p}</span></span>
@@ -435,7 +435,7 @@ export default function PackagesPage() {
             <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
-        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.7)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
 
         </>)}
         {/* SENIOR CITIZENS */}
@@ -541,13 +541,13 @@ export default function PackagesPage() {
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
-          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('PHOTO ADD-ONS')}</span>
+          <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)' }}>{t('PHOTO ADD-ONS')}</span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
             {photoAddons.map((ad) => (
               <span key={ad.t} style={addonPill}>{ad.t} <span style={{ fontFamily: MONO, fontWeight: 700, color: '#7333FF' }}>{ad.p}</span></span>
             ))}
           </div>
-          <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)', marginTop: 12 }}>{t('ALL PRICES VAT INCLUSIVE · PHOTOS ARE NON REFUNDABLE · T&C APPLY')}</div>
+          <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.7)', marginTop: 12 }}>{t('ALL PRICES VAT INCLUSIVE · PHOTOS ARE NON REFUNDABLE · T&C APPLY')}</div>
         </div>
 
         </>)}
@@ -593,7 +593,7 @@ export default function PackagesPage() {
               )}
               <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' }}>
                 <QuoteSubmitBtn onClick={() => { void quoteSubmit(); }} busy={qBusy} />
-                <span style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.55)' }}>{t('*HRDC REFUND CONDITIONS APPLY · REPLY WITHIN 1 WORKING DAY')}</span>
+                <span style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.7)' }}>{t('*HRDC REFUND CONDITIONS APPLY · REPLY WITHIN 1 WORKING DAY')}</span>
               </div>
             </div>
           )}
@@ -608,7 +608,7 @@ export default function PackagesPage() {
         </div>
 
         <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('TALK TO A PARK HOST:')}</span>
+          <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('TALK TO A PARK HOST:')}</span>
           <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener" style={contactPill}>{t('Chat')} · +230 5292 8841</a>
           <a href="mailto:sales@vallepark.com" style={contactPill}>{t('Email')} · sales@vallepark.com</a>
           <a href="tel:+2306604477" style={contactPill}>{t('Call')} · +230 660 4477</a>

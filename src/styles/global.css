@@ -124,3 +124,6 @@ html[dir="rtl"] body *, html[lang="hi"] body * { letter-spacing: normal !importa
 .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .gal-rest { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 @media (max-width: 900px) { .grid-4, .gal-rest { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+
+/* a11y: visible focus for every form field (several had outline:none) */
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #7333FF !important; outline-offset: 2px; }

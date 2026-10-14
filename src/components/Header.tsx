@@ -160,7 +160,7 @@ export function Header() {
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 z-[90] [transition:background_.3s_ease] backdrop-blur-[14px]"
+        className="fixed top-0 left-0 right-0 z-[90] [transition:background_.3s_ease] md:backdrop-blur-[14px]"
         // --fg carries the state-driven foreground colour to the class-styled controls below
         style={{ background: headerBg, borderBottom: headerBorder, ['--fg' as string]: headerFg } as CSSProperties}
       >
@@ -216,7 +216,7 @@ export function Header() {
                 </button>
                 <button
                   onClick={go(goto.booking)}
-                  className="border-0 bg-valle-red hover:bg-[#D91E44] cursor-pointer [font-family:inherit] text-[14px] font-bold text-white py-[11px] px-[20px] rounded-[999px] shadow-[0_4px_14px_rgba(255,51,88,.35)] whitespace-nowrap hover:[transform:translateY(-1px)]"
+                  className="border-0 bg-[#D91E44] hover:bg-[#B8163A] cursor-pointer [font-family:inherit] text-[14px] font-bold text-white py-[11px] px-[20px] rounded-[999px] shadow-[0_4px_14px_rgba(255,51,88,.35)] whitespace-nowrap hover:[transform:translateY(-1px)]"
                 >
                   {t('Book now')}
                 </button>
@@ -246,7 +246,7 @@ export function Header() {
               )}
               <button
                 onClick={go(goto.booking)}
-                className="border-0 bg-valle-red cursor-pointer [font-family:inherit] text-[13px] font-bold text-white py-[9px] px-[14px] rounded-[999px] whitespace-nowrap shrink-0"
+                className="border-0 bg-[#D91E44] cursor-pointer [font-family:inherit] text-[13px] font-bold text-white py-[9px] px-[14px] rounded-[999px] whitespace-nowrap shrink-0"
               >
                 {t('Book')}
               </button>
@@ -404,7 +404,7 @@ export function Header() {
           </div>
           <button
             onClick={go(goto.booking)}
-            className="press mt-[14px] border-0 bg-valle-red cursor-pointer font-display italic font-extrabold text-[16px] tracking-[.04em] uppercase text-white py-[14px] px-0 w-full rounded-[999px] shadow-[0_8px_20px_rgba(255,51,88,.35)] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
+            className="press mt-[14px] border-0 bg-[#D91E44] cursor-pointer font-display italic font-extrabold text-[16px] tracking-[.04em] uppercase text-white py-[14px] px-0 w-full rounded-[999px] shadow-[0_8px_20px_rgba(255,51,88,.35)] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
           >
             {t('Book now')} <Fwd />
           </button>

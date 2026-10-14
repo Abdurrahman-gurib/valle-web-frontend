@@ -90,7 +90,7 @@ export function TicketDay({ tk }: { tk: TicketView }) {
     <section data-testid="ticket-day" style={{ margin: '14px 0 10px', textAlign: 'start', background: '#F7F3FF', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '12px 14px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }}>
         <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{isToday ? t('YOUR DAY · LIVE') : t('YOUR DAY')}</div>
-        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.55)' }}>{t('PARK TIME {time}', { time: clock.time })}{live?.updatedAt ? ` · ${t('DESK UPDATE {time}', { time: new Date(live.updatedAt).toLocaleTimeString('en-GB', { timeZone: 'Indian/Mauritius', hour: '2-digit', minute: '2-digit' }) })}` : ''}</div>
+        <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.7)' }}>{t('PARK TIME {time}', { time: clock.time })}{live?.updatedAt ? ` · ${t('DESK UPDATE {time}', { time: new Date(live.updatedAt).toLocaleTimeString('en-GB', { timeZone: 'Indian/Mauritius', hour: '2-digit', minute: '2-digit' }) })}` : ''}</div>
       </div>
       <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
         {isToday && now && stepRow(now, t('NOW'), '#1E9E4A')}

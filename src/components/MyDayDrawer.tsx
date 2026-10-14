@@ -1,3 +1,4 @@
+import { useEscape } from '../hooks/useEscape';
 import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
@@ -13,7 +14,7 @@ const qtyBtn = 'h-[22px] w-[22px] cursor-pointer rounded-[6px] border-0 bg-white
 function Qty({ tag, val, dec, inc }: { tag: string; val: number; dec: () => void; inc: () => void }) {
   return (
     <span className="inline-flex items-center gap-[3px] rounded-[8px] bg-[#F7F3FF] px-[5px] py-0.5">
-      <span className="font-mono text-[8px] text-valle-purple/55">{tag}</span>
+      <span className="font-mono text-[8px] text-valle-purple/70">{tag}</span>
       <button onClick={dec} className={qtyBtn}>−</button>
       <span className="min-w-[14px] text-center text-[12.5px] font-bold">{val}</span>
       <button onClick={inc} className={qtyBtn}>+</button>
@@ -80,6 +81,7 @@ export function MyDayDrawer() {
   const goto = useGoto();
   const t = useT();
 
+  useEscape(app.dayOpen, app.closeDay);
   if (!app.dayOpen) return null;
 
   const cartActs = app.booking.selLines;
@@ -98,7 +100,7 @@ export function MyDayDrawer() {
         onClick={app.closeDay}
         className="fixed inset-0 z-[95] bg-[rgba(31,0,51,.55)] backdrop-blur-[3px]"
       />
-      <div className="fixed top-0 right-0 bottom-0 z-[96] flex w-[min(100vw,400px)] flex-col bg-white shadow-[-24px_0_60px_rgba(31,0,51,.4)]">
+      <div role="dialog" aria-modal="true" aria-label={t('My Day')} className="fixed top-0 right-0 bottom-0 z-[96] flex w-[min(100vw,400px)] flex-col bg-white shadow-[-24px_0_60px_rgba(31,0,51,.4)]">
         <div className="flex shrink-0 items-center gap-2.5 bg-valle-purple px-5 py-4 text-white">
           <div className="flex-1 -rotate-2 font-display text-[22px] font-black uppercase italic">{t('My Day')}</div>
           <span className="font-mono text-[9.5px] tracking-[.08em] text-white/70">{cartCountLabel}</span>
@@ -145,7 +147,7 @@ export function MyDayDrawer() {
           >
             {t('Check out')} <Fwd />
           </button>
-          <div className="mt-[9px] text-center font-mono text-[9px] tracking-[.06em] text-valle-purple/55">
+          <div className="mt-[9px] text-center font-mono text-[9px] tracking-[.06em] text-valle-purple/70">
             {t('FREE TO BOOK · PAY AT THE GATE')}
           </div>
         </div>

@@ -45,7 +45,7 @@ function Polaroid({ f, tilt, big }: { f: Frame; tilt: number; big?: boolean }) {
   const t = useT();
   return (
     <figure
-      className="m-0 bg-[#FFFDF7] pt-[10px] px-[10px] pb-3 rounded-[6px] shadow-[0_14px_34px_-18px_rgba(52,0,87,.55)] hover:shadow-[0_26px_50px_-18px_rgba(52,0,87,.45)] [transform:rotate(var(--tilt))_translateY(0px)] hover:[transform:rotate(0deg)_translateY(-6px)] [transition:transform_.28s_cubic-bezier(.2,.7,.2,1),box-shadow_.28s_cubic-bezier(.2,.7,.2,1)] w-full box-border"
+      className="m-0 bg-[#FFFDF7] pt-[10px] px-[10px] pb-3 rounded-[6px] shadow-[0_14px_34px_-18px_rgba(52,0,87,.7)] hover:shadow-[0_26px_50px_-18px_rgba(52,0,87,.45)] [transform:rotate(var(--tilt))_translateY(0px)] hover:[transform:rotate(0deg)_translateY(-6px)] [transition:transform_.28s_cubic-bezier(.2,.7,.2,1),box-shadow_.28s_cubic-bezier(.2,.7,.2,1)] w-full box-border"
       style={{ '--tilt': `${tilt}deg` } as CSSProperties}
     >
       <div className={cn('relative overflow-hidden bg-[#E9DFCB]', f.tall ? 'aspect-[3/4]' : 'aspect-[4/3]')}>
@@ -94,7 +94,7 @@ function Chapter({ id, n, kicker, title, children, frames, flip, extra }: {
   const isMobile = useIsMobile();
   const text = (
     <div data-reveal="1" className="self-center">
-      <span className={cn(eyebrow, 'text-[rgba(52,0,87,.55)]')}>{n} · {kicker}</span>
+      <span className={cn(eyebrow, 'text-[rgba(52,0,87,.7)]')}>{n} · {kicker}</span>
       <h2 className={cn(DISPLAY, 'text-[clamp(32px,4.2vw,56px)] text-valle-purple mt-[14px] mb-0 mx-0 [transform:rotate(-3deg)]')} style={{ transformOrigin: pivot() }}>
         {title}
       </h2>
@@ -130,7 +130,7 @@ function ThenNow() {
     <div data-reveal="1" className="mt-[clamp(28px,4vw,48px)]">
       <div className="flex justify-between items-baseline gap-3 flex-wrap">
         <span className={cn(eyebrow, 'text-valle-red')}>{t('THEN AND NOW · DRAG THE HANDLE')}</span>
-        <span className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.55)]">{t('SAME HILL, 1998 AND TODAY')}</span>
+        <span className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.7)]">{t('SAME HILL, 1998 AND TODAY')}</span>
       </div>
       <div
         ref={box}
@@ -178,7 +178,7 @@ function Pill({ label, href, primary }: { label: string; href: string; primary?:
   return (
     <a href={href} className={cn(
       'press inline-block font-sans font-bold text-[15px] py-[14px] px-[26px] rounded-[999px] hover:[transform:translateY(-1px)] [transition:transform_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
-      primary ? 'bg-valle-red hover:bg-[#D91E44] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]' : 'bg-[rgba(255,255,255,.12)] shadow-[inset_0_0_0_1.5px_rgba(255,255,255,.4)]',
+      primary ? 'bg-[#D91E44] hover:bg-[#B8163A] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]' : 'bg-[rgba(255,255,255,.12)] shadow-[inset_0_0_0_1.5px_rgba(255,255,255,.4)]',
     )} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{label}</a>
   );
 }

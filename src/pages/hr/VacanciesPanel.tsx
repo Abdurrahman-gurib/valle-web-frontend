@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
   VACANCY_STATUSES, deleteVacancy, employmentLabel, errorText, listVacancies, updateVacancy,
   type HrVacancy, type VacancyStatus,
 } from '../../lib/hrApi';
-import { color, radius } from '../../styles/theme';
-import { useHover } from '../../hooks/useHover';
-import { Btn, EmptyState, Spinner, display, mono, shortDate } from '../staff/ui';
+import { color } from '../../styles/theme';
+import { Btn, EmptyState, Spinner, shortDate } from '../staff/ui';
+import { cn } from '@/lib/utils';
 import { FilterSelect, MetaPill, Notice, Pill } from './hrUi';
 import VacancyForm from './VacancyForm';
 
@@ -17,18 +17,12 @@ import VacancyForm from './VacancyForm';
  * keeps the applicant history intact, which is the whole point of the audit.
  */
 
-const th: CSSProperties = {
-  ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', textTransform: 'uppercase',
-  color: color.violet, textAlign: 'left', padding: '10px 12px', whiteSpace: 'nowrap',
-};
+const thCls =
+  'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left py-[10px] px-[12px] whitespace-nowrap';
 
-const td: CSSProperties = {
-  padding: '11px 12px', fontSize: 13.5, borderTop: '1px solid ' + color.border, whiteSpace: 'nowrap',
-};
+const tdCls = 'py-[11px] px-[12px] text-[13.5px] border-t border-solid border-valle-lilac whitespace-nowrap';
 
-const cardStyle: CSSProperties = {
-  background: color.white, border: '1.5px solid ' + color.border, borderRadius: radius.lg,
-};
+const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
 
 const FILTERS = [{ value: 'all', label: 'All statuses' }, ...VACANCY_STATUSES.map((s) => ({ value: s.value as string, label: s.label }))];
 
@@ -40,26 +34,25 @@ function MiniBtn({ children, onClick, tone = 'ghost', disabled, title }: {
   disabled?: boolean;
   title?: string;
 }) {
-  const [h, bind] = useHover();
-  const on = h && !disabled;
-  const skin: Record<string, CSSProperties> = {
-    ghost: { border: '1.5px solid ' + color.border, background: on ? color.tint : 'transparent', color: color.purple },
-    dark: { border: 0, background: on ? color.deep : color.purple, color: color.white },
-    danger: { border: '1.5px solid ' + color.pinkDark, background: on ? color.pinkDark : 'transparent', color: on ? color.white : color.pinkDark },
+  const skin: Record<string, string> = {
+    ghost: cn('border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple', !disabled && 'hover:bg-[#F7F3FF]'),
+    dark: cn('border-0 bg-valle-purple text-white', !disabled && 'hover:bg-valle-deep'),
+    danger: cn(
+      'border-[1.5px] border-solid border-[#D91E44] bg-transparent text-[#D91E44]',
+      !disabled && 'hover:bg-[#D91E44] hover:text-white',
+    ),
   };
   return (
     <button
-      {...bind}
       type="button"
       title={title}
       disabled={disabled}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className="press-sm"
-      style={{
-        cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 12,
-        fontWeight: 700, padding: '6px 12px', borderRadius: radius.pill, whiteSpace: 'nowrap',
-        opacity: disabled ? 0.45 : 1, ...skin[tone],
-      }}
+      className={cn(
+        'press-sm [font-family:inherit] text-[12px] font-bold py-[6px] px-[12px] rounded-[999px] whitespace-nowrap',
+        disabled ? 'cursor-not-allowed opacity-45' : 'cursor-pointer opacity-100',
+        skin[tone],
+      )}
     >
       {children}
     </button>
@@ -75,7 +68,7 @@ function Actions({ v, busy, onEdit, onStatus, onDelete }: {
 }) {
   const hasApplicants = v.applicationCount > 0;
   return (
-    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+    <div className="flex gap-[6px] flex-wrap">
       <MiniBtn tone="dark" onClick={onEdit} disabled={busy}>Edit</MiniBtn>
       {v.status === 'draft' && (
         <MiniBtn onClick={() => onStatus('published')} disabled={busy}>Publish</MiniBtn>
@@ -105,26 +98,24 @@ function Row({ v, busy, onEdit, onStatus, onDelete }: {
   onStatus: (s: VacancyStatus) => void;
   onDelete: () => void;
 }) {
-  const [h, bind] = useHover();
   return (
     <tr
-      {...bind}
       onClick={onEdit}
-      style={{ cursor: 'pointer', background: h ? color.tint : color.white, transition: 'background .12s ease' }}
+      className="cursor-pointer bg-white hover:bg-[#F7F3FF] transition-[background] duration-[.12s] ease-[ease]"
     >
-      <td style={{ ...td, whiteSpace: 'normal', minWidth: 220 }}>
-        <div style={{ fontWeight: 700 }}>{v.title}</div>
-        <div style={{ ...mono, fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', marginTop: 2 }}>
+      <td className={cn(tdCls, 'whitespace-normal min-w-[220px]')}>
+        <div className="font-bold">{v.title}</div>
+        <div className="font-mono text-[10px] tracking-[.08em] text-[rgba(52,0,87,.5)] mt-[2px]">
           /{v.slug}
         </div>
       </td>
-      <td style={td}>{v.department || 'Not set'}</td>
-      <td style={td}>{employmentLabel(v.employment)}</td>
-      <td style={td}><Pill value={v.status} /></td>
-      <td style={{ ...td, fontWeight: 700 }}>{v.applicationCount}</td>
-      <td style={td}>{v.closesOn ? shortDate(v.closesOn) : 'Open'}</td>
-      <td style={td}>{shortDate(v.updatedAt)}</td>
-      <td style={td} onClick={(e) => e.stopPropagation()}>
+      <td className={tdCls}>{v.department || 'Not set'}</td>
+      <td className={tdCls}>{employmentLabel(v.employment)}</td>
+      <td className={tdCls}><Pill value={v.status} /></td>
+      <td className={cn(tdCls, 'font-bold')}>{v.applicationCount}</td>
+      <td className={tdCls}>{v.closesOn ? shortDate(v.closesOn) : 'Open'}</td>
+      <td className={tdCls}>{shortDate(v.updatedAt)}</td>
+      <td className={tdCls} onClick={(e) => e.stopPropagation()}>
         <Actions v={v} busy={busy} onEdit={onEdit} onStatus={onStatus} onDelete={onDelete} />
       </td>
     </tr>
@@ -140,23 +131,23 @@ function VacancyCard({ v, busy, onEdit, onStatus, onDelete }: {
   onDelete: () => void;
 }) {
   return (
-    <div style={{ ...cardStyle, padding: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 15.5, lineHeight: 1.25 }}>{v.title}</div>
-          <div style={{ ...mono, fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.5)', marginTop: 3 }}>
+    <div className={cn(cardCls, 'p-[14px]')}>
+      <div className="flex items-start gap-[10px]">
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-[15.5px] leading-[1.25]">{v.title}</div>
+          <div className="font-mono text-[10px] tracking-[.08em] text-[rgba(52,0,87,.5)] mt-[3px]">
             /{v.slug}
           </div>
         </div>
         <Pill value={v.status} />
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+      <div className="flex gap-[6px] flex-wrap mt-[10px]">
         {v.department && <MetaPill>{v.department}</MetaPill>}
         <MetaPill>{employmentLabel(v.employment)}</MetaPill>
         <MetaPill>{v.applicationCount} applicant{v.applicationCount === 1 ? '' : 's'}</MetaPill>
         <MetaPill>{v.closesOn ? 'Closes ' + shortDate(v.closesOn) : 'No closing date'}</MetaPill>
       </div>
-      <div style={{ marginTop: 12 }}>
+      <div className="mt-[12px]">
         <Actions v={v} busy={busy} onEdit={onEdit} onStatus={onStatus} onDelete={onDelete} />
       </div>
     </div>
@@ -238,11 +229,8 @@ export default function VacanciesPanel({ narrow, onChanged }: {
   return (
     <div>
       {/* ---- toolbar ---- */}
-      <div style={{
-        ...cardStyle, padding: 14, marginBottom: 14, display: 'flex', flexWrap: 'wrap',
-        gap: 10, alignItems: 'center',
-      }}>
-        <div style={{ ...display, fontSize: 20, marginRight: 4 }}>Open roles</div>
+      <div className={cn(cardCls, 'p-[14px] mb-[14px] flex flex-wrap gap-[10px] items-center')}>
+        <div className="font-display italic font-black uppercase text-[20px] mr-[4px]">Open roles</div>
         <FilterSelect
           value={status}
           onChange={setStatus}
@@ -250,18 +238,18 @@ export default function VacanciesPanel({ narrow, onChanged }: {
           options={FILTERS}
           width={narrow ? '100%' : 170}
         />
-        <span style={{ flex: 1 }} />
+        <span className="flex-1" />
         <Btn onClick={() => { setEditing(null); setCreating(true); }} style={narrow ? { width: '100%' } : undefined}>
           Post a new job
         </Btn>
       </div>
 
-      {notice && <div style={{ marginBottom: 12 }}><Notice tone="ok">{notice}</Notice></div>}
-      {err && <div style={{ marginBottom: 12 }}><Notice>{err}</Notice></div>}
+      {notice && <div className="mb-[12px]"><Notice tone="ok">{notice}</Notice></div>}
+      {err && <div className="mb-[12px]"><Notice>{err}</Notice></div>}
 
       {/* ---- list ---- */}
       {items.length === 0 ? null : narrow ? (
-        <div style={{ display: 'grid', gap: 10 }}>
+        <div className="grid gap-[10px]">
           {items.map((v) => (
             <VacancyCard
               key={v.id}
@@ -274,13 +262,13 @@ export default function VacanciesPanel({ narrow, onChanged }: {
           ))}
         </div>
       ) : (
-        <div style={{ ...cardStyle, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
+        <div className={cn(cardCls, 'overflow-hidden')}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[900px]">
               <thead>
-                <tr style={{ background: color.tint }}>
+                <tr className="bg-[#F7F3FF]">
                   {['Role', 'Department', 'Employment', 'Status', 'Applicants', 'Closes', 'Updated', ''].map((c, i) => (
-                    <th key={c || 'actions' + i} style={th}>{c}</th>
+                    <th key={c || 'actions' + i} className={thCls}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -302,13 +290,13 @@ export default function VacanciesPanel({ narrow, onChanged }: {
       )}
 
       {loading && (
-        <div style={{ padding: '34px 0', display: 'flex', justifyContent: 'center' }}>
+        <div className="py-[34px] px-0 flex justify-center">
           <Spinner color={color.violet} size={9} />
         </div>
       )}
 
       {!loading && items.length === 0 && (
-        <div style={cardStyle}>
+        <div className={cardCls}>
           {filtered
             ? <EmptyState title="Nothing here" note="No roles carry that status. Switch the filter to see the rest." />
             : <EmptyState title="No roles yet" note="Post the first job and it will show up on the public vacancies page the moment you publish it." />}

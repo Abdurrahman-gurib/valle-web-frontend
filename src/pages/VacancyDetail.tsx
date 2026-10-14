@@ -168,7 +168,7 @@ function TextField(p: FieldProps) {
       {invalid
         ? <ErrorNote id={p.id + '-err'} text={p.error || ''} />
         : p.hint
-          ? <div id={p.id + '-hint'} className="text-[12.5px] text-[rgba(52,0,87,.55)] mt-[6px]">{p.hint}</div>
+          ? <div id={p.id + '-hint'} className="text-[12.5px] text-[rgba(52,0,87,.7)] mt-[6px]">{p.hint}</div>
           : null}
     </div>
   );
@@ -609,7 +609,7 @@ export default function VacancyDetailPage() {
 
                 <SubmitButton busy={busy} disabled={tried && hasErrors} />
 
-                <div className="text-[12.5px] leading-[1.55] text-[rgba(52,0,87,.55)]">
+                <div className="text-[12.5px] leading-[1.55] text-[rgba(52,0,87,.7)]">
                   {t('We use your details only to consider you for this role. Prefer email? Write to')}{' '}
                   <a href={'mailto:' + CAREERS_EMAIL} style={{ color: color.violet }}>{CAREERS_EMAIL}</a>.
                 </div>

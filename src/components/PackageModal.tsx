@@ -153,7 +153,7 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
           {!!pack.hero && (
             <div style={{ fontSize: 14, fontWeight: 700, color: '#7333FF', marginTop: 6 }}>{pack.hero}</div>
           )}
-          <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 16 }}>{t('WHAT IS INCLUDED')}</div>
+          <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 16 }}>{t('WHAT IS INCLUDED')}</div>
           <div style={{ marginTop: 6 }}>
             {pack.items.map((pi) => (
               <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '5px 0', fontSize: 14.5, color: 'rgba(52,0,87,.85)' }}>
@@ -168,11 +168,11 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
           <div style={{ flex: 1, minHeight: 12 }} />
           <div style={{ display: 'flex', gap: 18, borderTop: '1px dashed #D9C9F0', paddingTop: 14, marginTop: 14 }}>
             <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('SINGLE')}</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('SINGLE')}</div>
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.single}</div>
             </div>
             <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.55)' }}>{t('DOUBLE')}</div>
+              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('DOUBLE')}</div>
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.dbl}</div>
             </div>
           </div>

@@ -257,7 +257,7 @@ export default function WaiverPage() {
                   <ol className="m-0 ps-5">
                     {WAIVER_TERMS.map((p) => <li key={p} className="mb-2">{t(p)}</li>)}
                   </ol>
-                  <div className="mt-1.5 font-mono text-[10px] text-valle-purple/55">{view.termsVersion}</div>
+                  <div className="mt-1.5 font-mono text-[10px] text-valle-purple/70">{view.termsVersion}</div>
                 </div>
               </Section>
 

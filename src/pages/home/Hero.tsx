@@ -45,7 +45,7 @@ export function Hero() {
         alt={t('Zipline flight over the Vallé Advenature™ Park valley')}
         priority
         surface="dark"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', animation: 'vken 16s ease-out infinite alternate' }}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
       />
       {HERO.map((src, i) => (
         <Img
@@ -57,7 +57,7 @@ export function Hero() {
           placeholder="transparent"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-            opacity: i === heroIdx ? 1 : 0, transition: 'opacity 1.6s ease', animation: 'vken 16s ease-out infinite alternate',
+            opacity: i === heroIdx ? 1 : 0, transition: 'opacity 1.6s ease', animation: i === heroIdx ? 'vken 16s ease-out infinite alternate' : 'none',
           }}
         />
       ))}

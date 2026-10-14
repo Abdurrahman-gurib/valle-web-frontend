@@ -28,8 +28,8 @@ function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick
     <a
       href={href}
       onClick={(e) => { e.preventDefault(); onClick(); }}
-      className="block cursor-pointer py-[7px] text-[15px] font-medium text-white opacity-[.92] transition-[color,opacity] hover:text-[var(--hover)] hover:opacity-100 focus-visible:text-[var(--hover)]"
-      style={{ textDecoration: 'none', ['--hover' as string]: hoverColor }}
+      className="block cursor-pointer py-[7px] text-[15px] font-medium opacity-[.92] transition-[color,opacity] [--fc:#FFFFFF] hover:[--fc:var(--hover)] hover:opacity-100 focus-visible:[--fc:var(--hover)]"
+      style={{ textDecoration: 'none', color: 'var(--fc)', ['--hover' as string]: hoverColor }}
     >
       {label}
     </a>

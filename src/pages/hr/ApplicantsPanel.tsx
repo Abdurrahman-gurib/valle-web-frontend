@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   APPLICATION_STATUSES, applicationsExportUrl, errorText, listApplications, listVacancies, safeCvHref, updateApplication,
   type ApplicationStatus, type HrApplication, type HrVacancy,
 } from '../../lib/hrApi';
-import { color, radius } from '../../styles/theme';
-import { useHover } from '../../hooks/useHover';
-import { Btn, EmptyState, Spinner, mono, relTime, shortDate } from '../staff/ui';
+import { color } from '../../styles/theme';
+import { Btn, EmptyState, Spinner, relTime, shortDate } from '../staff/ui';
+import { cn } from '@/lib/utils';
 import { ExportLink } from '../staff/reportUi';
 import {
   CopyButton, DetailLine, Drawer, FilterSelect, MetaPill, Notice, Pill, SectionTitle, TextArea,
-  fieldStyle,
+  fieldCls,
 } from './hrUi';
 
 /**
@@ -22,18 +22,12 @@ import {
 
 const PAGE_SIZE = 20;
 
-const th: CSSProperties = {
-  ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', textTransform: 'uppercase',
-  color: color.violet, textAlign: 'left', padding: '10px 12px', whiteSpace: 'nowrap',
-};
+const thCls =
+  'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left py-[10px] px-[12px] whitespace-nowrap';
 
-const td: CSSProperties = {
-  padding: '11px 12px', fontSize: 13.5, borderTop: '1px solid ' + color.border, whiteSpace: 'nowrap',
-};
+const tdCls = 'py-[11px] px-[12px] text-[13.5px] border-t border-solid border-valle-lilac whitespace-nowrap';
 
-const cardStyle: CSSProperties = {
-  background: color.white, border: '1.5px solid ' + color.border, borderRadius: radius.lg,
-};
+const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'All statuses' },
@@ -44,23 +38,21 @@ const yearsLabel = (y: number | null): string =>
   y === null || y === undefined ? 'Not given' : y === 0 ? 'No experience yet' : y + ' year' + (y === 1 ? '' : 's');
 
 function Row({ a, roleName, onOpen }: { a: HrApplication; roleName: string; onOpen: () => void }) {
-  const [h, bind] = useHover();
   return (
     <tr
-      {...bind}
       onClick={onOpen}
-      style={{ cursor: 'pointer', background: h ? color.tint : color.white, transition: 'background .12s ease' }}
+      className="cursor-pointer bg-white hover:bg-[#F7F3FF] transition-[background] duration-[.12s] ease-[ease]"
     >
-      <td style={{ ...td, whiteSpace: 'normal', minWidth: 220 }}>
-        <div style={{ fontWeight: 700 }}>{a.fullName}</div>
-        <div style={{ ...mono, fontSize: 10.5, letterSpacing: '.04em', color: 'rgba(52,0,87,.6)', marginTop: 2, wordBreak: 'break-all' }}>
+      <td className={cn(tdCls, 'whitespace-normal min-w-[220px]')}>
+        <div className="font-bold">{a.fullName}</div>
+        <div className="font-mono text-[10.5px] tracking-[.04em] text-[rgba(52,0,87,.6)] mt-[2px] break-all">
           {a.email}
         </div>
       </td>
-      <td style={{ ...td, whiteSpace: 'normal', minWidth: 160 }}>{roleName}</td>
-      <td style={td}>{yearsLabel(a.yearsExperience)}</td>
-      <td style={td}><Pill value={a.status} /></td>
-      <td style={td}>
+      <td className={cn(tdCls, 'whitespace-normal min-w-[160px]')}>{roleName}</td>
+      <td className={tdCls}>{yearsLabel(a.yearsExperience)}</td>
+      <td className={tdCls}><Pill value={a.status} /></td>
+      <td className={tdCls}>
         <span title={shortDate(a.createdAt)}>{relTime(a.createdAt)}</span>
       </td>
     </tr>
@@ -68,28 +60,25 @@ function Row({ a, roleName, onOpen }: { a: HrApplication; roleName: string; onOp
 }
 
 function ApplicantCard({ a, roleName, onOpen }: { a: HrApplication; roleName: string; onOpen: () => void }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       type="button"
       onClick={onOpen}
-      style={{
-        ...cardStyle, padding: 14, width: '100%', textAlign: 'left', cursor: 'pointer',
-        fontFamily: 'inherit', color: color.purple, display: 'block',
-        background: h ? color.tint : color.white,
-      }}
+      className={cn(
+        cardCls,
+        'p-[14px] w-full text-left cursor-pointer [font-family:inherit] text-valle-purple block bg-white hover:bg-[#F7F3FF]',
+      )}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 15.5 }}>{a.fullName}</div>
-          <div style={{ ...mono, fontSize: 10.5, color: 'rgba(52,0,87,.6)', marginTop: 3, wordBreak: 'break-all' }}>
+      <div className="flex items-start gap-[10px]">
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-[15.5px]">{a.fullName}</div>
+          <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.6)] mt-[3px] break-all">
             {a.email}
           </div>
         </div>
         <Pill value={a.status} />
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+      <div className="flex gap-[6px] flex-wrap mt-[10px]">
         <MetaPill>{roleName}</MetaPill>
         <MetaPill>{yearsLabel(a.yearsExperience)}</MetaPill>
         <MetaPill>{relTime(a.createdAt)}</MetaPill>
@@ -138,10 +127,10 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
     }
   };
 
-  const grid: CSSProperties = {
-    ...cardStyle, background: color.tint, padding: 16, display: 'grid', gap: 14,
-    gridTemplateColumns: narrow ? '1fr' : '1fr 1fr',
-  };
+  const gridCls = cn(
+    cardCls, 'bg-[#F7F3FF] p-[16px] grid gap-[14px]',
+    narrow ? 'grid-cols-[1fr]' : 'grid-cols-[1fr_1fr]',
+  );
 
   return (
     <Drawer
@@ -153,21 +142,21 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
       footer={
         <>
           <Btn variant="ghost" onClick={close} disabled={busy}>Close</Btn>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           <Btn onClick={() => { void save(); }} disabled={busy || !dirty}>
             {busy ? <Spinner /> : 'Save changes'}
           </Btn>
         </>
       }
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className="flex items-center gap-[10px] mb-[16px] flex-wrap">
         <Pill value={app.status} />
-        <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)' }}>
+        <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.5)]">
           APPLIED {shortDate(app.createdAt)}
         </span>
       </div>
 
-      <div style={grid}>
+      <div className={gridCls}>
         <DetailLine tag="APPLYING FOR" value={roleName} />
         <DetailLine tag="EXPERIENCE" value={yearsLabel(app.yearsExperience)} />
         <DetailLine tag="EMAIL" value={app.email} />
@@ -178,7 +167,8 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
               href={cv}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              style={{ color: color.violet, fontWeight: 600, wordBreak: 'break-all' }}
+              className="font-semibold break-all"
+              style={{ color: color.violet }}
             >
               Open CV
             </a>
@@ -187,27 +177,25 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
         <DetailLine tag="LAST UPDATED" value={shortDate(app.updatedAt)} />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+      <div className="flex gap-[8px] flex-wrap mt-[12px]">
         <CopyButton value={app.email} label="Copy email" />
         {app.phone ? <CopyButton value={app.phone} label="Copy phone" /> : null}
         <a
           href={'mailto:' + encodeURIComponent(app.email) + '?subject=' + encodeURIComponent('Your application to VALLÉ: ' + roleName)}
-          style={{
-            border: '1.5px solid ' + color.border, borderRadius: radius.pill, padding: '7px 14px',
-            fontSize: 12.5, fontWeight: 700, color: color.purple, textDecoration: 'none', whiteSpace: 'nowrap',
-          }}
+          className="border-[1.5px] border-solid border-valle-lilac rounded-[999px] py-[7px] px-[14px] text-[12.5px] font-bold whitespace-nowrap"
+          style={{ color: color.purple, textDecoration: 'none' }}
         >
           Write a reply
         </a>
       </div>
 
       <SectionTitle>Cover letter</SectionTitle>
-      <div style={{ ...cardStyle, padding: 16, fontSize: 14, lineHeight: 1.6 }}>
+      <div className={cn(cardCls, 'p-[16px] text-[14px] leading-[1.6]')}>
         {letterLines.length === 0 && (
-          <span style={{ color: 'rgba(52,0,87,.55)' }}>No cover letter was sent.</span>
+          <span className="text-[rgba(52,0,87,.7)]">No cover letter was sent.</span>
         )}
         {letterLines.map((line, i) => (
-          <p key={i} style={{ margin: i === 0 ? 0 : '10px 0 0', wordBreak: 'break-word' }}>{line}</p>
+          <p key={i} className={cn(i === 0 ? 'm-0' : 'mt-[10px] mx-0 mb-0', '[word-break:break-word]')}>{line}</p>
         ))}
       </div>
 
@@ -218,12 +206,12 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
         onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
         disabled={busy}
         aria-label="Application status"
-        style={{ ...fieldStyle, cursor: 'pointer', appearance: 'auto' }}
+        className={cn(fieldCls, 'cursor-pointer appearance-auto')}
       >
         {APPLICATION_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
       </select>
 
-      <div style={{ marginTop: 14 }}>
+      <div className="mt-[14px]">
         <TextArea
           id={'app-note-' + app.id}
           label="Internal note"
@@ -238,7 +226,7 @@ function ApplicantDrawer({ app, roleName, narrow, onClose, onSaved }: {
       </div>
 
       {(err || ok) && (
-        <div style={{ marginTop: 14 }}>
+        <div className="mt-[14px]">
           <Notice tone={err ? 'error' : 'ok'}>{err || ok}</Notice>
         </div>
       )}
@@ -330,17 +318,14 @@ export default function ApplicantsPanel({ narrow, onChanged }: {
   return (
     <div>
       {/* ---- filter bar: stacks on a tablet ---- */}
-      <div style={{
-        ...cardStyle, padding: 14, marginBottom: 14, display: 'flex', flexWrap: 'wrap',
-        gap: 10, alignItems: 'center',
-      }}>
+      <div className={cn(cardCls, 'p-[14px] mb-[14px] flex flex-wrap gap-[10px] items-center')}>
         <input
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search a name or email"
           aria-label="Search applicants"
-          style={{ ...fieldStyle, flex: '1 1 220px', width: 'auto', minWidth: 170 }}
+          className={cn(fieldCls, 'flex-[1_1_220px] w-auto min-w-[170px]')}
         />
         <FilterSelect
           value={vacancyId}
@@ -357,27 +342,27 @@ export default function ApplicantsPanel({ narrow, onChanged }: {
           width={narrow ? '100%' : 170}
         />
         {filtered && <Btn variant="ghost" onClick={clear} style={narrow ? { width: '100%' } : undefined}>Clear</Btn>}
-        <div style={{ marginLeft: narrow ? 0 : 'auto', width: narrow ? '100%' : 'auto' }}>
+        <div className={narrow ? 'ml-0 w-full' : 'ml-auto w-auto'}>
           <ExportLink href={applicationsExportUrl({ vacancyId: vacancyId === 'all' ? undefined : vacancyId, status: status === 'all' ? undefined : status, q: dq || undefined })} label="Export applicants CSV" />
         </div>
       </div>
 
-      {err && <div style={{ marginBottom: 12 }}><Notice>{err}</Notice></div>}
+      {err && <div className="mb-[12px]"><Notice>{err}</Notice></div>}
 
       {rows.length === 0 ? null : narrow ? (
-        <div style={{ display: 'grid', gap: 10 }}>
+        <div className="grid gap-[10px]">
           {rows.map((a) => (
             <ApplicantCard key={a.id} a={a} roleName={roleName(a)} onOpen={() => setOpenId(a.id)} />
           ))}
         </div>
       ) : (
-        <div style={{ ...cardStyle, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 760 }}>
+        <div className={cn(cardCls, 'overflow-hidden')}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[760px]">
               <thead>
-                <tr style={{ background: color.tint }}>
+                <tr className="bg-[#F7F3FF]">
                   {['Applicant', 'Role', 'Experience', 'Status', 'Applied'].map((c) => (
-                    <th key={c} style={th}>{c}</th>
+                    <th key={c} className={thCls}>{c}</th>
                   ))}
                 </tr>
               </thead>
@@ -392,13 +377,13 @@ export default function ApplicantsPanel({ narrow, onChanged }: {
       )}
 
       {loading && (
-        <div style={{ padding: '34px 0', display: 'flex', justifyContent: 'center' }}>
+        <div className="py-[34px] px-0 flex justify-center">
           <Spinner color={color.violet} size={9} />
         </div>
       )}
 
       {!loading && !err && rows.length === 0 && (
-        <div style={cardStyle}>
+        <div className={cardCls}>
           {filtered
             ? <EmptyState title="No matches" note="Nobody fits these filters. Widen the role or the status, or clear the search." />
             : <EmptyState title="No applications yet" note="Applications sent from a published vacancy page land here straight away." />}
@@ -406,11 +391,11 @@ export default function ApplicantsPanel({ narrow, onChanged }: {
       )}
 
       {total > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-          <span style={{ ...mono, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)' }}>
+        <div className="flex items-center gap-[12px] mt-[14px] flex-wrap">
+          <span className="font-mono text-[10.5px] tracking-[.1em] text-[rgba(52,0,87,.6)]">
             PAGE {page} OF {pages} · {total} APPLICATION{total === 1 ? '' : 'S'}
           </span>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           <Btn variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1 || loading}>
             ← Previous
           </Btn>

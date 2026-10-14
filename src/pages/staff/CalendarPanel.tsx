@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getCalendar, saveCalendar, type CalendarClosure, type CalendarView } from '../../lib/staffApi';
-import { Btn, Spinner, inputStyle, mono } from './ui';
-import { Panel, td, th, todayIsoPark } from './reportUi';
+import { cn } from '../../lib/utils';
+import { Btn, Spinner } from './ui';
+import { Panel, todayIsoPark } from './reportUi';
 
 /**
  * Calendar & capacity (managers): what one arrival slot can take, park wide
@@ -12,7 +13,13 @@ import { Panel, td, th, todayIsoPark } from './reportUi';
 
 const KIND_LABEL: Record<CalendarClosure['kind'], string> = { closed: 'Closed', maintenance: 'Maintenance', private: 'Private event' };
 const SLOT_LABEL: Record<CalendarClosure['slot'], string> = { all: 'Whole day', morning: 'Morning only', afternoon: 'Afternoon only' };
-const sel = { ...inputStyle, padding: '9px 12px' } as const;
+const LABEL = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
+const INPUT_CORE = 'border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
+const INPUT = INPUT_CORE + ' w-full px-[14px] py-[11px]';
+const SEL = INPUT_CORE + ' w-full px-[12px] py-[9px]';
+const SMALL = INPUT_CORE + ' px-[10px] py-[7px]';
+const TH = 'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left px-[12px] py-[10px] whitespace-nowrap';
+const TD = 'px-[12px] py-[10px] text-[13.5px] border-t border-valle-lilac whitespace-nowrap';
 
 export default function CalendarPanel() {
   const [data, setData] = useState<CalendarView | null>(null);
@@ -80,17 +87,17 @@ export default function CalendarPanel() {
   return (
     <div data-testid="calendar-panel">
       <Panel title="CALENDAR & CAPACITY · WHAT EACH ARRIVAL SLOT CAN TAKE, AND WHEN THE PARK IS CLOSED" action={<Btn variant="dark" onClick={() => { void save(); }} disabled={busy || !data}>{busy ? <Spinner color="#FFFFFF" /> : 'Save calendar'}</Btn>}>
-        <div style={{ padding: 14, display: 'grid', gap: 18 }}>
-          {err && <div role="alert" style={{ color: '#D91E44', fontSize: 13.5 }}>{err}</div>}
-          {saved && <div role="status" data-testid="calendar-saved" style={{ color: '#1E9E4A', fontSize: 13.5, fontWeight: 600 }}>{saved}</div>}
+        <div className="p-[14px] grid gap-[18px]">
+          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {saved && <div role="status" data-testid="calendar-saved" className="text-[#1E9E4A] text-[13.5px] font-semibold">{saved}</div>}
           {!data && !err && <Spinner />}
           {data && (
             <>
               <section>
-                <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>GUESTS PER ARRIVAL SLOT · PARK WIDE</div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
-                  <input value={slotCapacity} onChange={(e) => setSlotCapacity(e.target.value)} inputMode="numeric" aria-label="Guests per arrival slot" data-testid="slot-capacity" style={{ ...inputStyle, width: 110 }} />
-                  <span style={{ fontSize: 13, color: 'rgba(52,0,87,.65)' }}>
+                <div className={LABEL}>GUESTS PER ARRIVAL SLOT · PARK WIDE</div>
+                <div className="flex gap-[10px] items-center mt-[8px] flex-wrap">
+                  <input value={slotCapacity} onChange={(e) => setSlotCapacity(e.target.value)} inputMode="numeric" aria-label="Guests per arrival slot" data-testid="slot-capacity" className={INPUT_CORE + ' w-[110px] px-[14px] py-[11px]'} />
+                  <span className="text-[13px] text-[rgba(52,0,87,.65)]">
                     guests in the morning and again in the afternoon. The website shows quiet / busy / very busy / fully booked from this number and refuses a booking that would pass it.
                     {data.slotCapacitySource === 'default' && ' Not set yet: the server default applies.'}
                   </span>
@@ -98,23 +105,23 @@ export default function CalendarPanel() {
               </section>
 
               <section>
-                <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>PER EXPERIENCE · LEAVE EMPTY FOR NO LIMIT</div>
-                <div style={{ fontSize: 13, color: 'rgba(52,0,87,.65)', marginTop: 4 }}>Guests per slot for activities priced per person (a zipline's throughput); vehicles per slot for buggies and the like, priced per unit.</div>
-                <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                  <table style={{ borderCollapse: 'collapse', minWidth: 520 }} data-testid="activity-capacity">
-                    <thead><tr><th style={th}>Experience</th><th style={th}>Counts</th><th style={th}>Morning</th><th style={th}>Afternoon</th></tr></thead>
+                <div className={LABEL}>PER EXPERIENCE · LEAVE EMPTY FOR NO LIMIT</div>
+                <div className="text-[13px] text-[rgba(52,0,87,.65)] mt-[4px]">Guests per slot for activities priced per person (a zipline's throughput); vehicles per slot for buggies and the like, priced per unit.</div>
+                <div className="overflow-x-auto mt-[8px]">
+                  <table className="border-collapse min-w-[520px]" data-testid="activity-capacity">
+                    <thead><tr><th className={TH}>Experience</th><th className={TH}>Counts</th><th className={TH}>Morning</th><th className={TH}>Afternoon</th></tr></thead>
                     <tbody>
                       {data.experiences.map((e) => (
                         <tr key={e.id}>
-                          <td style={td}>{e.name}</td>
-                          <td style={{ ...td, color: 'rgba(52,0,87,.6)' }}>{e.priceMode === 'flat' ? 'vehicles / units' : 'guests'}</td>
+                          <td className={TD}>{e.name}</td>
+                          <td className={cn(TD, 'text-[rgba(52,0,87,.6)]')}>{e.priceMode === 'flat' ? 'vehicles / units' : 'guests'}</td>
                           {(['morning', 'afternoon'] as const).map((slot) => (
-                            <td key={slot} style={td}>
+                            <td key={slot} className={TD}>
                               <input
                                 value={capacity[e.id]?.[slot] ?? ''}
                                 onChange={(ev) => setCapacity((c) => ({ ...c, [e.id]: { ...(c[e.id] ?? { morning: '', afternoon: '' }), [slot]: ev.target.value } }))}
                                 inputMode="numeric" placeholder="no limit" aria-label={`${e.name} ${slot} capacity`} data-testid={`cap-${e.id}-${slot}`}
-                                style={{ ...inputStyle, width: 96, padding: '7px 10px' }}
+                                className={SMALL + ' w-[96px]'}
                               />
                             </td>
                           ))}
@@ -126,18 +133,18 @@ export default function CalendarPanel() {
               </section>
 
               <section>
-                <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>TIMED SESSIONS · START TIMES PER DAY</div>
-                <div style={{ fontSize: 13, color: 'rgba(52,0,87,.65)', marginTop: 4 }}>An experience with start times runs in sessions: the guest picks a time when booking, each session has its own capacity, and the ticket shows the day's itinerary. Afternoon arrivals can only take sessions from 12:00. Leave empty for a free-flow experience.</div>
-                <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                  <table style={{ borderCollapse: 'collapse', minWidth: 640 }} data-testid="activity-sessions">
-                    <thead><tr><th style={th}>Experience</th><th style={th}>Start times (HH:MM, comma separated)</th><th style={th}>Per session</th><th style={th}>Minutes</th></tr></thead>
+                <div className={LABEL}>TIMED SESSIONS · START TIMES PER DAY</div>
+                <div className="text-[13px] text-[rgba(52,0,87,.65)] mt-[4px]">An experience with start times runs in sessions: the guest picks a time when booking, each session has its own capacity, and the ticket shows the day's itinerary. Afternoon arrivals can only take sessions from 12:00. Leave empty for a free-flow experience.</div>
+                <div className="overflow-x-auto mt-[8px]">
+                  <table className="border-collapse min-w-[640px]" data-testid="activity-sessions">
+                    <thead><tr><th className={TH}>Experience</th><th className={TH}>Start times (HH:MM, comma separated)</th><th className={TH}>Per session</th><th className={TH}>Minutes</th></tr></thead>
                     <tbody>
                       {data.experiences.map((e) => (
                         <tr key={e.id}>
-                          <td style={td}>{e.name}</td>
-                          <td style={td}><input value={sessions[e.id]?.times ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), times: ev.target.value } }))} placeholder="e.g. 09:30, 10:30, 14:00" aria-label={`${e.name} session times`} data-testid={`ses-${e.id}-times`} style={{ ...inputStyle, width: 260, padding: '7px 10px' }} /></td>
-                          <td style={td}><input value={sessions[e.id]?.capacity ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), capacity: ev.target.value } }))} inputMode="numeric" placeholder="no limit" aria-label={`${e.name} per session`} data-testid={`ses-${e.id}-cap`} style={{ ...inputStyle, width: 90, padding: '7px 10px' }} /></td>
-                          <td style={td}><input value={sessions[e.id]?.durationMin ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), durationMin: ev.target.value } }))} inputMode="numeric" placeholder="60" aria-label={`${e.name} minutes`} style={{ ...inputStyle, width: 70, padding: '7px 10px' }} /></td>
+                          <td className={TD}>{e.name}</td>
+                          <td className={TD}><input value={sessions[e.id]?.times ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), times: ev.target.value } }))} placeholder="e.g. 09:30, 10:30, 14:00" aria-label={`${e.name} session times`} data-testid={`ses-${e.id}-times`} className={SMALL + ' w-[260px]'} /></td>
+                          <td className={TD}><input value={sessions[e.id]?.capacity ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), capacity: ev.target.value } }))} inputMode="numeric" placeholder="no limit" aria-label={`${e.name} per session`} data-testid={`ses-${e.id}-cap`} className={SMALL + ' w-[90px]'} /></td>
+                          <td className={TD}><input value={sessions[e.id]?.durationMin ?? ''} onChange={(ev) => setSessions((s) => ({ ...s, [e.id]: { ...(s[e.id] ?? { times: '', capacity: '', durationMin: '' }), durationMin: ev.target.value } }))} inputMode="numeric" placeholder="60" aria-label={`${e.name} minutes`} className={SMALL + ' w-[70px]'} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -146,34 +153,34 @@ export default function CalendarPanel() {
               </section>
 
               <section>
-                <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>CLOSED DAYS · MAINTENANCE · PRIVATE EVENTS</div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }} data-testid="closure-form">
-                  <input type="date" value={draft.from} min={today} onChange={(e) => setDraft({ ...draft, from: e.target.value, to: draft.to < e.target.value ? e.target.value : draft.to })} aria-label="From" data-testid="closure-from" style={sel} />
-                  <span style={{ fontSize: 13 }}>to</span>
-                  <input type="date" value={draft.to} min={draft.from} onChange={(e) => setDraft({ ...draft, to: e.target.value })} aria-label="To" data-testid="closure-to" style={sel} />
-                  <select value={draft.slot} onChange={(e) => setDraft({ ...draft, slot: e.target.value as CalendarClosure['slot'] })} aria-label="Slot" data-testid="closure-slot" style={sel}>
+                <div className={LABEL}>CLOSED DAYS · MAINTENANCE · PRIVATE EVENTS</div>
+                <div className="flex gap-[8px] items-center mt-[8px] flex-wrap" data-testid="closure-form">
+                  <input type="date" value={draft.from} min={today} onChange={(e) => setDraft({ ...draft, from: e.target.value, to: draft.to < e.target.value ? e.target.value : draft.to })} aria-label="From" data-testid="closure-from" className={SEL} />
+                  <span className="text-[13px]">to</span>
+                  <input type="date" value={draft.to} min={draft.from} onChange={(e) => setDraft({ ...draft, to: e.target.value })} aria-label="To" data-testid="closure-to" className={SEL} />
+                  <select value={draft.slot} onChange={(e) => setDraft({ ...draft, slot: e.target.value as CalendarClosure['slot'] })} aria-label="Slot" data-testid="closure-slot" className={SEL}>
                     {(Object.keys(SLOT_LABEL) as CalendarClosure['slot'][]).map((k) => <option key={k} value={k}>{SLOT_LABEL[k]}</option>)}
                   </select>
-                  <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as CalendarClosure['kind'] })} aria-label="Kind" data-testid="closure-kind" style={sel}>
+                  <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value as CalendarClosure['kind'] })} aria-label="Kind" data-testid="closure-kind" className={SEL}>
                     {(Object.keys(KIND_LABEL) as CalendarClosure['kind'][]).map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
                   </select>
-                  <input value={draft.reason} onChange={(e) => setDraft({ ...draft, reason: e.target.value })} placeholder="Reason shown to guests (optional)" aria-label="Reason" data-testid="closure-reason" style={{ ...inputStyle, flex: '1 1 200px' }} />
+                  <input value={draft.reason} onChange={(e) => setDraft({ ...draft, reason: e.target.value })} placeholder="Reason shown to guests (optional)" aria-label="Reason" data-testid="closure-reason" className={INPUT + ' flex-[1_1_200px]'} />
                   <Btn variant="ghost" onClick={addClosure}>Add closure</Btn>
                 </div>
-                {closures.length === 0 && <div style={{ fontSize: 13, color: 'rgba(52,0,87,.6)', marginTop: 10 }}>No closures. The park is open every day.</div>}
+                {closures.length === 0 && <div className="text-[13px] text-[rgba(52,0,87,.6)] mt-[10px]">No closures. The park is open every day.</div>}
                 {closures.length > 0 && (
-                  <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                    <table style={{ borderCollapse: 'collapse', minWidth: 560 }} data-testid="closure-list">
-                      <thead><tr><th style={th}>From</th><th style={th}>To</th><th style={th}>Slot</th><th style={th}>Kind</th><th style={th}>Reason</th><th style={th}></th></tr></thead>
+                  <div className="overflow-x-auto mt-[8px]">
+                    <table className="border-collapse min-w-[560px]" data-testid="closure-list">
+                      <thead><tr><th className={TH}>From</th><th className={TH}>To</th><th className={TH}>Slot</th><th className={TH}>Kind</th><th className={TH}>Reason</th><th className={TH}></th></tr></thead>
                       <tbody>
                         {closures.map((c, i) => (
-                          <tr key={i} style={{ opacity: c.to < today ? 0.5 : 1 }}>
-                            <td style={{ ...td, ...mono, fontSize: 12.5 }}>{c.from}</td>
-                            <td style={{ ...td, ...mono, fontSize: 12.5 }}>{c.to}</td>
-                            <td style={td}>{SLOT_LABEL[c.slot]}</td>
-                            <td style={td}>{KIND_LABEL[c.kind]}</td>
-                            <td style={td}>{c.reason || <span style={{ color: 'rgba(52,0,87,.45)' }}>—</span>}</td>
-                            <td style={td}><Btn variant="ghost" onClick={() => setClosures((list) => list.filter((_, j) => j !== i))}>Remove</Btn></td>
+                          <tr key={i} className={c.to < today ? 'opacity-[.5]' : 'opacity-100'}>
+                            <td className={cn(TD, 'font-mono text-[12.5px]')}>{c.from}</td>
+                            <td className={cn(TD, 'font-mono text-[12.5px]')}>{c.to}</td>
+                            <td className={TD}>{SLOT_LABEL[c.slot]}</td>
+                            <td className={TD}>{KIND_LABEL[c.kind]}</td>
+                            <td className={TD}>{c.reason || <span className="text-[rgba(52,0,87,.45)]">—</span>}</td>
+                            <td className={TD}><Btn variant="ghost" onClick={() => setClosures((list) => list.filter((_, j) => j !== i))}>Remove</Btn></td>
                           </tr>
                         ))}
                       </tbody>

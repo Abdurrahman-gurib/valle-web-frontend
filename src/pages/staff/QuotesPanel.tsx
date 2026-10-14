@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { QuoteRow } from '../../types';
 import { listQuotes, listReservations, setReservationStatus, type ReservationRow } from '../../lib/staffApi';
-import { Btn, EmptyState, Spinner, card, mono, relTime } from './ui';
-import { Panel, td, th } from './reportUi';
+import { cn } from '../../lib/utils';
+import { Btn, EmptyState, Spinner, relTime } from './ui';
+import { Panel } from './reportUi';
+
+const CARD = 'bg-white border-[1.5px] border-valle-lilac rounded-[18px]';
+const TH = 'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left px-[12px] py-[10px] whitespace-nowrap';
+const TD = 'px-[12px] py-[10px] text-[13.5px] border-t border-valle-lilac whitespace-nowrap';
 
 const PAGE_SIZE = 20;
 
@@ -45,24 +50,24 @@ export default function QuotesPanel() {
   return (
     <div data-testid="quotes-panel">
       <Panel title={`RESTAURANT TABLES · ${tables.filter((r) => r.status === 'requested').length} TO CONFIRM`}>
-        {tables.length === 0 && <div style={{ padding: 14, fontSize: 13.5, color: 'rgba(52,0,87,.6)' }}>No table requests yet. Guests ask for one from the restaurant pages.</div>}
+        {tables.length === 0 && <div className="p-[14px] text-[13.5px] text-[rgba(52,0,87,.6)]">No table requests yet. Guests ask for one from the restaurant pages.</div>}
         {tables.length > 0 && (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }} data-testid="tables-list">
-              <thead><tr style={{ background: '#F7F3FF' }}><th style={th}>When</th><th style={th}>Restaurant</th><th style={th}>Guest</th><th style={th}>People</th><th style={th}>Pre-order</th><th style={th}>Notes</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[860px]" data-testid="tables-list">
+              <thead><tr className="bg-[#F7F3FF]"><th className={TH}>When</th><th className={TH}>Restaurant</th><th className={TH}>Guest</th><th className={TH}>People</th><th className={TH}>Pre-order</th><th className={TH}>Notes</th><th className={TH}>Status</th><th className={TH}></th></tr></thead>
               <tbody>
                 {tables.map((r) => (
-                  <tr key={r.id} style={{ opacity: r.status === 'cancelled' ? 0.55 : 1 }}>
-                    <td style={{ ...td, ...mono, fontSize: 12.5 }}>{r.visitDate} {r.visitTime}</td>
-                    <td style={td}>{r.restaurantName}</td>
-                    <td style={{ ...td, fontWeight: 600 }}>{r.guestName}<div style={{ ...mono, fontSize: 10, fontWeight: 400, color: 'rgba(52,0,87,.6)' }}>{r.email}{r.phone ? ' · ' + r.phone : ''}{r.bookingRef ? ' · ' + r.bookingRef : ''}</div></td>
-                    <td style={td}>{r.party}</td>
-                    <td style={{ ...td, whiteSpace: 'normal', maxWidth: 260, fontSize: 12.5 }}>{r.preorder.length ? r.preorder.map((l) => `${l.qty} × ${l.item}`).join(', ') : '—'}</td>
-                    <td style={{ ...td, whiteSpace: 'normal', maxWidth: 220, fontSize: 12.5 }}>{r.notes || '—'}</td>
-                    <td style={{ ...td, ...mono, fontSize: 11, fontWeight: 700, color: r.status === 'confirmed' ? '#1E9E4A' : r.status === 'cancelled' ? '#D91E44' : '#8A6A00' }}>{r.status.toUpperCase()}</td>
-                    <td style={td}>
+                  <tr key={r.id} className={r.status === 'cancelled' ? 'opacity-[.55]' : 'opacity-100'}>
+                    <td className={cn(TD, 'font-mono text-[12.5px]')}>{r.visitDate} {r.visitTime}</td>
+                    <td className={TD}>{r.restaurantName}</td>
+                    <td className={cn(TD, 'font-semibold')}>{r.guestName}<div className="font-mono text-[10px] font-normal text-[rgba(52,0,87,.6)]">{r.email}{r.phone ? ' · ' + r.phone : ''}{r.bookingRef ? ' · ' + r.bookingRef : ''}</div></td>
+                    <td className={TD}>{r.party}</td>
+                    <td className={cn(TD, 'whitespace-normal max-w-[260px] text-[12.5px]')}>{r.preorder.length ? r.preorder.map((l) => `${l.qty} × ${l.item}`).join(', ') : '—'}</td>
+                    <td className={cn(TD, 'whitespace-normal max-w-[220px] text-[12.5px]')}>{r.notes || '—'}</td>
+                    <td className={cn(TD, 'font-mono text-[11px] font-bold', r.status === 'confirmed' ? 'text-[#1E9E4A]' : r.status === 'cancelled' ? 'text-[#D91E44]' : 'text-[#8A6A00]')}>{r.status.toUpperCase()}</td>
+                    <td className={TD}>
                       {r.status === 'requested' && (
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
+                        <div className="inline-flex gap-[6px]">
                           <Btn onClick={() => { void decide(r.id, 'confirmed'); }} disabled={tableBusy === r.id}>Confirm</Btn>
                           <Btn variant="ghost" onClick={() => { void decide(r.id, 'cancelled'); }} disabled={tableBusy === r.id}>Decline</Btn>
                         </div>
@@ -75,17 +80,17 @@ export default function QuotesPanel() {
           </div>
         )}
       </Panel>
-      {err && <div style={{ ...card, padding: 14, marginBottom: 14, color: '#D91E44', fontWeight: 600 }}>{err}</div>}
-      {loading && rows.length === 0 && <div style={{ padding: 30, display: 'flex', justifyContent: 'center' }}><Spinner color="#7333FF" /></div>}
+      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {loading && rows.length === 0 && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
       {!loading && rows.length === 0 && !err && (
         <EmptyState title="No quote requests yet" note="Requests sent from the team-building form on the Packages page land here." />
       )}
       {rows.length > 0 && (
         <Panel title={`GROUP & TEAM-BUILDING QUOTE REQUESTS · ${total}`}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 860 }}>
-              <thead><tr style={{ background: '#F7F3FF' }}>
-                <th style={th}>Received</th><th style={th}>Contact</th><th style={th}>Company</th><th style={th}>Group</th><th style={th}>Preferred date</th><th style={th}>Message</th><th style={th}>Reply</th>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[860px]">
+              <thead><tr className="bg-[#F7F3FF]">
+                <th className={TH}>Received</th><th className={TH}>Contact</th><th className={TH}>Company</th><th className={TH}>Group</th><th className={TH}>Preferred date</th><th className={TH}>Message</th><th className={TH}>Reply</th>
               </tr></thead>
               <tbody>
                 {rows.map((q) => {
@@ -93,17 +98,17 @@ export default function QuotesPanel() {
                   const subject = encodeURIComponent(`Your group visit to VALLÉ Advenature Park${q.company ? ' · ' + q.company : ''}`);
                   return (
                     <tr key={q.id}>
-                      <td style={td}><div>{relTime(q.createdAt)}</div><div style={{ ...mono, fontSize: 9.5, color: 'rgba(52,0,87,.55)' }}>{new Date(q.createdAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}</div></td>
-                      <td style={{ ...td, fontWeight: 600 }}>{q.name}<div style={{ ...mono, fontSize: 10, fontWeight: 400, color: 'rgba(52,0,87,.6)' }}>{q.email}{q.phone ? ' · ' + q.phone : ''}</div></td>
-                      <td style={td}>{q.company || '—'}</td>
-                      <td style={td}>{q.groupSize || '—'}</td>
-                      <td style={td}>{q.preferredDate || '—'}</td>
-                      <td style={{ ...td, whiteSpace: 'normal', maxWidth: 340, fontSize: 13 }}>{q.message || '—'}</td>
-                      <td style={td}>
-                        <div style={{ display: 'inline-flex', gap: 6 }}>
-                          <a href={`mailto:${q.email}?subject=${subject}`} style={linkBtn}>E-mail</a>
-                          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" style={linkBtn}>WhatsApp</a>}
-                          {q.phone && <a href={`tel:${q.phone.replace(/\s+/g, '')}`} style={linkBtn}>Call</a>}
+                      <td className={TD}><div>{relTime(q.createdAt)}</div><div className="font-mono text-[9.5px] text-[rgba(52,0,87,.7)]">{new Date(q.createdAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}</div></td>
+                      <td className={cn(TD, 'font-semibold')}>{q.name}<div className="font-mono text-[10px] font-normal text-[rgba(52,0,87,.6)]">{q.email}{q.phone ? ' · ' + q.phone : ''}</div></td>
+                      <td className={TD}>{q.company || '—'}</td>
+                      <td className={TD}>{q.groupSize || '—'}</td>
+                      <td className={TD}>{q.preferredDate || '—'}</td>
+                      <td className={cn(TD, 'whitespace-normal max-w-[340px] text-[13px]')}>{q.message || '—'}</td>
+                      <td className={TD}>
+                        <div className="inline-flex gap-[6px]">
+                          <a href={`mailto:${q.email}?subject=${subject}`} className={LINK_BTN} style={linkBtn}>E-mail</a>
+                          {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className={LINK_BTN} style={linkBtn}>WhatsApp</a>}
+                          {q.phone && <a href={`tel:${q.phone.replace(/\s+/g, '')}`} className={LINK_BTN} style={linkBtn}>Call</a>}
                         </div>
                       </td>
                     </tr>
@@ -113,9 +118,9 @@ export default function QuotesPanel() {
             </table>
           </div>
           {pages > 1 && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 12, borderTop: '1px solid #EBE2FF' }}>
-              <span style={{ ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)' }}>PAGE {page} OF {pages}</span>
-              <span style={{ flex: 1 }} />
+            <div className="flex gap-[8px] items-center p-[12px] border-t border-valle-lilac">
+              <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.6)]">PAGE {page} OF {pages}</span>
+              <span className="flex-1" />
               <Btn variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Previous</Btn>
               <Btn variant="ghost" onClick={() => setPage((p) => Math.min(pages, p + 1))} disabled={page >= pages}>Next</Btn>
             </div>
@@ -126,7 +131,6 @@ export default function QuotesPanel() {
   );
 }
 
-const linkBtn = {
-  border: '1.5px solid #340057', color: '#340057', borderRadius: 999, padding: '6px 11px', fontSize: 12, fontWeight: 700,
-  textDecoration: 'none', whiteSpace: 'nowrap' as const,
-};
+/* colour and underline stay inline: the global a{color} rule would beat a class */
+const linkBtn = { color: '#340057', textDecoration: 'none' };
+const LINK_BTN = 'border-[1.5px] border-valle-purple rounded-[999px] px-[11px] py-[6px] text-[12px] font-bold whitespace-nowrap';

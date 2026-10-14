@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Btn, card, display, inputStyle, label, mono, StatusChip, clockTime, shortDate } from './ui';
+import { cn } from '../../lib/utils';
+import { Btn, StatusChip, clockTime, shortDate } from './ui';
 import { gateCheckIn, gateWaiverPdfUrl, getGateDay, getGateView, isHttpError, type GateDayRow, type GateView } from '../../lib/staffApi';
 
 const money = (n: number) => 'Rs ' + n.toLocaleString('en-US');
+
+const CARD = 'bg-white border-[1.5px] border-valle-lilac rounded-[18px]';
+const LABEL = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
+const INPUT_CORE = 'border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
+const INPUT = INPUT_CORE + ' w-full px-[14px] py-[11px]';
 
 /** VAL-1234-26 from a scanned ticket / waiver URL, or from what the operator typed. */
 export function refFromScan(text: string): string | null {
@@ -78,17 +84,17 @@ function Scanner({ onRef, onClose }: { onRef: (ref: string) => void; onClose: ()
   }, [onRef]);
 
   return (
-    <div style={{ ...card, padding: 12, background: '#1F0033' }}>
+    <div className="bg-[#1F0033] border-[1.5px] border-valle-lilac rounded-[18px] p-[12px]">
       {err ? (
-        <div style={{ color: '#FFFFFF', padding: 16, fontWeight: 600 }}>{err}</div>
+        <div className="text-white p-[16px] font-semibold">{err}</div>
       ) : (
-        <div style={{ position: 'relative' }}>
-          <video ref={video} playsInline muted style={{ width: '100%', maxHeight: 360, objectFit: 'cover', borderRadius: 12, display: 'block', background: '#000' }} />
-          <div style={{ position: 'absolute', inset: '15% 25%', border: '3px solid #33FF74', borderRadius: 16, pointerEvents: 'none' }} />
+        <div className="relative">
+          <video ref={video} playsInline muted className="w-full max-h-[360px] object-cover rounded-[12px] block bg-black" />
+          <div className="absolute inset-y-[15%] inset-x-[25%] border-[3px] border-valle-green rounded-[16px] pointer-events-none" />
         </div>
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-        <span style={{ ...mono, color: 'rgba(255,255,255,.75)', fontSize: 11 }}>POINT AT THE TICKET QR CODE</span>
+      <div className="flex justify-between items-center mt-[10px]">
+        <span className="font-mono text-[rgba(255,255,255,.75)] text-[11px]">POINT AT THE TICKET QR CODE</span>
         <Btn variant="ghost" onClick={onClose} style={{ color: '#FFFFFF', borderColor: 'rgba(255,255,255,.4)' }}>Close camera</Btn>
       </div>
     </div>
@@ -142,9 +148,9 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
   const partyToday = day?.reduce((n, r) => n + r.party, 0) ?? 0;
 
   return (
-    <div style={{ display: 'grid', gap: 14 }}>
+    <div className="grid gap-[14px]">
       {/* ---- find the booking ---- */}
-      <div style={{ ...card, padding: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className={cn(CARD, 'p-[16px] flex gap-[10px] flex-wrap items-center')}>
         <Btn variant="dark" onClick={() => { setScan(true); setView(null); setErr(''); }}>Scan ticket QR</Btn>
         <input
           value={typed}
@@ -152,71 +158,71 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
           onKeyDown={(e) => { if (e.key === 'Enter') lookup(); }}
           placeholder="or type VAL-1234-26"
           data-testid="gate-ref"
-          style={{ ...inputStyle, width: 220, flex: '1 1 180px', ...mono, textTransform: 'uppercase' }}
+          className={INPUT_CORE.replace('[font-family:inherit]', 'font-mono') + ' px-[14px] py-[11px] w-[220px] flex-[1_1_180px] uppercase'}
         />
         <Btn variant="ghost" onClick={lookup}>Look up</Btn>
       </div>
 
       {scan && <Scanner onRef={open} onClose={() => setScan(false)} />}
-      {err && <div role="alert" style={{ ...card, padding: '12px 16px', borderColor: '#FF3358', background: '#FFE2E7', fontWeight: 600 }}>{err}</div>}
+      {err && <div role="alert" className="bg-[#FFE2E7] border-[1.5px] border-valle-red rounded-[18px] px-[16px] py-[12px] font-semibold">{err}</div>}
 
       {/* ---- the scanned booking ---- */}
       {view && (
-        <div data-testid="gate-view" style={{ ...card, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 18px', display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: blocked ? '#FFF1F3' : '#EFFFF4', borderBottom: '1.5px solid #EBE2FF' }}>
+        <div data-testid="gate-view" className={cn(CARD, 'overflow-hidden')}>
+          <div className={cn('px-[18px] py-[16px] flex justify-between gap-[12px] flex-wrap border-b-[1.5px] border-valle-lilac', blocked ? 'bg-[#FFF1F3]' : 'bg-[#EFFFF4]')}>
             <div>
-              <div style={{ ...mono, fontSize: 13, fontWeight: 700, color: '#FF3358' }}>{view.refCode}</div>
-              <div style={{ ...display, fontSize: 26, lineHeight: 1 }}>{view.guestName}</div>
-              <div style={{ fontSize: 13, marginTop: 4, color: 'rgba(52,0,87,.7)' }}>
+              <div className="font-mono text-[13px] font-bold text-valle-red">{view.refCode}</div>
+              <div className="font-display italic font-black uppercase text-[26px] leading-none">{view.guestName}</div>
+              <div className="text-[13px] mt-[4px] text-[rgba(52,0,87,.7)]">
                 {shortDate(view.visitDate)} · {view.slot} · {view.adults} adult{view.adults === 1 ? '' : 's'}{view.kids ? ` · ${view.kids} child${view.kids === 1 ? '' : 'ren'}` : ''} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
               </div>
-              {!view.isToday && <div style={{ ...mono, fontSize: 11, fontWeight: 700, color: '#D91E44', marginTop: 6 }}>NOT TODAY'S BOOKING</div>}
-              <div data-testid="gate-balance" style={{ ...mono, fontSize: 12, fontWeight: 700, marginTop: 6, color: view.balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+              {!view.isToday && <div className="font-mono text-[11px] font-bold text-[#D91E44] mt-[6px]">NOT TODAY'S BOOKING</div>}
+              <div data-testid="gate-balance" className={cn('font-mono text-[12px] font-bold mt-[6px]', view.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
                 {view.balance > 0 ? `TO COLLECT ${money(view.balance)} · PAID ${money(view.paidAmount)}` : 'FULLY PAID'}{view.adjustmentAmount > 0 ? ` · ${view.adjustmentNote || 'discount'} −${money(view.adjustmentAmount)}` : ''}
               </div>
             </div>
-            <div style={{ textAlign: 'right', display: 'grid', gap: 6, justifyItems: 'end' }}>
+            <div className="text-right grid gap-[6px] justify-items-end">
               <StatusChip status={view.status} />
-              <div data-testid="gate-waiver-count" style={{ ...mono, fontWeight: 700, fontSize: 15, color: view.missing ? '#D91E44' : '#1E9E4A' }}>
+              <div data-testid="gate-waiver-count" className={cn('font-mono font-bold text-[15px]', view.missing ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
                 WAIVERS {view.signedCount}/{view.required}
               </div>
-              {view.stops > 0 && <div style={{ ...mono, fontSize: 11, fontWeight: 700, color: '#D91E44' }}>{view.stops} LIMIT WARNING{view.stops > 1 ? 'S' : ''}</div>}
+              {view.stops > 0 && <div className="font-mono text-[11px] font-bold text-[#D91E44]">{view.stops} LIMIT WARNING{view.stops > 1 ? 'S' : ''}</div>}
             </div>
           </div>
 
-          <div style={{ padding: '14px 18px', display: 'grid', gap: 10 }}>
+          <div className="px-[18px] py-[14px] grid gap-[10px]">
             {view.lines.length > 0 && (
-              <div style={{ fontSize: 13, color: 'rgba(52,0,87,.75)' }}>{view.lines.map((l) => l.label).join(' · ')}</div>
+              <div className="text-[13px] text-[rgba(52,0,87,.75)]">{view.lines.map((l) => l.label).join(' · ')}</div>
             )}
-            {view.required === 0 && <div style={{ fontWeight: 600, color: '#1E9E4A' }}>No waiver needed: nothing on this booking is a zipline, quad, buggy or luge.</div>}
-            {view.required > 0 && view.waivers.length === 0 && <div style={{ fontWeight: 600 }}>No waiver signed yet. The guest can sign at the gate on their phone from the ticket link, or on paper.</div>}
+            {view.required === 0 && <div className="font-semibold text-[#1E9E4A]">No waiver needed: nothing on this booking is a zipline, quad, buggy or luge.</div>}
+            {view.required > 0 && view.waivers.length === 0 && <div className="font-semibold">No waiver signed yet. The guest can sign at the gate on their phone from the ticket link, or on paper.</div>}
             {onOpenBooking && (
               <div><Btn variant="ghost" onClick={() => onOpenBooking(view.refCode)} style={{ padding: '7px 14px', fontSize: 12.5 }}>Open booking (payment, top-up, FOC, postpone)</Btn></div>
             )}
             {view.waivers.map((w) => (
-              <div key={w.id} data-testid="gate-waiver" style={{ border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '10px 14px', background: w.flags.some((f) => f.level === 'stop') ? '#FFF6F7' : '#FFFFFF' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                  <div style={{ fontWeight: 800 }}>
+              <div key={w.id} data-testid="gate-waiver" className={cn('border-[1.5px] border-valle-lilac rounded-[14px] px-[14px] py-[10px]', w.flags.some((f) => f.level === 'stop') ? 'bg-[#FFF6F7]' : 'bg-white')}>
+                <div className="flex justify-between gap-[10px] flex-wrap">
+                  <div className="font-extrabold">
                     {w.participantName}
-                    <span style={{ ...mono, fontWeight: 600, fontSize: 12, marginLeft: 10 }}>{w.age} yrs · {w.heightCm} cm · {w.weightKg} kg</span>
+                    <span className="font-mono font-semibold text-[12px] ml-[10px]">{w.age} yrs · {w.heightCm} cm · {w.weightKg} kg</span>
                   </div>
-                  <span style={{ display: 'flex', gap: 12 }}>
-                    <a href={gateWaiverPdfUrl(view.refCode, w.id)} target="_blank" rel="noopener noreferrer" style={{ color: '#7333FF', fontWeight: 700, fontSize: 12.5, textDecoration: 'none' }}>PDF</a>
-                    <button type="button" onClick={() => setOpenSig(openSig === w.id ? null : w.id)} style={{ border: 0, background: 'transparent', color: '#7333FF', fontWeight: 700, cursor: 'pointer', fontSize: 12.5, padding: 0 }}>
+                  <span className="flex gap-[12px]">
+                    <a href={gateWaiverPdfUrl(view.refCode, w.id)} target="_blank" rel="noopener noreferrer" className="font-bold text-[12.5px]" style={{ color: '#7333FF', textDecoration: 'none' }}>PDF</a>
+                    <button type="button" onClick={() => setOpenSig(openSig === w.id ? null : w.id)} className="border-0 bg-transparent text-valle-violet font-bold cursor-pointer text-[12.5px] p-0">
                       {openSig === w.id ? 'Hide details' : 'Signature & details'}
                     </button>
                   </span>
                 </div>
                 {w.flags.map((f, i) => (
-                  <div key={i} style={{ fontSize: 13, fontWeight: 700, color: f.level === 'stop' ? '#D91E44' : '#B7791F', marginTop: 4 }}>
+                  <div key={i} className={cn('text-[13px] font-bold mt-[4px]', f.level === 'stop' ? 'text-[#D91E44]' : 'text-[#B7791F]')}>
                     {f.level === 'stop' ? '⛔' : '⚠'} {f.activity}: {f.message}
                   </div>
                 ))}
-                {w.medicalNotes && <div style={{ fontSize: 13, marginTop: 4 }}><strong>Medical:</strong> {w.medicalNotes}</div>}
+                {w.medicalNotes && <div className="text-[13px] mt-[4px]"><strong>Medical:</strong> {w.medicalNotes}</div>}
                 {openSig === w.id && (
-                  <div style={{ marginTop: 8, display: 'grid', gap: 6, fontSize: 13 }}>
-                    <img src={w.signature} alt={`Signature of ${w.signedBy}`} style={{ maxWidth: 320, width: '100%', border: '1px solid #EBE2FF', borderRadius: 10, background: '#FFFFFF' }} />
-                    <div>Signed by <strong>{w.signedBy}</strong>{w.isMinor ? ' (guardian)' : ''} · {shortDate(w.signedAt)} {clockTime(w.signedAt)} · read in {w.lang.toUpperCase()}{w.version > 1 ? <span data-testid="waiver-version" style={{ marginInlineStart: 6, fontFamily: "'Chivo Mono',monospace", fontSize: 10, background: '#FFFDE0', border: '1px solid #FFE94D', borderRadius: 999, padding: '2px 7px' }}>signed {w.version}× · earlier versions kept</span> : null}</div>
+                  <div className="mt-[8px] grid gap-[6px] text-[13px]">
+                    <img src={w.signature} alt={`Signature of ${w.signedBy}`} className="max-w-[320px] w-full border border-valle-lilac rounded-[10px] bg-white" />
+                    <div>Signed by <strong>{w.signedBy}</strong>{w.isMinor ? ' (guardian)' : ''} · {shortDate(w.signedAt)} {clockTime(w.signedAt)} · read in {w.lang.toUpperCase()}{w.version > 1 ? <span data-testid="waiver-version" className="ms-[6px] font-mono text-[10px] bg-[#FFFDE0] border border-[#FFE94D] rounded-[999px] px-[7px] py-[2px]">signed {w.version}× · earlier versions kept</span> : null}</div>
                     <div>Born {shortDate(w.birthDate)} · {w.nationality || 'nationality not given'}{w.idNumber ? ` · ID/passport ${w.idNumber}` : ''}</div>
                     <div>{w.address ? `${w.address} · ` : ''}{w.phone}{w.email ? ` · ${w.email}` : ''}</div>
                     <div>Emergency: {w.emergencyName}, {w.emergencyPhone}</div>
@@ -226,26 +232,26 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
               </div>
             ))}
             {view.missing > 0 && (
-              <div style={{ fontSize: 13.5 }}>
+              <div className="text-[13.5px]">
                 <strong>{view.missing} still to sign.</strong> They can do it now on their phone:{' '}
-                <a href={view.waiverUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#7333FF', wordBreak: 'break-all' }}>waiver link</a>
+                <a href={view.waiverUrl} target="_blank" rel="noopener noreferrer" className="break-all" style={{ color: '#7333FF' }}>waiver link</a>
               </div>
             )}
 
             {view.status === 'arrived' ? (
-              <div style={{ ...mono, fontWeight: 700, color: '#1E9E4A', fontSize: 14 }}>✓ CHECKED IN</div>
+              <div className="font-mono font-bold text-[#1E9E4A] text-[14px]">✓ CHECKED IN</div>
             ) : view.status === 'cancelled' ? (
-              <div style={{ ...mono, fontWeight: 700, color: '#D91E44', fontSize: 14 }}>CANCELLED BOOKING</div>
+              <div className="font-mono font-bold text-[#D91E44] text-[14px]">CANCELLED BOOKING</div>
             ) : blocked ? (
-              <div style={{ display: 'grid', gap: 8 }}>
+              <div className="grid gap-[8px]">
                 {!override ? (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <div className="flex gap-[10px] flex-wrap">
                     <Btn variant="danger" onClick={() => setOverride(true)}>Check in anyway…</Btn>
                     <Btn variant="ghost" onClick={() => open(view.refCode)}>Refresh</Btn>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason, e.g. paper waivers signed at the desk" style={{ ...inputStyle, flex: '1 1 260px' }} data-testid="gate-reason" />
+                  <div className="flex gap-[10px] flex-wrap items-center">
+                    <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason, e.g. paper waivers signed at the desk" className={INPUT + ' flex-[1_1_260px]'} data-testid="gate-reason" />
                     <Btn variant="danger" disabled={busy || !reason.trim()} onClick={() => checkIn(true)}>Confirm check-in</Btn>
                     <Btn variant="ghost" onClick={() => setOverride(false)}>Cancel</Btn>
                   </div>
@@ -259,25 +265,25 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
       )}
 
       {/* ---- today's arrivals ---- */}
-      <div style={{ ...card, padding: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
-          <div style={label}>TODAY&apos;S ARRIVALS</div>
-          <div style={{ ...mono, fontSize: 12 }}>{signedToday}/{partyToday} waivers signed</div>
+      <div className={cn(CARD, 'p-[16px]')}>
+        <div className="flex justify-between items-baseline gap-[10px] flex-wrap mb-[10px]">
+          <div className={LABEL}>TODAY&apos;S ARRIVALS</div>
+          <div className="font-mono text-[12px]">{signedToday}/{partyToday} waivers signed</div>
         </div>
-        {day === null && <div style={{ fontSize: 13 }}>Loading…</div>}
-        {day && day.length === 0 && <div style={{ fontSize: 13 }}>No bookings for today.</div>}
+        {day === null && <div className="text-[13px]">Loading…</div>}
+        {day && day.length === 0 && <div className="text-[13px]">No bookings for today.</div>}
         {day && day.length > 0 && (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-[13.5px]">
               <tbody>
                 {day.map((r) => (
-                  <tr key={r.refCode} onClick={() => open(r.refCode)} style={{ cursor: 'pointer', borderTop: '1px solid #F1EAFF' }}>
-                    <td style={{ padding: '8px 6px', ...mono, fontSize: 12 }}>{r.refCode}</td>
-                    <td style={{ padding: '8px 6px', fontWeight: 600 }}>{r.guestName}</td>
-                    <td style={{ padding: '8px 6px' }}>{r.slot}</td>
-                    <td style={{ padding: '8px 6px', ...mono, fontWeight: 700, color: r.signed >= r.party ? '#1E9E4A' : '#D91E44' }}>{Math.min(r.signed, r.party)}/{r.party}</td>
-                    <td style={{ padding: '8px 6px', ...mono, fontSize: 12, color: r.balance > 0 ? '#D91E44' : '#1E9E4A' }}>{r.balance > 0 ? money(r.balance) : 'paid'}</td>
-                    <td style={{ padding: '8px 6px' }}><StatusChip status={r.status} /></td>
+                  <tr key={r.refCode} onClick={() => open(r.refCode)} className="cursor-pointer border-t border-[#F1EAFF]">
+                    <td className="px-[6px] py-[8px] font-mono text-[12px]">{r.refCode}</td>
+                    <td className="px-[6px] py-[8px] font-semibold">{r.guestName}</td>
+                    <td className="px-[6px] py-[8px]">{r.slot}</td>
+                    <td className={cn('px-[6px] py-[8px] font-mono font-bold', r.signed >= r.party ? 'text-[#1E9E4A]' : 'text-[#D91E44]')}>{Math.min(r.signed, r.party)}/{r.party}</td>
+                    <td className={cn('px-[6px] py-[8px] font-mono text-[12px]', r.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>{r.balance > 0 ? money(r.balance) : 'paid'}</td>
+                    <td className="px-[6px] py-[8px]"><StatusChip status={r.status} /></td>
                   </tr>
                 ))}
               </tbody>

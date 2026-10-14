@@ -34,7 +34,7 @@ export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
         onClick={goto.booking}
         className="press"
         style={{
-          flex: 1.4, border: 0, background: '#FF3358', cursor: 'pointer', fontFamily: 'inherit',
+          flex: 1.4, border: 0, background: '#D91E44', cursor: 'pointer', fontFamily: 'inherit',
           fontSize: 14.5, fontWeight: 700, color: '#FFFFFF', padding: '13px 0', borderRadius: 12,
         }}
       >

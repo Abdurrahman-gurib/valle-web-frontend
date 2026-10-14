@@ -3,10 +3,10 @@ import {
   EMPLOYMENT_TYPES, createVacancy, errorText, requirementLines, toDateInput, updateVacancy,
   type EmploymentType, type HrVacancy, type VacancyInput, type VacancyStatus,
 } from '../../lib/hrApi';
-import { color, radius } from '../../styles/theme';
-import { Btn, Spinner, mono } from '../staff/ui';
+import { Btn, Spinner } from '../staff/ui';
+import { cn } from '@/lib/utils';
 import {
-  Drawer, Notice, SectionTitle, Segmented, SelectField, TextArea, TextField, labelStyle,
+  Drawer, Notice, SectionTitle, Segmented, SelectField, TextArea, TextField, labelCls,
 } from './hrUi';
 
 /**
@@ -157,7 +157,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
   };
 
   const reqCount = requirementLines(f.requirements).length;
-  const cols = narrow ? '1fr' : '1fr 1fr';
+  const cols = narrow ? 'grid-cols-[1fr]' : 'grid-cols-[1fr_1fr]';
 
   return (
     <Drawer
@@ -169,7 +169,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
       footer={
         <>
           <Btn variant="ghost" onClick={close} disabled={busy}>Cancel</Btn>
-          <span style={{ flex: 1 }} />
+          <span className="flex-1" />
           <Btn onClick={() => { void submit(); }} disabled={busy}>
             {busy ? <Spinner /> : (vacancy ? 'Save changes' : 'Create role')}
           </Btn>
@@ -178,18 +178,14 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
     >
       <form onSubmit={submit} noValidate>
         {vacancy && (
-          <div style={{
-            ...mono, fontSize: 10, letterSpacing: '.1em', color: 'rgba(52,0,87,.55)',
-            background: color.tint, border: '1.5px solid ' + color.border, borderRadius: radius.md,
-            padding: '8px 12px', marginBottom: 16, wordBreak: 'break-all',
-          }}>
+          <div className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] bg-[#F7F3FF] border-[1.5px] border-solid border-valle-lilac rounded-[12px] py-[8px] px-[12px] mb-[16px] break-all">
             /VACANCIES/{vacancy.slug.toUpperCase()} · {vacancy.applicationCount} APPLICATION{vacancy.applicationCount === 1 ? '' : 'S'}
           </div>
         )}
 
-        <div style={{ marginBottom: 18 }}>
-          <span style={labelStyle}>Visibility</span>
-          <div style={{ marginTop: 7 }}>
+        <div className="mb-[18px]">
+          <span className={labelCls}>Visibility</span>
+          <div className="mt-[7px]">
             <Segmented
               value={f.status === 'closed' ? 'closed' : f.status}
               onChange={(v) => set('status', v as VacancyStatus)}
@@ -208,7 +204,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
               }
             />
           </div>
-          <div style={{ fontSize: 12, color: 'rgba(52,0,87,.55)', marginTop: 7, lineHeight: 1.4 }}>
+          <div className="text-[12px] text-[rgba(52,0,87,.7)] mt-[7px] leading-[1.4]">
             {f.status === 'published'
               ? 'Published roles appear on the public vacancies page and accept applications.'
               : f.status === 'closed'
@@ -217,7 +213,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 14 }}>
+        <div className="grid gap-[14px]">
           <TextField
             id="vac-title"
             label="Job title"
@@ -231,7 +227,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
             hint={vacancy ? undefined : 'The web address is generated from the title.'}
           />
 
-          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: cols }}>
+          <div className={cn('grid gap-[14px]', cols)}>
             <TextField
               id="vac-department"
               label="Department"
@@ -252,7 +248,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
             />
           </div>
 
-          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: cols }}>
+          <div className={cn('grid gap-[14px]', cols)}>
             <TextField
               id="vac-location"
               label="Location"
@@ -342,13 +338,13 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
         </div>
 
         {serverError && (
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-[16px]">
             <Notice>{serverError}</Notice>
           </div>
         )}
 
         {/* Lets Enter submit the form while the visible action lives in the footer. */}
-        <button type="submit" style={{ display: 'none' }} aria-hidden="true" tabIndex={-1} />
+        <button type="submit" className="hidden" aria-hidden="true" tabIndex={-1} />
       </form>
     </Drawer>
   );

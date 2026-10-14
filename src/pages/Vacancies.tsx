@@ -80,7 +80,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
       )}
 
       <div className="mt-1 pt-3 flex items-center gap-3 flex-wrap justify-between" style={{ borderTop: '1px dashed #D9C9F0' }}>
-        <span className="font-mono text-[10.5px] font-normal tracking-[.08em] text-[rgba(52,0,87,.55)]">
+        <span className="font-mono text-[10.5px] font-normal tracking-[.08em] text-[rgba(52,0,87,.7)]">
           {v.salaryRange ? v.salaryRange : closesLabel(v.closesOn)}
         </span>
         <span className={cn(MONO, 'text-valle-purple group-hover:text-valle-red')}>{t('VIEW ROLE →')}</span>
@@ -199,7 +199,7 @@ export default function VacanciesPage() {
               {t('Come and join us')}
             </h2>
           </div>
-          <span className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.55)]">{countLabel}</span>
+          <span className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.7)]">{countLabel}</span>
         </div>
 
         <Stripes height={8} style={{ borderRadius: 999, margin: '18px 0 26px' }} />

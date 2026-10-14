@@ -1,7 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { useHover } from '../../hooks/useHover';
 import type { BookingStatus, RateKey } from '../../types';
-import { color, radius } from '../../styles/theme';
+import { cn } from '../../lib/utils';
 
 /**
  * Small shared pieces for the back office. Same visual language as the public
@@ -25,6 +24,14 @@ export const inputStyle: CSSProperties = {
 export const card: CSSProperties = {
   background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 18,
 };
+
+/* Class-name twins of the style objects above, for Tailwind markup. */
+export const monoCls = 'font-mono';
+export const displayCls = 'font-display italic font-black uppercase';
+export const labelCls = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
+export const fieldLabelCls = 'font-mono text-[10px] font-bold tracking-[.12em] text-[rgba(52,0,87,.6)]';
+export const inputCls = 'w-full rounded-[12px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-[14px] py-[11px] [font-family:inherit] text-[14.5px] text-valle-purple outline-none';
+export const cardCls = 'rounded-[18px] border-[1.5px] border-valle-lilac bg-white';
 
 export const textareaStyle: CSSProperties = {
   ...inputStyle, minHeight: 84, resize: 'vertical', lineHeight: 1.5, fontSize: 14,
@@ -54,14 +61,12 @@ export function usePrefersReducedMotion(): boolean {
 /** Pulsing three-dot loader that reuses the global `vbeat` keyframes. */
 export function Spinner({ color = '#FFFFFF', size = 7 }: { color?: string; size?: number }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.6 }} aria-hidden="true">
+    <span className="inline-flex items-center" style={{ gap: size * 0.6 }} aria-hidden="true">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          style={{
-            width: size, height: size, borderRadius: 999, background: color, display: 'block',
-            animation: 'vbeat .7s ease-in-out infinite', animationDelay: i * 0.12 + 's',
-          }}
+          className="block rounded-[999px] [animation:vbeat_.7s_ease-in-out_infinite]"
+          style={{ width: size, height: size, background: color, animationDelay: i * 0.12 + 's' }}
         />
       ))}
     </span>
@@ -73,49 +78,44 @@ export function Lockup({ color = '#FFFFFF', size = 27, sub = 'ADVENATURE™ PARK
   color?: string; size?: number; sub?: string;
 }) {
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', lineHeight: 1, userSelect: 'none',
-      transform: 'rotate(-4deg)', flexShrink: 0,
-    }}>
-      <span style={{ ...display, fontSize: size, letterSpacing: '-0.01em', color }}>VALLÉ</span>
-      <span style={{ ...mono, fontSize: size * 0.3, fontWeight: 600, letterSpacing: '.22em', color, opacity: 0.75, marginTop: 2 }}>
+    <div className="flex shrink-0 select-none flex-col leading-none [transform:rotate(-4deg)]">
+      <span className={cn(displayCls, 'tracking-[-0.01em]')} style={{ fontSize: size, color }}>VALLÉ</span>
+      <span className={cn(monoCls, 'mt-[2px] font-semibold tracking-[.22em] opacity-75')} style={{ fontSize: size * 0.3, color }}>
         {sub}
       </span>
     </div>
   );
 }
 
+const BTN_SKIN: Record<string, string> = {
+  solid: 'border-0 bg-valle-red text-white enabled:hover:bg-[#D91E44]',
+  danger: 'border-[1.5px] border-[#D91E44] bg-transparent text-[#D91E44] enabled:hover:bg-[#D91E44] enabled:hover:text-white',
+  dark: 'border-0 bg-valle-purple text-white enabled:hover:bg-valle-deep',
+  ghost: 'border-[1.5px] border-valle-lilac bg-transparent text-valle-purple enabled:hover:bg-[#F7F3FF]',
+};
+
 /** Filled / outlined pill button with the site's hover lift. */
-export function Btn({ children, onClick, variant = 'solid', disabled, type = 'button', style }: {
+export function Btn({ children, onClick, variant = 'solid', disabled, type = 'button', style, className }: {
   children: ReactNode;
   onClick?: () => void;
   variant?: 'solid' | 'ghost' | 'dark' | 'danger';
   disabled?: boolean;
   type?: 'button' | 'submit';
   style?: CSSProperties;
+  className?: string;
 }) {
-  const [h, bind] = useHover();
-  const on = h && !disabled;
-  const skin: Record<string, CSSProperties> = {
-    solid: { border: 0, background: on ? '#D91E44' : '#FF3358', color: '#FFFFFF' },
-    danger: { border: '1.5px solid #D91E44', background: on ? '#D91E44' : 'transparent', color: on ? '#FFFFFF' : '#D91E44' },
-    dark: { border: 0, background: on ? '#260040' : '#340057', color: '#FFFFFF' },
-    ghost: { border: '1.5px solid #EBE2FF', background: on ? '#F7F3FF' : 'transparent', color: '#340057' },
-  };
   return (
     <button
-      {...bind}
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="press"
-      style={{
-        cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700,
-        padding: '10px 18px', borderRadius: 999, opacity: disabled ? 0.55 : 1,
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, whiteSpace: 'nowrap',
-        transform: on ? 'translateY(-1px)' : 'none', transition: 'transform .15s ease, background .15s ease',
-        ...skin[variant], ...style,
-      }}
+      className={cn(
+        'press inline-flex cursor-pointer items-center justify-center gap-[8px] whitespace-nowrap rounded-[999px] px-[18px] py-[10px] [font-family:inherit] text-[13.5px] font-bold',
+        '[transition:transform_.15s_ease,background_.15s_ease] disabled:cursor-default disabled:opacity-55 enabled:hover:[transform:translateY(-1px)]',
+        BTN_SKIN[variant],
+        className,
+      )}
+      style={style}
     >
       {children}
     </button>
@@ -132,10 +132,10 @@ export function StatusChip({ status }: { status: BookingStatus | string }) {
   };
   const [bg, fg] = skin[status] || ['#F7F3FF', '#340057'];
   return (
-    <span style={{
-      ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase',
-      background: bg, color: fg, borderRadius: 999, padding: '4px 9px', whiteSpace: 'nowrap',
-    }}>
+    <span
+      className={cn(monoCls, 'whitespace-nowrap rounded-[999px] px-[9px] py-[4px] text-[10px] font-bold uppercase tracking-[.1em]')}
+      style={{ background: bg, color: fg }}
+    >
       {status}
     </span>
   );
@@ -153,14 +153,14 @@ export function RatePill({ rate, size = 'md' }: { rate: RateKey | string; size?:
     <span
       title={word + ' rate'}
       aria-label={word + ' rate'}
-      style={{
-        ...mono, fontSize: size === 'sm' ? 9.5 : 10.5, fontWeight: 700, letterSpacing: '.12em',
-        background: rr ? '#E2FFEB' : '#EBE2FF',
-        color: rr ? '#12B54A' : color.violet,
-        border: '1.5px solid ' + (rr ? 'rgba(18,181,74,.28)' : 'rgba(115,51,255,.28)'),
-        borderRadius: radius.pill, padding: size === 'sm' ? '2px 7px' : '3px 9px',
-        whiteSpace: 'nowrap', display: 'inline-block', lineHeight: 1.4,
-      }}
+      className={cn(
+        monoCls,
+        'inline-block whitespace-nowrap rounded-[999px] border-[1.5px] font-bold leading-[1.4] tracking-[.12em]',
+        size === 'sm' ? 'px-[7px] py-[2px] text-[9.5px]' : 'px-[9px] py-[3px] text-[10.5px]',
+        rr
+          ? 'border-[rgba(18,181,74,.28)] bg-[#E2FFEB] text-[#12B54A]'
+          : 'border-[rgba(115,51,255,.28)] bg-valle-lilac text-valle-violet',
+      )}
     >
       {rr ? 'RR' : 'NR'}
     </span>
@@ -174,14 +174,13 @@ export function RatePill({ rate, size = 'md' }: { rate: RateKey | string; size?:
 export function TypingDots({ color: dotColor = '#7333FF', size = 6 }: { color?: string; size?: number }) {
   const reduced = usePrefersReducedMotion();
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: size * 0.7, height: size + 6 }} aria-hidden="true">
+    <span className="inline-flex items-end" style={{ gap: size * 0.7, height: size + 6 }} aria-hidden="true">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
+          className={cn('block rounded-[999px]', reduced ? 'opacity-55' : '[animation:vdot_1.05s_ease-in-out_infinite]')}
           style={{
-            width: size, height: size, borderRadius: 999, background: dotColor, display: 'block',
-            opacity: reduced ? 0.55 : undefined,
-            animation: reduced ? undefined : 'vdot 1.05s ease-in-out infinite',
+            width: size, height: size, background: dotColor,
             animationDelay: reduced ? undefined : i * 0.15 + 's',
           }}
         />
@@ -195,11 +194,11 @@ export function Field({ id, tag, children, hint }: {
   id: string; tag: string; children: ReactNode; hint?: string;
 }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <label htmlFor={id} style={{ ...label, display: 'block', marginBottom: 5 }}>{tag}</label>
+    <div className="min-w-0">
+      <label htmlFor={id} className={cn(labelCls, 'mb-[5px] block')}>{tag}</label>
       {children}
       {hint && (
-        <div style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: '#D91E44', marginTop: 4 }}>
+        <div className={cn(monoCls, 'mt-[4px] text-[9.5px] tracking-[.08em] text-[#D91E44]')}>
           {hint}
         </div>
       )}
@@ -210,7 +209,7 @@ export function Field({ id, tag, children, hint }: {
 /** Mono section heading used between blocks in the drawers. */
 export function SectionLabel({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
-    <div style={{ ...label, fontSize: 9.5, letterSpacing: '.14em', margin: '20px 0 8px', ...style }}>
+    <div className={cn(labelCls, 'mx-0 mt-[20px] mb-[8px] text-[9.5px] tracking-[.14em]')} style={style}>
       {children}
     </div>
   );
@@ -221,19 +220,18 @@ export function SectionLabel({ children, style }: { children: ReactNode; style?:
  * reads the same number in the same shape in both places.
  */
 export function TotalTag({ amount, size = 26 }: { amount: string; size?: number }) {
-  return <span style={{ ...display, fontSize: size, lineHeight: 1, letterSpacing: '-0.01em' }}>{amount}</span>;
+  return <span className={cn(displayCls, 'leading-none tracking-[-0.01em]')} style={{ fontSize: size }}>{amount}</span>;
 }
 
 /** Green when the socket is live, amber while it retries / polls. */
 export function StatusDot({ connected, labelText }: { connected: boolean; labelText?: string }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-      <span style={{
-        width: 8, height: 8, borderRadius: 999, display: 'block', flexShrink: 0,
-        background: connected ? '#33FF74' : '#FFB020',
-        boxShadow: connected ? '0 0 0 3px rgba(51,255,116,.22)' : '0 0 0 3px rgba(255,176,32,.22)',
-      }} />
-      <span style={{ ...mono, fontSize: 10, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>
+    <span className="inline-flex items-center gap-[7px]">
+      <span className={cn(
+        'block h-[8px] w-[8px] shrink-0 rounded-[999px]',
+        connected ? 'bg-valle-green shadow-[0_0_0_3px_rgba(51,255,116,.22)]' : 'bg-[#FFB020] shadow-[0_0_0_3px_rgba(255,176,32,.22)]',
+      )} />
+      <span className={cn(monoCls, 'text-[10px] font-semibold tracking-[.12em] text-[rgba(52,0,87,.6)]')}>
         {labelText || (connected ? 'CONNECTED' : 'RECONNECTING…')}
       </span>
     </span>
@@ -242,9 +240,9 @@ export function StatusDot({ connected, labelText }: { connected: boolean; labelT
 
 export function EmptyState({ title, note }: { title: string; note: string }) {
   return (
-    <div style={{ padding: 'clamp(30px,6vw,60px) 20px', textAlign: 'center' }}>
-      <div style={{ ...display, fontSize: 26, color: '#340057', opacity: 0.85 }}>{title}</div>
-      <div style={{ fontSize: 14, color: 'rgba(52,0,87,.6)', marginTop: 8, lineHeight: 1.5 }}>{note}</div>
+    <div className="px-[20px] py-[clamp(30px,6vw,60px)] text-center">
+      <div className={cn(displayCls, 'text-[26px] text-valle-purple opacity-85')}>{title}</div>
+      <div className="mt-[8px] text-[14px] leading-[1.5] text-[rgba(52,0,87,.6)]">{note}</div>
     </div>
   );
 }

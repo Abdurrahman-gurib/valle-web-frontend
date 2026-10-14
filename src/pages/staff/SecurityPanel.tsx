@@ -5,9 +5,9 @@ import {
 } from '../../lib/staffApi';
 import { ValleButton } from '../../components/ui/valle';
 import { Panel } from './reportUi';
-import { Spinner, inputStyle, mono } from './ui';
+import { cn } from '../../lib/utils';
+import { Spinner, fieldLabelCls, inputCls } from './ui';
 
-const fieldLabel = { ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' } as const;
 
 function CodeForm({ id, labelText, submitText, busy, onSubmit, variant = 'dark' }: {
   id: string; labelText: string; submitText: string; busy: boolean; onSubmit: (code: string) => void; variant?: 'dark' | 'primary' | 'outline';
@@ -17,8 +17,8 @@ function CodeForm({ id, labelText, submitText, busy, onSubmit, variant = 'dark' 
   return (
     <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-2.5">
       <div className="min-w-[180px] flex-1">
-        <label htmlFor={id} style={fieldLabel}>{labelText}</label>
-        <input id={id} inputMode="text" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={40} required style={{ ...inputStyle, marginTop: 6 }} />
+        <label htmlFor={id} className={fieldLabelCls}>{labelText}</label>
+        <input id={id} inputMode="text" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={40} required className={cn(inputCls, 'mt-[6px]')} />
       </div>
       <ValleButton type="submit" variant={variant} size="sm" disabled={busy} className="w-auto px-5">{busy ? <Spinner /> : submitText}</ValleButton>
     </form>
@@ -83,7 +83,7 @@ export default function SecurityPanel() {
             <div className="mt-3 flex flex-wrap items-center gap-4">
               <img src={setup.qrDataUrl} alt="QR code to add VALLÉ Staff to your authenticator app" width={180} height={180} className="rounded-xl shadow-[0_0_0_1.5px_#EBE2FF]" />
               <div className="min-w-0 text-[13px]">
-                <div style={fieldLabel}>OR ENTER THIS KEY</div>
+                <div className={fieldLabelCls}>OR ENTER THIS KEY</div>
                 <code className="mt-1 block font-mono text-[13px] break-all select-all">{setup.secret.replace(/(.{4})/g, '$1 ').trim()}</code>
               </div>
             </div>

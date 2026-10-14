@@ -1,16 +1,16 @@
 import {
-  useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent,
+  useCallback, useEffect, useRef, useState, type FormEvent,
 } from 'react';
 import type { ChatMessage, ConversationStatus, ConversationSummary } from '../../types';
 import { StaffChat, type ChatStatus } from '../../lib/chatClient';
 import { useStaffAuth } from '../../store/StaffAuth';
-import { useHover } from '../../hooks/useHover';
+import { cn } from '../../lib/utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { listConversations, postStaffMessage, uploadStaffAttachment } from '../../lib/staffApi';
 import { Stripes } from '../../components/Stripes';
-import { color, motion, radius } from '../../styles/theme';
+import { color } from '../../styles/theme';
 import {
-  Btn, EmptyState, Spinner, StatusDot, TypingDots, card, clockTime, display, inputStyle, mono,
+  Btn, EmptyState, Spinner, StatusDot, TypingDots, clockTime, inputStyle,
   relTime, usePrefersReducedMotion,
 } from './ui';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from '../../components/chatParts';
@@ -50,46 +50,35 @@ function reconcile(prev: Row[], m: ChatMessage): Row[] {
 }
 
 function ConvRow({ conv, on, onClick }: { conv: ConversationSummary; on: boolean; onClick: () => void }) {
-  const [h, bind] = useHover();
   const name = conv.visitorName || 'Visitor';
   return (
     <button
-      {...bind}
       onClick={onClick}
-      style={{
-        display: 'block', width: '100%', textAlign: 'left', border: 0, cursor: 'pointer',
-        fontFamily: 'inherit', color: '#340057', padding: '12px 14px',
-        borderBottom: '1px solid #EBE2FF',
-        background: on ? '#EBE2FF' : (h ? '#F7F3FF' : 'transparent'),
-        borderLeft: on ? '3px solid #7333FF' : '3px solid transparent',
-        transition: 'background .12s ease',
-      }}
+      className={cn(
+        'block w-full text-left border-0 cursor-pointer font-[inherit] text-valle-purple py-[12px] px-[14px]',
+        'border-b border-solid border-b-valle-lilac border-l-[3px] transition-[background] duration-[.12s] ease-[ease]',
+        on ? 'bg-valle-lilac border-l-valle-violet' : 'bg-transparent hover:bg-[#F7F3FF] border-l-transparent',
+      )}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 14, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div className="flex items-baseline gap-[8px]">
+        <span className="text-[14px] font-bold flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {name}
         </span>
-        <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.06em', color: 'rgba(52,0,87,.5)', flexShrink: 0 }}>
+        <span className="font-mono text-[9.5px] tracking-[.06em] text-[rgba(52,0,87,.5)] shrink-0">
           {relTime(conv.lastMessageAt || conv.createdAt)}
         </span>
       </div>
       {conv.visitorEmail && (
-        <div style={{ ...mono, fontSize: 10, color: 'rgba(52,0,87,.5)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className="font-mono text-[10px] text-[rgba(52,0,87,.5)] mt-[2px] overflow-hidden text-ellipsis whitespace-nowrap">
           {conv.visitorEmail}
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
-        <span style={{
-          flex: 1, minWidth: 0, fontSize: 12.5, color: 'rgba(52,0,87,.65)',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+      <div className="flex items-center gap-[8px] mt-[5px]">
+        <span className="flex-1 min-w-0 text-[12.5px] text-[rgba(52,0,87,.65)] overflow-hidden text-ellipsis whitespace-nowrap">
           {conv.lastMessage || conv.subject || 'No messages yet'}
         </span>
         {conv.unreadStaff > 0 && (
-          <span style={{
-            ...mono, fontSize: 10, fontWeight: 700, background: '#FF3358', color: '#FFFFFF',
-            borderRadius: 999, padding: '2px 7px', flexShrink: 0, minWidth: 20, textAlign: 'center',
-          }}>
+          <span className="font-mono text-[10px] font-bold bg-valle-red text-white rounded-[999px] py-[2px] px-[7px] shrink-0 min-w-[20px] text-center">
             {conv.unreadStaff}
           </span>
         )}
@@ -105,32 +94,33 @@ function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
 
   if (m.sender === 'system') {
     return (
-      <div style={{ ...mono, fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase', color: 'rgba(52,0,87,.45)', textAlign: 'center', margin: '10px 0', animation: enter }}>
+      <div className="font-mono text-[10px] tracking-[.1em] uppercase text-[rgba(52,0,87,.45)] text-center my-[10px] mx-0" style={{ animation: enter }}>
         {m.body}
       </div>
     );
   }
 
-  const skin: CSSProperties = mine
-    ? {
-      background: color.purple, color: color.white, borderBottomRightRadius: 6,
-      boxShadow: '0 10px 22px -14px rgba(52,0,87,.85)',
-    }
-    : { background: color.white, color: color.purple, border: '1.5px solid ' + color.border, borderBottomLeftRadius: 6 };
-
   return (
-    <div style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: 9, animation: enter }}>
-      <div style={{ maxWidth: 'min(74%,460px)', minWidth: 0, opacity: m.pending ? 0.65 : 1 }}>
-        <div style={{ ...skin, borderRadius: 15, padding: '10px 13px', fontSize: 14, lineHeight: 1.45, whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'grid', gap: 8 }}>
+    <div className={cn('flex mb-[9px]', mine ? 'justify-end' : 'justify-start')} style={{ animation: enter }}>
+      <div className={cn('max-w-[min(74%,460px)] min-w-0', m.pending ? 'opacity-[0.65]' : 'opacity-100')}>
+        <div
+          className={cn(
+            'rounded-[15px] py-[10px] px-[13px] text-[14px] leading-[1.45] whitespace-pre-wrap grid gap-[8px]',
+            mine
+              ? 'bg-valle-purple text-white rounded-br-[6px] shadow-[0_10px_22px_-14px_rgba(52,0,87,.85)]'
+              : 'bg-white text-valle-purple border-[1.5px] border-solid border-valle-lilac rounded-bl-[6px]',
+          )}
+          style={{ wordBreak: 'break-word' }}
+        >
           {m.attachments?.map((a) => (
             <AttachmentView key={a.id} a={a} mine={mine} url={m.localUrl || attachmentUrl(a, { staff: true })} />
           ))}
           {m.body && <div>{linkify(m.body, mine ? '#FFFC33' : color.violet)}</div>}
         </div>
-        <div style={{
-          ...mono, fontSize: 9, letterSpacing: '.08em', marginTop: 3,
-          color: m.failed ? '#D91E44' : 'rgba(52,0,87,.45)', textAlign: mine ? 'right' : 'left',
-        }}>
+        <div className={cn(
+          'font-mono text-[9px] tracking-[.08em] mt-[3px]',
+          m.failed ? 'text-[#D91E44]' : 'text-[rgba(52,0,87,.45)]', mine ? 'text-right' : 'text-left',
+        )}>
           {m.failed ? 'NOT SENT · RECONNECTING' : (mine ? ((m.staffName ? m.staffName + ' · ' : '') + (m.pending ? 'SENDING…' : clockTime(m.createdAt))) : clockTime(m.createdAt))}
         </div>
       </div>
@@ -139,18 +129,14 @@ function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
 }
 
 function FilterTab({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       onClick={onClick}
-      style={{
-        flex: 1, border: 0, cursor: 'pointer', fontFamily: 'inherit', ...mono, fontSize: 10,
-        fontWeight: 700, letterSpacing: '.12em', padding: '8px 0', borderRadius: radius.pill,
-        background: on ? color.purple : (h ? '#EBE2FF' : 'transparent'),
-        color: on ? color.white : 'rgba(52,0,87,.7)',
-        transition: 'background ' + motion.fast + ', color ' + motion.fast,
-      }}
+      className={cn(
+        'flex-1 border-0 cursor-pointer font-mono text-[10px] font-bold tracking-[.12em] py-[8px] px-0 rounded-[999px]',
+        'transition-[background,color] duration-[.18s] ease-[cubic-bezier(.2,.7,.2,1)]',
+        on ? 'bg-valle-purple text-white' : 'bg-transparent hover:bg-valle-lilac text-[rgba(52,0,87,.7)]',
+      )}
     >
       {children}
     </button>
@@ -386,19 +372,19 @@ export default function ChatConsole({ active, onChanged }: {
   const paneHeight = stacked ? 'calc(100vh - 210px)' : 'clamp(440px,calc(100vh - 280px),760px)';
 
   return (
-    <div style={{
-      ...card, overflow: 'hidden', display: 'flex', height: paneHeight, minHeight: 380,
-      flexDirection: stacked ? 'column' : 'row',
-    }}>
+    <div
+      className={cn('bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px] overflow-hidden flex min-h-[380px]', stacked ? 'flex-col' : 'flex-row')}
+      style={{ height: paneHeight }}
+    >
       {/* ---------------------------------------------------- conversations ---- */}
       {showList && (
-        <div style={{
-          width: stacked ? '100%' : 320, flexShrink: 0, display: 'flex', flexDirection: 'column',
-          borderRight: stacked ? 0 : '1.5px solid #EBE2FF', minWidth: 0,
-        }}>
-          <div style={{ padding: 12, borderBottom: '1.5px solid #EBE2FF' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ ...display, fontSize: 19, flex: 1 }}>Conversations</span>
+        <div className={cn(
+          'shrink-0 flex flex-col min-w-0',
+          stacked ? 'w-full border-r-0' : 'w-[320px] border-r-[1.5px] border-solid border-r-valle-lilac',
+        )}>
+          <div className="p-[12px] border-b-[1.5px] border-solid border-b-valle-lilac">
+            <div className="flex items-center gap-[8px] mb-[10px]">
+              <span className="font-display italic font-black uppercase text-[19px] flex-1">Conversations</span>
               <StatusDot connected={connected} />
             </div>
             <input
@@ -409,13 +395,13 @@ export default function ChatConsole({ active, onChanged }: {
               aria-label="Search conversations"
               style={{ ...inputStyle, marginBottom: 8 }}
             />
-            <div style={{ display: 'flex', gap: 4, background: '#F7F3FF', borderRadius: 999, padding: 3 }}>
+            <div className="flex gap-[4px] bg-[#F7F3FF] rounded-[999px] p-[3px]">
               <FilterTab on={filter === 'open'} onClick={() => setFilter('open')}>OPEN</FilterTab>
               <FilterTab on={filter === 'closed'} onClick={() => setFilter('closed')}>CLOSED</FilterTab>
             </div>
           </div>
 
-          <div className="no-scrollbar" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+          <div className="no-scrollbar flex-1 overflow-y-auto min-h-0">
             {shown.length === 0 ? (
               <EmptyState
                 title={found ? 'No match' : filter === 'open' ? 'All clear' : 'Nothing closed'}
@@ -436,35 +422,28 @@ export default function ChatConsole({ active, onChanged }: {
 
       {/* ----------------------------------------------------------- thread ---- */}
       {showThread && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, background: '#F7F3FF' }}>
+        <div className="flex-1 flex flex-col min-w-0 bg-[#F7F3FF]">
           {!activeId ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="flex-1 flex items-center justify-center">
               <EmptyState title="Pick a conversation" note="Select a visitor on the left to read and reply to their thread." />
             </div>
           ) : (
             <>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px',
-                background: color.white, flexShrink: 0,
-              }}>
+              <div className="flex items-center gap-[10px] py-[11px] px-[14px] bg-white shrink-0">
                 {stacked && (
                   <button
                     onClick={() => { activeIdRef.current = null; setActiveId(null); }}
                     aria-label="Back to conversations"
-                    className="press"
-                    style={{
-                      border: '1.5px solid #EBE2FF', background: 'transparent', color: '#340057',
-                      width: 32, height: 32, borderRadius: 999, cursor: 'pointer', fontSize: 15, flexShrink: 0,
-                    }}
+                    className="press border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple w-[32px] h-[32px] rounded-[999px] cursor-pointer text-[15px] shrink-0"
                   >
                     ←
                   </button>
                 )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[15px] font-bold overflow-hidden text-ellipsis whitespace-nowrap">
                     {current?.visitorName || 'Visitor'}
                   </div>
-                  <div style={{ ...mono, fontSize: 10, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div className="font-mono text-[10px] tracking-[.06em] text-[rgba(52,0,87,.7)] overflow-hidden text-ellipsis whitespace-nowrap">
                     {current?.visitorEmail || 'No email given'}
                   </div>
                 </div>
@@ -474,13 +453,13 @@ export default function ChatConsole({ active, onChanged }: {
               </div>
               <Stripes height={4} style={{ flexShrink: 0 }} />
 
-              <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: 14, minHeight: 0 }}>
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-[14px] min-h-0">
                 {loadingThread ? (
-                  <div style={{ padding: '30px 0', display: 'flex', justifyContent: 'center' }}>
+                  <div className="py-[30px] px-0 flex justify-center">
                     <Spinner color="#7333FF" size={9} />
                   </div>
                 ) : msgs.length === 0 ? (
-                  <div style={{ ...mono, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.45)', textAlign: 'center', paddingTop: 24 }}>
+                  <div className="font-mono text-[10.5px] tracking-[.1em] text-[rgba(52,0,87,.45)] text-center pt-[24px]">
                     NO MESSAGES YET
                   </div>
                 ) : (
@@ -488,14 +467,12 @@ export default function ChatConsole({ active, onChanged }: {
                 )}
 
                 {peerTyping && (
-                  <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 9,
-                    background: color.white, border: '1.5px solid ' + color.border,
-                    borderRadius: 15, borderBottomLeftRadius: 6, padding: '9px 13px',
-                    animation: reduced ? 'vfade .2s ease both' : 'vrise .28s cubic-bezier(.2,.7,.2,1) both',
-                  }}>
+                  <div
+                    className="inline-flex items-center gap-[9px] bg-white border-[1.5px] border-solid border-valle-lilac rounded-[15px] rounded-bl-[6px] py-[9px] px-[13px]"
+                    style={{ animation: reduced ? 'vfade .2s ease both' : 'vrise .28s cubic-bezier(.2,.7,.2,1) both' }}
+                  >
                     <TypingDots color={color.violet} size={6} />
-                    <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>
+                    <span className="font-mono text-[9.5px] tracking-[.12em] text-[rgba(52,0,87,.6)]">
                       {(current?.visitorName || 'VISITOR').toUpperCase()} IS TYPING
                     </span>
                   </div>
@@ -503,23 +480,23 @@ export default function ChatConsole({ active, onChanged }: {
               </div>
 
               {fileErr && (
-                <div role="alert" style={{ ...mono, fontSize: 9.5, letterSpacing: '.08em', color: '#D91E44', background: '#FFE2E7', padding: '7px 14px', flexShrink: 0 }}>
+                <div role="alert" className="font-mono text-[9.5px] tracking-[.08em] text-[#D91E44] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
                   {fileErr.toUpperCase()}
                 </div>
               )}
               <form
                 onSubmit={submit}
-                style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1.5px solid #EBE2FF', background: '#FFFFFF', flexShrink: 0, position: 'relative', alignItems: 'center' }}
+                className="flex gap-[8px] p-[12px] border-t-[1.5px] border-solid border-t-valle-lilac bg-white shrink-0 relative items-center"
               >
                 <ComposerTools onFile={sendFile} onEmoji={(e) => setDraft((d) => d + e)} />
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <button type="button" onClick={() => setQuick((v) => !v)} aria-label="Quick replies" title="Quick replies" style={{ border: '1.5px solid ' + (quick ? '#FF3358' : '#EBE2FF'), background: quick ? '#FFE2E7' : '#FFFFFF', color: '#340057', width: 36, height: 36, borderRadius: 999, cursor: 'pointer', fontSize: 15 }}>⚡</button>
+                <div className="relative shrink-0">
+                  <button type="button" onClick={() => setQuick((v) => !v)} aria-label="Quick replies" title="Quick replies" className={cn('border-[1.5px] border-solid text-valle-purple w-[36px] h-[36px] rounded-[999px] cursor-pointer text-[15px]', quick ? 'border-valle-red bg-[#FFE2E7]' : 'border-valle-lilac bg-white')}>⚡</button>
                   {quick && (
-                    <div role="menu" data-testid="quick-replies" style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: 0, zIndex: 5, width: 'min(360px, calc(100vw - 40px))', background: '#FFFFFF', borderRadius: 14, boxShadow: '0 20px 50px -18px rgba(31,0,51,.6), 0 0 0 1.5px #EBE2FF', padding: 6, maxHeight: 260, overflowY: 'auto' }}>
+                    <div role="menu" data-testid="quick-replies" className="absolute bottom-[calc(100%+8px)] left-0 z-[5] w-[min(360px,calc(100vw-40px))] bg-white rounded-[14px] shadow-[0_20px_50px_-18px_rgba(31,0,51,.6),0_0_0_1.5px_#EBE2FF] p-[6px] max-h-[260px] overflow-y-auto">
                       {QUICK_REPLIES.map((r) => (
-                        <button key={r.label} type="button" role="menuitem" onClick={() => { setDraft((d) => (d ? d + ' ' : '') + r.text); setQuick(false); }} style={{ display: 'block', width: '100%', textAlign: 'left', border: 0, background: 'transparent', cursor: 'pointer', borderRadius: 8, padding: '8px 10px', fontFamily: 'inherit', color: '#340057' }}>
-                          <div style={{ fontWeight: 700, fontSize: 12.5 }}>{r.label}</div>
-                          <div style={{ fontSize: 12, color: 'rgba(52,0,87,.65)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.text}</div>
+                        <button key={r.label} type="button" role="menuitem" onClick={() => { setDraft((d) => (d ? d + ' ' : '') + r.text); setQuick(false); }} className="block w-full text-left border-0 bg-transparent cursor-pointer rounded-[8px] py-[8px] px-[10px] font-[inherit] text-valle-purple">
+                          <div className="font-bold text-[12.5px]">{r.label}</div>
+                          <div className="text-[12px] text-[rgba(52,0,87,.65)] whitespace-nowrap overflow-hidden text-ellipsis">{r.text}</div>
                         </button>
                       ))}
                     </div>

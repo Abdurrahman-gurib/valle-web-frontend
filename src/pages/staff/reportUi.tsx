@@ -1,7 +1,8 @@
 import { Bar, BarChart as RBarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { mur } from '../../lib/format';
-import { card, display, mono } from './ui';
+import { cn } from '../../lib/utils';
+import { cardCls, displayCls, mono, monoCls } from './ui';
 
 /** Shared bits for the Reports, Reconciliation and Forecast tabs. */
 
@@ -11,6 +12,11 @@ export const th: CSSProperties = {
 };
 export const td: CSSProperties = { padding: '10px 12px', fontSize: 13.5, borderTop: '1px solid #EBE2FF', whiteSpace: 'nowrap' };
 export const tdNum: CSSProperties = { ...td, ...mono, textAlign: 'right', fontSize: 12.5 };
+
+/* Class-name twins of th / td / tdNum, for Tailwind markup. */
+export const thCls = 'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left px-[12px] py-[10px] whitespace-nowrap';
+export const tdCls = 'px-[12px] py-[10px] text-[13.5px] border-t border-t-valle-lilac whitespace-nowrap';
+export const tdNumCls = cn(tdCls, 'font-mono text-right text-[12.5px]');
 
 export const todayIsoPark = (): string => new Date().toLocaleDateString('en-CA', { timeZone: 'Indian/Mauritius' });
 export const addDays = (iso: string, n: number): string => {
@@ -31,19 +37,19 @@ export const prevMonth = (iso: string) => {
 
 export function Kpi({ tag, value, sub, accent }: { tag: string; value: string; sub?: string; accent?: string }) {
   return (
-    <div style={{ ...card, padding: '14px 16px', borderLeft: accent ? '4px solid ' + accent : undefined }}>
-      <div style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{tag}</div>
-      <div style={{ ...display, fontSize: 26, letterSpacing: '-0.01em', marginTop: 4 }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: 'rgba(52,0,87,.6)', marginTop: 2 }}>{sub}</div>}
+    <div className={cn(cardCls, 'px-[16px] py-[14px]')} style={{ borderLeft: accent ? '4px solid ' + accent : undefined }}>
+      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>{tag}</div>
+      <div className={cn(displayCls, 'mt-[4px] text-[26px] tracking-[-0.01em]')}>{value}</div>
+      {sub && <div className="mt-[2px] text-[12px] text-[rgba(52,0,87,.6)]">{sub}</div>}
     </div>
   );
 }
 
 export function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <div style={{ ...card, overflow: 'hidden', marginBottom: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 14px', borderBottom: '1px solid #EBE2FF', flexWrap: 'wrap' }}>
-        <div style={{ ...mono, fontSize: 10.5, fontWeight: 700, letterSpacing: '.14em', color: '#340057' }}>{title}</div>
+    <div className={cn(cardCls, 'mb-[14px] overflow-hidden')}>
+      <div className="flex flex-wrap items-center justify-between gap-[10px] border-b border-b-valle-lilac px-[14px] py-[12px]">
+        <div className={cn(monoCls, 'text-[10.5px] font-bold tracking-[.14em] text-valle-purple')}>{title}</div>
         {action}
       </div>
       {children}
@@ -61,11 +67,8 @@ export function ExportLink({ href, label = 'Export CSV' }: { href: string; label
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
       data-testid="export-csv"
-      style={{
-        border: '1.5px solid #340057', background: h ? '#340057' : 'transparent', color: h ? '#FFFFFF' : '#340057',
-        borderRadius: 999, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-      }}
+      className="inline-flex items-center gap-[6px] whitespace-nowrap rounded-[999px] border-[1.5px] border-valle-purple bg-transparent px-[14px] py-[8px] text-[12.5px] font-bold hover:bg-valle-purple"
+      style={{ color: h ? '#FFFFFF' : '#340057', textDecoration: 'none' }}
     >
       ⭳ {label}
     </a>
@@ -78,10 +81,10 @@ function ChartTip({ active, payload }: { active?: boolean; payload?: { payload: 
   const p = active ? payload?.[0]?.payload : undefined;
   if (!p) return null;
   return (
-    <div style={{ background: '#340057', color: '#FFFFFF', borderRadius: 10, padding: '8px 11px', fontSize: 12.5, boxShadow: '0 12px 28px -12px rgba(38,0,64,.6)' }}>
-      <div style={{ ...mono, fontSize: 10, letterSpacing: '.1em', opacity: 0.7 }}>{p.label}</div>
-      <div style={{ fontWeight: 700, marginTop: 2 }}>{mur(p.value)}</div>
-      {p.sub && <div style={{ opacity: 0.75, marginTop: 2 }}>{p.sub}</div>}
+    <div className="rounded-[10px] bg-valle-purple px-[11px] py-[8px] text-[12.5px] text-white shadow-[0_12px_28px_-12px_rgba(38,0,64,.6)]">
+      <div className={cn(monoCls, 'text-[10px] tracking-[.1em] opacity-70')}>{p.label}</div>
+      <div className="mt-[2px] font-bold">{mur(p.value)}</div>
+      {p.sub && <div className="mt-[2px] opacity-75">{p.sub}</div>}
     </div>
   );
 }
@@ -89,12 +92,12 @@ function ChartTip({ active, payload }: { active?: boolean; payload?: { payload: 
 /** Daily revenue bars (Recharts): responsive, with a tooltip per day and a rupee axis. */
 export function BarChart({ points, height = 170 }: { points: Point[]; height?: number }) {
   return (
-    <div style={{ padding: '12px 10px 6px' }} role="img" aria-label="Daily revenue" data-testid="revenue-chart">
+    <div className="px-[10px] pt-[12px] pb-[6px]" role="img" aria-label="Daily revenue" data-testid="revenue-chart">
       <ResponsiveContainer width="100%" height={height}>
         <RBarChart data={points} margin={{ top: 4, right: 6, left: 0, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#EBE2FF" />
-          <XAxis dataKey="label" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={18} tick={{ fontSize: 10, fill: 'rgba(52,0,87,.55)', fontFamily: "'Chivo Mono',monospace" }} />
-          <YAxis width={58} tickLine={false} axisLine={false} tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v))} tick={{ fontSize: 10, fill: 'rgba(52,0,87,.55)', fontFamily: "'Chivo Mono',monospace" }} />
+          <XAxis dataKey="label" tickLine={false} axisLine={false} interval="preserveStartEnd" minTickGap={18} tick={{ fontSize: 10, fill: 'rgba(52,0,87,.7)', fontFamily: "'Chivo Mono',monospace" }} />
+          <YAxis width={58} tickLine={false} axisLine={false} tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v))} tick={{ fontSize: 10, fill: 'rgba(52,0,87,.7)', fontFamily: "'Chivo Mono',monospace" }} />
           <Tooltip cursor={{ fill: 'rgba(115,51,255,.08)' }} content={<ChartTip />} />
           <Bar dataKey="value" fill="#7333FF" radius={[4, 4, 0, 0]} maxBarSize={28} />
         </RBarChart>
@@ -105,19 +108,19 @@ export function BarChart({ points, height = 170 }: { points: Point[]; height?: n
 
 export function BreakdownTable({ rows, label, total }: { rows: { key: string; bookings: number; guests: number; revenue: number }[]; label: (k: string) => string; total: number }) {
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-      <thead><tr style={{ background: '#F7F3FF' }}><th style={th}>Group</th><th style={{ ...th, textAlign: 'right' }}>Bookings</th><th style={{ ...th, textAlign: 'right' }}>Guests</th><th style={{ ...th, textAlign: 'right' }}>Revenue</th><th style={{ ...th, textAlign: 'right' }}>Share</th></tr></thead>
+    <table className="w-full border-collapse">
+      <thead><tr className="bg-[#F7F3FF]"><th className={thCls}>Group</th><th className={cn(thCls, 'text-right')}>Bookings</th><th className={cn(thCls, 'text-right')}>Guests</th><th className={cn(thCls, 'text-right')}>Revenue</th><th className={cn(thCls, 'text-right')}>Share</th></tr></thead>
       <tbody>
         {rows.map((r) => (
           <tr key={r.key}>
-            <td style={td}>{label(r.key)}</td>
-            <td style={tdNum}>{r.bookings}</td>
-            <td style={tdNum}>{r.guests}</td>
-            <td style={tdNum}>{mur(r.revenue)}</td>
-            <td style={tdNum}>{total ? Math.round((r.revenue / total) * 100) : 0}%</td>
+            <td className={tdCls}>{label(r.key)}</td>
+            <td className={tdNumCls}>{r.bookings}</td>
+            <td className={tdNumCls}>{r.guests}</td>
+            <td className={tdNumCls}>{mur(r.revenue)}</td>
+            <td className={tdNumCls}>{total ? Math.round((r.revenue / total) * 100) : 0}%</td>
           </tr>
         ))}
-        {rows.length === 0 && <tr><td style={{ ...td, color: 'rgba(52,0,87,.5)' }} colSpan={5}>Nothing in this period.</td></tr>}
+        {rows.length === 0 && <tr><td className={cn(tdCls, 'text-[rgba(52,0,87,.5)]')} colSpan={5}>Nothing in this period.</td></tr>}
       </tbody>
     </table>
   );

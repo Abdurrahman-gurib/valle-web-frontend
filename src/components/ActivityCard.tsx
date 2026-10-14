@@ -17,9 +17,9 @@ export function ActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: str
   return (
     <motion.div
       onClick={a.open}
-      whileHover={{ y: -6, boxShadow: '0 26px 50px -20px rgba(52,0,87,.4)' }}
+      whileHover={{ y: -6}}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1.5px_#EBE2FF]"
+      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1.5px_#EBE2FF] relative after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-300 after:content-[''] hover:after:opacity-100 after:shadow-[0_24px_46px_-18px_rgba(52,0,87,.4)]"
       data-testid="activity-card"
     >
       <div className="relative h-[195px] bg-valle-lilac">

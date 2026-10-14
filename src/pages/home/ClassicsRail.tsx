@@ -19,7 +19,7 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
     <motion.div
       {...bind}
       onClick={() => a.open()}
-      whileHover={{ y: -6, boxShadow: '0 26px 50px -20px rgba(52,0,87,.4)' }}
+      whileHover={{ y: -6}}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
       style={{
         cursor: 'pointer', flex: '0 0 auto', width: 'min(330px,80vw)', background: '#FFFFFF',
@@ -86,7 +86,7 @@ export function ClassicsRail() {
           {t('Go big.')} <span style={{ color: '#FF3358' }}>{t('Go wild.')}</span>
         </h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.55)', marginRight: 10 }}>{t('03 · FAVOURITES')}</span>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)', marginRight: 10 }}>{t('03 · FAVOURITES')}</span>
           <CarouselArrows prev={c.prev} next={c.next} canPrev={c.canPrev} canNext={c.canNext} labels={{ prev: t('Scroll back'), next: t('Scroll forward') }} />
         </div>
       </div>

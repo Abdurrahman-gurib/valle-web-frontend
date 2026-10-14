@@ -21,7 +21,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
     <motion.a
       href={paths.explore(w.cat)}
       onClick={(e) => { e.preventDefault(); goto.explore(w.cat); }}
-      whileHover={{ y: -6, rotate: -1, boxShadow: '0 26px 50px -18px rgba(52,0,87,.5)' }}
+      whileHover={{ y: -6, rotate: -1}}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       className="relative block h-[400px] cursor-pointer overflow-hidden rounded-[18px] text-inherit"
       style={{ background: w.bg, textDecoration: 'none' }}
@@ -46,7 +46,7 @@ export function QuickPlan() {
     <section className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-[30px] flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
         <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Choose your day')}</h2>
-        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('01 · FOUR WAYS IN')}</span>
+        <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('01 · FOUR WAYS IN')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(235px,1fr))]">
         {WAYS.map((w) => <WayCardEl key={w.cat} w={w} count={ACTS.filter((a) => a.cat === w.cat).length} />)}

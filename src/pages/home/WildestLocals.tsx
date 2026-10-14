@@ -29,7 +29,7 @@ export function WildestLocals() {
         <motion.a
           href={paths.detail('animals')}
           onClick={(e) => { e.preventDefault(); goto.detail('animals'); }}
-          whileHover={{ y: -2, boxShadow: '0 14px 30px rgba(0,0,0,.35)' }}
+          whileHover={{ y: -2}}
           whileTap={{ scale: 0.97 }}
           className="mt-6 inline-block cursor-pointer rounded-full bg-valle-green px-[30px] py-[15px] text-[15px] font-bold text-valle-purple no-underline"
           style={{ textDecoration: 'none' }}

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getLiveOps, setLiveOps, type LiveOpsView } from '../../lib/staffApi';
-import { Btn, Spinner, inputStyle, mono } from './ui';
+import { Btn, Spinner } from './ui';
 import { Panel } from './reportUi';
+
+const INPUT = 'w-full border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[10px] py-[7px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
 
 /**
  * The desk's live board: wait at each activity start, where to meet, a note.
@@ -27,29 +29,29 @@ export default function LiveOpsPanel() {
   const clearWaits = () => setDraft((d) => Object.fromEntries(Object.entries(d).map(([id, x]) => [id, { ...x, waitMin: '' }])));
 
   return (
-    <div data-testid="live-ops-panel" style={{ marginTop: 14 }}>
-      <Panel title="LIVE BOARD · WAITS AND MEETING POINTS ON THE GUEST'S TICKET" action={view?.updatedAt ? <span style={{ ...mono, fontSize: 10, color: 'rgba(52,0,87,.55)' }}>last set {new Date(view.updatedAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}{view.updatedBy ? ' by ' + view.updatedBy : ''}</span> : undefined}>
-        <div style={{ padding: 14, display: 'grid', gap: 10 }}>
-          {err && <div role="alert" style={{ color: '#D91E44', fontSize: 13.5 }}>{err}</div>}
-          {saved && <div role="status" data-testid="live-ops-saved" style={{ color: '#1E9E4A', fontSize: 13.5, fontWeight: 600 }}>{saved}</div>}
+    <div data-testid="live-ops-panel" className="mt-[14px]">
+      <Panel title="LIVE BOARD · WAITS AND MEETING POINTS ON THE GUEST'S TICKET" action={view?.updatedAt ? <span className="font-mono text-[10px] text-[rgba(52,0,87,.7)]">last set {new Date(view.updatedAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}{view.updatedBy ? ' by ' + view.updatedBy : ''}</span> : undefined}>
+        <div className="p-[14px] grid gap-[10px]">
+          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {saved && <div role="status" data-testid="live-ops-saved" className="text-[#1E9E4A] text-[13.5px] font-semibold">{saved}</div>}
           {!view && !err && <Spinner />}
           {view && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 90px minmax(200px, 2fr) minmax(160px, 1.5fr)', gap: 8, alignItems: 'center', ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: '#7333FF' }}>
+              <div className="grid grid-cols-[minmax(140px,1fr)_90px_minmax(200px,2fr)_minmax(160px,1.5fr)] gap-[8px] items-center font-mono text-[10px] font-bold tracking-[.12em] text-valle-violet">
                 <span>ACTIVITY</span><span>WAIT MIN</span><span>MEETING POINT</span><span>NOTE FOR GUESTS</span>
               </div>
               {Object.entries(view.activities).map(([id, a]) => (
-                <div key={id} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 90px minmax(200px, 2fr) minmax(160px, 1.5fr)', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, fontSize: 13.5 }}>{a.name}{a.paused && <span style={{ ...mono, fontSize: 9, background: '#FF3358', color: '#FFFFFF', padding: '2px 6px', borderRadius: 999, marginInlineStart: 6 }}>PAUSED</span>}</span>
-                  <input inputMode="numeric" value={draft[id]?.waitMin ?? ''} placeholder="–" onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], waitMin: e.target.value.replace(/\D/g, '').slice(0, 3) } }))} style={{ ...inputStyle, padding: '7px 10px' }} data-testid={`wait-${id}`} aria-label={`Wait at ${a.name} in minutes`} />
-                  <input value={draft[id]?.meetingPoint ?? ''} maxLength={160} onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], meetingPoint: e.target.value } }))} style={{ ...inputStyle, padding: '7px 10px' }} aria-label={`Meeting point for ${a.name}`} />
-                  <input value={draft[id]?.note ?? ''} maxLength={160} placeholder="e.g. briefing every 20 min" onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], note: e.target.value } }))} style={{ ...inputStyle, padding: '7px 10px' }} aria-label={`Note for ${a.name}`} />
+                <div key={id} className="grid grid-cols-[minmax(140px,1fr)_90px_minmax(200px,2fr)_minmax(160px,1.5fr)] gap-[8px] items-center">
+                  <span className="font-bold text-[13.5px]">{a.name}{a.paused && <span className="font-mono text-[9px] bg-valle-red text-white px-[6px] py-[2px] rounded-[999px] ms-[6px]">PAUSED</span>}</span>
+                  <input inputMode="numeric" value={draft[id]?.waitMin ?? ''} placeholder="–" onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], waitMin: e.target.value.replace(/\D/g, '').slice(0, 3) } }))} className={INPUT} data-testid={`wait-${id}`} aria-label={`Wait at ${a.name} in minutes`} />
+                  <input value={draft[id]?.meetingPoint ?? ''} maxLength={160} onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], meetingPoint: e.target.value } }))} className={INPUT} aria-label={`Meeting point for ${a.name}`} />
+                  <input value={draft[id]?.note ?? ''} maxLength={160} placeholder="e.g. briefing every 20 min" onChange={(e) => setDraft((d) => ({ ...d, [id]: { ...d[id], note: e.target.value } }))} className={INPUT} aria-label={`Note for ${a.name}`} />
                 </div>
               ))}
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+              <div className="flex gap-[10px] items-center flex-wrap mt-[4px]">
                 <Btn variant="dark" onClick={() => { void save(); }} disabled={busy}>{busy ? <Spinner color="#FFFFFF" /> : 'Publish live board'}</Btn>
                 <Btn variant="ghost" onClick={clearWaits} disabled={busy}>Clear all waits</Btn>
-                <span style={{ fontSize: 12.5, color: 'rgba(52,0,87,.6)' }}>Leave the wait blank when nobody is timing it; 0–5 reads as "no queue". Paused comes from the park status above.</span>
+                <span className="text-[12.5px] text-[rgba(52,0,87,.6)]">Leave the wait blank when nobody is timing it; 0–5 reads as "no queue". Paused comes from the park status above.</span>
               </div>
             </>
           )}

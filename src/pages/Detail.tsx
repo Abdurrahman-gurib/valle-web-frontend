@@ -200,7 +200,7 @@ export default function DetailPage() {
             </div>
           )}
 
-          <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
+          <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
           <div style={{ marginTop: 10 }}>
             {act.gtk.map((g) => (
               <div key={g.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px dashed #D9C9F0', fontSize: 15, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
@@ -212,7 +212,7 @@ export default function DetailPage() {
 
           {showReviews && (
             <>
-              <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)', marginTop: 30 }}>{t('WHAT VISITORS SAY')}</div>
+              <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 30 }}>{t('WHAT VISITORS SAY')}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginTop: 12 }}>
                 <div style={{ background: '#FFFFE2', borderRadius: 16, padding: '18px 20px' }}>
                   <div style={{ color: '#FF3358', letterSpacing: 2, fontSize: 13 }}>★★★★★</div>
@@ -322,7 +322,7 @@ export default function DetailPage() {
       {act.id === 'zipline' && <div data-testid="activity-route-map" style={{ marginTop: 'clamp(36px,5vw,56px)' }}><ZiplineMap /></div>}
 
       <nav aria-label={t('Related pages')} style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.55)' }}>{t('SEE ALSO')}</span>
+        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)' }}>{t('SEE ALSO')}</span>
         {([
           [t('All {category} experiences', { category: catName.toLowerCase() }), paths.explore(act.cat)],
           [t('Packages & 2026 prices'), paths.packages()],

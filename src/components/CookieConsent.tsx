@@ -1,3 +1,4 @@
+import { useEscape } from '../hooks/useEscape';
 import { useEffect, useState } from 'react';
 import { getConsent, onConsentOpen, setConsent, type ConsentLevel } from '../lib/consent';
 import { useT } from '../i18n';
@@ -55,6 +56,8 @@ export function CookieConsent() {
     return onConsentOpen(() => { setAnalytics(getConsent()?.level === 'all'); setDetails(true); setOpen(true); });
   }, []);
 
+  // Escape folds the settings back; it never counts as a choice
+  useEscape(open && details, () => setDetails(false));
   if (!open) return null;
 
   const choose = (level: ConsentLevel) => { setConsent(level); setOpen(false); setDetails(false); };

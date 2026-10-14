@@ -5,7 +5,7 @@ import { computeBooking } from '../../store/booking';
 import { selKey } from '../../lib/sel';
 import { NATC, mur } from '../../lib/format';
 import { createStaffBooking, type BookingChannel } from '../../lib/staffApi';
-import { Btn, Field, SectionLabel, Spinner, inputStyle, mono, textareaStyle } from './ui';
+import { Btn, Field, SectionLabel, Spinner, inputStyle, textareaStyle } from './ui';
 import { todayIsoPark } from './reportUi';
 
 const CHANNELS: { key: BookingChannel; label: string }[] = [
@@ -90,21 +90,18 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
 
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(38,0,64,.45)', backdropFilter: 'blur(4px)' }} />
-      <aside role="dialog" aria-label="New booking" data-testid="new-booking" style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 81, width: 'min(560px,100%)', background: '#FFFFFF', color: '#340057',
-        boxShadow: '-24px 0 60px -30px rgba(31,0,51,.6)', display: 'flex', flexDirection: 'column', animation: 'vfade .2s ease both',
-      }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1.5px solid #EBE2FF', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div onClick={onClose} className="fixed inset-0 z-[80] bg-valle-deep/45 backdrop-blur-[4px]" />
+      <aside role="dialog" aria-label="New booking" data-testid="new-booking" className="fixed top-0 right-0 bottom-0 z-[81] flex w-[min(560px,100%)] flex-col bg-white text-valle-purple shadow-[-24px_0_60px_-30px_rgba(31,0,51,.6)] [animation:vfade_.2s_ease_both]">
+        <div className="flex items-center gap-2.5 border-b-[1.5px] border-solid border-valle-lilac px-5 py-4">
           <div>
-            <div style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>NEW BOOKING</div>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>Take a booking for a guest</div>
+            <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">NEW BOOKING</div>
+            <div className="text-[18px] font-extrabold">Take a booking for a guest</div>
           </div>
-          <button onClick={onClose} aria-label="Close" style={{ marginLeft: 'auto', border: '1.5px solid #EBE2FF', background: '#FFFFFF', width: 34, height: 34, borderRadius: 999, cursor: 'pointer', fontSize: 16 }}>×</button>
+          <button onClick={onClose} aria-label="Close" className="ml-auto h-[34px] w-[34px] cursor-pointer rounded-full border-[1.5px] border-solid border-valle-lilac bg-white text-[16px]">×</button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20, display: 'grid', gap: 16 }}>
-          <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+        <div className="grid flex-1 gap-4 overflow-y-auto p-5">
+          <div className="grid grid-cols-[1fr_1fr] gap-2.5">
             <Field id="nb-channel" tag="CAME IN BY">
               <select id="nb-channel" value={channel} onChange={(e) => setChannel(e.target.value as BookingChannel)} style={sel}>
                 {CHANNELS.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
@@ -118,9 +115,9 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
           </div>
 
           <SectionLabel>GUEST</SectionLabel>
-          <div style={{ display: 'grid', gap: 10 }}>
+          <div className="grid gap-2.5">
             <Field id="nb-name" tag="FULL NAME"><input id="nb-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Guest name" style={inputStyle} /></Field>
-            <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+            <div className="grid grid-cols-[1fr_1fr] gap-2.5">
               <Field id="nb-phone" tag="PHONE"><input id="nb-phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+230 …" style={inputStyle} /></Field>
               <Field id="nb-email" tag="E-MAIL"><input id="nb-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="guest@example.com" style={inputStyle} /></Field>
             </div>
@@ -133,7 +130,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
           </div>
 
           <SectionLabel>VISIT</SectionLabel>
-          <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
+          <div className="grid grid-cols-[1fr_1fr] gap-2.5">
             <Field id="nb-date" tag="DATE"><input id="nb-date" type="date" value={visitDate} min={todayIsoPark()} onChange={(e) => setVisitDate(e.target.value)} style={inputStyle} /></Field>
             <Field id="nb-slot" tag="ARRIVAL">
               <select id="nb-slot" value={slot} onChange={(e) => setSlot(e.target.value as SlotKey)} style={sel}>
@@ -145,13 +142,13 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
           </div>
 
           <SectionLabel>EXPERIENCES</SectionLabel>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <select aria-label="Experience" value={pickAct} onChange={(e) => { setPickAct(e.target.value); setPickVar(''); }} style={{ ...sel, flex: '1 1 180px' }}>
+          <div className="flex flex-wrap gap-2">
+            <select aria-label="Experience" value={pickAct} onChange={(e) => { setPickAct(e.target.value); setPickVar(''); }} style={sel} className="flex-[1_1_180px]">
               <option value="">Add an experience…</option>
               {bookable.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
             {options.length > 0 && (
-              <select aria-label="Option" value={pickVar} onChange={(e) => setPickVar(e.target.value)} style={{ ...sel, flex: '1 1 200px' }}>
+              <select aria-label="Option" value={pickVar} onChange={(e) => setPickVar(e.target.value)} style={sel} className="flex-[1_1_200px]">
                 <option value="">Option…</option>
                 {options.map((o) => <option key={o.n} value={o.n}>{o.n} · {mur(o[rate])}</option>)}
               </select>
@@ -159,15 +156,15 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
             <Btn onClick={addLine} disabled={!act || (options.length > 0 && !pickVar)}>Add</Btn>
           </div>
           {lines.length > 0 && (
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div className="grid gap-2">
               {lines.map((l, i) => {
                 const a = catalog.ACTS.find((x) => x.id === l.id);
                 const flat = a?.mode === 'flat';
                 return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1.5px solid #EBE2FF', borderRadius: 12, padding: '8px 12px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 160px', minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: 13.5 }}>{a?.name}</div>
-                      {l.variant && <div style={{ ...mono, fontSize: 10, color: 'rgba(52,0,87,.6)' }}>{l.variant}</div>}
+                  <div key={i} className="flex flex-wrap items-center gap-2.5 rounded-[12px] border-[1.5px] border-solid border-valle-lilac px-3 py-2">
+                    <div className="min-w-0 flex-[1_1_160px]">
+                      <div className="text-[13.5px] font-bold">{a?.name}</div>
+                      {l.variant && <div className="font-mono text-[10px] text-valle-purple/60">{l.variant}</div>}
                     </div>
                     {flat ? (
                       <Counter label={a?.flatLabel || 'units'} value={l.units} onChange={(d) => bump(i, 'units', d)} />
@@ -177,7 +174,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
                         <Counter label="kids" value={l.kids} onChange={(d) => bump(i, 'kids', d)} />
                       </>
                     )}
-                    <button onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="Remove" style={{ border: 0, background: 'transparent', cursor: 'pointer', color: '#D91E44', fontSize: 16 }}>×</button>
+                    <button onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="Remove" className="cursor-pointer border-0 bg-transparent text-[16px] text-[#D91E44]">×</button>
                   </div>
                 );
               })}
@@ -185,7 +182,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
           )}
 
           <SectionLabel>PAYMENT & NOTE</SectionLabel>
-          <div style={{ display: 'grid', gap: 10 }}>
+          <div className="grid gap-2.5">
             <Field id="nb-pay" tag="PAYMENT">
               <select id="nb-pay" value={payMode} onChange={(e) => setPayMode(e.target.value as PayMode)} style={sel}>
                 <option value="gate">Pays on arrival</option><option value="online">Paid online / by transfer</option>
@@ -197,13 +194,13 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
           </div>
         </div>
 
-        <div style={{ padding: '14px 20px', borderTop: '1.5px solid #EBE2FF', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap items-center gap-3 border-t-[1.5px] border-solid border-valle-lilac px-5 py-3.5">
           <div>
-            <div style={{ ...mono, fontSize: 9.5, letterSpacing: '.12em', color: '#7333FF' }}>TOTAL{summary.hasDiscount ? ' · EXPLORER PASS -15%' : ''}</div>
-            <div style={{ fontWeight: 900, fontSize: 24, fontFamily: "'Barlow',sans-serif", fontStyle: 'italic' }} data-testid="new-booking-total">{mur(summary.total)}</div>
+            <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-violet">TOTAL{summary.hasDiscount ? ' · EXPLORER PASS -15%' : ''}</div>
+            <div className="font-display text-[24px] font-black italic" data-testid="new-booking-total">{mur(summary.total)}</div>
           </div>
-          {err && <div role="alert" style={{ color: '#D91E44', fontWeight: 600, fontSize: 13, flex: '1 1 100%' }}>{err}</div>}
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          {err && <div role="alert" className="flex-[1_1_100%] text-[13px] font-semibold text-[#D91E44]">{err}</div>}
+          <div className="ml-auto flex gap-2">
             <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
             <Btn onClick={() => { void submit(); }} disabled={saving}>{saving ? <Spinner size={6} /> : 'Confirm booking'}</Btn>
           </div>
@@ -213,14 +210,15 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
   );
 }
 
+const counterBtn = 'h-[26px] w-[26px] cursor-pointer rounded-full border-[1.5px] border-solid border-valle-lilac bg-white font-bold';
+
 function Counter({ label, value, onChange }: { label: string; value: number; onChange: (d: number) => void }) {
-  const b: CSSProperties = { border: '1.5px solid #EBE2FF', background: '#FFFFFF', width: 26, height: 26, borderRadius: 999, cursor: 'pointer', fontWeight: 700 };
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <span style={{ ...mono, fontSize: 9.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)' }}>{label.toUpperCase()}</span>
-      <button onClick={() => onChange(-1)} aria-label={`Fewer ${label}`} style={b}>−</button>
-      <span style={{ ...mono, fontWeight: 700, minWidth: 16, textAlign: 'center' }}>{value}</span>
-      <button onClick={() => onChange(1)} aria-label={`More ${label}`} style={b}>+</button>
+    <div className="inline-flex items-center gap-1.5">
+      <span className="font-mono text-[9.5px] tracking-[.1em] text-valle-purple/60">{label.toUpperCase()}</span>
+      <button onClick={() => onChange(-1)} aria-label={`Fewer ${label}`} className={counterBtn}>−</button>
+      <span className="min-w-4 text-center font-mono font-bold">{value}</span>
+      <button onClick={() => onChange(1)} aria-label={`More ${label}`} className={counterBtn}>+</button>
     </div>
   );
 }

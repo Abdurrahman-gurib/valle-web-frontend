@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils';
 export function ValleCard({ className, children, ...rest }: ComponentProps<typeof motion.div>) {
   return (
     <motion.div
-      whileHover={{ y: -5, boxShadow: '0 24px 46px -18px rgba(52,0,87,.4)' }}
+      whileHover={{ y: -5}}
       transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className={cn('group flex flex-col overflow-hidden rounded-[18px] bg-white text-valle-purple shadow-[0_0_0_1.5px_#EBE2FF]', className)}
+      className={cn('group flex flex-col overflow-hidden rounded-[18px] bg-white text-valle-purple shadow-[0_0_0_1.5px_#EBE2FF] relative after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-300 after:content-[""] hover:after:opacity-100 after:shadow-[0_24px_46px_-18px_rgba(52,0,87,.4)]', className)}
       {...rest}
     >
       {children}
@@ -32,7 +32,7 @@ export const valleButton = cva(
       variant: {
         dark: 'bg-valle-purple text-white hover:bg-valle-violet',
         outline: 'border-[1.5px] border-valle-purple bg-transparent text-valle-purple hover:bg-valle-purple hover:text-white',
-        primary: 'bg-valle-red text-white shadow-[0_8px_20px_rgba(255,51,88,.4)] hover:bg-[#D91E44]',
+        primary: 'bg-[#D91E44] text-white shadow-[0_8px_20px_rgba(255,51,88,.4)] hover:bg-[#B8163A]',
       },
       size: { md: 'py-[13px] text-sm', sm: 'py-[11px] text-[13.5px]', lg: 'w-auto px-7 py-[15px] text-[15px]' },
     },
@@ -75,7 +75,7 @@ export function BulletList({ items, color, className }: { items: { t: string }[]
 export function PriceCol({ label, value, size = 23 }: { label: string; value: string; size?: number }) {
   return (
     <div className="flex-1">
-      <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-purple/55">{label}</div>
+      <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-purple/70">{label}</div>
       <div className="mt-0.5 font-display font-black italic" style={{ fontSize: size }}>{value}</div>
     </div>
   );

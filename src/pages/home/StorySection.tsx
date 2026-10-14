@@ -43,7 +43,7 @@ export function StorySection() {
           <Img src="/images/home-overview.avif" alt={t('Aerial overview of the Vallé valley')} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div>
-          <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/55">{t('05 · BORN OF NATURE, PURE ADVENTURE')}</span>
+          <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('05 · BORN OF NATURE, PURE ADVENTURE')}</span>
           <h2 className="mt-4 mb-0 origin-bottom-left -rotate-4 font-display text-[clamp(34px,4.4vw,58px)] leading-[0.88] font-black tracking-[-0.01em] uppercase italic">
             {t('Formerly La Vallée des Couleurs.')} <span className="text-valle-violet">{t('Forever Vallé.')}</span>
           </h2>
