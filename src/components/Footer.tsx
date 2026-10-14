@@ -1,9 +1,9 @@
+import { useCatalog } from '../store/CatalogContext';
 import { Link } from 'react-router-dom';
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
 import { LANGS, LANG_META, localizePath, stripLang, useLang, useT } from '../i18n';
-import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { InstallFooterLink } from './InstallApp';
 
@@ -24,16 +24,12 @@ function FooterLangs() {
 }
 
 function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick: () => void; hoverColor: string; href: string }) {
-  const [h, bind] = useHover();
   return (
     <a
-      {...bind}
       href={href}
       onClick={(e) => { e.preventDefault(); onClick(); }}
-      style={{
-        display: 'block', textDecoration: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, padding: '7px 0', opacity: h ? 1 : 0.92,
-        color: h ? hoverColor : '#FFFFFF',
-      }}
+      className="block cursor-pointer py-[7px] text-[15px] font-medium text-white opacity-[.92] transition-[color,opacity] hover:text-[var(--hover)] hover:opacity-100 focus-visible:text-[var(--hover)]"
+      style={{ textDecoration: 'none', ['--hover' as string]: hoverColor }}
     >
       {label}
     </a>
@@ -43,6 +39,7 @@ function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick
 export function Footer() {
   const goto = useGoto();
   const t = useT();
+  const catalog = useCatalog();
   return (
     <footer style={{ marginTop: 'clamp(64px,9vw,120px)' }}>
       <Stripes />
@@ -87,7 +84,7 @@ export function Footer() {
           <div>
             <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 600, letterSpacing: '.16em', opacity: 0.6 }}>{t('EXPLORE')}</div>
             <div style={{ marginTop: 10 }}>
-              <FootLink label={t('All 21 experiences')} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
+              <FootLink label={t('All {n} experiences', { n: catalog.ACTS.length })} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
               <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
               <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
               <FootLink label={t('Kids Park')} href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />

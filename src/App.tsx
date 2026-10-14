@@ -2,8 +2,6 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { MotionConfig } from 'motion/react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import NotFoundPage from './pages/NotFound';
-import TicketPage from './pages/Ticket';
-import WaiverPage from './pages/Waiver';
 import { CatalogProvider } from './store/CatalogContext';
 import { LANGS, LangProvider } from './i18n';
 import { paths } from './lib/nav';
@@ -17,20 +15,37 @@ import { ChatWidget } from './components/ChatWidget';
 import { OptionPicker } from './components/OptionPicker';
 import { CookieConsent } from './components/CookieConsent';
 import { useIsMobile } from './hooks/useIsMobile';
-import HomePage from './pages/Home';
-import ExplorePage from './pages/Explore';
-import DetailPage from './pages/Detail';
-import PackagesPage from './pages/Packages';
-import RestaurantPage from './pages/Restaurant';
-import BookingPage from './pages/Booking';
 import { OfflineStatus } from './components/InstallApp';
 import { ParkStatusBanner } from './components/ParkStatusBanner';
-import VacanciesPage from './pages/Vacancies';
-import StoryPage from './pages/Story';
-import LegalPage from './pages/Legal';
-import GroupsPage from './pages/Groups';
-import VacancyDetailPage from './pages/VacancyDetail';
 import StaffLogin from './pages/staff/Login';
+import { lazyPage, registerPage } from './lib/lazyPage';
+// public pages: one chunk each, loaded for the page being opened (see lib/lazyPage)
+const HomePage = lazyPage(() => import('./pages/Home'));
+registerPage(/^\/$/, HomePage);
+const ExplorePage = lazyPage(() => import('./pages/Explore'));
+registerPage(/^\/explore$/, ExplorePage);
+const DetailPage = lazyPage(() => import('./pages/Detail'));
+registerPage(/^\/activities\//, DetailPage);
+const PackagesPage = lazyPage(() => import('./pages/Packages'));
+registerPage(/^\/packages(\/|$)/, PackagesPage);
+const RestaurantPage = lazyPage(() => import('./pages/Restaurant'));
+registerPage(/^\/dine\//, RestaurantPage);
+const BookingPage = lazyPage(() => import('./pages/Booking'));
+registerPage(/^\/booking$/, BookingPage);
+const VacanciesPage = lazyPage(() => import('./pages/Vacancies'));
+registerPage(/^\/vacancies$/, VacanciesPage);
+const StoryPage = lazyPage(() => import('./pages/Story'));
+registerPage(/^\/story$/, StoryPage);
+const LegalPage = lazyPage(() => import('./pages/Legal'));
+registerPage(/^\/(privacy|terms)$/, LegalPage);
+const GroupsPage = lazyPage(() => import('./pages/Groups'));
+registerPage(/^\/groups$/, GroupsPage);
+const VacancyDetailPage = lazyPage(() => import('./pages/VacancyDetail'));
+registerPage(/^\/vacancies\//, VacancyDetailPage);
+const TicketPage = lazyPage(() => import('./pages/Ticket'));
+registerPage(/^\/ticket\//, TicketPage);
+const WaiverPage = lazyPage(() => import('./pages/Waiver'));
+registerPage(/^\/waiver\//, WaiverPage);
 // the back office (charts, QR scanner, chat console) loads only when staff open it
 const StaffDashboard = lazy(() => import('./pages/staff/Dashboard'));
 const HrDashboard = lazy(() => import('./pages/hr/Dashboard'));
@@ -76,7 +91,8 @@ function PublicShell() {
     }}>
       <Header />
       <ParkStatusBanner />
-      <Outlet />
+      {/* a page not fetched yet (rare: the rest preload when the browser is idle) */}
+      <Suspense fallback={<div style={{ minHeight: '100vh' }} />}><Outlet /></Suspense>
       <Footer />
       <MyDayDrawer />
       <RateGate />

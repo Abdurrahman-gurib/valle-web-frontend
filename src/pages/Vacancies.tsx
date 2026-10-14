@@ -1,3 +1,4 @@
+import { useCatalog } from '../store/CatalogContext';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useCallback, useEffect, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -140,6 +141,7 @@ function PinkLink({ label, href }: { label: string; href: string }) {
 
 export default function VacanciesPage() {
   const t = useT();
+  const catalog = useCatalog();
   useSeo({ title: t('Careers · Work in the valley · VALLÉ Advenature™ Park'), description: t('Open roles at Vallé Advenature Park in Chamouny, Mauritius: guides, hospitality, mechanics and more. Apply online.'), canonicalPath: '/vacancies', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Careers', path: '/vacancies' }])] });
   const ref = useReveal<HTMLElement>();
   const navigate = useNavigate();
@@ -196,7 +198,7 @@ export default function VacanciesPage() {
               {t('Guides, riders, cooks, gardeners, hosts: every day at Vallé Advenature™ Park is run by people who love this valley. If you want an office with ziplines over it, start here.')}
             </p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 26 }}>
-              {[t('21 EXPERIENCES'), t('OPEN DAILY · 09:00–17:30'), t('ONE TEAM')].map((chip) => (
+              {[t('{n} EXPERIENCES', { n: catalog.ACTS.length }), t('OPEN DAILY · 09:00–17:30'), t('ONE TEAM')].map((chip) => (
                 <span key={chip} style={{
                   ...mono, fontWeight: 400, letterSpacing: '.12em', color: 'rgba(255,255,255,.85)',
                   background: 'rgba(255,255,255,.1)', borderRadius: radius.sm, padding: '9px 12px',

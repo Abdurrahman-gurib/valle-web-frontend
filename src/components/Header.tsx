@@ -448,7 +448,7 @@ export function Header() {
             ))}
           </div>
           <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.1s' }}>{t('Home')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.14s' }}>{t('All 21 experiences')}<span style={{ color: '#FFFC33' }}><Fwd /></span></a>
+          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.14s' }}>{t('All {n} experiences', { n: catalog.ACTS.length })}<span style={{ color: '#FFFC33' }}><Fwd /></span></a>
           <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.16s' }}>{t('Packages & team building')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
           <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>
             <span style={{ display: 'flex', gap: 7 }}>{t('Prices shown:')}<span style={{ color: 'rgba(255,255,255,.72)' }}>{t(app.rateWord)}</span></span>

@@ -199,13 +199,14 @@ test.describe('home', () => {
 test.describe('explore', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
-  test('lists all 21 experiences and filters by search', async ({ page }) => {
+  test('lists every experience and filters by search', async ({ page }) => {
     await page.goto('/explore');
-    await expect(page.getByText('21 OF 21')).toBeVisible();
+    const total = ((await (await page.request.get('/api/catalog')).json()) as { ACTS: unknown[] }).ACTS.length;
+    await expect(page.getByText(`${total} OF ${total}`)).toBeVisible();
     await page.goto('/explore?q=zip'); // the header search lands here; the page itself has no search box
-    await expect(page.getByText(/\d+ OF 21/)).toBeVisible();
-    const count = await page.getByText(/^\d+ OF 21$/).textContent();
-    expect(Number(count!.split(' ')[0])).toBeLessThan(21);
+    const shown = page.getByText(new RegExp('^[0-9]+ OF ' + total + '$'));
+    await expect(shown).toBeVisible();
+    expect(Number((await shown.textContent())!.split(' ')[0])).toBeLessThan(total);
     await expectNoHorizontalScroll(page);
   });
 
@@ -234,7 +235,7 @@ test.describe('experience detail', () => {
     await page.goto('/experience/does-not-exist');
     await expect(page).toHaveURL(/\/activities\/does-not-exist$/);
     await expect(page.getByRole('heading', { name: /Off the/i })).toBeVisible();
-    await page.getByRole('main').getByRole('link', { name: /All 21 experiences/i }).click();
+    await page.getByRole('main').getByRole('link', { name: /All \d+ experiences/i }).click();
     await expect(page).toHaveURL(/\/explore$/);
   });
 });

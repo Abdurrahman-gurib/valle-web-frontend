@@ -1,3 +1,4 @@
+import { useCatalog } from '../../store/CatalogContext';
 import { useEffect, useRef, useState } from 'react';
 import { animate, useInView, useReducedMotion } from 'motion/react';
 import { Fwd } from '@/components/ui/arrows';
@@ -33,6 +34,7 @@ function Stat({ value, label, color, rule }: { value: React.ReactNode; label: st
 /** "Our story": formerly La Vallée des Couleurs narrative + stats. */
 export function StorySection() {
   const t = useT();
+  const catalog = useCatalog();
   const goto = useGoto();
   return (
     <section id="story" data-screen-label="Our story" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
@@ -57,7 +59,7 @@ export function StorySection() {
           <div className="mt-7 flex flex-wrap gap-[30px]">
             <Stat value={<CountUp to={23} />} label={t('COLOURS OF EARTH')} color="#FF3358" rule="#FF3358" />
             <Stat value={<CountUp to={5.5} decimals={1} suffix=" KM" />} label={t('LONGEST ZIPLINE')} color="#7333FF" rule="#33FF74" />
-            <Stat value={<CountUp to={21} />} label={t('EXPERIENCES')} color="#340057" rule="#FFFC33" />
+            <Stat value={<CountUp to={catalog.ACTS.length} />} label={t('EXPERIENCES')} color="#340057" rule="#FFFC33" />
           </div>
         </div>
       </div>
