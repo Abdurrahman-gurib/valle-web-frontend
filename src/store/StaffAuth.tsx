@@ -2,14 +2,20 @@ import {
   createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode,
 } from 'react';
 import type { StaffUser } from '../types';
-import { setUnauthorizedHandler, staffLogin, staffLogout, staffMe } from '../lib/staffApi';
+import {
+  isTwoFactorPending, setUnauthorizedHandler, staffLogin, staffLoginTwoFactor, staffLogout, staffMe,
+  type TwoFactorPending,
+} from '../lib/staffApi';
 import { setHrUnauthorizedHandler } from '../lib/hrApi';
 
 export interface StaffAuthState {
   user: StaffUser | null;
   /** true until the first GET /api/staff/auth/me settles */
   loading: boolean;
-  login: (email: string, password: string) => Promise<StaffUser>;
+  /** Resolves with the user, or with a pending step when the account uses two-step login. */
+  login: (email: string, password: string) => Promise<StaffUser | TwoFactorPending>;
+  /** Second step: the 6-digit code (or a recovery code) for a pending login. */
+  completeTwoFactor: (pendingToken: string, code: string) => Promise<StaffUser>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -18,6 +24,7 @@ const Ctx = createContext<StaffAuthState>({
   user: null,
   loading: true,
   login: async () => { throw new Error('StaffAuthProvider is missing'); },
+  completeTwoFactor: async () => { throw new Error('StaffAuthProvider is missing'); },
   logout: async () => { /* no-op */ },
   refresh: async () => { /* no-op */ },
 });
@@ -50,6 +57,14 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const next = await staffLogin(email, password);
+    if (isTwoFactorPending(next)) return next;
+    setUser(next);
+    setLoading(false);
+    return next;
+  }, []);
+
+  const completeTwoFactor = useCallback(async (pendingToken: string, code: string) => {
+    const next = await staffLoginTwoFactor(pendingToken, code);
     setUser(next);
     setLoading(false);
     return next;
@@ -61,8 +76,8 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<StaffAuthState>(
-    () => ({ user, loading, login, logout, refresh }),
-    [user, loading, login, logout, refresh],
+    () => ({ user, loading, login, completeTwoFactor, logout, refresh }),
+    [user, loading, login, completeTwoFactor, logout, refresh],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

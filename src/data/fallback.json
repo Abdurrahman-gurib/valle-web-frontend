@@ -2056,6 +2056,16 @@
    "cta": "Add the buggy to my day →",
    "shots": [
     {
+     "src": "/images/day/buggy-01.webp",
+     "tag": "THE BUGGY",
+     "cap": "Room for the whole family."
+    },
+    {
+     "src": "/images/day/buggy-02.webp",
+     "tag": "ROOF ON",
+     "cap": "Shade overhead, mud underneath."
+    },
+    {
      "src": "/images/buggy-river.webp",
      "tag": "INTO THE RIVER",
      "cap": "Wheels in the water, everyone screaming, nobody soaked."
@@ -2146,6 +2156,31 @@
      "cap": "Straight through the water."
     },
     {
+     "src": "/images/day/quad-01.webp",
+     "tag": "TWO UP",
+     "cap": "Driver and passenger on the trail."
+    },
+    {
+     "src": "/images/day/quad-02.webp",
+     "tag": "ON THE LOOP",
+     "cap": "The orange quad on the forest loop."
+    },
+    {
+     "src": "/images/day/quad-03.webp",
+     "tag": "DUST TRACK",
+     "cap": "Out of the trees and onto the dirt."
+    },
+    {
+     "src": "/images/day/quad-04.webp",
+     "tag": "THUMBS UP",
+     "cap": "Halfway round and loving it."
+    },
+    {
+     "src": "/images/day/quad-05.webp",
+     "tag": "TRAIL READY",
+     "cap": "Helmets on, engines running."
+    },
+    {
      "src": "/images/quad-earth.webp",
      "tag": "THE OCEAN RIDGE",
      "cap": "Past the Coloured Earth with the southern sea in the distance."
@@ -2229,6 +2264,31 @@
      "src": "/images/shoot/zipline-08.webp",
      "tag": "THE LONG LINE",
      "cap": "A rider crossing the valley."
+    },
+    {
+     "src": "/images/day/zipline-01.webp",
+     "tag": "SUPERMAN",
+     "cap": "Head first over the valley."
+    },
+    {
+     "src": "/images/day/zipline-02.webp",
+     "tag": "FULL STRETCH",
+     "cap": "Flying flat out above the trees."
+    },
+    {
+     "src": "/images/day/zipline-03.webp",
+     "tag": "WITH THE GUIDE",
+     "cap": "A guide rides alongside the first line."
+    },
+    {
+     "src": "/images/day/zipline-04.webp",
+     "tag": "THE GLIDE",
+     "cap": "Arms forward, nothing below."
+    },
+    {
+     "src": "/images/day/zipline-05.webp",
+     "tag": "TANDEM",
+     "cap": "Two riders, one cable."
     },
     {
      "src": "/images/zipline-waterfall.webp",
@@ -2319,6 +2379,31 @@
      "src": "/images/shoot/nepalese-06.webp",
      "tag": "MID-BRIDGE",
      "cap": "The view that makes it worth it."
+    },
+    {
+     "src": "/images/day/nepalese-01.webp",
+     "tag": "THE SPAN",
+     "cap": "The full length of the bridge over the forest."
+    },
+    {
+     "src": "/images/day/nepalese-02.webp",
+     "tag": "BALANCE",
+     "cap": "Hands on the ropes, one step at a time."
+    },
+    {
+     "src": "/images/day/nepalese-03.webp",
+     "tag": "TOGETHER",
+     "cap": "Crossing as a pair."
+    },
+    {
+     "src": "/images/day/nepalese-04.webp",
+     "tag": "ARMS OUT",
+     "cap": "Halfway, and it feels like flying."
+    },
+    {
+     "src": "/images/day/nepalese-05.webp",
+     "tag": "THE LONG WALK",
+     "cap": "The bridge stretches into the green."
     },
     {
      "src": "/images/bridge-span.webp",
@@ -2469,6 +2554,26 @@
      "src": "/images/shoot/luge-06.webp",
      "tag": "FRIENDS",
      "cap": "Side by side on the track."
+    },
+    {
+     "src": "/images/day/luge-01.webp",
+     "tag": "GRIN",
+     "cap": "All smiles into the bend."
+    },
+    {
+     "src": "/images/day/luge-02.webp",
+     "tag": "LOW AND FAST",
+     "cap": "Low in the kart, fast through the turn."
+    },
+    {
+     "src": "/images/day/luge-03.webp",
+     "tag": "THE APEX",
+     "cap": "Clipping the corner."
+    },
+    {
+     "src": "/images/day/luge-04.webp",
+     "tag": "DUO",
+     "cap": "Two to a kart on the long run."
     },
     {
      "src": "/images/luge-duo-curve.webp",

@@ -1,18 +1,18 @@
 import { abs, breadcrumbs, useSeo } from '../lib/seo';
 import {
   useCallback, useEffect, useMemo, useState,
-  type CSSProperties, type FormEvent, type ReactNode,
+  type FormEvent, type ReactNode,
 } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
-import { useHover } from '../hooks/useHover';
+import { cn } from '../lib/utils';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { Img } from '../components/Img';
 import { Stripes } from '../components/Stripes';
 import { applyToVacancy, getVacancy, isHttpError } from '../lib/careersApi';
 import { fullDateFromIso } from '../lib/format';
 import type { ApplicationRequest, EmploymentType, VacancyDetail } from '../types';
-import { color, display, font, mono, motion, radius, shadow } from '../styles/theme';
+import { color } from '../styles/theme';
 import { paths } from '../lib/nav';
 import { useT, _t } from '../i18n';
 
@@ -101,27 +101,24 @@ function validate(f: FormState): Errors {
 
 // ---------------------------------------------------------------- small parts
 
-const labelStyle: CSSProperties = { ...mono, color: 'rgba(52,0,87,.7)', display: 'block', marginBottom: 7 };
+/** Mono label: Chivo Mono 10.5px bold, letter-spaced. */
+const MONO = 'font-mono text-[10.5px] font-bold tracking-[.14em]';
+/** Display heading: Barlow italic 900, uppercase, tight. */
+const DISPLAY = 'font-display italic font-black tracking-[-0.01em] leading-[0.9] uppercase';
 
-function fieldStyle(invalid: boolean, focused: boolean): CSSProperties {
-  return {
-    width: '100%',
-    border: `1.5px solid ${invalid ? color.pinkDark : focused ? color.violet : color.border}`,
-    background: invalid ? color.errFill : color.white,
-    borderRadius: radius.md,
-    padding: '12px 15px',
-    fontFamily: font.body,
-    fontSize: 15,
-    color: color.purple,
-    outline: 'none',
-    transition: `border-color ${motion.fast}, background ${motion.fast}`,
-  };
+const labelCls = cn(MONO, 'text-[rgba(52,0,87,.7)] block mb-[7px]');
+
+function fieldCls(invalid: boolean): string {
+  return cn(
+    'w-full border-[1.5px] border-solid rounded-[12px] py-3 px-[15px] font-sans text-[15px] text-valle-purple outline-none [transition:border-color_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
+    invalid ? 'border-[#D91E44] bg-[#FFE2E7]' : 'border-valle-lilac focus:border-valle-violet bg-white',
+  );
 }
 
 function ErrorNote({ id, text }: { id: string; text: string }) {
   const t = useT();
   return (
-    <div id={id} role="alert" style={{ ...mono, fontWeight: 400, color: color.pinkDark, marginTop: 6, letterSpacing: '.06em' }}>
+    <div id={id} role="alert" className="font-mono text-[10.5px] font-normal text-[#D91E44] mt-[6px] tracking-[.06em]">
       {t(text)}
     </div>
   );
@@ -145,13 +142,12 @@ interface FieldProps {
 
 function TextField(p: FieldProps) {
   const t = useT();
-  const [focused, setFocused] = useState(false);
   const invalid = Boolean(p.error);
   return (
     <div>
-      <label htmlFor={p.id} style={labelStyle}>
+      <label htmlFor={p.id} className={labelCls}>
         {p.label.toUpperCase()}
-        {!p.required && <span style={{ opacity: 0.55 }}> · {t('OPTIONAL')}</span>}
+        {!p.required && <span className="opacity-55"> · {t('OPTIONAL')}</span>}
       </label>
       <input
         id={p.id}
@@ -166,14 +162,13 @@ function TextField(p: FieldProps) {
         aria-required={p.required || undefined}
         aria-describedby={invalid ? p.id + '-err' : p.hint ? p.id + '-hint' : undefined}
         onChange={(e) => p.onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => { setFocused(false); p.onBlur(); }}
-        style={fieldStyle(invalid, focused)}
+        onBlur={() => { p.onBlur(); }}
+        className={fieldCls(invalid)}
       />
       {invalid
         ? <ErrorNote id={p.id + '-err'} text={p.error || ''} />
         : p.hint
-          ? <div id={p.id + '-hint'} style={{ fontSize: 12.5, color: 'rgba(52,0,87,.55)', marginTop: 6 }}>{p.hint}</div>
+          ? <div id={p.id + '-hint'} className="text-[12.5px] text-[rgba(52,0,87,.55)] mt-[6px]">{p.hint}</div>
           : null}
     </div>
   );
@@ -192,13 +187,12 @@ interface AreaProps {
 
 function TextArea(p: AreaProps) {
   const t = useT();
-  const [focused, setFocused] = useState(false);
   const invalid = Boolean(p.error);
   const left = p.max - p.value.length;
   return (
     <div>
-      <label htmlFor={p.id} style={labelStyle}>
-        {p.label.toUpperCase()}<span style={{ opacity: 0.55 }}> · {t('OPTIONAL')}</span>
+      <label htmlFor={p.id} className={labelCls}>
+        {p.label.toUpperCase()}<span className="opacity-55"> · {t('OPTIONAL')}</span>
       </label>
       <textarea
         id={p.id}
@@ -209,14 +203,13 @@ function TextArea(p: AreaProps) {
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? p.id + '-err' : p.id + '-count'}
         onChange={(e) => p.onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => { setFocused(false); p.onBlur(); }}
-        style={{ ...fieldStyle(invalid, focused), resize: 'vertical', lineHeight: 1.55, minHeight: 120 }}
+        onBlur={() => { p.onBlur(); }}
+        className={cn(fieldCls(invalid), 'resize-y leading-[1.55] min-h-[120px]')}
       />
       {invalid
         ? <ErrorNote id={p.id + '-err'} text={p.error || ''} />
         : (
-          <div id={p.id + '-count'} style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.5)', marginTop: 6, textAlign: 'right' }}>
+          <div id={p.id + '-count'} className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.5)] mt-[6px] text-right">
             {t('{n} CHARACTERS LEFT', { n: left })}
           </div>
         )}
@@ -226,7 +219,7 @@ function TextArea(p: AreaProps) {
 
 function Pill({ children, bg, fg }: { children: ReactNode; bg: string; fg: string }) {
   return (
-    <span style={{ ...mono, background: bg, color: fg, borderRadius: radius.pill, padding: '7px 12px', lineHeight: 1 }}>
+    <span className={cn(MONO, 'rounded-[999px] py-[7px] px-3 leading-none')} style={{ background: bg, color: fg }}>
       {children}
     </span>
   );
@@ -234,33 +227,22 @@ function Pill({ children, bg, fg }: { children: ReactNode; bg: string; fg: strin
 
 function SubmitButton({ busy, disabled, onClick }: { busy: boolean; disabled: boolean; onClick?: () => void }) {
   const t = useT();
-  const [h, bind] = useHover();
   const off = busy || disabled;
   return (
     <button
-      {...bind}
       type="submit"
       onClick={onClick}
       disabled={off}
       aria-busy={busy || undefined}
-      className={off ? undefined : 'press'}
-      style={{
-        width: '100%', border: 0, cursor: off ? 'not-allowed' : 'pointer',
-        background: off ? '#C9B3E8' : h ? color.pinkDark : color.pink,
-        fontFamily: font.display, fontStyle: 'italic', fontWeight: 900, fontSize: 17,
-        letterSpacing: '.03em', textTransform: 'uppercase', color: color.white,
-        padding: '15px 0', borderRadius: radius.pill,
-        boxShadow: off ? 'none' : shadow.pink,
-        transform: !off && h ? 'translateY(-1px)' : 'none',
-        transition: `transform ${motion.fast}, background ${motion.fast}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-      }}
+      className={cn(
+        'w-full border-0 font-display italic font-black text-[17px] tracking-[.03em] uppercase text-white py-[15px] px-0 rounded-[999px] flex items-center justify-center gap-[10px] [transition:transform_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
+        off
+          ? 'cursor-not-allowed bg-[#C9B3E8] shadow-none'
+          : 'press cursor-pointer bg-valle-red hover:bg-[#D91E44] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)] hover:[transform:translateY(-1px)]',
+      )}
     >
       {busy && (
-        <span aria-hidden style={{
-          width: 9, height: 9, borderRadius: 999, background: color.white,
-          display: 'inline-block', animation: 'vbeat .9s ease-in-out infinite',
-        }} />
+        <span aria-hidden className="w-[9px] h-[9px] rounded-[999px] bg-white inline-block [animation:vbeat_.9s_ease-in-out_infinite]" />
       )}
       {busy ? t('Sending…') : t('Send my application')}
     </button>
@@ -268,17 +250,10 @@ function SubmitButton({ busy, disabled, onClick }: { busy: boolean; disabled: bo
 }
 
 function GhostButton({ label, onClick }: { label: string; onClick: () => void }) {
-  const [h, bind] = useHover();
   return (
     <button
-      {...bind}
       onClick={onClick}
-      className="press"
-      style={{
-        border: `2px solid ${color.purple}`, background: h ? color.purple : 'transparent', cursor: 'pointer',
-        fontFamily: font.body, fontSize: 14, fontWeight: 700, color: h ? color.white : color.purple,
-        padding: '12px 24px', borderRadius: radius.pill, transition: `background ${motion.fast}, color ${motion.fast}`,
-      }}
+      className="press border-2 border-solid border-valle-purple bg-transparent hover:bg-valle-purple cursor-pointer font-sans text-[14px] font-bold text-valle-purple hover:text-white py-3 px-6 rounded-[999px] [transition:background_.18s_cubic-bezier(.2,.7,.2,1),color_.18s_cubic-bezier(.2,.7,.2,1)]"
     >
       {label}
     </button>
@@ -393,21 +368,18 @@ export default function VacancyDetailPage() {
   // ---- states that replace the whole page ----
 
   const shell = (children: ReactNode) => (
-    <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+    <main ref={ref} className="max-w-[1320px] mx-auto pt-[104px] px-[clamp(16px,3.5vw,40px)] pb-0">
       {children}
-      <div style={{ height: 'clamp(48px,6vw,80px)' }} />
+      <div className="h-[clamp(48px,6vw,80px)]" />
     </main>
   );
 
   if (state === 'loading') {
     return shell(
-      <div style={{ padding: 'clamp(40px,8vw,120px) 0', textAlign: 'center' }}>
-        <div style={{ ...mono, color: color.violet }}>{t('LOADING THE ROLE…')}</div>
-        <div style={{
-          margin: '22px auto 0', width: 'min(520px,100%)', height: 10, borderRadius: radius.pill,
-          background: color.tint, overflow: 'hidden',
-        }}>
-          <div style={{ width: '40%', height: '100%', background: color.violet, animation: 'vfade 1s ease-in-out infinite alternate' }} />
+      <div className="py-[clamp(40px,8vw,120px)] px-0 text-center">
+        <div className={cn(MONO, 'text-valle-violet')}>{t('LOADING THE ROLE…')}</div>
+        <div className="mt-[22px] mx-auto mb-0 w-[min(520px,100%)] h-[10px] rounded-[999px] bg-[#F7F3FF] overflow-hidden">
+          <div className="w-[40%] h-full bg-valle-violet [animation:vfade_1s_ease-in-out_infinite_alternate]" />
         </div>
       </div>,
     );
@@ -416,20 +388,17 @@ export default function VacancyDetailPage() {
   if (state === 'missing' || state === 'error') {
     const missing = state === 'missing';
     return shell(
-      <div style={{
-        background: missing ? color.tint : color.errFill, border: `1.5px solid ${color.border}`,
-        borderRadius: radius.xl, padding: 'clamp(28px,4vw,56px)', textAlign: 'center',
-      }}>
-        <div style={{ ...mono, color: color.violet }}>{missing ? t('ROLE CLOSED') : t('SOMETHING WENT WRONG')}</div>
-        <h1 style={{ ...display, fontSize: 'clamp(28px,4vw,48px)', color: color.purple, margin: '12px 0 0', transform: 'rotate(-2deg)' }}>
+      <div className={cn('border-[1.5px] border-solid border-valle-lilac rounded-[24px] p-[clamp(28px,4vw,56px)] text-center', missing ? 'bg-[#F7F3FF]' : 'bg-[#FFE2E7]')}>
+        <div className={cn(MONO, 'text-valle-violet')}>{missing ? t('ROLE CLOSED') : t('SOMETHING WENT WRONG')}</div>
+        <h1 className={cn(DISPLAY, 'text-[clamp(28px,4vw,48px)] text-valle-purple mt-3 mb-0 mx-0 [transform:rotate(-2deg)]')}>
           {missing ? t('This role is no longer open') : t('We could not load this role')}
         </h1>
-        <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'rgba(52,0,87,.72)', margin: '16px auto 0', maxWidth: 520 }}>
+        <p className="text-[15.5px] leading-[1.6] text-[rgba(52,0,87,.72)] mt-4 mx-auto mb-0 max-w-[520px]">
           {missing
             ? t('It may have been filled or taken down. Have a look at what is open today, or send us an open application.')
             : t('Please try again in a moment. If it keeps happening, write to us at {email}.', { email: CAREERS_EMAIL })}
         </p>
-        <div style={{ marginTop: 22, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="mt-[22px] flex gap-3 justify-center flex-wrap">
           <GhostButton label={t('← All open roles')} onClick={() => navigate(paths.vacancies())} />
         </div>
       </div>,
@@ -448,32 +417,24 @@ export default function VacancyDetailPage() {
   const about = paragraphs(vacancy.description);
   const hasErrors = Object.keys(errors).length > 0;
 
-  const sectionTitle: CSSProperties = {
-    ...display, fontSize: 'clamp(22px,2.6vw,30px)', color: color.purple, margin: 0,
-  };
+  const sectionTitle = cn(DISPLAY, 'text-[clamp(22px,2.6vw,30px)] text-valle-purple m-0');
 
   return (
-    <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+    <main ref={ref} className="max-w-[1320px] mx-auto pt-[104px] px-[clamp(16px,3.5vw,40px)] pb-0">
       <button
         onClick={() => navigate(paths.vacancies())}
-        style={{
-          border: 0, background: 'transparent', cursor: 'pointer', padding: 0,
-          ...mono, color: color.violet, marginBottom: 18,
-        }}
+        className={cn('border-0 bg-transparent cursor-pointer p-0', MONO, 'text-valle-violet mb-[18px]')}
       >
         {t('← ALL OPEN ROLES')}
       </button>
 
       {/* ---- role header ---- */}
       <header data-reveal>
-        <div style={{ ...mono, color: color.pink }}>{(vacancy.department || t('VALLÉ PARK')).toUpperCase()}</div>
-        <h1 style={{
-          ...display, fontSize: 'clamp(38px,6vw,82px)', color: color.purple, margin: '12px 0 0',
-          transform: 'rotate(-3deg)', transformOrigin: 'left bottom', maxWidth: 900,
-        }}>
+        <div className={cn(MONO, 'text-valle-red')}>{(vacancy.department || t('VALLÉ PARK')).toUpperCase()}</div>
+        <h1 className={cn(DISPLAY, 'text-[clamp(38px,6vw,82px)] text-valle-purple mt-3 mb-0 mx-0 [transform:rotate(-3deg)] origin-bottom-left max-w-[900px]')}>
           {vacancy.title}
         </h1>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 22 }}>
+        <div className="flex gap-2 flex-wrap mt-[22px]">
           <Pill bg={emp.bg} fg={emp.fg}>{empLabel}</Pill>
           <Pill bg={color.tint} fg={color.purple}>{(vacancy.location || t('CHAMOUNY, MAURITIUS')).toUpperCase()}</Pill>
           {vacancy.salaryRange && <Pill bg={color.purple} fg={color.yellow}>{vacancy.salaryRange.toUpperCase()}</Pill>}
@@ -485,60 +446,42 @@ export default function VacancyDetailPage() {
               const el = document.getElementById('apply');
               if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 84), behavior: 'smooth' });
             }}
-            className="press"
-            style={{
-              marginTop: 18, width: '100%', border: 0, background: color.pink, cursor: 'pointer',
-              fontFamily: font.display, fontStyle: 'italic', fontWeight: 900, fontSize: 16,
-              letterSpacing: '.03em', textTransform: 'uppercase', color: color.white,
-              padding: '14px 0', borderRadius: radius.pill, boxShadow: shadow.pink,
-            }}
+            className="press mt-[18px] w-full border-0 bg-valle-red cursor-pointer font-display italic font-black text-[16px] tracking-[.03em] uppercase text-white py-[14px] px-0 rounded-[999px] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]"
           >
             {t('Apply for this role ↓')}
           </button>
         )}
-        <Stripes height={8} style={{ borderRadius: radius.pill, margin: '26px 0 0' }} />
+        <Stripes height={8} style={{ borderRadius: 999, margin: '26px 0 0' }} />
       </header>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'minmax(0,1.3fr) minmax(340px,.7fr)',
-        gap: 'clamp(24px,3.5vw,56px)',
-        alignItems: 'start',
-        marginTop: 'clamp(28px,3.5vw,44px)',
-      }}>
+      <div className={cn('grid gap-[clamp(24px,3.5vw,56px)] items-start mt-[clamp(28px,3.5vw,44px)]', isMobile ? 'grid-cols-[1fr]' : 'grid-cols-[minmax(0,1.3fr)_minmax(340px,.7fr)]')}>
         {/* ---- left: the role ---- */}
         <div>
           {vacancy.summary && (
-            <p data-reveal style={{
-              fontSize: 'clamp(17px,1.6vw,21px)', lineHeight: 1.55, color: color.purple, fontWeight: 500,
-              margin: 0, borderLeft: `4px solid ${color.green}`, paddingLeft: 18,
-            }}>
+            <p data-reveal className="text-[clamp(17px,1.6vw,21px)] leading-[1.55] text-valle-purple font-medium m-0 border-l-4 border-solid border-valle-green pl-[18px]">
               {vacancy.summary}
             </p>
           )}
 
           {about.length > 0 && (
-            <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>{t('About the role')}</h2>
+            <section data-reveal className="mt-[clamp(28px,3vw,40px)]">
+              <h2 className={sectionTitle}>{t('About the role')}</h2>
               {about.map((p, i) => (
-                <p key={i} style={{ fontSize: 15.5, lineHeight: 1.7, color: 'rgba(52,0,87,.78)', margin: '14px 0 0' }}>{p}</p>
+                <p key={i} className="text-[15.5px] leading-[1.7] text-[rgba(52,0,87,.78)] mt-[14px] mb-0 mx-0">{p}</p>
               ))}
             </section>
           )}
 
           {reqs.length > 0 && (
-            <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>{t('What we are looking for')}</h2>
-              <ul style={{ listStyle: 'none', margin: '16px 0 0', padding: 0, display: 'grid', gap: 10 }}>
+            <section data-reveal className="mt-[clamp(28px,3vw,40px)]">
+              <h2 className={sectionTitle}>{t('What we are looking for')}</h2>
+              <ul className="list-none mt-4 mb-0 mx-0 p-0 grid gap-[10px]">
                 {reqs.map((r, i) => (
-                  <li key={i} style={{
-                    display: 'flex', gap: 12, alignItems: 'flex-start', background: color.tint,
-                    border: `1.5px solid ${color.border}`, borderRadius: radius.md, padding: '13px 16px',
-                  }}>
-                    <span aria-hidden style={{ ...mono, color: color.violet, marginTop: 3 }}>
+                  <li key={i} className="flex gap-3 items-start bg-[#F7F3FF] border-[1.5px] border-solid border-valle-lilac rounded-[12px] py-[13px] px-4">
+                    <span aria-hidden className={cn(MONO, 'text-valle-violet mt-[3px]')}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span style={{ fontSize: 15, lineHeight: 1.55, color: 'rgba(52,0,87,.82)' }}>{r}</span>
+                    <span className="text-[15px] leading-[1.55] text-[rgba(52,0,87,.82)]">{r}</span>
                   </li>
                 ))}
               </ul>
@@ -546,16 +489,12 @@ export default function VacancyDetailPage() {
           )}
 
           {perks.length > 0 && (
-            <section data-reveal style={{ marginTop: 'clamp(28px,3vw,40px)' }}>
-              <h2 style={sectionTitle}>{t('What you get')}</h2>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}>
+            <section data-reveal className="mt-[clamp(28px,3vw,40px)]">
+              <h2 className={sectionTitle}>{t('What you get')}</h2>
+              <div className="flex flex-wrap gap-[10px] mt-4">
                 {perks.map((b, i) => (
-                  <span key={i} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 8, background: color.white,
-                    boxShadow: `0 0 0 1.5px ${color.border}`, borderRadius: radius.pill, padding: '10px 15px',
-                    fontSize: 14, color: color.purple,
-                  }}>
-                    <span aria-hidden style={{ color: color.greenDeep, fontWeight: 700 }}>✓</span>
+                  <span key={i} className="inline-flex items-center gap-2 bg-white shadow-[0_0_0_1.5px_#EBE2FF] rounded-[999px] py-[10px] px-[15px] text-[14px] text-valle-purple">
+                    <span aria-hidden className="text-[#12B54A] font-bold">✓</span>
                     {b}
                   </span>
                 ))}
@@ -563,22 +502,19 @@ export default function VacancyDetailPage() {
             </section>
           )}
 
-          <section data-reveal style={{ marginTop: 'clamp(28px,3.5vw,44px)' }}>
-            <h2 style={sectionTitle}>{t('Where you would work')}</h2>
-            <div style={{
-              position: 'relative', marginTop: 16, borderRadius: radius.xl, overflow: 'hidden',
-              minHeight: isMobile ? 200 : 260, background: color.purple, boxShadow: shadow.card,
-            }}>
+          <section data-reveal className="mt-[clamp(28px,3.5vw,44px)]">
+            <h2 className={sectionTitle}>{t('Where you would work')}</h2>
+            <div className={cn('relative mt-4 rounded-[24px] overflow-hidden bg-valle-purple shadow-[0_18px_40px_-22px_rgba(52,0,87,.45)]', isMobile ? 'min-h-[200px]' : 'min-h-[260px]')}>
               <Img
                 src="/images/trail-reception.webp"
                 alt={t('The reception trail at Vallé Advenature Park')}
                 surface="dark"
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(38,0,64,.88), rgba(38,0,64,0) 62%)' }} />
-              <div style={{ position: 'absolute', left: 20, right: 20, bottom: 18, color: color.white }}>
-                <div style={{ ...mono, color: color.yellow }}>{t('CHAMOUNY, SOUTH MAURITIUS')}</div>
-                <div style={{ ...display, fontSize: 'clamp(20px,2.4vw,28px)', marginTop: 6 }}>
+              <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(38,0,64,.88),rgba(38,0,64,0)_62%)]" />
+              <div className="absolute left-5 right-5 bottom-[18px] text-white">
+                <div className={cn(MONO, 'text-valle-yellow')}>{t('CHAMOUNY, SOUTH MAURITIUS')}</div>
+                <div className={cn(DISPLAY, 'text-[clamp(20px,2.4vw,28px)] mt-[6px]')}>
                   {t('200 hectares of valley, open daily')}
                 </div>
               </div>
@@ -589,53 +525,44 @@ export default function VacancyDetailPage() {
         {/* ---- right: apply ---- */}
         <aside
           id="apply"
-          style={{ position: isMobile ? 'static' : 'sticky', top: 92, marginTop: isMobile ? 8 : 0 }}
+          className={cn('top-[92px]', isMobile ? 'static mt-2' : 'sticky mt-0')}
         >
-          <div style={{
-            background: color.white, borderRadius: radius.xl, overflow: 'hidden',
-            boxShadow: `0 0 0 1.5px ${color.border}, ${shadow.card}`,
-          }}>
-            <div style={{ background: color.purple, padding: '18px 22px' }}>
-              <div style={{ ...mono, color: color.yellow }}>{sent ? t('APPLICATION SENT') : t('APPLY NOW')}</div>
-              <div style={{ ...display, fontSize: 24, color: color.white, marginTop: 6 }}>
+          <div className="bg-white rounded-[24px] overflow-hidden shadow-[0_0_0_1.5px_#EBE2FF,0_18px_40px_-22px_rgba(52,0,87,.45)]">
+            <div className="bg-valle-purple py-[18px] px-[22px]">
+              <div className={cn(MONO, 'text-valle-yellow')}>{sent ? t('APPLICATION SENT') : t('APPLY NOW')}</div>
+              <div className={cn(DISPLAY, 'text-[24px] text-white mt-[6px]')}>
                 {sent ? t('Thank you') : t('Tell us about you')}
               </div>
             </div>
             <Stripes height={8} />
 
             {sent ? (
-              <div style={{ padding: 'clamp(20px,2.4vw,26px)', animation: 'vfadeup .4s ease both' }}>
-                <div style={{
-                  background: color.okFill, border: `1.5px solid ${color.green}`, borderRadius: radius.lg,
-                  padding: '18px 20px',
-                }}>
-                  <div style={{ ...display, fontSize: 22, color: color.purple }}>{t('Application received')}</div>
-                  <div style={{ ...mono, fontWeight: 400, color: 'rgba(52,0,87,.65)', marginTop: 8 }}>
+              <div className="p-[clamp(20px,2.4vw,26px)] [animation:vfadeup_.4s_ease_both]">
+                <div className="bg-[#E2FFEB] border-[1.5px] border-solid border-valle-green rounded-[18px] py-[18px] px-5">
+                  <div className={cn(DISPLAY, 'text-[22px] text-valle-purple')}>{t('Application received')}</div>
+                  <div className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.65)] mt-2">
                     {doneRef ? t('REFERENCE {ref}', { ref: doneRef }) + ' · ' : ''}{vacancy.title.toUpperCase()}
                   </div>
                 </div>
-                <div style={{ ...mono, color: color.violet, marginTop: 20 }}>{t('WHAT HAPPENS NEXT')}</div>
-                <ol style={{ margin: '12px 0 0', padding: 0, listStyle: 'none', display: 'grid', gap: 12 }}>
+                <div className={cn(MONO, 'text-valle-violet mt-5')}>{t('WHAT HAPPENS NEXT')}</div>
+                <ol className="mt-3 mb-0 mx-0 p-0 list-none grid gap-3">
                   {[
                     t('Our HR team reads every application, usually within five working days.'),
                     t('If your profile fits the role, we email you to arrange a chat, on site or by phone.'),
                     t('Keep an eye on your spam folder: our reply comes from a vallepark.com address.'),
                   ].map((step, i) => (
-                    <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <span aria-hidden style={{
-                        ...mono, background: color.tint, color: color.violet, borderRadius: radius.pill,
-                        width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>{i + 1}</span>
-                      <span style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(52,0,87,.78)' }}>{step}</span>
+                    <li key={i} className="flex gap-3 items-start">
+                      <span aria-hidden className={cn(MONO, 'bg-[#F7F3FF] text-valle-violet rounded-[999px] w-[26px] h-[26px] inline-flex items-center justify-center shrink-0')}>{i + 1}</span>
+                      <span className="text-[14.5px] leading-[1.55] text-[rgba(52,0,87,.78)]">{step}</span>
                     </li>
                   ))}
                 </ol>
-                <div style={{ marginTop: 22, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <div className="mt-[22px] flex gap-[10px] flex-wrap">
                   <GhostButton label={t('Browse other roles')} onClick={() => navigate(paths.vacancies())} />
                 </div>
               </div>
             ) : (
-              <form onSubmit={onSubmit} noValidate style={{ padding: 'clamp(20px,2.4vw,26px)', display: 'grid', gap: 16 }}>
+              <form onSubmit={onSubmit} noValidate className="p-[clamp(20px,2.4vw,26px)] grid gap-4">
                 <TextField
                   id="fullName" label={t('Full name')} required autoComplete="name" maxLength={120}
                   placeholder="Jean-Marc Lafleur"
@@ -669,26 +596,20 @@ export default function VacancyDetailPage() {
                 />
 
                 {apiErr && (
-                  <div role="alert" style={{
-                    background: color.errFill, border: `1.5px solid ${color.pinkDark}`, borderRadius: radius.md,
-                    padding: '13px 16px', fontSize: 14, lineHeight: 1.5, color: color.purple,
-                  }}>
+                  <div role="alert" className="bg-[#FFE2E7] border-[1.5px] border-solid border-[#D91E44] rounded-[12px] py-[13px] px-4 text-[14px] leading-[1.5] text-valle-purple">
                     {apiErr}
                   </div>
                 )}
 
                 {tried && hasErrors && !apiErr && (
-                  <div role="alert" style={{
-                    background: color.warnFill, border: `1.5px solid ${color.border}`, borderRadius: radius.md,
-                    padding: '13px 16px', fontSize: 14, lineHeight: 1.5, color: color.purple,
-                  }}>
+                  <div role="alert" className="bg-[#FFFFE2] border-[1.5px] border-solid border-valle-lilac rounded-[12px] py-[13px] px-4 text-[14px] leading-[1.5] text-valle-purple">
                     {t('Please check the highlighted fields before sending.')}
                   </div>
                 )}
 
                 <SubmitButton busy={busy} disabled={tried && hasErrors} />
 
-                <div style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.55)' }}>
+                <div className="text-[12.5px] leading-[1.55] text-[rgba(52,0,87,.55)]">
                   {t('We use your details only to consider you for this role. Prefer email? Write to')}{' '}
                   <a href={'mailto:' + CAREERS_EMAIL} style={{ color: color.violet }}>{CAREERS_EMAIL}</a>.
                 </div>
@@ -698,7 +619,7 @@ export default function VacancyDetailPage() {
         </aside>
       </div>
 
-      <div style={{ height: 'clamp(48px,6vw,80px)' }} />
+      <div className="h-[clamp(48px,6vw,80px)]" />
     </main>
   );
 }

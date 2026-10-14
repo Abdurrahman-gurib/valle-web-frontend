@@ -22,8 +22,10 @@ import CalendarPanel from './CalendarPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
+import TeamPanel from './TeamPanel';
+import SecurityPanel from './SecurityPanel';
 
-type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat' | 'calendar';
+type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat' | 'calendar' | 'team' | 'security';
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -203,6 +205,7 @@ export default function StaffDashboard() {
           explanation rather than a dashboard full of failed requests: the API
           already refuses it with 403, this makes the refusal legible. */}
       {!canAccessReservations(auth.user.role) ? (
+        <>
         <div style={{
           ...card, maxWidth: 560, margin: '6vh auto 0', overflow: 'hidden',
           animation: 'vfadeup .35s ease both',
@@ -247,6 +250,8 @@ export default function StaffDashboard() {
             </div>
           </div>
         </div>
+        <div style={{ maxWidth: 560, margin: '14px auto 40px', padding: '0 14px' }}><SecurityPanel /></div>
+        </>
       ) : (
       <div style={{ padding: 'clamp(16px,3vw,26px) clamp(14px,3vw,28px) 40px', maxWidth: 1440, margin: '0 auto' }}>
         {/* ---- stat strip ---- */}
@@ -275,6 +280,8 @@ export default function StaffDashboard() {
           <TabBtn on={tab === 'quotes'} onClick={() => setTab('quotes')}>Quotes</TabBtn>
           <TabBtn on={tab === 'chat'} onClick={() => setTab('chat')}>Chat</TabBtn>
           {String(auth.user.role) === 'manager' && <TabBtn on={tab === 'calendar'} onClick={() => setTab('calendar')}>Calendar</TabBtn>}
+          {String(auth.user.role) === 'manager' && <TabBtn on={tab === 'team'} onClick={() => setTab('team')}>Team</TabBtn>}
+          <TabBtn on={tab === 'security'} onClick={() => setTab('security')}>Security</TabBtn>
         </div>
 
         {toast && (
@@ -301,6 +308,8 @@ export default function StaffDashboard() {
         {tab === 'forecast' && <ForecastPanel />}
         {tab === 'quotes' && <QuotesPanel />}
         {tab === 'calendar' && String(auth.user.role) === 'manager' && <CalendarPanel />}
+        {tab === 'team' && String(auth.user.role) === 'manager' && <TeamPanel currentUserId={auth.user.id} />}
+        {tab === 'security' && <SecurityPanel />}
         <div style={{ display: tab === 'chat' ? 'block' : 'none' }}>
           <ChatConsole active={tab === 'chat'} onChanged={reloadStats} />
         </div>

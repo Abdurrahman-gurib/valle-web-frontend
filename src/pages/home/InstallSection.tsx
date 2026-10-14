@@ -1,7 +1,7 @@
-import { useHover } from '../../hooks/useHover';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { isRtl, useLang, useT } from '../../i18n';
 import { promptInstall, useInstall } from '../../lib/pwa';
+import { cn } from '@/lib/utils';
 
 /**
  * "The park in your pocket": the home page's invitation to install the site to
@@ -11,13 +11,11 @@ import { promptInstall, useInstall } from '../../lib/pwa';
  *   - anything else: both sets of steps, so the guest can do it on their phone
  * Hidden once the site already runs from the home screen.
  */
-const MONO = "'Chivo Mono',monospace";
-const BARLOW = "'Barlow',sans-serif";
 
 function Benefit({ dot, children }: { dot: string; children: string }) {
   return (
-    <li style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15, lineHeight: 1.5, color: 'rgba(255,255,255,.9)' }}>
-      <span aria-hidden style={{ flex: 'none', width: 10, height: 10, borderRadius: 3, background: dot, marginTop: 7, transform: 'rotate(45deg)' }} />
+    <li className="flex items-start gap-3 text-[15px] leading-[1.5] text-white/90">
+      <span aria-hidden className="mt-[7px] size-2.5 flex-none rotate-45 rounded-[3px]" style={{ background: dot }} />
       <span>{children}</span>
     </li>
   );
@@ -25,23 +23,20 @@ function Benefit({ dot, children }: { dot: string; children: string }) {
 
 /** A phone home screen drawn in CSS, with the VALLÉ icon where the guest's would be. */
 function PhoneMock({ label }: { label: string }) {
-  const tile = (bg: string, key: number) => <span key={key} style={{ aspectRatio: '1 / 1', borderRadius: 13, background: bg }} />;
+  const tile = (bg: string, key: number) => <span key={key} className="aspect-square rounded-[13px]" style={{ background: bg }} />;
   const muted = 'rgba(255,255,255,.14)';
   return (
-    <div role="img" aria-label={label} style={{
-      width: 'min(250px, 62vw)', aspectRatio: '9 / 17.5', borderRadius: 34, background: '#1B0030', padding: 12,
-      boxShadow: '0 40px 80px -30px rgba(0,0,0,.7), inset 0 0 0 2px rgba(255,255,255,.14)', transform: 'rotate(4deg)',
-    }}>
-      <div style={{ height: '100%', borderRadius: 24, background: 'linear-gradient(160deg,#7333FF 0%,#340057 55%,#260040 100%)', padding: '26px 16px 14px', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+    <div role="img" aria-label={label} className="aspect-[9/17.5] w-[min(250px,62vw)] rotate-4 rounded-[34px] bg-[#1B0030] p-3 shadow-[0_40px_80px_-30px_rgba(0,0,0,.7),inset_0_0_0_2px_rgba(255,255,255,.14)]">
+      <div className="box-border flex h-full flex-col rounded-[24px] bg-[linear-gradient(160deg,#7333FF_0%,#340057_55%,#260040_100%)] px-4 pt-[26px] pb-3.5">
+        <div className="grid grid-cols-[repeat(4,1fr)] gap-3">
           {[0, 1, 2, 3, 4].map((k) => tile(muted, k))}
-          <span style={{ position: 'relative' }}>
-            <img src="/icon-maskable-192.png" alt="" width={96} height={96} loading="lazy" style={{ display: 'block', width: '100%', height: 'auto', aspectRatio: '1 / 1', borderRadius: 13, boxShadow: '0 0 0 2px #33FF74, 0 10px 22px -6px rgba(51,255,116,.6)' }} />
-            <span style={{ position: 'absolute', left: '50%', top: '100%', transform: 'translateX(-50%)', marginTop: 4, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', color: '#FFFFFF' }}>VALLÉ</span>
+          <span className="relative">
+            <img src="/icon-maskable-192.png" alt="" width={96} height={96} loading="lazy" className="block aspect-square h-auto w-full rounded-[13px] shadow-[0_0_0_2px_#33FF74,0_10px_22px_-6px_rgba(51,255,116,.6)]" />
+            <span className="absolute top-full left-1/2 mt-1 -translate-x-1/2 font-mono text-[8.5px] font-bold tracking-[.08em] text-white">VALLÉ</span>
           </span>
           {[6, 7].map((k) => tile(muted, k))}
         </div>
-        <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, padding: 10, borderRadius: 18, background: 'rgba(255,255,255,.1)' }}>
+        <div className="mt-auto grid grid-cols-[repeat(4,1fr)] gap-3 rounded-[18px] bg-white/10 p-2.5">
           {[0, 1, 2, 3].map((k) => tile('rgba(255,255,255,.22)', k))}
         </div>
       </div>
@@ -54,67 +49,53 @@ export function InstallSection() {
   const state = useInstall();
   const lang = useLang();
   const isMobile = useIsMobile();
-  const [h, bind] = useHover();
   if (state === 'installed') return null;
 
-  const steps = { fontSize: 14, lineHeight: 1.55, color: '#FFFC33', fontWeight: 600, margin: 0 } as const;
+  const steps = 'm-0 text-[14px] leading-[1.55] font-semibold text-valle-yellow';
   return (
     <section
       id="app"
       data-screen-label="Install the app"
       data-testid="install-section"
-      style={{ maxWidth: 1320, margin: 'clamp(56px,8vw,104px) auto 0', padding: '0 clamp(16px,3.5vw,40px)' }}
+      className="mx-auto mt-[clamp(56px,8vw,104px)] mb-0 max-w-[1320px] px-[clamp(16px,3.5vw,40px)] py-0"
     >
-      <div data-reveal="1" style={{
-        background: '#340057', borderRadius: 24, overflow: 'hidden', position: 'relative',
-        display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.25fr .75fr', gap: 'clamp(24px,4vw,56px)', alignItems: 'center',
-        padding: 'clamp(28px,4.5vw,60px)',
-      }}>
+      <div data-reveal="1" className={cn('relative grid items-center gap-[clamp(24px,4vw,56px)] overflow-hidden rounded-[24px] bg-valle-purple p-[clamp(28px,4.5vw,60px)]', isMobile ? 'grid-cols-[1fr]' : 'grid-cols-[1.25fr_.75fr]')}>
         <div>
-          <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: '#33FF74' }}>{t('TAKE THE VALLEY WITH YOU')}</span>
-          <h2 style={{
-            fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(34px,4.6vw,62px)', lineHeight: lang === 'hi' ? 1.2 : 0.88, letterSpacing: '-0.01em',
-            margin: '16px 0 0', textTransform: 'uppercase', color: '#FFFFFF', transform: 'rotate(-3deg)', transformOrigin: isRtl() ? 'right bottom' : 'left bottom',
-          }}>
-            {t('The park in')}<br /><span style={{ color: '#FFFC33' }}>{t('your pocket.')}</span>
+          <span className="font-mono text-[12px] font-semibold tracking-[.16em] text-valle-green">{t('TAKE THE VALLEY WITH YOU')}</span>
+          <h2 className={cn('mx-0 mt-4 mb-0 -rotate-3 font-display text-[clamp(34px,4.6vw,62px)] font-black tracking-[-0.01em] text-white uppercase italic', lang === 'hi' ? 'leading-[1.2]' : 'leading-[0.88]', isRtl() ? 'origin-bottom-right' : 'origin-bottom-left')}>
+            {t('The park in')}<br /><span className="text-valle-yellow">{t('your pocket.')}</span>
           </h2>
-          <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: '22px 0 0', maxWidth: '46ch' }}>
+          <p className="mx-0 mt-[22px] mb-0 max-w-[46ch] text-[16px] leading-[1.6] text-white/82">
             {t('Add VALLÉ to your home screen and it opens like an app, with or without signal.')}
           </p>
-          <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 0', display: 'grid', gap: 10 }}>
+          <ul className="mx-0 mt-5 mb-0 grid list-none gap-2.5 p-0">
             <Benefit dot="#33FF74">{t('Activities, packages and prices, saved for offline')}</Benefit>
             <Benefit dot="#FFFC33">{t('Your ticket and QR code at the gate, even with no network')}</Benefit>
             <Benefit dot="#FF3358">{t('One tap from your home screen, nothing to download from a store')}</Benefit>
           </ul>
 
-          <div style={{ marginTop: 26, display: 'grid', gap: 8, maxWidth: '52ch' }}>
+          <div className="mt-[26px] grid max-w-[52ch] gap-2">
             {state === 'prompt' && (
               <div>
                 <button
-                  {...bind}
                   data-testid="install-button"
-                  className="press"
+                  className="press cursor-pointer rounded-full border-0 bg-valle-red px-[34px] py-4 font-[inherit] text-[16px] font-bold text-white shadow-[0_10px_28px_-6px_rgba(255,51,88,.6)] transition-[transform,background] duration-[.18s] ease-[ease] hover:bg-[#D91E44] hover:[transform:translateY(-2px)]"
                   onClick={() => { void promptInstall(); }}
-                  style={{
-                    border: 0, background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontFamily: 'inherit', fontWeight: 700, fontSize: 16,
-                    padding: '16px 34px', borderRadius: 999, cursor: 'pointer', boxShadow: '0 10px 28px -6px rgba(255,51,88,.6)',
-                    transform: h ? 'translateY(-2px)' : 'none', transition: 'transform .18s, background .18s',
-                  }}
                 >
                   {t('Install the app')}
                 </button>
               </div>
             )}
             {state !== 'prompt' && state !== 'ios' && (
-              <p data-testid="install-steps-android" style={steps}>{t('On Android: open the browser menu and choose “Install app” or “Add to Home screen”.')}</p>
+              <p data-testid="install-steps-android" className={steps}>{t('On Android: open the browser menu and choose “Install app” or “Add to Home screen”.')}</p>
             )}
             {state !== 'prompt' && (
-              <p data-testid="install-steps-ios" style={steps}>{t('On iPhone or iPad: tap Share, then “Add to Home Screen”.')}</p>
+              <p data-testid="install-steps-ios" className={steps}>{t('On iPhone or iPad: tap Share, then “Add to Home Screen”.')}</p>
             )}
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', padding: isMobile ? '6px 0 10px' : 0 }}>
+        <div className={cn('flex justify-center', isMobile ? 'px-0 pt-1.5 pb-2.5' : 'p-0')}>
           <PhoneMock label={t('The VALLÉ icon on a phone home screen')} />
         </div>
       </div>

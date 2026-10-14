@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { LANG_META, isRtl, useLang, useT, _t } from '../i18n';
 import { paths } from '../lib/nav';
 import { breadcrumbs, useSeo } from '../lib/seo';
+import { cn } from '@/lib/utils';
 
 /**
  * /privacy and /terms: the two legal pages the footer links to. The wording is
@@ -10,8 +11,6 @@ import { breadcrumbs, useSeo } from '../lib/seo';
  * the waiver and the backend notifications); update them when that changes.
  */
 
-const MONO = "'Chivo Mono',monospace";
-const BARLOW = "'Barlow',sans-serif";
 const UPDATED = '2026-10-06';
 
 type Section = { h: string; p: string[] };
@@ -100,38 +99,39 @@ export default function LegalPage({ kind }: { kind: 'privacy' | 'terms' }) {
   const date = new Date(UPDATED + 'T00:00:00Z').toLocaleDateString(LANG_META[lang].locale, { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <main data-testid={`legal-${kind}`} style={{ maxWidth: 860, margin: '0 auto', padding: '140px clamp(16px,3.5vw,40px) 70px' }}>
-      <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.16em', color: '#7333FF' }}>{eyebrow}</div>
-      <h1 style={{
-        fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(38px,6vw,76px)', lineHeight: lang === 'ar' || lang === 'hi' ? 1.15 : 0.86, margin: '14px 0 0',
-        textTransform: 'uppercase', transform: 'rotate(-3deg)', transformOrigin: isRtl() ? 'right bottom' : 'left bottom',
-      }}>{title}</h1>
-      <p style={{ fontSize: 17, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '60ch', margin: '26px 0 0' }}>{lead}</p>
-      <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.1em', color: 'rgba(52,0,87,.5)', marginTop: 14 }}>{t('LAST UPDATED')} · {date}</div>
+    <main data-testid={`legal-${kind}`} className="mx-auto max-w-[860px] px-[clamp(16px,3.5vw,40px)] pt-[140px] pb-[70px]">
+      <div className="font-mono text-[12px] font-bold tracking-[.16em] text-valle-violet">{eyebrow}</div>
+      <h1 className={cn(
+        'mx-0 mt-3.5 mb-0 -rotate-3 font-display text-[clamp(38px,6vw,76px)] font-black uppercase italic',
+        lang === 'ar' || lang === 'hi' ? 'leading-[1.15]' : 'leading-[0.86]',
+        isRtl() ? 'origin-bottom-right' : 'origin-bottom-left',
+      )}>{title}</h1>
+      <p className="mx-0 mt-[26px] mb-0 max-w-[60ch] text-[17px] leading-[1.6] text-valle-purple/75">{lead}</p>
+      <div className="mt-3.5 font-mono text-[11px] tracking-[.1em] text-valle-purple/50">{t('LAST UPDATED')} · {date}</div>
 
-      <nav aria-label={t('Sections')} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 28 }}>
+      <nav aria-label={t('Sections')} className="mt-7 flex flex-wrap gap-2">
         {sections.map((s, i) => (
-          <a key={s.h} href={`#s${i + 1}`} style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.08em', color: '#340057', border: '1.5px solid #EBE2FF', borderRadius: 999, padding: '7px 12px', textDecoration: 'none', background: '#FFFFFF' }}>
+          <a key={s.h} href={`#s${i + 1}`} className="rounded-full border-[1.5px] border-solid border-valle-lilac bg-white px-3 py-[7px] font-mono text-[11px] font-semibold tracking-[.08em]" style={{ color: '#340057', textDecoration: 'none' }}>
             {String(i + 1).padStart(2, '0')} · {t(s.h)}
           </a>
         ))}
       </nav>
 
       {sections.map((s, i) => (
-        <section key={s.h} id={`s${i + 1}`} style={{ marginTop: 40, scrollMarginTop: 96 }}>
-          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(22px,2.6vw,30px)', textTransform: 'uppercase', margin: 0, color: '#340057' }}>
-            <span style={{ color: '#FF3358', marginInlineEnd: 10 }}>{String(i + 1).padStart(2, '0')}</span>{t(s.h)}
+        <section key={s.h} id={`s${i + 1}`} className="mt-10 scroll-mt-24">
+          <h2 className="m-0 font-display text-[clamp(22px,2.6vw,30px)] font-black text-valle-purple uppercase italic">
+            <span className="me-2.5 text-valle-red">{String(i + 1).padStart(2, '0')}</span>{t(s.h)}
           </h2>
           {s.p.map((p) => (
-            <p key={p} style={{ fontSize: 15.5, lineHeight: 1.7, color: 'rgba(52,0,87,.8)', margin: '12px 0 0' }}>{t(p, { date })}</p>
+            <p key={p} className="mx-0 mt-3 mb-0 text-[15.5px] leading-[1.7] text-valle-purple/80">{t(p, { date })}</p>
           ))}
         </section>
       ))}
 
-      <div style={{ marginTop: 48, padding: '18px 22px', background: '#F7F3FF', borderRadius: 16, fontSize: 14.5, lineHeight: 1.6, color: 'rgba(52,0,87,.8)', display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ flex: '1 1 260px' }}>{privacy ? t('Read also the terms of use and the safety waiver.') : t('Read also the privacy policy, and the safety waiver you sign before the activities.')}</span>
-        <Link to={privacy ? paths.terms() : paths.privacy()} style={{ fontWeight: 700, color: '#7333FF' }}>{privacy ? t('Terms of use') : t('Privacy policy')} →</Link>
-        <a href="/api/tickets/sample/waiver.pdf" target="_blank" rel="noopener" style={{ fontWeight: 700, color: '#7333FF' }}>{t('Safety waiver (PDF)')} →</a>
+      <div className="mt-12 flex flex-wrap items-center gap-3.5 rounded-[16px] bg-[#F7F3FF] px-[22px] py-[18px] text-[14.5px] leading-[1.6] text-valle-purple/80">
+        <span className="flex-[1_1_260px]">{privacy ? t('Read also the terms of use and the safety waiver.') : t('Read also the privacy policy, and the safety waiver you sign before the activities.')}</span>
+        <Link to={privacy ? paths.terms() : paths.privacy()} className="font-bold" style={{ color: '#7333FF' }}>{privacy ? t('Terms of use') : t('Privacy policy')} →</Link>
+        <a href="/api/tickets/sample/waiver.pdf" target="_blank" rel="noopener" className="font-bold" style={{ color: '#7333FF' }}>{t('Safety waiver (PDF)')} →</a>
       </div>
     </main>
   );

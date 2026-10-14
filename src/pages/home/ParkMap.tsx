@@ -4,7 +4,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { useGoto } from '../../lib/nav';
 import { useCardModel } from '../../lib/card';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { useHover } from '../../hooks/useHover';
+import { cn } from '@/lib/utils';
 import { Img } from '../../components/Img';
 import type { Pin } from '../../types';
 import { useT, fwd } from '../../i18n';
@@ -21,27 +21,20 @@ interface SelPinModel {
 }
 
 export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void; scale?: number }) {
-  const [h, bind] = useHover();
   const sub = p.kind === 'sub';
   const base = (isMobile ? (sub ? 17 : 21) : (sub ? 30 : 36)) * scale;
   const dim = on ? base + (isMobile ? 4 : 10) * scale : base;
   const fs = (isMobile ? (sub ? 7 : 9.5) : (sub ? 10 : 13)) * (scale < 1 ? (1 + scale) / 2 : 1);
   return (
     <button
-      {...bind}
       onClick={() => onClick(i)}
       title={p.name}
-      style={{
-        position: 'absolute', left: p.px + '%', top: p.py + '%', transform: 'translate(-50%,-50%)',
-        width: dim, height: dim, borderRadius: 999, border: '2px solid #FFFFFF',
-        background: on ? '#FFFC33' : (sub ? '#33FF74' : '#FF3358'),
-        color: sub || on ? '#340057' : '#FFFFFF',
-        fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: fs, cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: on ? '0 0 0 7px rgba(255,252,51,.35), 0 6px 16px rgba(0,0,0,.4)' : '0 4px 10px rgba(0,0,0,.35)',
-        transition: 'all .2s ease', padding: 0, lineHeight: 1,
-        ...(h ? { transform: 'translate(-50%,-50%) scale(1.18)' } : undefined),
-      }}
+      className={cn(
+        'absolute flex -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-solid border-white p-0 font-mono leading-none font-bold transition-all duration-200 ease-[ease] hover:scale-[1.18]',
+        on ? 'bg-valle-yellow shadow-[0_0_0_7px_rgba(255,252,51,.35),0_6px_16px_rgba(0,0,0,.4)]' : (sub ? 'bg-valle-green shadow-[0_4px_10px_rgba(0,0,0,.35)]' : 'bg-valle-red shadow-[0_4px_10px_rgba(0,0,0,.35)]'),
+        sub || on ? 'text-valle-purple' : 'text-white',
+      )}
+      style={{ left: p.px + '%', top: p.py + '%', width: dim, height: dim, fontSize: fs }}
     >
       {p.n}
     </button>
@@ -49,35 +42,28 @@ export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pin; 
 }
 
 function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; left: string; top: string; transform: string; onClose: () => void }) {
-  const [hBtn, bindBtn] = useHover();
-  const [hX, bindX] = useHover();
   const t = useT();
   return (
-    <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 6, width: 'min(320px,94%)' }}>
-      <div style={{ pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', background: '#FFFFFF', borderRadius: 14, overflow: 'hidden', boxShadow: '0 18px 44px -10px rgba(31,0,51,.65)', animation: 'vfadeup .22s ease both' }}>
-        <div style={{ width: 96, flexShrink: 0, background: '#EBE2FF' }}>
+    <div className="pointer-events-none absolute z-[6] w-[min(320px,94%)]" style={{ left, top, transform }}>
+      <div className="pointer-events-auto relative flex w-full animate-[vfadeup_.22s_ease_both] overflow-hidden rounded-[14px] bg-white shadow-[0_18px_44px_-10px_rgba(31,0,51,.65)]">
+        <div className="w-24 shrink-0 bg-valle-lilac">
           <Img src={sel.img} alt={sel.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        <div style={{ flex: 1, minWidth: 0, padding: '11px 13px 12px' }}>
-          <span style={{ background: sel.catColor, color: sel.catFg, fontFamily: "'Chivo Mono',monospace", fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{sel.catBadge}</span>
-          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 14.5, textTransform: 'uppercase', marginTop: 6, lineHeight: 1 }}>{sel.name}</div>
-          <div style={{ fontSize: 11.5, color: 'rgba(52,0,87,.7)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{sel.sub}</div>
+        <div className="min-w-0 flex-1 px-[13px] pt-[11px] pb-3">
+          <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[8.5px] font-bold tracking-[.08em]" style={{ background: sel.catColor, color: sel.catFg }}>{sel.catBadge}</span>
+          <div className="mt-1.5 font-display text-[14.5px] leading-none font-extrabold uppercase italic">{sel.name}</div>
+          <div className="mt-[5px] line-clamp-2 text-[11.5px] leading-[1.45] text-valle-purple/70">{sel.sub}</div>
           <button
-            {...bindBtn}
             onClick={sel.btnClick}
-            style={{ marginTop: 8, border: 0, background: hBtn ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, color: '#FFFFFF', padding: '8px 15px', borderRadius: 999 }}
+            className="mt-2 cursor-pointer rounded-full border-0 bg-valle-purple px-[15px] py-2 font-[inherit] text-[11.5px] font-bold text-white hover:bg-valle-violet"
           >
             {sel.btnLabel}
           </button>
         </div>
         <button
-          {...bindX}
           onClick={onClose}
           aria-label={t('Close')}
-          style={{
-            position: 'absolute', top: 8, right: 8, border: '1px solid ' + (hX ? '#FF3358' : '#EBE2FF'), background: '#FFFFFF',
-            color: hX ? '#FF3358' : 'rgba(52,0,87,.6)', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
-          }}
+          className="absolute top-2 right-2 size-6 cursor-pointer rounded-full border border-solid border-valle-lilac bg-white p-0 text-[12px] leading-none text-valle-purple/60 hover:border-valle-red hover:text-valle-red"
         >
           ×
         </button>
@@ -130,24 +116,24 @@ export function ParkMap() {
   const popTransform = pp ? (isMobile ? 'translateX(-50%)' : (pp.py < 34 ? 'translate(-50%, 22px)' : 'translate(-50%, calc(-100% - 22px))')) : 'none';
 
   return (
-    <section style={{ background: '#260040', marginTop: 'clamp(56px,8vw,104px)', padding: 'clamp(56px,8vw,104px) 0 clamp(48px,7vw,88px)', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, left: '-2%', right: '-2%', height: 10, background: 'repeating-linear-gradient(-45deg,#33FF74 0 14px,#340057 14px 28px)', transform: 'rotate(-.6deg)' }} />
-      <div style={{ position: 'absolute', left: '50%', top: '30%', width: 1400, height: 1400, marginLeft: -700, borderRadius: 999, background: 'radial-gradient(circle, rgba(115,51,255,.22), rgba(31,0,51,0) 55%)', pointerEvents: 'none' }} />
+    <section className="relative mt-[clamp(56px,8vw,104px)] overflow-hidden bg-valle-deep px-0 pt-[clamp(56px,8vw,104px)] pb-[clamp(48px,7vw,88px)]">
+      <div className="absolute top-0 right-[-2%] left-[-2%] h-2.5 rotate-[-.6deg] bg-[repeating-linear-gradient(-45deg,#33FF74_0_14px,#340057_14px_28px)]" />
+      <div className="pointer-events-none absolute top-[30%] left-1/2 ml-[-700px] size-[1400px] rounded-full bg-[radial-gradient(circle,rgba(115,51,255,.22),rgba(31,0,51,0)_55%)]" />
       <ValleyMist />
-      <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 clamp(16px,3.5vw,40px)', position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', borderBottom: '2px solid rgba(255,255,255,.25)', paddingBottom: 28 }}>
-          <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.6vw,64px)', lineHeight: 0.85, letterSpacing: '-0.01em', margin: 0, color: '#FFFFFF', textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('The walking trail')}</h2>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(255,255,255,.6)' }}>{t('02 · SITEMAP · ≈1.8 KM LOOP')}</span>
+      <div className="relative mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] py-0">
+        <div className="flex flex-wrap items-baseline justify-between gap-5 border-0 border-b-2 border-solid border-white/25 pb-7">
+          <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] text-white uppercase italic">{t('The walking trail')}</h2>
+          <span className="font-mono text-[12px] font-semibold tracking-[.16em] text-white/60">{t('02 · SITEMAP · ≈1.8 KM LOOP')}</span>
         </div>
-        <p style={{ color: 'rgba(255,255,255,.75)', fontSize: 15.5, lineHeight: 1.55, maxWidth: '56ch', margin: '18px 0 0' }}>
+        <p className="mx-0 mt-[18px] mb-0 max-w-[56ch] text-[15.5px] leading-[1.55] text-white/75">
           {t('The official park sitemap, live. Ten lettered stops loop 1.8 km through the valley, plus the Green Zone wildlife and the Chamouzé falls. Tap any pin to preview a stop.')}
         </p>
-        <div data-reveal="1" style={{ marginTop: 38 }}>
+        <div data-reveal="1" className="mt-[38px]">
           <div>
-            <div style={{ position: 'relative', background: '#2E0A4E', border: '1px solid rgba(255,255,255,.16)', borderRadius: 22, padding: 'clamp(10px,1.5vw,20px)', boxShadow: '0 40px 90px -40px rgba(0,0,0,.55)' }}>
-              <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 12 }}>
-                <div style={{ transform: 'translate(0px, 0px) scale(1)', transformOrigin: '50% 50%', willChange: 'transform' }}>
-                  <div style={{ position: 'relative' }}>
+            <div className="relative rounded-[22px] border border-solid border-white/16 bg-[#2E0A4E] p-[clamp(10px,1.5vw,20px)] shadow-[0_40px_90px_-40px_rgba(0,0,0,.55)]">
+              <div className="relative overflow-hidden rounded-[12px]">
+                <div className="origin-center will-change-transform" style={{ transform: 'translate(0px, 0px) scale(1)' }}>
+                  <div className="relative">
                     <Img
                       src="/images/park-sitemap.webp"
                       alt={t('Vallé official walking trail sitemap: ten lettered stops on a 1.8 km loop')}
@@ -169,18 +155,19 @@ export function ParkMap() {
                     ))}
                   </div>
                 </div>
-                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'linear-gradient(115deg, rgba(255,255,255,.1), rgba(255,255,255,0) 46%)', mixBlendMode: 'screen' }} />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,.1),rgba(255,255,255,0)_46%)] mix-blend-screen" />
                 {selPin && (
                   <PinPopup sel={selPin} left={popLeft} top={popTop} transform={popTransform} onClose={() => setSelectedPin(-1)} />
                 )}
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-2 pt-3.5 pb-0.5 font-mono text-[10.5px] tracking-[.08em] text-white/70">
                 <span>{t('TAP A PIN TO PREVIEW A STOP')}</span>
                 <a
                   href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z"
                   target="_blank"
                   rel="noopener"
-                  style={{ color: '#FFFC33', fontWeight: 600 }}
+                  className="font-semibold"
+                  style={{ color: '#FFFC33' }}
                 >
                   {t('GET DIRECTIONS · GOOGLE MAPS ↗')}
                 </a>
@@ -189,11 +176,11 @@ export function ParkMap() {
             </div>
           </div>
         </div>
-        <div style={{ border: '1.5px dashed rgba(255,255,255,.35)', borderRadius: 16, padding: '16px 22px', color: 'rgba(255,255,255,.8)', marginTop: 18, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 13.5, lineHeight: 1.55, flex: 1, minWidth: 260 }}>
+        <div className="mt-[18px] flex flex-wrap items-baseline justify-between gap-[18px] rounded-[16px] border-[1.5px] border-dashed border-white/35 px-[22px] py-4 text-white/80">
+          <div className="min-w-[260px] flex-1 text-[13.5px] leading-[1.55]">
             {t("From the entrance the trail climbs past the Kids Park, La Citronelle and the Green Zone's tortoises and albino deer to the Luge Kart zone, then loops back along the 23 Coloured Earth, both waterfalls and La Tour viewpoint.")}
           </div>
-          <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, opacity: 0.8 }}>{t('A ENTRANCE · F 23 COLOURED EARTH · GZ WILDLIFE')}</div>
+          <div className="font-mono text-[11px] opacity-80">{t('A ENTRANCE · F 23 COLOURED EARTH · GZ WILDLIFE')}</div>
         </div>
       </div>
     </section>

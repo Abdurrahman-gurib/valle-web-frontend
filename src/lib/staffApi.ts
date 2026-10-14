@@ -79,12 +79,52 @@ function qs(params: Record<string, string | number | undefined>): string {
 
 // ---- auth ----
 
-export function staffLogin(email: string, password: string): Promise<StaffUser> {
-  return request<StaffUser>('/staff/auth/login', {
+/** Password accepted, but the account uses two-step login: ask for the code. */
+export interface TwoFactorPending { twoFactorRequired: true; pendingToken: string }
+
+export function isTwoFactorPending(v: StaffUser | TwoFactorPending): v is TwoFactorPending {
+  return (v as TwoFactorPending).twoFactorRequired === true;
+}
+
+export function staffLogin(email: string, password: string): Promise<StaffUser | TwoFactorPending> {
+  return request<StaffUser | TwoFactorPending>('/staff/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   }, { allow401: true });
 }
+
+export function staffLoginTwoFactor(pendingToken: string, code: string): Promise<StaffUser> {
+  return request<StaffUser>('/staff/auth/login/2fa', {
+    method: 'POST',
+    body: JSON.stringify({ pendingToken, code }),
+  }, { allow401: true });
+}
+
+/** Always resolves the same way whether or not the account exists. */
+export const requestPasswordReset = (email: string) =>
+  request<{ ok: true }>('/staff/auth/forgot', { method: 'POST', body: JSON.stringify({ email }) }, { allow401: true });
+export const resetPassword = (token: string, password: string) =>
+  request<{ ok: true }>('/staff/auth/reset', { method: 'POST', body: JSON.stringify({ token, password }) }, { allow401: true });
+
+// ---- own security (two-step login) ----
+export interface TwoFactorStatus { enabled: boolean; recoveryCodesLeft: number }
+export interface TotpSetup { otpauthUrl: string; qrDataUrl: string; secret: string }
+export const getTwoFactorStatus = () => request<TwoFactorStatus>('/staff/security/2fa');
+export const beginTwoFactorSetup = () => request<TotpSetup>('/staff/security/2fa/setup', { method: 'POST' });
+export const enableTwoFactor = (code: string) => request<{ recoveryCodes: string[] }>('/staff/security/2fa/enable', { method: 'POST', body: JSON.stringify({ code }) });
+export const disableTwoFactor = (code: string) => request<{ ok: true }>('/staff/security/2fa/disable', { method: 'POST', body: JSON.stringify({ code }) });
+export const regenerateRecoveryCodes = (code: string) => request<{ recoveryCodes: string[] }>('/staff/security/2fa/recovery-codes', { method: 'POST', body: JSON.stringify({ code }) });
+
+// ---- team (managers) ----
+export type TeamRole = 'agent' | 'hr' | 'manager';
+export interface TeamMember { id: string; email: string; name: string; role: TeamRole; active: boolean; twoFactorEnabled: boolean; lastLoginAt: string | null; createdAt: string }
+export const listTeam = () => request<TeamMember[]>('/staff/users');
+export const createTeamMember = (body: { name: string; email: string; role: TeamRole }) =>
+  request<{ user: TeamMember; emailSent: boolean }>('/staff/users', { method: 'POST', body: JSON.stringify(body) });
+export const updateTeamMember = (id: string, patch: { role?: TeamRole; active?: boolean; name?: string }) =>
+  request<TeamMember>('/staff/users/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(patch) });
+export const sendTeamReset = (id: string) =>
+  request<{ emailSent: boolean }>('/staff/users/' + encodeURIComponent(id) + '/password-reset', { method: 'POST' });
 
 export function staffLogout(): Promise<{ ok: boolean }> {
   return request<{ ok: boolean }>('/staff/auth/logout', { method: 'POST' }, { allow401: true });

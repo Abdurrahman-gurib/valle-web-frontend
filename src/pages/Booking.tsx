@@ -6,7 +6,9 @@ import { useApp } from '../store/AppStore';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 import { CurrencyPicker } from '../components/CurrencyPicker';
 import { motion } from 'motion/react';
-import { Check, Minus, Plus } from 'lucide-react';
+import { CalendarDays, Check, Minus, Plus } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ValleButton } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
 import { useCatalog } from '../store/CatalogContext';
@@ -301,6 +303,7 @@ export default function BookingPage() {
     return () => { dead = true; };
   }, []);
   const [redirecting, setRedirecting] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
   // One key per attempt: kept across retries of the same submit, renewed once a booking is written.
   const attemptKey = useRef(newAttemptKey());
   useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: ONLINE_PAYMENT ? t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.') : t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
@@ -677,19 +680,32 @@ export default function BookingPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
                   <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.55)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
-                  <input
-                    type="date"
-                    value={customDate}
-                    min={tIso}
-                    onChange={(e) => setCustomDate(e.target.value)}
-                    style={{
-                      border: '1.5px solid ' + (customDate ? '#7333FF' : '#EBE2FF'),
-                      background: customDate ? '#7333FF' : '#FFFFFF',
-                      color: customDate ? '#FFFFFF' : '#340057',
-                      borderRadius: '14px', padding: '10px 14px', fontFamily: 'inherit', fontSize: '14px',
-                      fontWeight: 600, cursor: 'pointer', outline: 'none',
-                    }}
-                  />
+                  <Popover open={calOpen} onOpenChange={setCalOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        data-testid="date-picker"
+                        className={cn('inline-flex cursor-pointer items-center gap-2 rounded-[14px] border-[1.5px] px-3.5 py-2.5 font-sans text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', customDate ? 'border-valle-violet bg-valle-violet text-white' : 'border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50')}
+                      >
+                        <CalendarDays size={16} strokeWidth={2.4} aria-hidden />
+                        {customDate ? (fullDateFromIso(customDate) || customDate) : t('Pick a date')}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto rounded-2xl border-valle-lilac bg-white p-2 text-valle-purple shadow-[0_24px_48px_-20px_rgba(52,0,87,.45)]">
+                      <Calendar
+                        mode="single"
+                        selected={customDate ? new Date(customDate + 'T12:00:00') : undefined}
+                        onSelect={(d) => {
+                          if (!d) return;
+                          const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                          setCustomDate(iso); setCalOpen(false);
+                        }}
+                        disabled={{ before: new Date(tIso + 'T00:00:00') }}
+                        defaultMonth={customDate ? new Date(customDate + 'T12:00:00') : new Date(tIso + 'T12:00:00')}
+                        className="[--cell-size:2.4rem] [&_.rdp-day_button[aria-selected=true]]:!bg-valle-violet [&_.rdp-day_button[aria-selected=true]]:!text-white"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
                   <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} closure={selectedLoad?.morning.closure} />

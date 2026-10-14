@@ -1,15 +1,15 @@
 import { Fwd } from '@/components/ui/arrows';
 import {
-  useCallback, useEffect, useRef, useState, type CSSProperties, type FormEvent,
+  useCallback, useEffect, useRef, useState, type FormEvent,
 } from 'react';
 import type { ChatMessage } from '../types';
 import { VisitorChat, getVisitorKey, type ChatStatus } from '../lib/chatClient';
-import { useHover } from '../hooks/useHover';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { Stripes } from './Stripes';
-import { color, display, font, motion, radius, shadow } from '../styles/theme';
+import { color } from '../styles/theme';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from './chatParts';
 import { useT, fwd } from '../i18n';
+import { cn } from '@/lib/utils';
 
 /**
  * Public floating chat launcher (visitors only, never rendered on /staff*).
@@ -31,8 +31,13 @@ const PANEL_W = 360;
 
 type Row = ChatMessage & { pending?: boolean; failed?: boolean; localUrl?: string };
 
-const monoText: CSSProperties = { fontFamily: font.mono };
-const displayText: CSSProperties = { ...display };
+/* Class equivalents of the theme tokens (styles/theme.ts): tint #F7F3FF,
+   pinkDark #D91E44, motion.fast/base/spring easings, shadow.pink/panel. */
+const displayText = 'font-display italic font-black tracking-[-0.01em] leading-[0.9] uppercase';
+const fadeIn = 'animate-[vfade_.2s_ease_both]';
+const riseIn = 'animate-[vrise_.34s_cubic-bezier(.2,.7,.2,1)_both]';
+const fieldLabel = 'font-mono text-[9.5px] font-bold tracking-[.14em] text-valle-violet';
+const inputCls = 'w-full border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] py-[11px] px-[13px] [font-family:inherit] text-[14px] outline-none text-valle-purple [transition:border-color_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]';
 
 function introDone(): boolean {
   try { return localStorage.getItem(INTRO_KEY) === '1'; } catch { return false; }
@@ -87,15 +92,9 @@ function ChatGlyph() {
 function Lockup() {
   const t = useT();
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', lineHeight: 1, userSelect: 'none',
-      transform: 'rotate(-4deg)', flexShrink: 0, transformOrigin: 'left center',
-    }}>
-      <span style={{ ...displayText, fontSize: 25, color: color.white }}>VALLÉ</span>
-      <span style={{
-        ...monoText, fontSize: 8.5, fontWeight: 700, letterSpacing: '.24em',
-        color: color.green, marginTop: 3,
-      }}>
+    <div className="flex flex-col leading-none select-none [transform:rotate(-4deg)] shrink-0 origin-left">
+      <span className={cn(displayText, 'text-[25px] text-white')}>VALLÉ</span>
+      <span className="font-mono text-[8.5px] font-bold tracking-[.24em] text-valle-green mt-[3px]">
         {t('LIVE CHAT')}
       </span>
     </div>
@@ -106,7 +105,7 @@ function Lockup() {
  * Pink circle with a shallow idle float.
  *
  * The float runs on an inner layer, never on the <button> itself, for two
- * reasons: an animation's transform outranks the inline hover transform, and a
+ * reasons: an animation's transform outranks the hover transform, and a
  * button whose own box never stops moving is a moving click target (assistive
  * tech, automation and shaky hands all suffer). So the hit area is a fixed
  * 58x58 and only the painted circle bobs, by at most 5px.
@@ -114,56 +113,43 @@ function Lockup() {
 function Launcher({ onClick, unread, bottom, right, reduced }: {
   onClick: () => void; unread: number; bottom: number; right: number; reduced: boolean;
 }) {
-  const [h, bind] = useHover();
   const t = useT();
   return (
     <button
-      {...bind}
       onClick={onClick}
       aria-label={unread > 0 ? (unread === 1 ? t('Open chat, {n} new message', { n: unread }) : t('Open chat, {n} new messages', { n: unread })) : t('Open chat')}
-      className="press"
-      style={{
-        position: 'fixed', bottom, right, zIndex: 85,
-        width: 58, height: 58, padding: 0, border: 0, background: 'transparent',
-        color: color.white, cursor: 'pointer',
-        transform: h && !reduced ? 'scale(1.06)' : 'none',
-        transition: 'transform ' + motion.spring,
-      }}
+      className={cn(
+        'press group fixed z-[85] w-[58px] h-[58px] p-0 border-0 bg-transparent text-white cursor-pointer',
+        '[transition:transform_.42s_cubic-bezier(.16,1.06,.3,1.12)]',
+        !reduced && 'hover:[transform:scale(1.06)]',
+      )}
+      style={{ bottom, right }}
     >
       <span
-        style={{
-          position: 'absolute', inset: 0, borderRadius: radius.pill,
-          background: h ? color.pinkDark : color.pink,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: h
-            ? '0 22px 46px -10px rgba(217,30,68,.72)'
-            : '0 18px 40px -10px rgba(217,30,68,.6)',
-          animation: reduced ? undefined : 'vfloat 4.2s ease-in-out infinite',
-          transition: 'background ' + motion.fast + ', box-shadow ' + motion.fast,
-        }}
+        className={cn(
+          'absolute inset-0 rounded-[999px] bg-valle-red group-hover:bg-[#D91E44] flex items-center justify-center',
+          'shadow-[0_18px_40px_-10px_rgba(217,30,68,.6)] group-hover:shadow-[0_22px_46px_-10px_rgba(217,30,68,.72)]',
+          '[transition:background_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]',
+          !reduced && 'animate-[vfloat_4.2s_ease-in-out_infinite]',
+        )}
       >
         {/* Soft ring that widens on hover, so the pink reads as a live control. */}
         <span
           aria-hidden="true"
-          style={{
-            position: 'absolute', inset: -4, borderRadius: radius.pill, pointerEvents: 'none',
-            border: '1.5px solid rgba(255,51,88,.45)',
-            opacity: h && !reduced ? 1 : 0,
-            transform: h && !reduced ? 'scale(1)' : 'scale(.86)',
-            transition: 'opacity ' + motion.base + ', transform ' + motion.spring,
-          }}
+          className={cn(
+            'absolute -inset-[4px] rounded-[999px] pointer-events-none border-[1.5px] border-solid border-[rgba(255,51,88,.45)]',
+            'opacity-0 [transform:scale(.86)] [transition:opacity_.28s_cubic-bezier(.2,.7,.2,1),transform_.42s_cubic-bezier(.16,1.06,.3,1.12)]',
+            !reduced && 'group-hover:opacity-100 group-hover:[transform:scale(1)]',
+          )}
         />
         <ChatGlyph />
         {unread > 0 && (
           <span
-            style={{
-              position: 'absolute', top: -3, right: -3, minWidth: 21, height: 21, borderRadius: radius.pill,
-              background: color.yellow, color: color.purple, border: '2px solid ' + color.white,
-              ...monoText, fontSize: 10, fontWeight: 700, lineHeight: '17px', padding: '0 4px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px -2px rgba(52,0,87,.45)',
-              animation: reduced ? undefined : 'vpop .4s cubic-bezier(.16,1.06,.3,1.12) both',
-            }}
+            className={cn(
+              'absolute -top-[3px] -right-[3px] min-w-[21px] h-[21px] rounded-[999px] bg-valle-yellow text-valle-purple border-2 border-solid border-white',
+              'font-mono text-[10px] font-bold leading-[17px] py-0 px-[4px] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(52,0,87,.45)]',
+              !reduced && 'animate-[vpop_.4s_cubic-bezier(.16,1.06,.3,1.12)_both]',
+            )}
           >
             {unread > 9 ? '9+' : unread}
           </span>
@@ -176,16 +162,15 @@ function Launcher({ onClick, unread, bottom, right, reduced }: {
 /** Three dots with a staggered bounce, shown while staff is typing. */
 function TypingDots({ reduced }: { reduced: boolean }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: 4.5, height: 12 }} aria-hidden="true">
+    <span className="inline-flex items-end gap-[4.5px] h-[12px]" aria-hidden="true">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          style={{
-            width: 6, height: 6, borderRadius: radius.pill, background: color.violet, display: 'block',
-            opacity: reduced ? 0.55 : undefined,
-            animation: reduced ? undefined : 'vdot 1.05s ease-in-out infinite',
-            animationDelay: reduced ? undefined : i * 0.15 + 's',
-          }}
+          className={cn(
+            'block w-[6px] h-[6px] rounded-[999px] bg-valle-violet',
+            reduced ? 'opacity-[.55]' : 'animate-[vdot_1.05s_ease-in-out_infinite]',
+          )}
+          style={reduced ? undefined : { animationDelay: i * 0.15 + 's' }}
         />
       ))}
     </span>
@@ -196,57 +181,37 @@ function TypingDots({ reduced }: { reduced: boolean }) {
 function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; visitorKey: string }) {
   const mine = m.sender === 'visitor';
   const t = useT();
-  const enter = reduced ? 'vfade .2s ease both' : 'vrise .32s cubic-bezier(.2,.7,.2,1) both';
+  const enter = reduced ? fadeIn : 'animate-[vrise_.32s_cubic-bezier(.2,.7,.2,1)_both]';
 
   if (m.sender === 'system') {
     return (
-      <div style={{
-        ...monoText, fontSize: 9.5, letterSpacing: '.1em', textTransform: 'uppercase',
-        color: 'rgba(52,0,87,.45)', textAlign: 'center', margin: '10px 0', animation: enter,
-      }}>
+      <div className={cn('font-mono text-[9.5px] tracking-[.1em] uppercase text-[rgba(52,0,87,.45)] text-center my-[10px] mx-0', enter)}>
         {m.body}
       </div>
     );
   }
 
-  const skin: CSSProperties = mine
-    ? {
-      background: color.purple, color: color.white, borderBottomRightRadius: 6,
-      boxShadow: '0 10px 22px -14px rgba(52,0,87,.85)',
-    }
-    : {
-      background: color.tint, color: color.purple, border: '1.5px solid ' + color.border,
-      borderBottomLeftRadius: 6,
-    };
-
   return (
-    <div style={{
-      display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: 9,
-      animation: enter,
-    }}>
-      <div style={{ maxWidth: '82%', minWidth: 0, opacity: m.pending ? 0.7 : 1 }}>
+    <div className={cn('flex mb-[9px]', mine ? 'justify-end' : 'justify-start', enter)}>
+      <div className={cn('max-w-[82%] min-w-0', m.pending ? 'opacity-70' : 'opacity-100')}>
         {!mine && m.staffName && (
-          <div style={{
-            ...monoText, fontSize: 9, fontWeight: 700, letterSpacing: '.14em',
-            color: color.violet, marginBottom: 4, paddingLeft: 2,
-          }}>
+          <div className="font-mono text-[9px] font-bold tracking-[.14em] text-valle-violet mb-[4px] pl-[2px]">
             {m.staffName.toUpperCase()}
           </div>
         )}
-        <div style={{
-          ...skin, borderRadius: 15, padding: '10px 13px', fontSize: 14, lineHeight: 1.45,
-          whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'grid', gap: 8,
-        }}>
+        <div className={cn(
+          'rounded-[15px] py-[10px] px-[13px] text-[14px] leading-[1.45] whitespace-pre-wrap [word-break:break-word] grid gap-[8px]',
+          mine
+            ? 'bg-valle-purple text-white rounded-br-[6px] shadow-[0_10px_22px_-14px_rgba(52,0,87,.85)]'
+            : 'bg-[#F7F3FF] text-valle-purple border-[1.5px] border-solid border-valle-lilac rounded-bl-[6px]',
+        )}>
           {m.attachments?.map((a) => (
             <AttachmentView key={a.id} a={a} mine={mine} url={m.localUrl || attachmentUrl(a, { visitorKey })} />
           ))}
           {m.body && <div>{linkify(m.body, mine ? '#FFFC33' : color.violet)}</div>}
         </div>
         {m.failed && (
-          <div style={{
-            ...monoText, fontSize: 9, letterSpacing: '.08em', color: color.pinkDark,
-            marginTop: 4, textAlign: 'right',
-          }}>
+          <div className="font-mono text-[9px] tracking-[.08em] text-[#D91E44] mt-[4px] text-right">
             {t('NOT SENT · CHECK YOUR CONNECTION')}
           </div>
         )}
@@ -421,13 +386,6 @@ export function ChatWidget() {
     return <Launcher onClick={openPanel} unread={unread} bottom={bottom} right={right} reduced={reduced} />;
   }
 
-  const inputStyle: CSSProperties = {
-    width: '100%', border: '1.5px solid ' + color.border, background: color.tint,
-    borderRadius: radius.md, padding: '11px 13px', fontFamily: 'inherit', fontSize: 14,
-    outline: 'none', color: color.purple,
-    transition: 'border-color ' + motion.fast + ', box-shadow ' + motion.fast,
-  };
-
   const panelAnim = reduced
     ? 'vfade .2s ease both'
     : (closing
@@ -438,45 +396,31 @@ export function ChatWidget() {
     <div
       role="dialog"
       aria-label={t('Chat with VALLÉ')}
-      style={{
-        position: 'fixed', zIndex: 86, bottom, right,
-        left: isMobile ? 12 : 'auto', width: isMobile ? 'auto' : PANEL_W,
-        maxHeight: isMobile ? 'calc(100vh - 170px)' : 'min(540px,calc(100vh - 120px))',
-        height: isMobile ? 'calc(100vh - 170px)' : 520,
-        background: color.tint, borderRadius: 20, overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: shadow.panel,
-        transformOrigin: 'bottom right',
-        animation: panelAnim,
-        fontFamily: font.body, color: color.purple,
-      }}
+      className={cn(
+        'fixed z-[86] bg-[#F7F3FF] rounded-[20px] overflow-hidden flex flex-col shadow-[0_40px_90px_-20px_rgba(0,0,0,.6)] origin-bottom-right font-sans text-valle-purple',
+        isMobile ? 'left-[12px] w-auto max-h-[calc(100vh-170px)] h-[calc(100vh-170px)]' : 'left-auto max-h-[min(540px,calc(100vh-120px))] h-[520px]',
+      )}
+      // position and the open/close spring depend on viewport and state
+      style={{ bottom, right, width: isMobile ? 'auto' : PANEL_W, animation: panelAnim }}
     >
       {/* ------------------------------------------------------------ header -- */}
-      <div style={{
-        position: 'relative', background: color.purple, color: color.white,
-        padding: '14px 15px 13px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0,
-        overflow: 'hidden',
-      }}>
+      <div className="relative bg-valle-purple text-white pt-[14px] px-[15px] pb-[13px] flex items-center gap-[12px] shrink-0 overflow-hidden">
         {/* Soft violet wash behind the lockup, purely decorative. */}
         <span
           aria-hidden="true"
-          style={{
-            position: 'absolute', top: -46, right: -30, width: 150, height: 150, borderRadius: '50%',
-            background: 'radial-gradient(circle,rgba(115,51,255,.55) 0%,rgba(115,51,255,0) 70%)',
-            pointerEvents: 'none',
-          }}
+          className="absolute -top-[46px] -right-[30px] w-[150px] h-[150px] rounded-[50%] bg-[radial-gradient(circle,rgba(115,51,255,.55)_0%,rgba(115,51,255,0)_70%)] pointer-events-none"
         />
-        <div style={{ minWidth: 0, flex: 1, position: 'relative' }}>
+        <div className="min-w-0 flex-1 relative">
           <Lockup />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 9 }}>
+          <div className="flex items-center gap-[7px] mt-[9px]">
             <span
-              style={{
-                width: 7, height: 7, borderRadius: radius.pill, flexShrink: 0, display: 'block',
-                background: connected ? color.green : '#FFB020',
-                animation: connected && !reduced ? 'vhalo 2.2s ease-out infinite' : undefined,
-              }}
+              className={cn(
+                'block w-[7px] h-[7px] rounded-[999px] shrink-0',
+                connected ? 'bg-valle-green' : 'bg-[#FFB020]',
+                connected && !reduced && 'animate-[vhalo_2.2s_ease-out_infinite]',
+              )}
             />
-            <span style={{ ...monoText, fontSize: 9.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.72)' }}>
+            <span className="font-mono text-[9.5px] tracking-[.12em] text-[rgba(255,255,255,.72)]">
               {statusLabel}
             </span>
           </div>
@@ -484,14 +428,7 @@ export function ChatWidget() {
         <button
           onClick={closePanel}
           aria-label={t('Close chat')}
-          className="press"
-          style={{
-            position: 'relative',
-            border: '1.5px solid rgba(255,255,255,.32)', background: 'rgba(255,255,255,.06)', color: color.white,
-            width: 31, height: 31, borderRadius: radius.pill, cursor: 'pointer', fontSize: 16, lineHeight: 1,
-            flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background ' + motion.fast,
-          }}
+          className="press relative border-[1.5px] border-solid border-[rgba(255,255,255,.32)] bg-[rgba(255,255,255,.06)] text-white w-[31px] h-[31px] rounded-[999px] cursor-pointer text-[16px] leading-none shrink-0 flex items-center justify-center [transition:background_.18s_cubic-bezier(.2,.7,.2,1)]"
         >
           ×
         </button>
@@ -500,53 +437,36 @@ export function ChatWidget() {
 
       {intro ? (
         /* ------------------------------------------------ first-run identity -- */
-        <div
-          className="no-scrollbar"
-          style={{
-            flex: 1, overflowY: 'auto', padding: 18, background: color.white,
-            animation: reduced ? 'vfade .2s ease both' : 'vrise .34s cubic-bezier(.2,.7,.2,1) both',
-          }}
-        >
-          <div style={{ ...displayText, fontSize: 30, lineHeight: 1 }}>{t('Hi there')}</div>
-          <p style={{ fontSize: 13.5, lineHeight: 1.55, color: 'rgba(52,0,87,.68)', margin: '10px 0 18px' }}>
+        <div className={cn('no-scrollbar flex-1 overflow-y-auto p-[18px] bg-white', reduced ? fadeIn : riseIn)}>
+          <div className={cn(displayText, 'text-[30px] leading-none')}>{t('Hi there')}</div>
+          <p className="text-[13.5px] leading-[1.55] text-[rgba(52,0,87,.68)] mt-[10px] mx-0 mb-[18px]">
             {t('Ask us anything about activities, packages or planning your day. Leave your details if you would like us to follow up; both are optional.')}
           </p>
 
-          <label htmlFor="vw-name" style={{ ...monoText, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>
+          <label htmlFor="vw-name" className={fieldLabel}>
             {t('NAME')}
           </label>
-          <div style={{ marginTop: 5, marginBottom: 12 }}>
-            <input id="vw-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Your name')} style={inputStyle} />
+          <div className="mt-[5px] mb-[12px]">
+            <input id="vw-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Your name')} className={inputCls} />
           </div>
 
-          <label htmlFor="vw-email" style={{ ...monoText, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', color: color.violet }}>
+          <label htmlFor="vw-email" className={fieldLabel}>
             {t('EMAIL')}
           </label>
-          <div style={{ marginTop: 5, marginBottom: 18 }}>
-            <input id="vw-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
+          <div className="mt-[5px] mb-[18px]">
+            <input id="vw-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
           </div>
 
-          <div style={{ display: 'flex', gap: 9 }}>
+          <div className="flex gap-[9px]">
             <button
               onClick={() => { setName(''); setEmail(''); beginChat(); }}
-              className="press"
-              style={{
-                flex: 1, border: '1.5px solid ' + color.border, background: 'transparent', color: color.purple,
-                cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
-                padding: '11px 0', borderRadius: radius.pill,
-                transition: 'background ' + motion.fast,
-              }}
+              className="press flex-1 border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple cursor-pointer [font-family:inherit] text-[14px] font-bold py-[11px] px-0 rounded-[999px] [transition:background_.18s_cubic-bezier(.2,.7,.2,1)]"
             >
               {t('Skip')}
             </button>
             <button
               onClick={beginChat}
-              className="press"
-              style={{
-                flex: 1.4, border: 0, background: color.pink, color: color.white, cursor: 'pointer',
-                fontFamily: 'inherit', fontSize: 14, fontWeight: 700, padding: '11px 0',
-                borderRadius: radius.pill, boxShadow: shadow.pink,
-              }}
+              className="press flex-[1.4] border-0 bg-valle-red text-white cursor-pointer [font-family:inherit] text-[14px] font-bold py-[11px] px-0 rounded-[999px] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]"
             >
               {t('Start chat')} <Fwd />
             </button>
@@ -557,15 +477,10 @@ export function ChatWidget() {
           {/* -------------------------------------------------------- messages -- */}
           <div
             ref={scrollRef}
-            className="no-scrollbar"
-            style={{ flex: 1, overflowY: 'auto', padding: 14, minHeight: 0, background: color.white }}
+            className="no-scrollbar flex-1 overflow-y-auto p-[14px] min-h-0 bg-white"
           >
             {msgs.length === 0 && (
-              <div style={{
-                ...monoText, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.45)',
-                textAlign: 'center', paddingTop: 18,
-                animation: reduced ? 'vfade .2s ease both' : 'vrise .34s cubic-bezier(.2,.7,.2,1) both',
-              }}>
+              <div className={cn('font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.45)] text-center pt-[18px]', reduced ? fadeIn : riseIn)}>
                 {t('SAY HELLO · WE ARE LISTENING')}
               </div>
             )}
@@ -573,15 +488,13 @@ export function ChatWidget() {
 
             {staffTyping && (
               <div
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 9,
-                  background: color.tint, border: '1.5px solid ' + color.border,
-                  borderRadius: 15, borderBottomLeftRadius: 6, padding: '9px 13px',
-                  animation: reduced ? 'vfade .2s ease both' : 'vrise .28s cubic-bezier(.2,.7,.2,1) both',
-                }}
+                className={cn(
+                  'inline-flex items-center gap-[9px] bg-[#F7F3FF] border-[1.5px] border-solid border-valle-lilac rounded-[15px] rounded-bl-[6px] py-[9px] px-[13px]',
+                  reduced ? fadeIn : 'animate-[vrise_.28s_cubic-bezier(.2,.7,.2,1)_both]',
+                )}
               >
                 <TypingDots reduced={reduced} />
-                <span style={{ ...monoText, fontSize: 9, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>
+                <span className="font-mono text-[9px] tracking-[.12em] text-[rgba(52,0,87,.6)]">
                   {t('VALLÉ IS TYPING')}
                 </span>
               </div>
@@ -589,26 +502,20 @@ export function ChatWidget() {
           </div>
 
           {!connected && (
-            <div style={{
-              ...monoText, fontSize: 9.5, letterSpacing: '.1em', color: '#8A6A00',
-              background: 'rgba(255,176,32,.16)', padding: '7px 14px', flexShrink: 0,
-            }}>
+            <div className="font-mono text-[9.5px] tracking-[.1em] text-[#8A6A00] bg-[rgba(255,176,32,.16)] py-[7px] px-[14px] shrink-0">
               {status === 'connecting' ? t('CONNECTING…') : t('RECONNECTING…')} {t('YOUR MESSAGES WILL STILL GO THROUGH')}
             </div>
           )}
 
           {/* -------------------------------------------------------- composer -- */}
           {fileErr && (
-            <div role="alert" style={{ ...monoText, fontSize: 9.5, letterSpacing: '.08em', color: color.pinkDark, background: '#FFE2E7', padding: '7px 14px', flexShrink: 0 }}>
+            <div role="alert" className="font-mono text-[9.5px] tracking-[.08em] text-[#D91E44] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
               {fileErr.toUpperCase()}
             </div>
           )}
           <form
             onSubmit={submit}
-            style={{
-              display: 'flex', gap: 8, padding: 11, borderTop: '1.5px solid ' + color.border,
-              background: color.white, flexShrink: 0, position: 'relative', alignItems: 'center',
-            }}
+            className="flex gap-[8px] p-[11px] border-t-[1.5px] border-solid border-valle-lilac bg-white shrink-0 relative items-center"
           >
             <ComposerTools onFile={sendFile} onEmoji={(e) => setDraft((d) => d + e)} />
             <input
@@ -617,19 +524,16 @@ export function ChatWidget() {
               maxLength={2000}
               placeholder={t('Type a message…')}
               aria-label={t('Message')}
-              style={{ ...inputStyle, flex: 1, minWidth: 0 }}
+              className={cn(inputCls, 'flex-1 min-w-0')}
             />
             <button
               type="submit"
               disabled={!draft.trim()}
-              className="press"
-              style={{
-                border: 0, background: color.pink, color: color.white, borderRadius: radius.pill,
-                cursor: draft.trim() ? 'pointer' : 'default', opacity: draft.trim() ? 1 : 0.45,
-                fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '0 18px', flexShrink: 0,
-                boxShadow: draft.trim() ? shadow.pink : 'none',
-                transition: 'opacity ' + motion.fast + ', box-shadow ' + motion.fast,
-              }}
+              className={cn(
+                'press border-0 bg-valle-red text-white rounded-[999px] [font-family:inherit] text-[13.5px] font-bold py-0 px-[18px] shrink-0',
+                '[transition:opacity_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]',
+                draft.trim() ? 'cursor-pointer opacity-100 shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]' : 'cursor-default opacity-45 shadow-none',
+              )}
             >
               {t('Send')}
             </button>

@@ -4,7 +4,6 @@ import { abs, breadcrumbs, useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
-import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
@@ -15,11 +14,14 @@ import { TableReservation } from '../components/TableReservation';
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{label}</div>
-      <div style={{ fontWeight: 600, fontSize: 15, marginTop: 4, fontFamily: "'Work Sans',sans-serif" }}>{value}</div>
+      <div className="text-[10px] tracking-[.14em] opacity-60">{label}</div>
+      <div className="mt-1 font-sans text-[15px] font-semibold">{value}</div>
     </div>
   );
 }
+
+const H2 = 'm-0 origin-bottom-left -rotate-2 font-display text-[clamp(26px,3.4vw,42px)] font-black tracking-[-0.01em] uppercase italic';
+const HEAD = 'flex flex-wrap items-baseline justify-between gap-4 border-0 border-b-2 border-solid border-valle-purple pb-3.5';
 
 export default function RestaurantPage() {
   const t = useT();
@@ -29,8 +31,6 @@ export default function RestaurantPage() {
   const goto = useGoto();
   const { RESTOS } = useCatalog();
   const { id } = useParams<{ id: string }>();
-  const [backH, backBind] = useHover();
-  const [otherH, otherBind] = useHover();
 
   const valid = id === 'chamouze' || id === 'citronelle';
   const r = valid ? RESTOS[id as string] : undefined;
@@ -53,75 +53,58 @@ export default function RestaurantPage() {
   const rMenuPdf = r.menuPdf || '';
 
   return (
-    <main ref={ref} style={{ maxWidth: 1180, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+    <main ref={ref} className="mx-auto max-w-[1180px] px-[clamp(16px,3.5vw,40px)] pt-[104px] pb-0">
       <a
         href={paths.dine()}
         onClick={(e) => { e.preventDefault(); goto.dine(); }}
-        {...backBind}
-        style={{
-          display: 'inline-block', textDecoration: 'none', cursor: 'pointer', fontFamily: 'inherit',
-          fontSize: 14, fontWeight: 700, color: backH ? '#FF3358' : '#7333FF', padding: '8px 0',
-        }}
+        className="inline-block cursor-pointer px-0 py-2 font-[inherit] text-[14px] font-bold text-valle-violet! hover:text-valle-red!"
+        style={{ textDecoration: 'none' }}
       >{t('← All dining')}</a>
 
       {/* Hero header */}
-      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(52vh,480px)', minHeight: 300, background: '#EBE2FF', marginTop: 12 }}>
+      <div className="relative mt-3 h-[min(52vh,480px)] min-h-[300px] overflow-hidden rounded-[24px] bg-valle-lilac">
         <Img src={r.img} alt={r.name} priority style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.82), rgba(31,0,51,0) 55%)' }} />
-        <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(18px,3vw,30px)', color: '#FFFFFF' }}>
-          <span style={{
-            background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 10.5,
-            fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px',
-            display: 'inline-block', transform: 'rotate(-4deg)',
-          }}>{r.badge}</span>
-          <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom', marginTop: 16 }}>
-            <h1 style={{
-              fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
-              fontSize: 'clamp(36px,5.6vw,76px)', lineHeight: 0.82, letterSpacing: '-0.01em',
-              margin: 0, textTransform: 'uppercase',
-            }}>{r.name}</h1>
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(31,0,51,.82),rgba(31,0,51,0)_55%)]" />
+        <div className="absolute right-[clamp(18px,3vw,36px)] bottom-[clamp(18px,3vw,30px)] left-[clamp(18px,3vw,36px)] text-white">
+          <span className="inline-block -rotate-4 rounded-full bg-valle-yellow px-[13px] py-[7px] font-mono text-[10.5px] font-bold tracking-[.1em] text-valle-purple">{r.badge}</span>
+          <div className="mt-4 origin-bottom-left -rotate-4">
+            <h1 className="m-0 font-display text-[clamp(36px,5.6vw,76px)] leading-[0.82] font-black tracking-[-0.01em] uppercase italic">{r.name}</h1>
           </div>
-          <div style={{ fontSize: 'clamp(14px,1.6vw,17px)', opacity: 0.92, marginTop: 14 }}>{r.tag}</div>
+          <div className="mt-3.5 text-[clamp(14px,1.6vw,17px)] opacity-92">{r.tag}</div>
         </div>
       </div>
 
       {/* About + facts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(24px,4vw,48px)', marginTop: 'clamp(24px,4vw,40px)', alignItems: 'start' }}>
+      <div className="mt-[clamp(24px,4vw,40px)] grid [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))] items-start gap-[clamp(24px,4vw,48px)]">
         <div>
-          <p style={{ fontSize: 'clamp(16px,1.8vw,18.5px)', lineHeight: 1.65, color: 'rgba(52,0,87,.82)', margin: 0 }}>{r.about}</p>
-          <div style={{ marginTop: 18, background: '#FFFFE2', borderRadius: 14, padding: '14px 18px', fontSize: 14, color: '#340057', fontWeight: 600 }}>{r.detail}</div>
+          <p className="m-0 text-[clamp(16px,1.8vw,18.5px)] leading-[1.65] text-valle-purple/82">{r.about}</p>
+          <div className="mt-[18px] rounded-[14px] bg-[#FFFFE2] px-[18px] py-3.5 text-[14px] font-semibold text-valle-purple">{r.detail}</div>
         </div>
-        <div style={{ background: '#340057', color: '#FFFFFF', borderRadius: 20, padding: '0 0 26px', overflow: 'hidden' }}>
+        <div className="overflow-hidden rounded-[20px] bg-valle-purple px-0 pt-0 pb-[26px] text-white">
           <StripesSm />
-          <div style={{ padding: '22px 26px 0' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: "'Chivo Mono',monospace" }}>
+          <div className="px-[26px] pt-[22px] pb-0">
+            <div className="grid grid-cols-[1fr_1fr] gap-4 font-mono">
               <Fact label={t('CUISINE')} value={r.cuisine} />
               <Fact label={t('HOURS')} value={r.hours} />
               <Fact label={t('PRICES')} value={r.price} />
               <Fact label={t('SETTING')} value={r.setting} />
             </div>
-            <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
+            <div className="mx-0 my-5 h-px bg-white/20" />
             <TableReservation restaurantId={id as string} restaurantName={r.name} menuGroups={rMenuGroups} />
             <a
               href="tel:+2306604477"
-              style={{
-                display: 'block', textAlign: 'center', border: '1.5px solid rgba(255,255,255,.5)',
-                color: '#FFFFFF', fontSize: 14, fontWeight: 700, padding: '13px 0', borderRadius: 999, marginTop: 10,
-              }}
+              className="mt-2.5 block rounded-full border-[1.5px] border-solid border-white/50 px-0 py-[13px] text-center text-[14px] font-bold"
+              style={{ color: '#FFFFFF' }}
             >{t('Call')} +230 660 44 77</a>
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, opacity: 0.6, textAlign: 'center', marginTop: 12 }}>{t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
+            <div className="mt-3 text-center font-mono text-[10px] opacity-60">{t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
           </div>
         </div>
       </div>
 
       {/* Gallery */}
-      <div style={{ marginTop: 'clamp(40px,6vw,64px)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14 }}>
-          <h2 style={{
-            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
-            fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
-            textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>{t('Inside the restaurant')}</h2>
+      <div className="mt-[clamp(40px,6vw,64px)]">
+        <div className={HEAD}>
+          <h2 className={H2}>{t('Inside the restaurant')}</h2>
           <CarouselArrows prev={gal.prev} next={gal.next} canPrev={gal.canPrev} canNext={gal.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />
         </div>
         <div id="vgal" className="pt-[18px] pb-[14px]">
@@ -136,64 +119,50 @@ export default function RestaurantPage() {
       </div>
 
       {/* Menu & prices */}
-      <div style={{ marginTop: 'clamp(32px,5vw,52px)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>
-          <h2 style={{
-            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
-            fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
-            textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>{t('Menu & prices')}</h2>
+      <div className="mt-[clamp(32px,5vw,52px)]">
+        <div className={HEAD + ' mb-[18px]'}>
+          <h2 className={H2}>{t('Menu & prices')}</h2>
           {rMenuPdf !== '' && (
-            <a href={rMenuPdf} target="_blank" style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em' }}>{t('FULL MENU (PDF) ↗')}</a>
+            <a href={rMenuPdf} target="_blank" className="font-mono text-[12px] font-semibold tracking-[.12em]">{t('FULL MENU (PDF) ↗')}</a>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(295px,1fr))', gap: 14, alignItems: 'start' }}>
+        <div className="grid [grid-template-columns:repeat(auto-fit,minmax(295px,1fr))] items-start gap-3.5">
           {rMenuGroups.map((mg) => (
-            <div key={mg.title} style={{ background: '#FFFFFF', borderRadius: 18, padding: '18px 22px 20px', boxShadow: '0 0 0 1.5px #EBE2FF' }}>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{mg.title}</div>
+            <div key={mg.title} className="rounded-[18px] bg-white px-[22px] pt-[18px] pb-5 shadow-[0_0_0_1.5px_#EBE2FF]">
+              <div className="font-mono text-[11px] font-bold tracking-[.14em] text-valle-violet">{mg.title}</div>
               {mg.items.map((mi) => (
-                <div key={mi.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, padding: '9px 0', borderBottom: '1px dashed #EBE2FF' }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 14.5 }}>{mi.n}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(52,0,87,.6)', lineHeight: 1.45 }}>{mi.note}</div>
+                <div key={mi.n} className="flex items-baseline justify-between gap-3 px-0 py-[9px]" style={{ borderBottom: '1px dashed #EBE2FF' }}>
+                  <div className="min-w-0">
+                    <div className="text-[14.5px] font-semibold">{mi.n}</div>
+                    <div className="text-[12px] leading-[1.45] text-valle-purple/60">{mi.note}</div>
                   </div>
-                  <div style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', color: '#340057' }}>{mi.p}</div>
+                  <div className="font-mono text-[13px] font-bold whitespace-nowrap text-valle-purple">{mi.p}</div>
                 </div>
               ))}
             </div>
           ))}
         </div>
-        <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.55)', marginTop: 14 }}>{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
+        <div className="mt-3.5 font-mono text-[11px] text-valle-purple/55">{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
       </div>
 
       {/* Also in the valley */}
-      <div style={{ marginTop: 'clamp(40px,6vw,64px)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>
-          <h2 style={{
-            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
-            fontSize: 'clamp(26px,3.4vw,42px)', letterSpacing: '-0.01em', margin: 0,
-            textTransform: 'uppercase', transform: 'rotate(-2deg)', transformOrigin: 'left bottom',
-          }}>{t('Also in the valley')}</h2>
+      <div className="mt-[clamp(40px,6vw,64px)]">
+        <div className={HEAD + ' mb-[18px]'}>
+          <h2 className={H2}>{t('Also in the valley')}</h2>
         </div>
         <a
           href={paths.resto(otherId)}
           onClick={(e) => { e.preventDefault(); goto.resto(otherId); }}
-          {...otherBind}
-          style={{
-            cursor: 'pointer', color: 'inherit', textDecoration: 'none', display: 'flex', flexWrap: 'wrap', background: '#FFFFFF',
-            borderRadius: 20, overflow: 'hidden',
-            boxShadow: otherH ? '0 18px 36px -16px rgba(52,0,87,.4)' : '0 0 0 1.5px #EBE2FF',
-            transition: 'transform .25s ease, box-shadow .25s ease',
-            transform: otherH ? 'translateY(-4px)' : undefined,
-          }}
+          className="flex cursor-pointer flex-wrap overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1.5px_#EBE2FF] transition-[transform,box-shadow] duration-[.25s] ease-[ease] hover:shadow-[0_18px_36px_-16px_rgba(52,0,87,.4)] hover:[transform:translateY(-4px)]"
+          style={{ color: 'inherit', textDecoration: 'none' }}
         >
-          <div style={{ flex: 1, minWidth: 260, minHeight: 200, background: '#EBE2FF' }}>
+          <div className="min-h-[200px] min-w-[260px] flex-1 bg-valle-lilac">
             <Img src={other.img} alt={other.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
-          <div style={{ flex: 1.6, minWidth: 260, padding: '24px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 26, textTransform: 'uppercase' }}>{other.name}</div>
-            <div style={{ fontSize: 14.5, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.5 }}>{other.tag}</div>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: '#7333FF', marginTop: 12 }}>{t('Visit →')}</div>
+          <div className="flex min-w-[260px] flex-[1.6] flex-col justify-center px-7 py-6">
+            <div className="font-display text-[26px] font-extrabold uppercase italic">{other.name}</div>
+            <div className="mt-1.5 text-[14.5px] leading-[1.5] text-valle-purple/70">{other.tag}</div>
+            <div className="mt-3 text-[13.5px] font-bold text-valle-violet">{t('Visit →')}</div>
           </div>
         </a>
       </div>

@@ -38,6 +38,16 @@ function ago(iso?: string): string {
 
 const KIND: Record<BackupRun['kind'], string> = { backup: 'Nightly backup', restore_test: 'Restore test' };
 
+/** Off-site copy of a nightly backup (API fields since migration 023; absent on older runs). */
+type WithOffsite = { offsiteStatus?: '' | 'not_configured' | 'uploaded' | 'failed'; offsiteDetail?: string };
+function offsite(run: BackupRun): { text: string; color: string } | null {
+  const o = run as BackupRun & WithOffsite;
+  if (o.offsiteStatus === 'uploaded') return { text: 'Off-site copy: uploaded', color: '#12B54A' };
+  if (o.offsiteStatus === 'not_configured') return { text: 'Off-site copy: not configured', color: 'rgba(52,0,87,.6)' };
+  if (o.offsiteStatus === 'failed') return { text: `Off-site copy: failed: ${o.offsiteDetail || 'unknown error'}`, color: '#D91E44' };
+  return null;
+}
+
 export default function BackupsPanel() {
   const [data, setData] = useState<BackupStatus | null>(null);
   const [err, setErr] = useState('');
@@ -80,6 +90,11 @@ export default function BackupsPanel() {
                   accent={data.lastGoodRestoreTest ? '#33FF74' : '#FFFC33'}
                 />
               </div>
+              {data.lastBackup && offsite(data.lastBackup) && (
+                <p data-testid="backup-offsite" style={{ fontSize: 13.5, fontWeight: 700, margin: '14px 0 0', color: offsite(data.lastBackup)!.color }}>
+                  {offsite(data.lastBackup)!.text}
+                </p>
+              )}
               {data.problems.length > 0 && (
                 <ul data-testid="backup-problems" style={{ margin: '14px 0 0', paddingLeft: 18, fontSize: 13.5, lineHeight: 1.55, color: data.state === 'failing' ? '#D91E44' : '#8A7A00' }}>
                   {data.problems.map((p) => <li key={p}>{p}</li>)}
@@ -108,7 +123,10 @@ export default function BackupsPanel() {
                     <td style={{ ...td, fontWeight: 700, color: r.ok ? '#12B54A' : '#D91E44' }}>{r.ok ? 'Passed' : 'Failed'}</td>
                     <td style={tdNum}>{size(r.bytes)}</td>
                     <td style={tdNum}>{r.rows ? r.rows.toLocaleString('en') : ''}</td>
-                    <td style={{ ...td, whiteSpace: 'normal', minWidth: 220, color: 'rgba(52,0,87,.7)' }}>{r.detail}</td>
+                    <td style={{ ...td, whiteSpace: 'normal', minWidth: 220, color: 'rgba(52,0,87,.7)' }}>
+                      {r.detail}
+                      {offsite(r) && <div style={{ color: offsite(r)!.color, marginTop: 2 }}>{offsite(r)!.text}</div>}
+                    </td>
                   </tr>
                 ))}
               </tbody>

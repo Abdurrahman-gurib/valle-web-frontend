@@ -7,7 +7,7 @@ import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { paths, useGoto } from '../lib/nav';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { useHover } from '../hooks/useHover';
+import { cn } from '@/lib/utils';
 import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
@@ -26,52 +26,45 @@ void MENU_KEYS;
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 function NavBtn({ label, onClick, color, chev, href, snug }: { label: string; onClick: () => void; color: string; chev?: string; href?: string; snug?: boolean }) {
-  const [h, bind] = useHover();
-  const style = {
-    border: 0, background: h ? 'rgba(255,51,88,.14)' : 'transparent', cursor: 'pointer', textDecoration: 'none',
-    fontFamily: 'inherit', // longer (non-English) labels stop growing at the size that fits the 1320px row
-    fontSize: snug ? 'clamp(13px, 1.05vw, 14.3px)' : 'clamp(13px, 1.05vw, 15px)', fontWeight: 600, color,
-    padding: snug ? '10px clamp(7px, 0.95vw, 13px)' : '10px clamp(7px, 0.95vw, 14px)',
-    borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
-  } as const;
+  const cls = cn(
+    'flex items-center gap-[6px] whitespace-nowrap rounded-[999px] border-0 bg-transparent cursor-pointer no-underline [font-family:inherit] font-semibold py-[10px] hover:bg-[rgba(255,51,88,.14)]',
+    // longer (non-English) labels stop growing at the size that fits the 1320px row
+    snug ? 'text-[length:clamp(13px,1.05vw,14.3px)] px-[clamp(7px,0.95vw,13px)]' : 'text-[length:clamp(13px,1.05vw,15px)] px-[clamp(7px,0.95vw,14px)]',
+  );
   // Real links get a real href (crawlable); menu toggles stay buttons.
   if (href) {
     return (
-      <a {...bind} href={href} onClick={(e) => { e.preventDefault(); onClick(); }} style={style}>
+      <a href={href} onClick={(e) => { e.preventDefault(); onClick(); }} className={cls} style={{ color, textDecoration: 'none' }}>
         {label}
       </a>
     );
   }
   return (
-    <button {...bind} onClick={onClick} aria-expanded={chev === '▲'} style={style}>
+    <button onClick={onClick} aria-expanded={chev === '▲'} className={cls} style={{ color }}>
       {label}
-      {chev && <motion.span aria-hidden animate={{ rotate: chev === '▲' ? 180 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} style={{ display: 'inline-flex', opacity: 0.75 }}><ChevronDown size={14} strokeWidth={2.5} /></motion.span>}
+      {chev && <motion.span aria-hidden animate={{ rotate: chev === '▲' ? 180 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} className="inline-flex opacity-75"><ChevronDown size={14} strokeWidth={2.5} /></motion.span>}
     </button>
   );
 }
 
 function MegaLink({ name, onClick, hoverColor = '#FF3358', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
-  const [h, bind] = useHover();
   return (
     <a
-      {...bind}
       href={href}
       onClick={(e) => { e.preventDefault(); onClick(); }}
-      style={{
-        display: 'block', textDecoration: 'none', cursor: 'pointer', fontSize: 15, fontWeight: 500, color: h ? hoverColor : '#340057',
-        padding: '5.5px 0', transform: h ? 'translateX(3px)' : 'none', transition: 'transform .15s ease',
-      }}
+      className="block cursor-pointer text-[15px] font-medium py-[5.5px] [--c:#340057] hover:[--c:var(--hc)] [transition:transform_.15s_ease] hover:[transform:translateX(3px)]"
+      // global a / a:hover colours are unlayered, so the colour stays inline and reads a class-driven variable
+      style={{ color: 'var(--c)', textDecoration: 'none', ['--hc' as string]: hoverColor } as CSSProperties}
     >
       {name}
     </a>
   );
 }
 
-const mobileNavRow: CSSProperties = {
-  cursor: 'pointer', fontSize: 16.5, fontWeight: 600, color: '#FFFFFF', padding: '12px 0',
-  borderBottom: '1px solid rgba(255,255,255,.16)', display: 'flex',
-  justifyContent: 'space-between', alignItems: 'center',
-};
+const mobileNavRow = 'cursor-pointer text-[16.5px] font-semibold text-white py-[12px] border-b border-solid border-[rgba(255,255,255,.16)] flex justify-between items-center animate-[vfadeup_.3s_ease_both]';
+const monoLink = 'block no-underline cursor-pointer font-mono text-[12px] font-semibold tracking-[.12em]';
+const megaPanel = 'absolute top-[70px] left-0 right-0 bg-white border-b border-solid border-valle-lilac shadow-[0_32px_60px_-20px_rgba(52,0,87,.35)]';
+const hamburgerBar = 'block w-[16px] h-[2px] bg-current rounded-[2px]';
 
 export function Header() {
   const app = useApp();
@@ -114,10 +107,6 @@ export function Header() {
   const [megaPkgOpen, setMegaPkgOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchQ, setSearchQ] = useState('');
-  const [hRate, bindRate] = useHover();
-  const [hDay, bindDay] = useHover();
-  const [hBook, bindBook] = useHover();
-  const [hZip, bindZip] = useHover();
 
   useEffect(() => {
     let raf = false;
@@ -170,35 +159,33 @@ export function Header() {
 
   return (
     <>
-      <header style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 90, transition: 'background .3s ease',
-        background: headerBg, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderBottom: headerBorder,
-      }}>
+      <header
+        className="fixed top-0 left-0 right-0 z-[90] [transition:background_.3s_ease] backdrop-blur-[14px]"
+        // --fg carries the state-driven foreground colour to the class-styled controls below
+        style={{ background: headerBg, borderBottom: headerBorder, ['--fg' as string]: headerFg } as CSSProperties}
+      >
         {/* The language offer rides on top of the fixed header so nothing covers it. */}
         <LanguageSuggest />
-        <div style={{
+        <div className={cn(
           // full width: the logo hugs the left edge and the actions the right
-          margin: '0 auto', padding: '0 clamp(16px,2.5vw,40px)', height: 70,
+          'mx-auto px-[clamp(16px,2.5vw,40px)] h-[70px] items-center gap-[clamp(12px,2.5vw,32px)]',
           // desktop: three columns so the menu sits in the true centre between logo and actions
-          ...(isMobile ? { display: 'flex' } : { display: 'grid', gridTemplateColumns: '1fr auto 1fr' }),
-          alignItems: 'center', gap: 'clamp(12px,2.5vw,32px)',
-        }}>
+          isMobile ? 'flex' : 'grid grid-cols-[1fr_auto_1fr]',
+        )}>
           <a
             href="/"
             aria-label={t('VALLÉ Advenature Park, home')}
             onClick={(e) => { e.preventDefault(); go(goto.home)(); }}
-            style={{
-              textDecoration: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', lineHeight: 1,
-              userSelect: 'none', transform: 'rotate(-4deg)', flexShrink: 0, justifySelf: 'start',
-            }}
+            className="cursor-pointer flex flex-col leading-none select-none [transform:rotate(-4deg)] shrink-0 justify-self-start"
+            style={{ color: 'inherit', textDecoration: 'none' }}
           >
-            <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 27, letterSpacing: '-0.01em', color: headerFg }}>VALLÉ</span>
-            <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 8, fontWeight: 600, letterSpacing: '.22em', color: headerFg, opacity: 0.75, marginTop: 2 }}>ADVENATURE™ PARK</span>
+            <span className="font-display italic font-black text-[27px] tracking-[-0.01em]" style={{ color: headerFg }}>VALLÉ</span>
+            <span className="font-mono text-[8px] font-semibold tracking-[.22em] opacity-75 mt-[2px]" style={{ color: headerFg }}>ADVENATURE™ PARK</span>
           </a>
 
           {!isMobile && (
             <>
-              <nav ref={navRef} style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0, justifyContent: 'center', overflow: 'hidden' }}>
+              <nav ref={navRef} className="flex items-center gap-[2px] min-w-0 justify-center overflow-hidden">
                 <NavBtn snug={lang !== 'en'} label={t('Explore')} chev={megaOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaOpen(!megaOpen); setMegaPkgOpen(false); }} />
                 <NavBtn snug={lang !== 'en'} label={t('Packages')} chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaPkgOpen(!megaPkgOpen); setMegaOpen(false); }} />
                 <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
@@ -206,52 +193,30 @@ export function Header() {
                 <NavBtn snug={lang !== 'en'} label={menu('Our story')} href={paths.story()} color={headerFg} onClick={go(goto.story)} />
                 <NavBtn snug={lang !== 'en'} label={menu('Vacancies')} href={paths.vacancies()} color={headerFg} onClick={go(gotoVacancies)} />
               </nav>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifySelf: 'end' }}>
+              <div className="flex items-center gap-[10px] justify-self-end">
                 <button
-                  {...bindRate}
                   onClick={app.openRateGate}
                   title={t('Change your rate')}
-                  style={{
-                    border: `1.5px solid ${hRate ? '#7333FF' : 'rgba(115,51,255,.5)'}`,
-                    background: hRate ? '#7333FF' : 'transparent', cursor: 'pointer',
-                    fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.1em',
-                    color: hRate ? '#FFFFFF' : headerFg, padding: '9px 12px', borderRadius: 999,
-                    whiteSpace: 'nowrap', lineHeight: 1,
-                  }}
+                  className="border-[1.5px] border-solid border-[rgba(115,51,255,.5)] bg-transparent cursor-pointer font-mono text-[11px] font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-violet hover:bg-valle-violet hover:text-white"
                 >
                   {app.rateTag} ⇄
                 </button>
                 <LanguagePicker fg={headerFg} />
                 <button
-                  {...bindDay}
                   onClick={() => { setMegaOpen(false); setMegaPkgOpen(false); app.openDay(); }}
                   title={t('Your selected experiences')}
-                  style={{
-                    border: `1.5px solid ${headerFg}`, opacity: hDay ? 1 : 0.92, background: 'transparent',
-                    cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, color: headerFg,
-                    padding: '9px 15px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 8,
-                    whiteSpace: 'nowrap', transform: hDay ? 'translateY(-1px)' : 'none',
-                  }}
+                  className="border-[1.5px] border-solid border-[var(--fg)] opacity-[.92] hover:opacity-100 bg-transparent cursor-pointer [font-family:inherit] text-[13.5px] font-bold text-[var(--fg)] py-[9px] px-[15px] rounded-[999px] flex items-center gap-[8px] whitespace-nowrap hover:[transform:translateY(-1px)]"
                 >
                   {t('My Day')}
                   {app.hasSel && (
-                    <span style={{
-                      background: '#FF3358', color: '#FFFFFF', borderRadius: 999, minWidth: 20, height: 20,
-                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11.5, padding: '0 5px',
-                    }}>
+                    <span className="bg-valle-red text-white rounded-[999px] min-w-[20px] h-[20px] inline-flex items-center justify-center text-[11.5px] px-[5px]">
                       {app.selCount}
                     </span>
                   )}
                 </button>
                 <button
-                  {...bindBook}
                   onClick={go(goto.booking)}
-                  style={{
-                    border: 0, background: hBook ? '#D91E44' : '#FF3358', cursor: 'pointer', fontFamily: 'inherit',
-                    fontSize: 14, fontWeight: 700, color: '#FFFFFF', padding: '11px 20px', borderRadius: 999,
-                    boxShadow: '0 4px 14px rgba(255,51,88,.35)', whiteSpace: 'nowrap',
-                    transform: hBook ? 'translateY(-1px)' : 'none',
-                  }}
+                  className="border-0 bg-valle-red hover:bg-[#D91E44] cursor-pointer [font-family:inherit] text-[14px] font-bold text-white py-[11px] px-[20px] rounded-[999px] shadow-[0_4px_14px_rgba(255,51,88,.35)] whitespace-nowrap hover:[transform:translateY(-1px)]"
                 >
                   {t('Book now')}
                 </button>
@@ -260,15 +225,11 @@ export function Header() {
           )}
 
           {isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginLeft: 'auto' }}>
+            <div className="flex items-center gap-[7px] ml-auto">
               <button
                 onClick={app.openRateGate}
                 title={t('Change your rate')}
-                style={{
-                  border: '1.5px solid rgba(115,51,255,.55)', background: 'transparent', cursor: 'pointer',
-                  fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                  color: headerFg, padding: '8px 9px', borderRadius: 999, whiteSpace: 'nowrap', lineHeight: 1, flexShrink: 0,
-                }}
+                className="border-[1.5px] border-solid border-[rgba(115,51,255,.55)] bg-transparent cursor-pointer font-mono text-[10px] font-bold tracking-[.06em] text-[var(--fg)] py-[8px] px-[9px] rounded-[999px] whitespace-nowrap leading-none shrink-0"
               >
                 {app.rateTag}
               </button>
@@ -278,37 +239,25 @@ export function Header() {
                   onClick={app.openDay}
                   title={t('My Day')}
                   aria-label={t('My Day')}
-                  style={{
-                    border: 0, background: '#340057', cursor: 'pointer', fontFamily: "'Barlow',sans-serif",
-                    fontStyle: 'italic', fontSize: 16, fontWeight: 900, color: '#FFFFFF', width: 34, height: 34,
-                    padding: 0, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, lineHeight: 1, boxShadow: '0 3px 10px rgba(52,0,87,.35)',
-                  }}
+                  className="border-0 bg-valle-purple cursor-pointer font-display italic text-[16px] font-black text-white w-[34px] h-[34px] p-0 rounded-[999px] flex items-center justify-center shrink-0 leading-none shadow-[0_3px_10px_rgba(52,0,87,.35)]"
                 >
                   {app.selCount}
                 </button>
               )}
               <button
                 onClick={go(goto.booking)}
-                style={{
-                  border: 0, background: '#FF3358', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
-                  fontWeight: 700, color: '#FFFFFF', padding: '9px 14px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-                }}
+                className="border-0 bg-valle-red cursor-pointer [font-family:inherit] text-[13px] font-bold text-white py-[9px] px-[14px] rounded-[999px] whitespace-nowrap shrink-0"
               >
                 {t('Book')}
               </button>
               <button
                 onClick={() => { setMobileNavOpen(!mobileNavOpen); setMegaOpen(false); setMegaPkgOpen(false); }}
                 aria-label={t('Menu')}
-                style={{
-                  border: `1.5px solid ${headerFg}`, background: 'transparent', cursor: 'pointer', color: headerFg,
-                  width: 40, height: 40, borderRadius: 999, display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center', gap: 3,
-                }}
+                className="border-[1.5px] border-solid border-[var(--fg)] bg-transparent cursor-pointer text-[var(--fg)] w-[40px] h-[40px] rounded-[999px] flex flex-col items-center justify-center gap-[3px]"
               >
-                <span style={{ width: 16, height: 2, background: 'currentColor', borderRadius: 2, display: 'block', transition: 'transform .25s ease', transform: mobileNavOpen ? 'translateY(5px) rotate(45deg)' : 'none' }} />
-                <span style={{ width: 16, height: 2, background: 'currentColor', borderRadius: 2, display: 'block', transition: 'opacity .2s ease', opacity: mobileNavOpen ? 0 : 1 }} />
-                <span style={{ width: 16, height: 2, background: 'currentColor', borderRadius: 2, display: 'block', transition: 'transform .25s ease', transform: mobileNavOpen ? 'translateY(-5px) rotate(-45deg)' : 'none' }} />
+                <span className={cn(hamburgerBar, '[transition:transform_.25s_ease]', mobileNavOpen && '[transform:translateY(5px)_rotate(45deg)]')} />
+                <span className={cn(hamburgerBar, '[transition:opacity_.2s_ease]', mobileNavOpen ? 'opacity-0' : 'opacity-100')} />
+                <span className={cn(hamburgerBar, '[transition:transform_.25s_ease]', mobileNavOpen && '[transform:translateY(-5px)_rotate(-45deg)]')} />
               </button>
             </div>
           )}
@@ -316,18 +265,18 @@ export function Header() {
 
         {/* Packages mega menu */}
         {megaPkgOpen && !isMobile && (
-          <div style={{ position: 'absolute', top: 70, left: 0, right: 0, background: '#FFFFFF', borderBottom: '1px solid #EBE2FF', boxShadow: '0 32px 60px -20px rgba(52,0,87,.35)' }}>
+          <div className={megaPanel}>
             <StripesSm />
-            <div style={{ maxWidth: 1320, margin: '0 auto', padding: '28px clamp(16px,3.5vw,40px) 32px', display: 'flex', gap: 'clamp(20px,3vw,44px)', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div onClick={go(() => goto.packages())} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14 }}>
+            <div className="max-w-[1320px] mx-auto pt-[28px] px-[clamp(16px,3.5vw,40px)] pb-[32px] flex gap-[clamp(20px,3vw,44px)] flex-wrap items-start">
+              <div className="flex-1 min-w-[220px]">
+                <div onClick={go(() => goto.packages())} className="cursor-pointer font-mono text-[12px] font-semibold tracking-[.12em] text-valle-red mb-[14px]">
                   {t('ALL PACKAGES')} <Fwd />
                 </div>
                 {/* CSS columns pack the groups top to bottom, so a short group never leaves a gap under it */}
-                <div style={{ columnWidth: 170, columnGap: 24 }} data-testid="packages-menu">
+                <div className="[column-width:170px] [column-gap:24px]" data-testid="packages-menu">
                   {pkgGroups.map((g) => (
-                    <div key={g.title} style={{ breakInside: 'avoid', marginBottom: 16 }}>
-                      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 12.5, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF', marginBottom: 6 }}>{g.title}</div>
+                    <div key={g.title} className="break-inside-avoid mb-[16px]">
+                      <div className="font-mono text-[12.5px] font-bold tracking-[.14em] text-valle-violet mb-[6px]">{g.title}</div>
                       {g.links.map(([name, key]) => (
                         <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
                       ))}
@@ -335,13 +284,13 @@ export function Header() {
                   ))}
                 </div>
               </div>
-              <div style={{ flex: '0 0 280px', background: '#340057', borderRadius: 16, padding: '18px 20px', color: '#FFFFFF' }}>
-                <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#33FF74' }}>{t('MOST BOOKED')}</div>
-                <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 24, textTransform: 'uppercase', marginTop: 6 }}>{t('VIP Ultimate')}</div>
-                <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,.78)', marginTop: 6, lineHeight: 1.45 }}>
+              <div className="flex-[0_0_280px] bg-valle-purple rounded-[16px] py-[18px] px-[20px] text-white">
+                <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-green">{t('MOST BOOKED')}</div>
+                <div className="font-display italic font-black text-[24px] uppercase mt-[6px]">{t('VIP Ultimate')}</div>
+                <div className="text-[13.5px] text-[rgba(255,255,255,.78)] mt-[6px] leading-[1.45]">
                   {t('Everything in the valley, private guide, butler service and lunch. Souvenir gift included.')}
                 </div>
-                <div onClick={go(() => goto.packages('vip'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.1em', color: '#FFFC33', marginTop: 12 }}>
+                <div onClick={go(() => goto.packages('vip'))} className="cursor-pointer font-mono text-[11px] font-bold tracking-[.1em] text-valle-yellow mt-[12px]">
                   {t('SEE THE FULL DAY')} <Fwd />
                 </div>
               </div>
@@ -351,46 +300,42 @@ export function Header() {
 
         {/* Explore mega menu */}
         {megaOpen && !isMobile && (
-          <div style={{ position: 'absolute', top: 70, left: 0, right: 0, background: '#FFFFFF', borderBottom: '1px solid #EBE2FF', boxShadow: '0 32px 60px -20px rgba(52,0,87,.35)' }}>
+          <div className={megaPanel}>
             <StripesSm />
-            <div style={{ maxWidth: 1320, margin: '0 auto', padding: '30px clamp(16px,3.5vw,40px) 36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 'clamp(20px,3vw,44px)' }}>
+            <div className="max-w-[1320px] mx-auto pt-[30px] px-[clamp(16px,3.5vw,40px)] pb-[36px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[clamp(20px,3vw,44px)]">
               <div>
-                <a href={paths.explore('adventure')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('adventure'))(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#FF3358', marginBottom: 14}}>{t('ADVENTURE')} <Fwd /></a>
+                <a href={paths.explore('adventure')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('adventure'))(); }} className={cn(monoLink, 'mb-[14px]')} style={{ color: '#FF3358', textDecoration: 'none' }}>{t('ADVENTURE')} <Fwd /></a>
                 {linkList('adventure').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} />)}
               </div>
               <div>
-                <div onClick={go(() => goto.explore('nature'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#340057', marginBottom: 14 }}>
-                  <span style={{ color: '#33FF74' }}>●</span> {t('NATURE')} <Fwd />
+                <div onClick={go(() => goto.explore('nature'))} className="cursor-pointer font-mono text-[12px] font-semibold tracking-[.12em] text-valle-purple mb-[14px]">
+                  <span className="text-valle-green">●</span> {t('NATURE')} <Fwd />
                 </div>
                 {linkList('nature').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
               </div>
               <div>
-                <div onClick={go(() => goto.explore('kids'))} style={{ cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#340057', marginBottom: 14 }}>
-                  <span style={{ color: '#FFFC33', textShadow: '0 0 1px rgba(52,0,87,.4)' }}>●</span> {t('KIDS PARK')} <Fwd />
+                <div onClick={go(() => goto.explore('kids'))} className="cursor-pointer font-mono text-[12px] font-semibold tracking-[.12em] text-valle-purple mb-[14px]">
+                  <span className="text-valle-yellow [text-shadow:0_0_1px_rgba(52,0,87,.4)]">●</span> {t('KIDS PARK')} <Fwd />
                 </div>
                 {linkList('kids').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
               </div>
               <div>
-                <a href={paths.explore('tours')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('tours'))(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', marginBottom: 14}}>{t('TOURS & GROUPS')} <Fwd /></a>
+                <a href={paths.explore('tours')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('tours'))(); }} className={cn(monoLink, 'mb-[14px]')} style={{ color: '#7333FF', textDecoration: 'none' }}>{t('TOURS & GROUPS')} <Fwd /></a>
                 {linkList('tours').map((a) => <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor="#7333FF" />)}
-                <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '20px 0 0'}}>{t('PACKAGES')} <Fwd /></a>
-                <a href={paths.team()} onClick={(e) => { e.preventDefault(); go(goto.team)(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0'}}>{t('TEAM BUILDING')} <Fwd /></a>
-                <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} style={{ display: 'block', textDecoration: 'none', cursor: 'pointer', fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600, letterSpacing: '.12em', color: '#7333FF', margin: '12px 0 0'}}>{t('DINE')} <Fwd /></a>
+                <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} className={cn(monoLink, 'mt-[20px]')} style={{ color: '#7333FF', textDecoration: 'none' }}>{t('PACKAGES')} <Fwd /></a>
+                <a href={paths.team()} onClick={(e) => { e.preventDefault(); go(goto.team)(); }} className={cn(monoLink, 'mt-[12px]')} style={{ color: '#7333FF', textDecoration: 'none' }}>{t('TEAM BUILDING')} <Fwd /></a>
+                <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} className={cn(monoLink, 'mt-[12px]')} style={{ color: '#7333FF', textDecoration: 'none' }}>{t('DINE')} <Fwd /></a>
               </div>
               <div
-                {...bindZip}
                 onClick={go(() => goto.detail('zipline'))}
-                style={{
-                  cursor: 'pointer', borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 210,
-                  background: '#340057', transform: hZip ? 'translateY(-3px)' : 'none', transition: 'transform .2s ease',
-                }}
+                className="cursor-pointer rounded-[16px] overflow-hidden relative min-h-[210px] bg-valle-purple [transition:transform_.2s_ease] hover:[transform:translateY(-3px)]"
               >
                 <Img src="/images/ziplineadventures.avif" alt={t('Zipline Adventures')} surface="dark" placeholder="#340057" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.9), rgba(31,0,51,0) 60%)' }} />
-                <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14, color: '#FFFFFF' }}>
-                  <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 600, letterSpacing: '.16em', color: '#FFFC33' }}>{t('MOST LOVED')}</div>
-                  <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 22, marginTop: 4, textTransform: 'uppercase' }}>{t('Zipline Adventures')}</div>
-                  <div style={{ fontSize: 12.5, opacity: 0.85, marginTop: 2 }}>{t('8 routes · up to 5.5 km of flight')}</div>
+                <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(31,0,51,.9),rgba(31,0,51,0)_60%)]" />
+                <div className="absolute left-[16px] right-[16px] bottom-[14px] text-white">
+                  <div className="font-mono text-[10px] font-semibold tracking-[.16em] text-valle-yellow">{t('MOST LOVED')}</div>
+                  <div className="font-display italic font-extrabold text-[22px] mt-[4px] uppercase">{t('Zipline Adventures')}</div>
+                  <div className="text-[12.5px] opacity-85 mt-[2px]">{t('8 routes · up to 5.5 km of flight')}</div>
                 </div>
               </div>
             </div>
@@ -400,32 +345,24 @@ export function Header() {
 
       {/* Mobile nav overlay */}
       {mobileNavOpen && (
-        <div style={{
-          position: 'fixed', inset: '70px 0 0 0', zIndex: 89, background: '#260040', overflowY: 'auto',
-          padding: '16px 20px 28px', display: 'flex', flexDirection: 'column',
-        }}>
-          <div style={{ display: 'flex', gap: 8, animation: 'vfadeup .3s ease both' }}>
+        <div className="fixed top-[70px] right-0 bottom-0 left-0 z-[89] bg-valle-deep overflow-y-auto pt-[16px] px-[20px] pb-[28px] flex flex-col">
+          <div className="flex gap-[8px] animate-[vfadeup_.3s_ease_both]">
             <input
-              className="vbar-input"
+              className="vbar-input flex-1 min-w-0 border-[1.5px] border-solid border-[rgba(255,255,255,.3)] bg-[rgba(255,255,255,.12)] rounded-[999px] py-[12px] px-[18px] [font-family:inherit] text-[14px] text-white outline-none"
               value={searchQ}
               onChange={(e) => setSearchQ(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') searchGo(); }}
               placeholder={t('Search ziplines, tortoises, waterfalls…')}
-              style={{
-                flex: 1, minWidth: 0, border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.12)',
-                borderRadius: 999, padding: '12px 18px', fontFamily: 'inherit', fontSize: 14, color: '#FFFFFF', outline: 'none',
-              }}
             />
             <button
               onClick={searchGo}
               aria-label={t('Search')}
-              className="press-sm"
-              style={{ border: 0, background: '#FF3358', color: '#FFFFFF', width: 44, height: 44, borderRadius: 999, cursor: 'pointer', fontSize: 16, flexShrink: 0 }}
+              className="press-sm border-0 bg-valle-red text-white w-[44px] h-[44px] rounded-[999px] cursor-pointer text-[16px] shrink-0"
             >
               <Fwd />
             </button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '14px 0 4px', animation: 'vfadeup .3s ease both', animationDelay: '.05s' }}>
+          <div className="grid grid-cols-[1fr_1fr] gap-[8px] mt-[14px] mb-[4px] animate-[vfadeup_.3s_ease_both] [animation-delay:.05s]">
             {([
               [t('Adventure'), 'adventure', '#FF3358', '#FFFFFF', -1],
               [t('Nature'), 'nature', '#33FF74', '#340057', 1],
@@ -436,54 +373,44 @@ export function Header() {
                 key={cat}
                 href={paths.explore(cat)}
                 onClick={(e) => { e.preventDefault(); go(() => goto.explore(cat))(); }}
-                className="press"
-                style={{
-                  display: 'block', textDecoration: 'none', cursor: 'pointer', background: bg, color: fg, borderRadius: 12, padding: '13px 14px',
-                  fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 15,
-                  textTransform: 'uppercase', transform: `rotate(${rot}deg)`,
-                }}
+                className="press block cursor-pointer rounded-[12px] py-[13px] px-[14px] font-display italic font-extrabold text-[15px] uppercase"
+                style={{ textDecoration: 'none', background: bg, color: fg, transform: `rotate(${rot}deg)` }}
               >
                 {label}
               </a>
             ))}
           </div>
-          <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.1s' }}>{t('Home')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.14s' }}>{t('All {n} experiences', { n: catalog.ACTS.length })}<span style={{ color: '#FFFC33' }}><Fwd /></span></a>
-          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.16s' }}>{t('Packages & team building')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>
-            <span style={{ display: 'flex', gap: 7 }}>{t('Prices shown:')}<span style={{ color: 'rgba(255,255,255,.72)' }}>{t(app.rateWord)}</span></span>
-            <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '5px 10px', whiteSpace: 'nowrap' }}>{app.rateTag} ⇄</span>
+          <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} className={cn(mobileNavRow, '[animation-delay:.1s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Home')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} className={cn(mobileNavRow, '[animation-delay:.14s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('All {n} experiences', { n: catalog.ACTS.length })}<span className="text-valle-yellow"><Fwd /></span></a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} className={cn(mobileNavRow, '[animation-delay:.16s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Packages & team building')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')}>
+            <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
+            <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>
           </div>
-          <a href={paths.plan()} onClick={(e) => { e.preventDefault(); go(goto.plan)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.18s' }}>{t('Plan your visit')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.22s' }}>{t('Dine')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <a href={paths.story()} onClick={(e) => { e.preventDefault(); go(goto.story)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.26s' }}>{t('Our story')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <a href={paths.vacancies()} onClick={(e) => { e.preventDefault(); go(gotoVacancies)(); }} style={{ ...mobileNavRow, textDecoration: 'none', animation: 'vfadeup .3s ease both', animationDelay: '.28s' }}>{t('Vacancies')}<span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span></a>
-          <div onClick={() => { setMobileNavOpen(false); app.openDay(); }} style={{ ...mobileNavRow, animation: 'vfadeup .3s ease both', animationDelay: '.3s' }}>
-            <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <a href={paths.plan()} onClick={(e) => { e.preventDefault(); go(goto.plan)(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Plan your visit')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} className={cn(mobileNavRow, '[animation-delay:.22s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Dine')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.story()} onClick={(e) => { e.preventDefault(); go(goto.story)(); }} className={cn(mobileNavRow, '[animation-delay:.26s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Our story')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.vacancies()} onClick={(e) => { e.preventDefault(); go(gotoVacancies)(); }} className={cn(mobileNavRow, '[animation-delay:.28s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Vacancies')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <div onClick={() => { setMobileNavOpen(false); app.openDay(); }} className={cn(mobileNavRow, '[animation-delay:.3s]')}>
+            <span className="flex gap-[10px] items-center">
               {t('My Day')}
               {app.hasSel && (
-                <span style={{ background: '#FF3358', color: '#FFFFFF', borderRadius: 999, minWidth: 22, height: 22, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, padding: '0 6px' }}>
+                <span className="bg-valle-red text-white rounded-[999px] min-w-[22px] h-[22px] inline-flex items-center justify-center text-[12px] px-[6px]">
                   {app.selCount}
                 </span>
               )}
             </span>
-            <span style={{ color: 'rgba(255,252,51,.7)' }}><Fwd /></span>
+            <span className="text-[rgba(255,252,51,.7)]"><Fwd /></span>
           </div>
           <button
             onClick={go(goto.booking)}
-            className="press"
-            style={{
-              marginTop: 14, border: 0, background: '#FF3358', cursor: 'pointer', fontFamily: "'Barlow',sans-serif",
-              fontStyle: 'italic', fontWeight: 800, fontSize: 16, letterSpacing: '.04em', textTransform: 'uppercase',
-              color: '#FFFFFF', padding: '14px 0', width: '100%', borderRadius: 999,
-              boxShadow: '0 8px 20px rgba(255,51,88,.35)', animation: 'vfadeup .3s ease both', animationDelay: '.34s',
-            }}
+            className="press mt-[14px] border-0 bg-valle-red cursor-pointer font-display italic font-extrabold text-[16px] tracking-[.04em] uppercase text-white py-[14px] px-0 w-full rounded-[999px] shadow-[0_8px_20px_rgba(255,51,88,.35)] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
           >
             {t('Book now')} <Fwd />
           </button>
-          <div style={{ marginTop: 14, animation: 'vfadeup .3s ease both', animationDelay: '.38s' }}>
+          <div className="mt-[14px] animate-[vfadeup_.3s_ease_both] [animation-delay:.38s]">
             <Stripes height={6} style={{ borderRadius: 99 }} />
-            <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(255,255,255,.7)', marginTop: 10 }}>
+            <div className="font-mono text-[11px] text-[rgba(255,255,255,.7)] mt-[10px]">
               {t('OPEN DAILY · 09:00–17:30 · CHAMOUNY, MAURITIUS')}
             </div>
           </div>

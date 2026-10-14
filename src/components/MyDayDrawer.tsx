@@ -4,30 +4,19 @@ import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { money } from '../lib/format';
 import { entryPrices } from '../store/booking';
-import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { useT, fwd } from '../i18n';
 import type { SelLine } from '../types';
 
-const qtyBtn: React.CSSProperties = {
-  border: 0, background: '#FFFFFF', borderRadius: 6, width: 22, height: 22, cursor: 'pointer',
-  fontSize: 12, fontWeight: 700, color: '#340057', lineHeight: 1, padding: 0,
-};
-const qtyWrap: React.CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 3, background: '#F7F3FF', borderRadius: 8, padding: '2px 5px',
-};
-const qtyTag: React.CSSProperties = {
-  fontFamily: "'Chivo Mono',monospace", fontSize: 8, color: 'rgba(52,0,87,.55)',
-};
-const qtyNum: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, minWidth: 14, textAlign: 'center' };
+const qtyBtn = 'h-[22px] w-[22px] cursor-pointer rounded-[6px] border-0 bg-white p-0 text-[12px] leading-none font-bold text-valle-purple';
 
 function Qty({ tag, val, dec, inc }: { tag: string; val: number; dec: () => void; inc: () => void }) {
   return (
-    <span style={qtyWrap}>
-      <span style={qtyTag}>{tag}</span>
-      <button onClick={dec} style={qtyBtn}>−</button>
-      <span style={qtyNum}>{val}</span>
-      <button onClick={inc} style={qtyBtn}>+</button>
+    <span className="inline-flex items-center gap-[3px] rounded-[8px] bg-[#F7F3FF] px-[5px] py-0.5">
+      <span className="font-mono text-[8px] text-valle-purple/55">{tag}</span>
+      <button onClick={dec} className={qtyBtn}>−</button>
+      <span className="min-w-[14px] text-center text-[12.5px] font-bold">{val}</span>
+      <button onClick={inc} className={qtyBtn}>+</button>
     </span>
   );
 }
@@ -36,7 +25,6 @@ function CartRow({ line }: { line: SelLine }) {
   const app = useApp();
   const goto = useGoto();
   const t = useT();
-  const [hRem, bindRem] = useHover();
   const a = line.act;
   const c = line.qty;
   const isFlat = a.mode === 'flat';
@@ -50,17 +38,17 @@ function CartRow({ line }: { line: SelLine }) {
     ] || t('UNITS');
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 0', borderBottom: '1px dashed #EBE2FF' }}>
+    <div className="flex items-center gap-2.5 py-[11px]" style={{ borderBottom: '1px dashed #EBE2FF' }}>
       <div
         onClick={() => { app.closeDay(); goto.detail(a.id); }}
-        style={{ width: 46, height: 46, borderRadius: 10, overflow: 'hidden', flexShrink: 0, cursor: 'pointer', background: '#EBE2FF' }}
+        className="h-[46px] w-[46px] shrink-0 cursor-pointer overflow-hidden rounded-[10px] bg-valle-lilac"
       >
         <Img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.name}</div>
-        {line.variant && <div style={{ fontSize: 10.5, color: '#7333FF', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t(line.variant)}</div>}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, flexWrap: 'wrap' }}>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[13px] font-bold">{a.name}</div>
+        {line.variant && <div className="truncate text-[10.5px] font-semibold text-valle-violet">{t(line.variant)}</div>}
+        <div className="mt-[5px] flex flex-wrap items-center gap-[5px]">
           {!isFlat && (
             <>
               <Qty tag={t('AD')} val={c.a || 0} dec={() => app.bumpSel(line.key, 'a', -1)} inc={() => app.bumpSel(line.key, 'a', 1)} />
@@ -72,17 +60,12 @@ function CartRow({ line }: { line: SelLine }) {
           )}
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-        <span style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 11.5 }}>{money(amt)}</span>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <span className="font-mono text-[11.5px] font-bold">{money(amt)}</span>
         <button
-          {...bindRem}
           onClick={() => app.toggleSel(a.id, line.variant)}
           title={t('Remove')}
-          style={{
-            border: `1px solid ${hRem ? '#FF3358' : '#EBE2FF'}`, background: 'transparent',
-            color: hRem ? '#FF3358' : 'rgba(52,0,87,.5)', width: 22, height: 22, borderRadius: 999,
-            cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
-          }}
+          className="h-[22px] w-[22px] cursor-pointer rounded-full border border-valle-lilac bg-transparent p-0 text-[12px] leading-none text-valle-purple/50 hover:border-valle-red hover:text-valle-red"
         >
           ×
         </button>
@@ -96,9 +79,6 @@ export function MyDayDrawer() {
   const catalog = useCatalog();
   const goto = useGoto();
   const t = useT();
-  const [hClose, bindClose] = useHover();
-  const [hCheckout, bindCheckout] = useHover();
-  const [hBrowse, bindBrowse] = useHover();
 
   if (!app.dayOpen) return null;
 
@@ -116,73 +96,56 @@ export function MyDayDrawer() {
     <>
       <div
         onClick={app.closeDay}
-        style={{ position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(31,0,51,.55)', backdropFilter: 'blur(3px)' }}
+        className="fixed inset-0 z-[95] bg-[rgba(31,0,51,.55)] backdrop-blur-[3px]"
       />
-      <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 96, width: 'min(100vw,400px)',
-        background: '#FFFFFF', boxShadow: '-24px 0 60px rgba(31,0,51,.4)', display: 'flex', flexDirection: 'column',
-      }}>
-        <div style={{ padding: '16px 20px', background: '#340057', color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', flex: 1, transform: 'rotate(-2deg)' }}>{t('My Day')}</div>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>{cartCountLabel}</span>
+      <div className="fixed top-0 right-0 bottom-0 z-[96] flex w-[min(100vw,400px)] flex-col bg-white shadow-[-24px_0_60px_rgba(31,0,51,.4)]">
+        <div className="flex shrink-0 items-center gap-2.5 bg-valle-purple px-5 py-4 text-white">
+          <div className="flex-1 -rotate-2 font-display text-[22px] font-black uppercase italic">{t('My Day')}</div>
+          <span className="font-mono text-[9.5px] tracking-[.08em] text-white/70">{cartCountLabel}</span>
           <button
-            {...bindClose}
             onClick={app.closeDay}
             aria-label={t('Close')}
-            style={{
-              border: '1.5px solid rgba(255,255,255,.4)', background: hClose ? 'rgba(255,255,255,.15)' : 'transparent',
-              color: '#FFFFFF', width: 32, height: 32, borderRadius: 999, cursor: 'pointer', fontSize: 15, lineHeight: 1, padding: 0,
-            }}
+            className="h-8 w-8 cursor-pointer rounded-full border-[1.5px] border-white/40 bg-transparent p-0 text-[15px] leading-none text-white hover:bg-white/15"
           >
             ×
           </button>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '6px 18px 14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', borderBottom: '1px dashed #EBE2FF', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 110 }}>
-              <div style={{ fontWeight: 700, fontSize: 13.5 }}>{t('Park entry')}</div>
-              <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, color: 'rgba(52,0,87,.6)', marginTop: 2 }}>{t('TRAILS INCLUDED')}</div>
+        <div className="flex-1 overflow-y-auto px-[18px] pt-1.5 pb-[14px]">
+          <div className="flex flex-wrap items-center gap-2 py-3" style={{ borderBottom: '1px dashed #EBE2FF' }}>
+            <div className="min-w-[110px] flex-1">
+              <div className="text-[13.5px] font-bold">{t('Park entry')}</div>
+              <div className="mt-0.5 font-mono text-[9px] text-valle-purple/60">{t('TRAILS INCLUDED')}</div>
             </div>
             <Qty tag={t('AD')} val={app.adults} dec={() => app.setAdults(app.adults - 1)} inc={() => app.setAdults(app.adults + 1)} />
             <Qty tag={t('CH')} val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />
-            <span style={{ fontFamily: "'Chivo Mono',monospace", fontWeight: 700, fontSize: 11.5, minWidth: 64, textAlign: 'right' }}>{entryAmt}</span>
+            <span className="min-w-16 text-right font-mono text-[11.5px] font-bold">{entryAmt}</span>
           </div>
           {cartActs.map((l) => <CartRow key={l.key} line={l} />)}
           {cartActs.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '28px 10px' }}>
-              <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 19, textTransform: 'uppercase' }}>{t('Nothing here yet')}</div>
-              <div style={{ fontSize: 13, color: 'rgba(52,0,87,.6)', marginTop: 6, lineHeight: 1.5 }}>{t('Tap + on any experience card to build your day.')}</div>
+            <div className="px-2.5 py-7 text-center">
+              <div className="font-display text-[19px] font-extrabold uppercase italic">{t('Nothing here yet')}</div>
+              <div className="mt-1.5 text-[13px] leading-[1.5] text-valle-purple/60">{t('Tap + on any experience card to build your day.')}</div>
               <button
-                {...bindBrowse}
                 onClick={() => { app.closeDay(); goto.explore('all'); }}
-                style={{
-                  marginTop: 14, border: '2px solid #340057', background: hBrowse ? '#340057' : 'transparent',
-                  cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
-                  color: hBrowse ? '#FFFFFF' : '#340057', padding: '11px 22px', borderRadius: 999,
-                }}
+                className="mt-[14px] cursor-pointer rounded-full border-2 border-valle-purple bg-transparent px-[22px] py-[11px] text-[13px] font-bold text-valle-purple [font-family:inherit] hover:bg-valle-purple hover:text-white"
               >
                 {t('Explore experiences')} <Fwd />
               </button>
             </div>
           )}
         </div>
-        <div style={{ padding: '14px 18px 16px', borderTop: '1.5px solid #EBE2FF', flexShrink: 0, background: '#FFFFFF' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>{t('Total')}</span>
-            <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 26 }}>{money(app.booking.total)}</span>
+        <div className="shrink-0 border-t-[1.5px] border-valle-lilac bg-white px-[18px] pt-[14px] pb-4">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[14px] font-bold">{t('Total')}</span>
+            <span className="font-display text-[26px] font-black italic">{money(app.booking.total)}</span>
           </div>
           <button
-            {...bindCheckout}
             onClick={() => { app.closeDay(); goto.booking(); }}
-            style={{
-              width: '100%', marginTop: 10, border: 0, background: hCheckout ? '#D91E44' : '#FF3358',
-              cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF',
-              padding: '15px 0', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)',
-            }}
+            className="mt-2.5 w-full cursor-pointer rounded-full border-0 bg-valle-red px-0 py-[15px] text-[15px] font-bold text-white shadow-[0_8px_20px_rgba(255,51,88,.35)] [font-family:inherit] hover:bg-[#D91E44]"
           >
             {t('Check out')} <Fwd />
           </button>
-          <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 9, letterSpacing: '.06em', color: 'rgba(52,0,87,.55)', textAlign: 'center', marginTop: 9 }}>
+          <div className="mt-[9px] text-center font-mono text-[9px] tracking-[.06em] text-valle-purple/55">
             {t('FREE TO BOOK · PAY AT THE GATE')}
           </div>
         </div>

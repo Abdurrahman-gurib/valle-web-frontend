@@ -18,6 +18,7 @@ import { useIsMobile } from './hooks/useIsMobile';
 import { OfflineStatus } from './components/InstallApp';
 import { ParkStatusBanner } from './components/ParkStatusBanner';
 import StaffLogin from './pages/staff/Login';
+import StaffResetPassword from './pages/staff/ResetPassword';
 import { lazyPage, registerPage } from './lib/lazyPage';
 // public pages: one chunk each, loaded for the page being opened (see lib/lazyPage)
 const HomePage = lazyPage(() => import('./pages/Home'));
@@ -151,6 +152,7 @@ export default function App() {
             <Route path="/staff">
               <Route index element={backOffice(<StaffDashboard />)} />
               <Route path="login" element={<StaffLogin />} />
+              <Route path="reset" element={<StaffResetPassword />} />
               <Route path="*" element={<Navigate to="/staff" replace />} />
             </Route>
             <Route path="/hr" element={backOffice(<HrDashboard />)} />

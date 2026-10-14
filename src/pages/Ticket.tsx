@@ -11,12 +11,11 @@ import { ManageBooking } from './ManageBooking';
 import { DayForecast, useParkStatus } from '../components/WeatherCard';
 import { TicketDay } from '../components/TicketDay';
 import { TicketPhotos } from '../components/TicketPhotos';
+import { cn } from '@/lib/utils';
 
 /** Arrival slot words for the share text (the API sends 'morning' / 'afternoon'). */
 const SLOT_WORDS: Record<string, string> = { morning: _t('morning'), afternoon: _t('afternoon') };
 
-const MONO = "'Chivo Mono',monospace";
-const BARLOW = "'Barlow',sans-serif";
 
 /**
  * The guest's ticket: what the QR code and the e-mailed link open. Needs the
@@ -80,26 +79,26 @@ export default function TicketPage() {
   const share = tk ? `https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot} arrival', { ref: tk.refCode, date: fullDateFromIso(tk.visitDate) || tk.visitDate, slot: t(SLOT_WORDS[tk.slot] ?? tk.slot) }) + '\n' + tk.ticketUrl)}` : '';
 
   return (
-    <main style={{ maxWidth: 560, margin: '0 auto', padding: '110px clamp(16px,3.5vw,40px) 60px', fontFamily: "'Work Sans',sans-serif", color: '#340057' }}>
+    <main className="mx-auto max-w-[560px] px-[clamp(16px,3.5vw,40px)] pt-[110px] pb-[60px] font-sans text-valle-purple">
       {err && (
-        <div style={{ background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: 16, padding: '16px 20px', fontWeight: 600 }}>
+        <div className="rounded-[16px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-5 py-4 font-semibold">
           {err} <Link to={paths.booking()} style={{ color: '#7333FF' }}>{t('Book a day')}</Link>
         </div>
       )}
-      {!tk && !err && <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: 'rgba(52,0,87,.6)' }}>{t('LOADING YOUR TICKET…')}</div>}
+      {!tk && !err && <div className="font-mono text-[11px] tracking-[.12em] text-valle-purple/60">{t('LOADING YOUR TICKET…')}</div>}
       {tk && (
-        <article data-testid="ticket" style={{ background: '#FFFFFF', borderRadius: 22, overflow: 'hidden', boxShadow: '0 30px 70px -30px rgba(31,0,51,.5), 0 0 0 1.5px #EBE2FF' }}>
-          <div style={{ background: '#340057', color: '#FFFFFF', padding: '20px 24px' }}>
-            <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.16em', opacity: 0.7 }}>{t('VALLÉ ADVENATURE™ PARK · YOUR TICKET')}</div>
-            <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 30, marginTop: 4, textTransform: 'uppercase' }}>{tk.guestName}</div>
+        <article data-testid="ticket" className="overflow-hidden rounded-[22px] bg-white shadow-[0_30px_70px_-30px_rgba(31,0,51,.5),0_0_0_1.5px_#EBE2FF]">
+          <div className="bg-valle-purple px-6 py-5 text-white">
+            <div className="font-mono text-[10px] tracking-[.16em] opacity-70">{t('VALLÉ ADVENATURE™ PARK · YOUR TICKET')}</div>
+            <div className="mt-1 font-display text-[30px] font-black uppercase italic">{tk.guestName}</div>
           </div>
           <Stripes />
-          <div style={{ padding: 24, textAlign: 'center' }}>
-            <img src={tk.qrUrl} alt={t('Ticket QR code {ref}', { ref: tk.refCode })} width={240} height={240} data-testid="ticket-qr" style={{ display: 'inline-block', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: 8, background: '#FFFFFF', width: 240, height: 240 }} />
-            <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 28, letterSpacing: '.06em', color: '#FF3358', marginTop: 12 }}>{tk.refCode}</div>
-            {tk.status === 'cancelled' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#D91E44', fontWeight: 700 }}>{t('THIS BOOKING WAS CANCELLED')}</div>}
-            {tk.status === 'arrived' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#1E9E4A', fontWeight: 700 }}>{t('CHECKED IN · ENJOY THE VALLEY')}</div>}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, textAlign: 'left', marginTop: 22 }}>
+          <div className="p-6 text-center">
+            <img src={tk.qrUrl} alt={t('Ticket QR code {ref}', { ref: tk.refCode })} width={240} height={240} data-testid="ticket-qr" className="inline-block h-[240px] w-[240px] rounded-[14px] border-[1.5px] border-valle-lilac bg-white p-2" />
+            <div className="mt-3 font-mono text-[28px] font-bold tracking-[.06em] text-valle-red">{tk.refCode}</div>
+            {tk.status === 'cancelled' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#D91E44]">{t('THIS BOOKING WAS CANCELLED')}</div>}
+            {tk.status === 'arrived' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#1E9E4A]">{t('CHECKED IN · ENJOY THE VALLEY')}</div>}
+            <div className="mt-[22px] grid grid-cols-2 gap-3 text-left">
               <Fact tag={t('VISIT')} value={fullDateFromIso(tk.visitDate) || tk.visitDate} />
               <Fact tag={t('ARRIVAL')} value={tk.slot === 'morning' ? t('Morning · 09:00–12:00') : t('Afternoon · 12:00–15:30')} />
               <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
@@ -107,55 +106,53 @@ export default function TicketPage() {
             </div>
             <DayForecast date={tk.visitDate} style={{ marginTop: 12, justifyContent: 'center' }} />
             <TicketParkNotice />
-            {tk.status === 'postponed' && <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 11, letterSpacing: '.12em', color: '#8A6A00', fontWeight: 700 }}>{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
+            {tk.status === 'postponed' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#8A6A00]">{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
             {tk.group && (
-                <div data-testid="ticket-group" style={{ marginTop: 16, textAlign: 'start', background: '#F7F3FF', border: '1.5px solid #EBE2FF', borderRadius: 14, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</div>
-                  <div style={{ fontWeight: 800, fontSize: 15, marginTop: 4 }}>{tk.group.organisation}</div>
+                <div data-testid="ticket-group" className="mt-4 rounded-[14px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-4 py-3 text-start text-[13.5px] leading-[1.55]">
+                  <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</div>
+                  <div className="mt-1 text-[15px] font-extrabold">{tk.group.organisation}</div>
                   <div>{t('Leader: {name} · {n} people · {listed} names listed', { name: tk.group.leaderName, n: tk.adults + tk.kids, listed: tk.group.participants.length })}</div>
-                  {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div style={{ color: '#D91E44', fontWeight: 700, marginTop: 4 }}>{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
+                  {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div className="mt-1 font-bold text-[#D91E44]">{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
                 </div>
             )}
             {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && (
               <WaiverBlock group={!!tk.group} signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
-            <div style={{ height: 1, background: '#EBE2FF', margin: '18px 0' }} />
+            <div className="my-[18px] h-px bg-valle-lilac" />
             {tk.status !== 'cancelled' && <TicketDay tk={tk} />}
             {tk.status !== 'cancelled' && <TicketPhotos tk={tk} token={token} onChanged={(v) => setT(v)} />}
             {tk.lines.some((l) => l.time) && (
-              <div data-testid="itinerary" style={{ margin: '14px 0 10px', textAlign: 'start', background: '#FFFDE0', border: '1.5px solid #FFE94D', borderRadius: 14, padding: '12px 16px' }}>
-                <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#8A6A00' }}>{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</div>
+              <div data-testid="itinerary" className="mx-0 mt-[14px] mb-2.5 rounded-[14px] border-[1.5px] border-[#FFE94D] bg-[#FFFDE0] px-4 py-3 text-start">
+                <div className="font-mono text-[10px] font-bold tracking-[.14em] text-[#8A6A00]">{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</div>
                 {tk.lines.filter((l) => l.time).sort((a, b) => (a.time as string).localeCompare(b.time as string)).map((l, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'baseline', marginTop: 6, fontSize: 14 }}>
-                    <span style={{ fontFamily: MONO, fontWeight: 800, color: '#340057', minWidth: 48 }}>{l.time}</span>
-                    <span style={{ fontWeight: 600 }}>{l.label.replace(/ · \d{2}:\d{2}$/, '')}</span>
+                  <div key={i} className="mt-1.5 flex items-baseline gap-3 text-[14px]">
+                    <span className="min-w-12 font-mono font-extrabold text-valle-purple">{l.time}</span>
+                    <span className="font-semibold">{l.label.replace(/ · \d{2}:\d{2}$/, '')}</span>
                   </div>
                 ))}
               </div>
             )}
             {tk.lines.map((l, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left' }}>
-                <span style={{ color: 'rgba(52,0,87,.72)' }}>{l.label}</span>
-                <span style={{ fontFamily: MONO, fontWeight: 600, whiteSpace: 'nowrap' }}>{mur(l.amount)}</span>
+              <div key={i} className="flex justify-between gap-3 py-[5px] text-left text-[13.5px]">
+                <span className="text-valle-purple/72">{l.label}</span>
+                <span className="font-mono font-semibold whitespace-nowrap">{mur(l.amount)}</span>
               </div>
             ))}
             {(tk.adjustmentAmount ?? 0) > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '5px 0', fontSize: 13.5, textAlign: 'left', color: '#1E9E4A', fontWeight: 600 }}>
+              <div className="flex justify-between gap-3 py-[5px] text-left text-[13.5px] font-semibold text-[#1E9E4A]">
                 <span>{tk.couponCode ? t('Code {code}', { code: tk.couponCode }) : t('Discount')}{tk.adjustmentNote ? ' · ' + tk.adjustmentNote : ''}</span>
-                <span style={{ fontFamily: MONO, whiteSpace: 'nowrap' }}>− {mur(tk.adjustmentAmount ?? 0)}</span>
+                <span className="font-mono whitespace-nowrap">− {mur(tk.adjustmentAmount ?? 0)}</span>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, marginTop: 6, borderTop: '1px dashed #D9C9F0', fontWeight: 800, fontSize: 16 }}>
+            <div className="mt-1.5 flex justify-between pt-2.5 text-[16px] font-extrabold" style={{ borderTop: '1px dashed #D9C9F0' }}>
               <span>{t('Total')}</span>
-              <span style={{ fontFamily: MONO }}>{mur(tk.total)}</span>
+              <span className="font-mono">{mur(tk.total)}</span>
             </div>
             {paymentId && (
-              <div data-testid="payment-outcome" data-status={payWait ? 'pending' : pay?.status ?? 'unknown'} role="status" style={{
-                marginTop: 14, borderRadius: 14, padding: '12px 14px', fontSize: 14, fontWeight: 700, textAlign: 'start',
-                background: payWait ? '#F7F3FF' : pay?.status === 'paid' ? '#E6FFEE' : '#FFE2E7',
-                border: `1.5px solid ${payWait ? '#D9C9F0' : pay?.status === 'paid' ? '#33FF74' : '#FF3358'}`,
-                color: payWait ? '#340057' : pay?.status === 'paid' ? '#1E9E4A' : '#D91E44',
-              }}>
+              <div data-testid="payment-outcome" data-status={payWait ? 'pending' : pay?.status ?? 'unknown'} role="status" className={cn(
+                'mt-[14px] rounded-[14px] border-[1.5px] px-[14px] py-3 text-start text-[14px] font-bold',
+                payWait ? 'border-[#D9C9F0] bg-[#F7F3FF] text-valle-purple' : pay?.status === 'paid' ? 'border-valle-green bg-[#E6FFEE] text-[#1E9E4A]' : 'border-valle-red bg-[#FFE2E7] text-[#D91E44]',
+              )}>
                 {payWait
                   ? t('Confirming your payment…')
                   : pay?.status === 'paid'
@@ -164,27 +161,27 @@ export default function TicketPage() {
               </div>
             )}
             {tk.balance !== undefined && (
-              <div data-testid="ticket-balance" style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 6, fontSize: 14, fontWeight: 700, color: tk.balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+              <div data-testid="ticket-balance" className={cn('mt-1.5 flex justify-between gap-3 text-[14px] font-bold', tk.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
                 <span>{tk.balance > 0 ? t('To pay on arrival') : t('Paid')}</span>
-                <span style={{ fontFamily: MONO }}>{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
+                <span className="font-mono">{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
               </div>
             )}
             {canPayOnline && (tk.balance ?? 0) > 0 && tk.status !== 'cancelled' && !payWait && (
-              <div data-print-hide="" style={{ marginTop: 14 }}>
-                <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" style={{ ...btn('#33FF74', '#340057'), border: 0, cursor: 'pointer', font: 'inherit', fontWeight: 700 }}>
+              <div data-print-hide="" className="mt-[14px]">
+                <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" className="inline-block cursor-pointer rounded-full border-0 bg-valle-green px-5 py-3 [font-size:inherit] leading-[inherit] font-bold text-valle-purple no-underline [font-family:inherit]">
                   {paying === 'busy' ? t('Opening secure payment…') : t('Pay {amount} online now', { amount: mur(tk.balance ?? 0) })}
                 </button>
-                {paying === 'error' && <div style={{ color: '#D91E44', fontSize: 13, marginTop: 6 }}>{t('Online payment is not available right now. You can pay at the gate.')}</div>}
+                {paying === 'error' && <div className="mt-1.5 text-[13px] text-[#D91E44]">{t('Online payment is not available right now. You can pay at the gate.')}</div>}
               </div>
             )}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 22 }} data-print-hide="">
-              <a href={share} target="_blank" rel="noopener noreferrer" style={btn('#25D366', '#FFFFFF')}>{t('Add to WhatsApp')}</a>
-              <button onClick={() => window.print()} style={btn('#FFFFFF', '#340057', true)}>{t('Save / print')}</button>
-              {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" style={btn('#FFFFFF', '#340057', true)}>{t('Receipt (PDF)')}</a>}
+            <div className="mt-[22px] flex flex-wrap justify-center gap-2.5" data-print-hide="">
+              <a href={share} target="_blank" rel="noopener noreferrer" className={cn(BTN, 'bg-[#25D366]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Add to WhatsApp')}</a>
+              <button onClick={() => window.print()} className={cn(BTN, BTN_OUTLINE, 'bg-white text-valle-purple')}>{t('Save / print')}</button>
+              {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" className={cn(BTN, BTN_OUTLINE, 'bg-white')} style={{ color: '#340057', textDecoration: 'none' }}>{t('Receipt (PDF)')}</a>}
             </div>
             <ManageBooking tk={tk} token={token} onChanged={(v) => setT(v)} />
             <InstallCard style={{ marginTop: 18 }} />
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: 'rgba(52,0,87,.65)', marginTop: 18, textAlign: 'left' }}>
+            <p className="mt-[18px] text-left text-[12.5px] leading-[1.55] text-valle-purple/65">
               {t('Show this QR code at the gate. B102, Mare Anguilles, Chamouny ·')} <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>{t('directions')}</a>.{' '}
               {t('Bring closed shoes, sunscreen and water. Free cancellation: call')} <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 44 77</a> {t('or write to {email}.', { email: 'sales@vallepark.com' })}
             </p>
@@ -200,13 +197,13 @@ function WaiverBlock({ signed, required, href, group }: { signed: number; requir
   const t = useT();
   const all = signed >= required;
   return (
-    <div data-testid="ticket-waivers" data-print-hide="" style={{ marginTop: 20, textAlign: 'start', background: all ? '#E6FFEE' : '#FFFDE0', border: `1.5px solid ${all ? '#33FF74' : '#FFE94D'}`, borderRadius: 14, padding: '14px 16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ fontWeight: 800, fontSize: 15 }}>{all ? t('Waivers signed') : group ? t('Leader: sign the waiver pack for the group') : t('Skip the queue: sign your waivers')}</div>
-        <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: 13 }}>{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
+    <div data-testid="ticket-waivers" data-print-hide="" className={cn('mt-5 rounded-[14px] border-[1.5px] px-4 py-[14px] text-start', all ? 'border-valle-green bg-[#E6FFEE]' : 'border-[#FFE94D] bg-[#FFFDE0]')}>
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="text-[15px] font-extrabold">{all ? t('Waivers signed') : group ? t('Leader: sign the waiver pack for the group') : t('Skip the queue: sign your waivers')}</div>
+        <div className="font-mono text-[13px] font-bold">{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
       </div>
-      {!all && <p style={{ margin: '6px 0 10px', fontSize: 13.5, lineHeight: 1.5 }}>{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
-      <a href={href} style={{ ...btn(all ? '#FFFFFF' : '#340057', all ? '#340057' : '#FFFFFF', all), padding: '9px 16px', fontSize: 13, marginTop: all ? 8 : 0 }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
+      {!all && <p className="mx-0 mt-1.5 mb-2.5 text-[13.5px] leading-[1.5]">{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
+      <a href={href} className={cn('inline-block cursor-pointer rounded-full px-4 py-[9px] text-[13px] font-bold no-underline [font-family:inherit]', all ? 'mt-2 border-[1.5px] border-valle-purple bg-white' : 'mt-0 bg-valle-purple')} style={{ color: all ? '#340057' : '#FFFFFF', textDecoration: 'none' }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
     </div>
   );
 }
@@ -217,8 +214,8 @@ function TicketParkNotice() {
   const status = useParkStatus();
   if (!status || (status.state === 'open' && !status.message)) return null;
   return (
-    <div data-testid="ticket-park-status" data-state={status.state} style={{ marginTop: 12, background: status.state === 'closed' ? '#FFE2E7' : '#FFFFE2', border: '1.5px solid ' + (status.state === 'closed' ? '#FF3358' : '#E6E000'), borderRadius: 12, padding: '10px 14px', fontSize: 13.5, lineHeight: 1.5 }}>
-      <strong style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.14em' }}>{status.state === 'closed' ? t('PARK CLOSED TODAY') : status.state === 'partial' ? t('PARTLY OPEN TODAY') : t('PARK NOTICE')}</strong>
+    <div data-testid="ticket-park-status" data-state={status.state} className={cn('mt-3 rounded-[12px] border-[1.5px] px-[14px] py-2.5 text-[13.5px] leading-[1.5]', status.state === 'closed' ? 'border-valle-red bg-[#FFE2E7]' : 'border-[#E6E000] bg-[#FFFFE2]')}>
+      <strong className="font-mono text-[10.5px] tracking-[.14em]">{status.state === 'closed' ? t('PARK CLOSED TODAY') : status.state === 'partial' ? t('PARTLY OPEN TODAY') : t('PARK NOTICE')}</strong>
       {status.pausedNames.length > 0 && <div>{t('Paused right now: {names}', { names: status.pausedNames.join(', ') })}</div>}
       {status.message && <div>{status.message}</div>}
     </div>
@@ -228,13 +225,12 @@ function TicketParkNotice() {
 function Fact({ tag, value }: { tag: string; value: string }) {
   return (
     <div>
-      <div style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.13em', color: '#7333FF' }}>{tag}</div>
-      <div style={{ fontSize: 14, fontWeight: 600, marginTop: 3 }}>{value}</div>
+      <div className="font-mono text-[9.5px] font-bold tracking-[.13em] text-valle-violet">{tag}</div>
+      <div className="mt-[3px] text-[14px] font-semibold">{value}</div>
     </div>
   );
 }
 
-const btn = (bg: string, fg: string, outline = false) => ({
-  background: bg, color: fg, border: outline ? '1.5px solid #340057' : 0, borderRadius: 999, padding: '12px 20px', fontWeight: 700, fontSize: 14,
-  textDecoration: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-block',
-});
+/** Pill button / link base; colours are added per use (links keep their colour inline: the global `a` rule beats utilities). */
+const BTN = 'inline-block cursor-pointer rounded-full px-5 py-3 text-[14px] font-bold no-underline [font-family:inherit]';
+const BTN_OUTLINE = 'border-[1.5px] border-valle-purple';
