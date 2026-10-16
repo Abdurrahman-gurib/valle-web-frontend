@@ -39,6 +39,29 @@ const riseIn = 'animate-[vrise_.34s_cubic-bezier(.2,.7,.2,1)_both]';
 const fieldLabel = 'font-mono text-[9.5px] font-bold tracking-[.14em] text-valle-violet';
 const inputCls = 'w-full border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] py-[11px] px-[13px] [font-family:inherit] text-[14px] outline-none text-valle-purple [transition:border-color_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]';
 
+/** Once the launcher has appeared it stays for the rest of the visit. */
+let launcherRevealed = false;
+const LAUNCHER_DELAY_MS = 20000;
+
+/**
+ * Fewer pop-ups on arrival: the launcher waits until the guest has been on the
+ * site for 20 s or has scrolled past the first screen. Returning chat users
+ * (intro done) and guests with an unread reply see it at once.
+ */
+function useLauncherReveal(force: boolean): boolean {
+  const [shown, setShown] = useState(() => launcherRevealed || force);
+  useEffect(() => {
+    if (shown) { launcherRevealed = true; return; }
+    if (force) { setShown(true); return; }
+    const reveal = () => setShown(true);
+    const timer = window.setTimeout(reveal, LAUNCHER_DELAY_MS);
+    const onScroll = () => { if (window.scrollY > window.innerHeight) reveal(); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.clearTimeout(timer); window.removeEventListener('scroll', onScroll); };
+  }, [shown, force]);
+  return shown;
+}
+
 function introDone(): boolean {
   try { return localStorage.getItem(INTRO_KEY) === '1'; } catch { return false; }
 }
@@ -235,6 +258,7 @@ export function ChatWidget() {
   const [staffTyping, setStaffTyping] = useState(false);
   const [fileErr, setFileErr] = useState('');
   const t = useT();
+  const launcherShown = useLauncherReveal(!intro || unread > 0);
 
   const chatRef = useRef<VisitorChat | null>(null);
   const openRef = useRef(open);
@@ -383,6 +407,7 @@ export function ChatWidget() {
       : t('RECONNECTING…');
 
   if (!open) {
+    if (!launcherShown) return null;
     return <Launcher onClick={openPanel} unread={unread} bottom={bottom} right={right} reduced={reduced} />;
   }
 

@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
+import { paths, useGoto } from '../../lib/nav';
 
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
   const t = useT();
   const { HERO } = useCatalog();
+  const goto = useGoto();
   const [heroIdx, setHeroIdx] = useState(0);
   const copyRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +73,14 @@ export function Hero() {
         <p data-hero-copy className="mx-0 mt-[22px] mb-0 max-w-[52ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-white/88">
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
+        <div data-hero-copy className="mt-7 flex flex-wrap gap-3">
+          <a href={paths.booking()} onClick={(e) => { e.preventDefault(); goto.booking(); }} className="press inline-block rounded-full bg-[#D91E44] px-8 py-4 text-base font-bold shadow-[0_10px_24px_-8px_rgba(255,51,88,.6)] hover:bg-[#B8163A]" style={{ color: '#FFFFFF', textDecoration: 'none' }}>
+            {t('Book your day')}
+          </a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); goto.packages(); }} className="press inline-block rounded-full border-2 border-solid border-white/80 bg-transparent px-7 py-[14px] text-base font-bold hover:bg-white/15" style={{ color: '#FFFFFF', textDecoration: 'none' }}>
+            {t('See packages')}
+          </a>
+        </div>
       </div>
       <div className="absolute right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col gap-2">
         {HERO.map((src, i) => (

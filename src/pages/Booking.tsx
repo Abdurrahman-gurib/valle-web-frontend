@@ -3,10 +3,9 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { useLocation } from 'react-router-dom';
 import type { BookingRequest, SelLine } from '../types';
 import { useApp } from '../store/AppStore';
-import { QuadMap, ZiplineMap } from './home/ActivityMaps';
 import { CurrencyPicker } from '../components/CurrencyPicker';
 import { motion } from 'motion/react';
-import { CalendarDays, Check, Minus, Plus } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, Minus, Plus, Sparkles } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ValleButton } from '@/components/ui/valle';
@@ -21,7 +20,10 @@ import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, newAtte
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
-import { localizePath, tr, useT, _t } from '../i18n';
+import { back, fwd, localizePath, tr, useT, _t } from '../i18n';
+import { track } from '../lib/funnel';
+import { bestValue, comboSwap, extras, FAMILY_TITLE } from './booking/offers';
+import { PRODUCT_PREFIX } from '../types';
 import { InstallCard } from '../components/InstallApp';
 
 /** The waiver form sits next to the ticket: same reference, same token, in the page's language. */
@@ -44,8 +46,7 @@ const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
 
 // Nationality values (NATC keys) are stored and sent in English; listed here so the extractor sees them.
-const NATIONALITY_KEYS = [_t('Mauritius'), _t('Réunion / France'), _t('United Kingdom'), _t('Germany'), _t('Italy'), _t('India'), _t('China'), _t('South Africa'), _t('UAE'), _t('Australia'), _t('USA')];
-void NATIONALITY_KEYS;
+const NATIONALITIES = [_t('Mauritius'), _t('Réunion / France'), _t('United Kingdom'), _t('Germany'), _t('Italy'), _t('India'), _t('China'), _t('South Africa'), _t('UAE'), _t('Australia'), _t('USA'), _t('Other')];
 
 const stepLabel: CSSProperties = {
   fontFamily: MONO, fontSize: '11.5px', fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)',
@@ -289,6 +290,36 @@ function PayCard({ on, bgOn, title, note, onClick }: { on: boolean; bgOn: string
   );
 }
 
+/**
+ * One booking step. The open step shows its content; a closed step shows its title and
+ * what was chosen, and opens on tap. On phones only the open step is on screen.
+ */
+function StepCard({ n, step, title, summary, onOpen, children }: { n: number; step: number; title: string; summary: string; onOpen: () => void; children: ReactNode }) {
+  const t = useT();
+  const open = n === step;
+  return (
+    <section
+      data-testid={'step-' + n}
+      aria-labelledby={'step-h-' + n}
+      className={cn(!open && 'max-sm:hidden')}
+      style={{ marginTop: '14px', background: '#FFFFFF', borderRadius: '18px', boxShadow: open ? '0 0 0 2px #7333FF' : '0 0 0 1.5px #EBE2FF', padding: open ? 'clamp(14px,2.4vw,22px)' : '12px 18px' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span aria-hidden style={{ flexShrink: 0, width: '26px', height: '26px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: MONO, fontSize: '12px', fontWeight: 700, background: open ? '#7333FF' : n < step ? '#33FF74' : '#EBE2FF', color: open ? '#FFFFFF' : '#340057' }}>{n < step ? '✓' : n}</span>
+        <h2 id={'step-h-' + n} style={{ margin: 0, flex: 1, minWidth: 0, fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: open ? '22px' : '17px', textTransform: 'uppercase', lineHeight: 1.05 }}>
+          {title}
+          {!open && <span style={{ display: 'block', fontFamily: 'inherit', fontStyle: 'normal', fontWeight: 500, fontSize: '13px', textTransform: 'none', color: 'rgba(52,0,87,.7)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{summary}</span>}
+        </h2>
+        {!open && (
+          <button type="button" onClick={onOpen} aria-label={t('Change') + ' · ' + title}
+            className="cursor-pointer rounded-full border-[1.5px] border-valle-lilac bg-white px-3.5 py-1.5 font-sans text-[12.5px] font-bold text-valle-purple hover:border-valle-violet focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet">{t('Change')}</button>
+        )}
+      </div>
+      {open && <div style={{ marginTop: '16px' }}>{children}</div>}
+    </section>
+  );
+}
+
 /* Confirm button in the sticky summary bar */
 function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return <ValleButton variant="primary" size="lg" onClick={onClick} className="px-[26px] py-3.5 text-[14.5px]">{label}</ValleButton>;
@@ -368,6 +399,19 @@ export default function BookingPage() {
     }
   };
   const [submitting, setSubmitting] = useState(false);
+  // The four steps: 1 choose, 2 date & time, 3 details, 4 pay. Only the current one is open.
+  const [step, setStep] = useState(1);
+  const [rateErr, setRateErr] = useState(false);
+  const stepTop = useRef<HTMLDivElement>(null);
+  const goStep = (n: number) => {
+    setStep(n);
+    setRateErr(false);
+    requestAnimationFrame(() => {
+      const el = stepTop.current;
+      if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
+  };
+  useEffect(() => { track('view_booking'); }, []);
   const [natFocus, setNatFocus] = useState(false);
   const [backHov, backBind] = useHover();
 
@@ -375,6 +419,7 @@ export default function BookingPage() {
   // (_nav('booking', { confirmed: false }) + scrollTo(0,0)).
   useEffect(() => {
     setConfirmed(false);
+    setStep(1);
     window.scrollTo(0, 0);
   }, [location.key]);
 
@@ -488,6 +533,7 @@ export default function BookingPage() {
     if (submitting) return;
     if (needsTime.length > 0) {
       setApiErr(t('Pick a start time for {names}.', { names: needsTime.join(', ') }));
+      setStep(2);
       return;
     }
     if (selectedSlotFull || activityFull.length > 0) {
@@ -496,19 +542,21 @@ export default function BookingPage() {
         : activityFull.length > 0
         ? t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })
         : t('That arrival slot is fully booked on this date. Pick the other slot or another day.'));
+      setStep(2);
       return;
     }
     const ok = name.trim() && (email.trim() || phone.trim());
-    if (!ok) { setFormErr(true); return; }
+    if (!ok) { setFormErr(true); setStep(3); return; }
     setFormErr(false);
     setApiErr('');
     setSubmitting(true);
+    track('submit');
     const req: BookingRequest = {
       visitDate: customDate || (dOpts[dateIdx] ? dOpts[dateIdx].iso : dOpts[0].iso),
       slot: slot === 0 ? 'morning' : 'afternoon',
       adults,
       kids,
-      rate: rate ?? 'rr',
+      rate,
       items: booking.selLines.map((l) => ({ id: l.act.id, variant: l.variant, adults: l.qty.a, kids: l.qty.k, units: l.qty.u, time: times[l.key] || undefined })),
       name: name.trim(),
       phone: phone.trim() || undefined,
@@ -541,7 +589,7 @@ export default function BookingPage() {
       // or a limited promo code whose last use just went to someone else.
       const msg = (e as Error).message || '';
       const codeUsed = status === 409 && /code/i.test(msg);
-      if (status === 409 && !codeUsed) void refreshAvail(req.visitDate);
+      if (status === 409 && !codeUsed) { void refreshAvail(req.visitDate); setStep(2); }
       if (codeUsed) { setOffer(null); setCouponMsg(''); }
       setApiErr(codeUsed
         ? t('This code has just been fully used. Remove it or try another.')
@@ -554,6 +602,7 @@ export default function BookingPage() {
       return;
     }
     setRefCode(code);
+    track('booked');
     attemptKey.current = newAttemptKey();
     setHold(null);
     setSubmitting(false);
@@ -574,6 +623,45 @@ export default function BookingPage() {
     goto.home();
   };
 
+  // step machinery
+  const stepNames = [t('Choose'), t('Date & time'), t('Your details'), t('Pay')];
+  const chooseSummary = (cartActs.length === 0 ? t('Park entry only') : cartActs.map((l) => l.act.name).join(', ')) + ' · ' + partySummary + ' · ' + (rate === 'rr' ? t('Resident') : t('Visitor'));
+  const packs = useMemo(() => bestValue(catalog, rate), [catalog, rate]);
+  const swap = useMemo(() => comboSwap(catalog, sel, adults, kids, rate), [catalog, sel, adults, kids, rate]);
+  const extraList = useMemo(() => extras(catalog, sel, adults, kids, rate), [catalog, sel, adults, kids, rate]);
+  useEffect(() => { if (swap) track('suggestion_shown', swap.product.key); }, [swap]);
+  const [moreOpen, setMoreOpen] = useState(() => !!nat);
+  const next = () => {
+    setApiErr('');
+    if (step === 1) {
+      if (!app.rateChosen) { setRateErr(true); return; }
+      track('pick_items');
+      goStep(2);
+      return;
+    }
+    if (step === 2) {
+      if (needsTime.length > 0) { setApiErr(t('Pick a start time for {names}.', { names: needsTime.join(', ') })); return; }
+      if (selectedSlotFull || activityFull.length > 0) {
+        setApiErr(selectedSlotLevel === 'closed'
+          ? t('The park is closed for that arrival slot. Pick another day.')
+          : activityFull.length > 0
+          ? t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })
+          : t('That arrival slot is fully booked on this date. Pick the other slot or another day.'));
+        return;
+      }
+      track('pick_date');
+      goStep(3);
+      return;
+    }
+    if (step === 3) {
+      if (!(name.trim() && (email.trim() || phone.trim()))) { setFormErr(true); return; }
+      track('details');
+      goStep(4);
+      return;
+    }
+    void confirmNow();
+  };
+
   // confirmation bits
   const guestLine = (name.trim() || t('Guest')) + (nat ? ' · ' + t(nat) : '');
   // Nothing is charged on the site today, so the stamp never claims a payment.
@@ -592,193 +680,255 @@ export default function BookingPage() {
     <main ref={ref} style={{ maxWidth: '1180px', margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
       {!confirmed && (
         <>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-            <h1 style={{
-              fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(38px,5.8vw,74px)',
-              lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase',
-              transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
-            }}>{t('Build your day')}</h1>
-            <span style={{ fontFamily: MONO, fontSize: '12px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('BOOKING MADE SIMPLE')}</span>
-          </div>
-          <div style={{ fontFamily: MONO, fontSize: '12px', color: 'rgba(52,0,87,.6)', marginTop: '12px' }}>{ONLINE_PAYMENT ? t('FREE TO BOOK · PAY ONLINE OR AT THE GATE · E-RECEIPT BY EMAIL & SMS') : t('FREE TO BOOK · PAY AT THE GATE · E-RECEIPT BY EMAIL & SMS')}</div>
+          <h1 style={{
+            fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(34px,5vw,60px)',
+            lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase',
+            transform: 'rotate(-4deg)', transformOrigin: 'left bottom',
+          }}>{t('Build your day')}</h1>
 
-          {/* One column, top to bottom: the five steps read as a flow (1 pick, 2 your day, 3 when, 4 details, 5 pay). */}
-          <div>
-            <div>
-              {/* 1 · PICK EXPERIENCES */}
-              <div style={{ marginTop: '30px' }}>
-                <div style={stepLabel}>{t('1 · TAP TO ADD EXPERIENCES')}</div>
-                <div style={{ background: passHintBg, borderRadius: '14px', padding: '13px 18px', fontSize: '13.5px', color: '#340057', fontWeight: 600, marginTop: '12px' }}>{passHint}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(146px,1fr))', gap: '10px', marginTop: '14px' }}>
-                  {bookCards.map((m) => <BookCard key={m.id} m={m} />)}
-                </div>
+          {/* progress: four steps, each one a way back to it */}
+          <nav aria-label={t('Booking steps')} style={{ marginTop: '26px', scrollMarginTop: '90px' }} ref={stepTop}>
+            <div aria-hidden style={{ height: '6px', borderRadius: '999px', background: '#EBE2FF', overflow: 'hidden' }}>
+              <div data-testid="booking-progress" style={{ height: '100%', width: (step / 4) * 100 + '%', background: '#7333FF', borderRadius: '999px', transition: 'width .3s ease' }} />
+            </div>
+            <ol style={{ listStyle: 'none', margin: '10px 0 0', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', gap: '6px' }}>
+              {stepNames.map((label, i) => (
+                <li key={label}>
+                  <button
+                    type="button"
+                    data-testid={'step-tab-' + (i + 1)}
+                    aria-current={step === i + 1 ? 'step' : undefined}
+                    onClick={() => goStep(i + 1)}
+                    className="w-full cursor-pointer rounded-lg border-0 bg-transparent px-1 py-1 text-start focus-visible:outline-2 focus-visible:outline-valle-violet"
+                    style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 700, letterSpacing: '.06em', color: step === i + 1 ? '#7333FF' : step > i + 1 ? '#340057' : 'rgba(52,0,87,.6)' }}
+                  >
+                    {step > i + 1 ? '✓ ' : (i + 1) + ' · '}{label.toUpperCase()}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
+          {draftLoaded && <div role="status" data-testid="draft-loaded" style={{ marginTop: '14px', background: '#E6FFEE', border: '1.5px solid #33FF74', borderRadius: '14px', padding: '12px 18px', fontSize: '14px', fontWeight: 600, color: '#340057' }}>{draftLoaded}</div>}
+
+          {/* 1 · CHOOSE */}
+          <StepCard n={1} step={step} title={stepNames[0]} summary={chooseSummary} onOpen={() => goStep(1)}>
+            <div role="radiogroup" aria-label={t('Your rate')} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={stepLabel}>{t('YOUR RATE')}</span>
+              {(['nr', 'rr'] as const).map((r) => {
+                const on = app.rateChosen && rate === r;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    data-testid={'rate-' + r}
+                    onClick={() => { app.setRate(r); setRateErr(false); }}
+                    className="cursor-pointer rounded-full border-[1.5px] px-4 py-2 font-sans text-[13.5px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet"
+                    style={{ borderColor: on ? '#7333FF' : '#EBE2FF', background: on ? '#7333FF' : '#FFFFFF', color: on ? '#FFFFFF' : '#340057' }}
+                  >{r === 'nr' ? t('I am visiting') : t('I live in Mauritius')}</button>
+                );
+              })}
+            </div>
+            {rateErr && <div role="alert" style={{ marginTop: '8px', fontSize: '13px', fontWeight: 600, color: '#D91E44' }}>{t('Choose your rate to see your prices.')}</div>}
+
+            {/* party: park entry */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', flexWrap: 'wrap', background: '#F7F3FF', borderRadius: '14px', marginTop: '14px' }}>
+              <div style={{ flex: 1, minWidth: '150px' }}>
+                <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{t('Park entry')}</div>
+                <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote}</div>
               </div>
+              <Stepper tag={t('ADULTS')} val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+              <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+              <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'end' }}>{entryAmt}</div>
+            </div>
+            <a href={localizePath('/groups')} style={{ display: 'inline-block', marginTop: '8px', fontSize: '12.5px', fontWeight: 600, color: '#7333FF' }}>{t('13 or more? Book as a group')} {fwd()}</a>
 
-              {/* 2 · YOUR DAY (cart) */}
-              <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>{t('2 · YOUR DAY')} · {cartCountLabel}</div>
-                <div style={{ background: '#FFFFFF', borderRadius: '18px', boxShadow: '0 0 0 1.5px #EBE2FF', marginTop: '12px', overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', flexWrap: 'wrap', background: '#F7F3FF' }}>
-                    <div style={{ flex: 1, minWidth: '150px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{t('Park entry')}</div>
-                      <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote} · {t('ALL NATURE TRAILS INCLUDED')}</div>
-                    </div>
-                    <Stepper tag={t('ADULTS')} val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
-                    <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
-                    <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '13px', minWidth: '84px', textAlign: 'right' }}>{entryAmt}</div>
-                  </div>
-                  {cartActs.map((l) => (
-                    <div key={l.key}>
-                      <CartLine line={l} />
-                      {sessionsOf(l.act.id) && (
-                        <div data-testid={`session-picker-${l.act.id}`} style={{ padding: '0 18px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: times[l.key] ? 'rgba(52,0,87,.6)' : '#D91E44' }}>{t('START TIME')}</span>
-                          {timesFor(l.act.id).map(([tm, lv]) => (
-                            <button
-                              key={tm}
-                              type="button"
-                              disabled={lv === 'full'}
-                              aria-pressed={times[l.key] === tm}
-                              onClick={() => setTimes((x) => ({ ...x, [l.key]: tm }))}
-                              style={{
-                                border: '1.5px solid ' + (times[l.key] === tm ? '#7333FF' : '#EBE2FF'), background: times[l.key] === tm ? '#7333FF' : lv === 'full' ? '#F7F3FF' : '#FFFFFF',
-                                color: times[l.key] === tm ? '#FFFFFF' : '#340057', opacity: lv === 'full' ? 0.5 : 1, cursor: lv === 'full' ? 'not-allowed' : 'pointer',
-                                fontFamily: MONO, fontWeight: 700, fontSize: '12px', padding: '6px 10px', borderRadius: '999px',
-                              }}
-                            >{tm}{lv === 'full' ? ' · ' + t('FULL') : lv === 'busy' ? ' · ' + t('FEW LEFT') : ''}</button>
-                          ))}
-                          {timesFor(l.act.id).length === 0 && <span style={{ fontSize: '12.5px', color: '#D91E44', fontWeight: 600 }}>{t('No session for an afternoon arrival: choose the morning.')}</span>}
+            {/* best value: one package per family */}
+            {packs.length > 0 && (
+              <div style={{ marginTop: '22px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+                  <span style={stepLabel}>{t('BEST VALUE · PACKAGES')}</span>
+                  <a href={localizePath('/packages')} style={{ fontSize: '12.5px', fontWeight: 700, color: '#7333FF' }}>{t('See all packages')} {fwd()}</a>
+                </div>
+                <div data-testid="best-value" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '10px 2px 6px', scrollSnapType: 'x mandatory' }}>
+                  {packs.map(({ product: p, family, popular }) => {
+                    const inDay = !!sel[PRODUCT_PREFIX + p.key];
+                    const each = rate === 'rr' ? p.rr : p.nr;
+                    const party = productAmount(p, rate, Math.max(1, adults), kids, 1);
+                    return (
+                      <div key={p.key} data-testid={'pack-' + p.key} style={{ flex: '0 0 210px', scrollSnapAlign: 'start', borderRadius: '14px', overflow: 'hidden', border: '1.5px solid ' + (inDay ? '#7333FF' : '#EBE2FF'), background: inDay ? 'rgba(115,51,255,.06)' : '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ position: 'relative', height: '84px', background: '#EBE2FF' }}>
+                          {p.image && <img src={p.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+                          {popular && <span style={{ position: 'absolute', top: '8px', insetInlineStart: '8px', background: '#FFFC33', color: '#340057', fontFamily: MONO, fontSize: '9px', fontWeight: 700, letterSpacing: '.08em', borderRadius: '999px', padding: '4px 8px' }}>{t('MOST POPULAR')}</span>}
                         </div>
-                      )}
-                    </div>
-                  ))}
-                  {cartActs.length === 0 && (
-                    <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.7)' }}>
-                      {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
-                    </div>
-                  )}
+                        <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', gap: '3px', flex: 1 }}>
+                          <div style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.08em', color: 'rgba(52,0,87,.6)' }}>{t(FAMILY_TITLE[family]).toUpperCase()}</div>
+                          <div style={{ fontWeight: 800, fontSize: '15px' }}>{p.name}</div>
+                          <div style={{ fontFamily: MONO, fontSize: '10.5px', color: 'rgba(52,0,87,.7)' }}>{p.mode === 'flat' ? money(each) : t('{price} /PERSON', { price: money(each) })}</div>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: '#340057' }}>{t('{amount} for your party', { amount: money(party) })}</div>
+                          <button
+                            type="button"
+                            aria-pressed={inDay}
+                            aria-label={(inDay ? t('In my day') : t('Add')) + ' · ' + p.name}
+                            onClick={() => { app.toggleSel(PRODUCT_PREFIX + p.key); if (!inDay) track('package_click', p.key); }}
+                            className="mt-auto cursor-pointer rounded-full border-[1.5px] border-valle-purple px-3 py-[7px] font-sans text-[12.5px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet"
+                            style={{ marginTop: '8px', background: inDay ? '#340057' : '#FFFFFF', color: inDay ? '#FFFC33' : '#340057' }}
+                          >{inDay ? '✓ ' + t('In my day') : t('Add')}</button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
 
-              {/* the route maps of what is in the cart, so the day can be pictured while booking */}
-              {cartActs.some((l) => l.act.id === 'quad' || l.act.id === 'buggy') && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><QuadMap /></div>}
-              {cartActs.some((l) => l.act.id === 'zipline') && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><ZiplineMap /></div>}
-
-              {/* 3 · WHEN */}
-              <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>{t('3 · WHEN ARE YOU COMING?')}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(86px,1fr))', gap: '8px', marginTop: '12px' }}>
-                  {dOpts.map((o) => (
-                    <DateChip
-                      key={o.i}
-                      o={o}
-                      on={!customDate && dateIdx === o.i}
-                      onClick={() => { setDateIdx(o.i); setCustomDate(''); }}
-                      load={avail[o.iso]}
-                    />
-                  ))}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.7)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
-                  <Popover open={calOpen} onOpenChange={setCalOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        data-testid="date-picker"
-                        className={cn('inline-flex cursor-pointer items-center gap-2 rounded-[14px] border-[1.5px] px-3.5 py-2.5 font-sans text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', customDate ? 'border-valle-violet bg-valle-violet text-white' : 'border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50')}
-                      >
-                        <CalendarDays size={16} strokeWidth={2.4} aria-hidden />
-                        {customDate ? (fullDateFromIso(customDate) || customDate) : t('Pick a date')}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-auto rounded-2xl border-valle-lilac bg-white p-2 text-valle-purple shadow-[0_24px_48px_-20px_rgba(52,0,87,.45)]">
-                      <Calendar
-                        mode="single"
-                        selected={customDate ? new Date(customDate + 'T12:00:00') : undefined}
-                        onSelect={(d) => {
-                          if (!d) return;
-                          const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                          setCustomDate(iso); setCalOpen(false);
-                        }}
-                        disabled={{ before: new Date(tIso + 'T00:00:00') }}
-                        defaultMonth={customDate ? new Date(customDate + 'T12:00:00') : new Date(tIso + 'T12:00:00')}
-                        className="[--cell-size:2.4rem] [&_.rdp-day_button[aria-selected=true]]:!bg-valle-violet [&_.rdp-day_button[aria-selected=true]]:!text-white"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                  <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} closure={selectedLoad?.morning.closure} />
-                  <SlotChip label={t('Afternoon')} sub={t('ARRIVE 12:00–15:30')} on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} closure={selectedLoad?.afternoon.closure} />
-                </div>
-                {activityFull.length > 0 && (
-                  <div role="alert" data-testid="activity-full" style={{ marginTop: '10px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '12px', padding: '10px 14px', fontSize: '13.5px', fontWeight: 600, color: '#340057' }}>
-                    {t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })}
-                  </div>
-                )}
-                {hold && !selectedSlotFull && activityFull.length === 0 && (
-                  <div data-testid="hold-note" style={{ marginTop: '10px', fontFamily: MONO, fontSize: '10px', letterSpacing: '.08em', color: '#1E9E4A', fontWeight: 700 }}>
-                    {t('YOUR PLACES ARE HELD UNTIL {time}', { time: hold.until })}
-                  </div>
-                )}
-                {Object.keys(avail).length > 0 && (
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
-                    <span>{t('DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:')}</span>
-                    {(['quiet', 'busy', 'very-busy', 'full', 'closed'] as BusyLevel[]).map((l) => (
-                      <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{t(LEVEL_LABEL[l])}
-                      </span>
-                    ))}
-                  </div>
-                )}
+            {/* activities one by one */}
+            <div style={{ marginTop: '20px' }}>
+              <span style={stepLabel}>{t('OR PICK ACTIVITIES ONE BY ONE')}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: '10px', marginTop: '10px' }}>
+                {bookCards.map((m) => <BookCard key={m.id} m={m} />)}
               </div>
             </div>
 
-            <div>
-              {/* 4 · DETAILS */}
-              <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>{t('4 · YOUR DETAILS · FOR YOUR CONFIRMATION & E-RECEIPT')}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px', marginTop: '12px' }}>
-                  <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder={t('Full name')} />
-                  <div style={{ position: 'relative' }}>
-                    <select aria-label={t('Nationality')}
-                      value={nat}
-                      onChange={(e) => setNatAndPrefill(e.target.value)}
-                      onFocus={() => setNatFocus(true)}
-                      onBlur={() => setNatFocus(false)}
-                      style={{
-                        width: '100%', appearance: 'none', WebkitAppearance: 'none',
-                        border: '1.5px solid ' + (natFocus ? '#7333FF' : '#EBE2FF'), background: '#F7F3FF',
-                        borderRadius: '12px', padding: '13px 34px 13px 16px', fontFamily: 'inherit',
-                        fontSize: '15px', color: '#340057', cursor: 'pointer', outline: 'none',
-                      }}
-                    >
-                      <option value="">{t('Nationality')}</option>
-                      <option value="Mauritius">{t('Mauritius')}</option>
-                      <option value="Réunion / France">{t('Réunion / France')}</option>
-                      <option value="United Kingdom">{t('United Kingdom')}</option>
-                      <option value="Germany">{t('Germany')}</option>
-                      <option value="Italy">{t('Italy')}</option>
-                      <option value="India">{t('India')}</option>
-                      <option value="China">{t('China')}</option>
-                      <option value="South Africa">{t('South Africa')}</option>
-                      <option value="UAE">{t('UAE')}</option>
-                      <option value="Australia">{t('Australia')}</option>
-                      <option value="USA">{t('USA')}</option>
-                      <option value="Other">{t('Other')}</option>
-                    </select>
-                    <span style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '11px', color: 'rgba(52,0,87,.7)' }}>▾</span>
-                  </div>
-                  <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder={t('Contact number (SMS / WhatsApp)')} />
-                  <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder={t('Email')} />
+            {swap && (
+              <div data-testid="combo-swap" role="status" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', background: '#E2FFEB', border: '1.5px solid #33FF74', borderRadius: '14px', padding: '12px 16px' }}>
+                <Sparkles size={18} aria-hidden />
+                <span style={{ flex: '1 1 200px', fontSize: '14px', fontWeight: 700 }}>{t('Switch to {name} and save {amount}', { name: swap.product.name, amount: mur(swap.save) })}</span>
+                <button type="button" onClick={() => { app.swapSel(swap.remove, PRODUCT_PREFIX + swap.product.key, swap.entry); track('suggestion_taken', swap.product.key); }}
+                  className="cursor-pointer rounded-full border-0 bg-valle-purple px-4 py-2 font-sans text-[13px] font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet">{t('Switch')}</button>
+              </div>
+            )}
+            {booking.advCount >= 2 && <div style={{ background: passHintBg, borderRadius: '14px', padding: '11px 16px', fontSize: '13px', color: '#340057', fontWeight: 600, marginTop: '12px' }}>{passHint}</div>}
+
+            {cartActs.length > 0 && (
+              <div style={{ marginTop: '18px' }}>
+                <span style={stepLabel}>{t('YOUR DAY')} · {cartCountLabel}</span>
+                <div style={{ background: '#FFFFFF', borderRadius: '16px', boxShadow: '0 0 0 1.5px #EBE2FF', marginTop: '10px', overflow: 'hidden' }}>
+                  {cartActs.map((l) => <CartLine key={l.key} line={l} />)}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '10px' }}>
+              </div>
+            )}
+          </StepCard>
+
+          {/* 2 · DATE & TIME */}
+          <StepCard n={2} step={step} title={stepNames[1]} summary={dateSummary + ' · ' + slotName} onOpen={() => goStep(2)}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(78px,1fr))', gap: '8px' }}>
+              {dOpts.map((o) => (
+                <DateChip key={o.i} o={o} on={!customDate && dateIdx === o.i} onClick={() => { setDateIdx(o.i); setCustomDate(''); }} load={avail[o.iso]} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.7)' }}>{t('ANOTHER MONTH? PICK ANY DATE →')}</span>
+              <Popover open={calOpen} onOpenChange={setCalOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    data-testid="date-picker"
+                    className={cn('inline-flex cursor-pointer items-center gap-2 rounded-[14px] border-[1.5px] px-3.5 py-2.5 font-sans text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', customDate ? 'border-valle-violet bg-valle-violet text-white' : 'border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50')}
+                  >
+                    <CalendarDays size={16} strokeWidth={2.4} aria-hidden />
+                    {customDate ? (fullDateFromIso(customDate) || customDate) : t('Pick a date')}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-auto rounded-2xl border-valle-lilac bg-white p-2 text-valle-purple shadow-[0_24px_48px_-20px_rgba(52,0,87,.45)]">
+                  <Calendar
+                    mode="single"
+                    selected={customDate ? new Date(customDate + 'T12:00:00') : undefined}
+                    onSelect={(d) => {
+                      if (!d) return;
+                      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                      setCustomDate(iso); setCalOpen(false);
+                    }}
+                    disabled={{ before: new Date(tIso + 'T00:00:00') }}
+                    defaultMonth={customDate ? new Date(customDate + 'T12:00:00') : new Date(tIso + 'T12:00:00')}
+                    className="[--cell-size:2.4rem] [&_.rdp-day_button[aria-selected=true]]:!bg-valle-violet [&_.rdp-day_button[aria-selected=true]]:!text-white"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+              <SlotChip label={t('Morning')} sub={t('ARRIVE 09:00–12:00')} on={slot === 0} onClick={() => setSlot(0)} level={selectedLoad?.morning.level} closure={selectedLoad?.morning.closure} />
+              <SlotChip label={t('Afternoon')} sub={t('ARRIVE 12:00–15:30')} on={slot === 1} onClick={() => setSlot(1)} level={selectedLoad?.afternoon.level} closure={selectedLoad?.afternoon.closure} />
+            </div>
+            {cartActs.filter((l) => sessionsOf(l.act.id)).map((l) => (
+              <div key={l.key} data-testid={`session-picker-${l.act.id}`} style={{ marginTop: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: times[l.key] ? 'rgba(52,0,87,.6)' : '#D91E44' }}>{l.act.name.toUpperCase()} · {t('START TIME')}</span>
+                {timesFor(l.act.id).map(([tm, lv]) => (
+                  <button
+                    key={tm}
+                    type="button"
+                    disabled={lv === 'full'}
+                    aria-pressed={times[l.key] === tm}
+                    onClick={() => { setTimes((x) => ({ ...x, [l.key]: tm })); setApiErr(''); }}
+                    style={{
+                      border: '1.5px solid ' + (times[l.key] === tm ? '#7333FF' : '#EBE2FF'), background: times[l.key] === tm ? '#7333FF' : lv === 'full' ? '#F7F3FF' : '#FFFFFF',
+                      color: times[l.key] === tm ? '#FFFFFF' : '#340057', opacity: lv === 'full' ? 0.5 : 1, cursor: lv === 'full' ? 'not-allowed' : 'pointer',
+                      fontFamily: MONO, fontWeight: 700, fontSize: '12px', padding: '6px 10px', borderRadius: '999px',
+                    }}
+                  >{tm}{lv === 'full' ? ' · ' + t('FULL') : lv === 'busy' ? ' · ' + t('FEW LEFT') : ''}</button>
+                ))}
+                {timesFor(l.act.id).length === 0 && <span style={{ fontSize: '12.5px', color: '#D91E44', fontWeight: 600 }}>{t('No session for an afternoon arrival: choose the morning.')}</span>}
+              </div>
+            ))}
+            {activityFull.length > 0 && (
+              <div role="alert" data-testid="activity-full" style={{ marginTop: '10px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '12px', padding: '10px 14px', fontSize: '13.5px', fontWeight: 600, color: '#340057' }}>
+                {t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })}
+              </div>
+            )}
+            {Object.keys(avail).length > 0 && (
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
+                <span>{t('DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:')}</span>
+                {(['quiet', 'busy', 'very-busy', 'full', 'closed'] as BusyLevel[]).map((l) => (
+                  <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '999px', background: LEVEL_COLOR[l], display: 'inline-block' }} />{t(LEVEL_LABEL[l])}
+                  </span>
+                ))}
+              </div>
+            )}
+          </StepCard>
+
+          {/* 3 · YOUR DETAILS */}
+          <StepCard n={3} step={step} title={stepNames[2]} summary={name.trim() ? [name.trim(), email.trim() || phone.trim()].filter(Boolean).join(' · ') : t('Not filled in yet')} onOpen={() => goStep(3)}>
+            <div style={{ fontSize: '13px', color: 'rgba(52,0,87,.7)', marginBottom: '10px' }}>{t('Your ticket goes to your e-mail or WhatsApp: one of the two is enough.')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px' }}>
+              <Field value={name} onChange={(v) => { setName(v); setFormErr(false); setApiErr(''); }} placeholder={t('Full name')} />
+              <Field value={email} onChange={(v) => { setEmail(v); setFormErr(false); setApiErr(''); }} placeholder={t('Email')} />
+              <Field value={phone} onChange={(v) => { setPhone(v); setFormErr(false); setApiErr(''); }} placeholder={t('Contact number (SMS / WhatsApp)')} />
+            </div>
+            <button type="button" aria-expanded={moreOpen} aria-controls="booking-more" data-testid="more-options" onClick={() => setMoreOpen((o) => !o)}
+              className="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-transparent px-1 py-1 font-sans text-[13px] font-bold text-valle-violet focus-visible:outline-2 focus-visible:outline-valle-violet">
+              <ChevronDown size={16} aria-hidden style={{ transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />{t('More options')}
+            </button>
+            {moreOpen && (
+              <div id="booking-more" style={{ marginTop: '8px', display: 'grid', gap: '10px' }}>
+                <div style={{ position: 'relative', maxWidth: '360px' }}>
+                  <select aria-label={t('Nationality')}
+                    value={nat}
+                    onChange={(e) => setNatAndPrefill(e.target.value)}
+                    onFocus={() => setNatFocus(true)}
+                    onBlur={() => setNatFocus(false)}
+                    style={{
+                      width: '100%', appearance: 'none', WebkitAppearance: 'none',
+                      border: '1.5px solid ' + (natFocus ? '#7333FF' : '#EBE2FF'), background: '#F7F3FF',
+                      borderRadius: '12px', padding: '13px 34px 13px 16px', fontFamily: 'inherit',
+                      fontSize: '15px', color: '#340057', cursor: 'pointer', outline: 'none',
+                    }}
+                  >
+                    <option value="">{t('Nationality')}</option>
+                    {NATIONALITIES.map((v) => <option key={v} value={v}>{t(v)}</option>)}
+                  </select>
+                  <span style={{ position: 'absolute', insetInlineEnd: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '11px', color: 'rgba(52,0,87,.7)' }}>▾</span>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <input
                     value={coupon}
                     onChange={(e) => { setCoupon(e.target.value.toUpperCase()); setOffer(null); setCouponMsg(''); }}
                     onBlur={() => { void tryCoupon(); }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void tryCoupon(); } }}
                     placeholder={t('Promo or partner code (optional)')}
+                    aria-label={t('Promo or partner code (optional)')}
                     data-testid="coupon-input"
                     dir="ltr"
                     style={{ ...inputStyle, flex: '1 1 220px', fontFamily: MONO, textTransform: 'uppercase', borderColor: offer ? '#33FF74' : '#EBE2FF' }}
@@ -787,68 +937,101 @@ export default function BookingPage() {
                   {couponMsg && <span data-testid="coupon-msg" style={{ fontSize: '13px', fontWeight: 600, color: offer ? '#1E9E4A' : '#D91E44', flex: '1 1 100%' }}>{couponMsg}{offer?.note ? ' · ' + offer.note : ''}</span>}
                 </div>
               </div>
-
-              {/* 5 · PAYMENT: shown when the API has a payment provider (or VITE_ONLINE_PAYMENT=1) */}
-              {ONLINE_PAYMENT && <div style={{ marginTop: '34px' }}>
-                <div style={stepLabel}>{t('5 · HOW WOULD YOU LIKE TO PAY?')}</div>
-                <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '12px' }}>
-                  <PayCard
-                    on={payMode === 'gate'}
-                    bgOn="#FFFFE2"
-                    title={t('Pay on arrival')}
-                    note={t('Free to book · no cancellation fee · cash or card at the gate.')}
-                    onClick={() => setPayMode('gate')}
-                  />
-                  <PayCard
-                    on={payMode === 'online'}
-                    bgOn="#E2FFEB"
-                    title={t('Pay online now')}
-                    note={t('Visa, Mastercard or Juice · skip the till, straight to the fun.')}
-                    onClick={() => setPayMode('online')}
-                  />
-                </div>
-              </div>}
+            )}
+            <div data-testid="save-for-later" style={{ marginTop: '16px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', fontSize: '13.5px', color: 'rgba(52,0,87,.75)' }}>
+              {draftState === 'sent'
+                ? <span data-testid="draft-sent" style={{ color: '#1E9E4A', fontWeight: 700 }}>{t('Saved. A link to come back to this day is in your inbox (valid 14 days). Nothing is reserved yet.')}</span>
+                : <>
+                    <span>{t('Not finishing now?')}</span>
+                    {draftState === 'ask' && <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder={t('Your e-mail')} aria-label={t('Your e-mail')} data-testid="draft-email" style={{ ...inputStyle, flex: '1 1 200px', padding: '9px 12px' }} />}
+                    <button type="button" onClick={() => { void saveForLater(); }} disabled={draftState === 'busy'} data-testid="draft-save" style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '8px 14px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                      {draftState === 'busy' ? t('Saving…') : t('E-mail me a link to come back to this day')}
+                    </button>
+                    {draftState === 'error' && <span style={{ color: '#D91E44', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
+                  </>}
             </div>
-          </div>
+          </StepCard>
 
-          {draftLoaded && <div role="status" data-testid="draft-loaded" style={{ marginTop: '18px', background: '#E6FFEE', border: '1.5px solid #33FF74', borderRadius: '14px', padding: '12px 18px', fontSize: '14px', fontWeight: 600, color: '#340057' }}>{draftLoaded}</div>}
-          <div data-testid="save-for-later" style={{ marginTop: '18px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', fontSize: '13.5px', color: 'rgba(52,0,87,.75)' }}>
-            {draftState === 'sent'
-              ? <span data-testid="draft-sent" style={{ color: '#1E9E4A', fontWeight: 700 }}>{t('Saved. A link to come back to this day is in your inbox (valid 14 days). Nothing is reserved yet.')}</span>
-              : <>
-                  <span>{t('Not finishing now?')}</span>
-                  {draftState === 'ask' && <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder={t('Your e-mail')} aria-label={t('Your e-mail')} data-testid="draft-email" style={{ ...inputStyle, flex: '1 1 200px', padding: '9px 12px' }} />}
-                  <button type="button" onClick={() => { void saveForLater(); }} disabled={draftState === 'busy'} data-testid="draft-save" style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '8px 14px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    {draftState === 'busy' ? t('Saving…') : t('E-mail me a link to come back to this day')}
-                  </button>
-                  {draftState === 'error' && <span style={{ color: '#D91E44', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
-                </>}
-          </div>
+          {/* 4 · PAY */}
+          <StepCard n={4} step={step} title={stepNames[3]} summary={payOnline ? t('Pay online now') : t('Pay on arrival')} onOpen={() => goStep(4)}>
+            {extraList.length > 0 && (
+              <div data-testid="add-to-day">
+                <span style={stepLabel}>{t('ADD TO YOUR DAY')}</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                  {extraList.map((x) => (
+                    <button key={x.key} type="button" data-testid={'extra-' + x.kind}
+                      onClick={() => { app.toggleSel(x.id, x.variant); track('addon_add', x.kind); }}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-valle-lilac bg-white px-3.5 py-2 text-start font-sans text-[13px] text-valle-purple transition-colors hover:border-valle-violet focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet">
+                      <Plus size={14} strokeWidth={3} aria-hidden />
+                      <span style={{ fontWeight: 700 }}>{x.kind === 'photo' ? t('Photo package · {name}', { name: x.name }) : x.name}</span>
+                      <span style={{ fontFamily: MONO, fontSize: '11px', fontWeight: 700, color: '#7333FF' }}>+{money(x.amount)}</span>
+                    </button>
+                  ))}
+                  <a href={localizePath('/dine/chamouze')} data-testid="extra-lunch" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1.5px solid #EBE2FF', borderRadius: '999px', padding: '8px 14px', fontSize: '13px', fontWeight: 700, color: '#340057', textDecoration: 'none' }}>{t('Lunch at Chamouze')} {fwd()}</a>
+                </div>
+              </div>
+            )}
+            {ONLINE_PAYMENT && (
+              <div style={{ marginTop: extraList.length ? '20px' : 0 }}>
+                <div style={stepLabel}>{t('HOW WOULD YOU LIKE TO PAY?')}</div>
+                <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '10px', marginTop: '10px' }}>
+                  <PayCard on={payMode === 'gate'} bgOn="#FFFFE2" title={t('Pay on arrival')} note={t('Free to book · no cancellation fee · cash or card at the gate.')} onClick={() => setPayMode('gate')} />
+                  <PayCard on={payMode === 'online'} bgOn="#E2FFEB" title={t('Pay online now')} note={t('Visa, Mastercard or Juice · skip the till, straight to the fun.')} onClick={() => setPayMode('online')} />
+                </div>
+              </div>
+            )}
+            <div style={{ marginTop: '18px', background: '#F7F3FF', borderRadius: '14px', padding: '12px 16px' }}>
+              {booking.lines.map((ln, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '3px 0', fontSize: '13px' }}>
+                  <span style={{ color: 'rgba(52,0,87,.75)' }}>{ln.label}</span>
+                  <span style={{ fontFamily: MONO, fontWeight: 600, whiteSpace: 'nowrap' }}>{ln.amt}</span>
+                </div>
+              ))}
+              <div style={{ fontSize: '12.5px', color: 'rgba(52,0,87,.7)', marginTop: '6px' }}>{dateSummary} · {slotName} · {partySummary}</div>
+            </div>
+          </StepCard>
+
+          {hold && !selectedSlotFull && activityFull.length === 0 && (
+            <div data-testid="hold-note" style={{ marginTop: '12px', fontFamily: MONO, fontSize: '10px', letterSpacing: '.08em', color: '#1E9E4A', fontWeight: 700 }}>
+              {t('YOUR PLACES ARE HELD UNTIL {time}', { time: hold.until })}
+            </div>
+          )}
           {formErr && (
-            <div style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
+            <div role="alert" style={{ marginTop: '14px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
               {t("Add your name and an email or contact number, that's where your confirmation & receipt go.")}
             </div>
           )}
           {apiErr && (
-            <div style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
+            <div role="alert" style={{ marginTop: '14px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
               {apiErr}
             </div>
           )}
-          <div style={{
-            position: 'sticky', bottom: '14px', marginTop: '20px', background: '#340057', borderRadius: '18px',
-            padding: '16px 22px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap',
-            boxShadow: '0 18px 40px -12px rgba(38,0,64,.5)',
+          {/* sticky summary: running total and the one next action */}
+          <div data-testid="booking-bar" className="max-sm:!bottom-[calc(84px+env(safe-area-inset-bottom,0px))]" style={{
+            position: 'sticky', bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))', marginTop: '18px', background: '#340057', borderRadius: '18px',
+            padding: '14px 18px', boxShadow: '0 18px 40px -12px rgba(38,0,64,.5)', zIndex: 20,
           }}>
-            <div style={{ flex: 1, minWidth: '170px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
-                <CurrencyPicker fg="#FFFFFF" compact />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '160px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15px' }}>{sumLine}</div>
+                  <CurrencyPicker fg="#FFFFFF" compact />
+                </div>
+                <div style={{ fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.7)', marginTop: '3px' }}>{step === 4 ? payModeNote : t('STEP {n} OF 4', { n: step })}</div>
               </div>
-              <div style={{ fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: '3px' }}>{payModeNote}</div>
+              {step > 1 && !redirecting && (
+                <button type="button" onClick={() => goStep(step - 1)} data-testid="step-back"
+                  className="cursor-pointer rounded-full border-[1.5px] border-white/50 bg-transparent px-4 py-3 font-sans text-[13.5px] font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">{back()} {t('Back')}</button>
+              )}
+              {redirecting
+                ? <div data-testid="checkout-redirect" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '14.5px', padding: '14px 4px' }}>{t('Taking you to the secure payment page…')}</div>
+                : <ConfirmBtn label={step < 4 ? t('Continue') + ' ' + fwd() : confirmLabel} onClick={next} />}
             </div>
-            {redirecting
-              ? <div data-testid="checkout-redirect" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '14.5px', padding: '14px 4px' }}>{t('Taking you to the secure payment page…')}</div>
-              : <ConfirmBtn label={confirmLabel} onClick={confirmNow} />}
+            {step === 4 && (
+              <div data-testid="trust-line" style={{ marginTop: '8px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.75)' }}>
+                {[t('FREE CANCELLATION'), ONLINE_PAYMENT ? t('PAY AT THE GATE OR ONLINE') : t('PAY AT THE GATE'), t('TICKET BY E-MAIL & WHATSAPP')].join(' · ')}
+              </div>
+            )}
           </div>
         </>
       )}

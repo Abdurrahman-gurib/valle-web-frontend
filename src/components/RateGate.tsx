@@ -1,5 +1,5 @@
+import type React from 'react';
 import { useEscape } from '../hooks/useEscape';
-import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { entryPrices } from '../store/booking';
@@ -38,13 +38,9 @@ export function RateGate() {
   const nr = entryPrices(catalog, 'nr');
   const t = useT();
   const [hKeep, bindKeep] = useHover();
-  const { pathname } = useLocation();
-  // Escape closes the rate question once a rate is already chosen (the first visit has to pick one)
-  useEscape(app.rateGateOpen && app.rateGateDismissable, app.closeRateGate);
+  // Only opened on purpose (the header rate pill): Escape always closes it.
+  useEscape(app.rateGateOpen, app.closeRateGate);
   if (!app.rateGateOpen) return null;
-  // A guest opening their ticket or waiver from the e-mail has already booked:
-  // the first-visit rate question would only stand between them and the form.
-  if (!app.rateGateDismissable && /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname)) return null;
 
   return (
     <div role="dialog" aria-modal="true" aria-label={t('Choose your rate')} style={{
@@ -107,5 +103,29 @@ export function RateGate() {
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Small inline switch for pages that show prices: visitor prices by default,
+ * one tap to resident prices (and back). Replaces the old first-visit gate.
+ */
+export function ResidentToggle({ style }: { style?: React.CSSProperties }) {
+  const app = useApp();
+  const t = useT();
+  const resident = app.rate === 'rr';
+  return (
+    <button
+      type="button"
+      data-testid="resident-toggle"
+      aria-pressed={resident}
+      onClick={() => app.setRate(resident ? 'nr' : 'rr')}
+      style={{
+        border: '1.5px solid #EBE2FF', background: resident ? '#E2FFEB' : '#FFFFFF', color: '#340057', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: 13, fontWeight: 600, borderRadius: 999, padding: '7px 14px', ...style,
+      }}
+    >
+      {resident ? t('Showing resident prices · show visitor prices') : t('Mauritian resident? Show resident prices')}
+    </button>
   );
 }

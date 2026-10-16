@@ -21,6 +21,7 @@ import { isRtl, localizePath, useLang, useT, fwd } from '../i18n';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useParkStatus } from '../components/WeatherCard';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
+import { Accordion } from '@/components/ui/accordion';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -125,6 +126,10 @@ export default function DetailPage() {
   const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
   const hasPrices = pl.length > 0;
   const showReviews = act.id === 'zipline';
+  const keyFact = act.gtk[0]?.t;
+  const moreFacts = act.gtk.slice(1);
+  // the route map of this activity: the two quad & buggy loops, the zipline stations
+  const routeMap = act.id === 'quad' || act.id === 'buggy' ? <QuadMap /> : act.id === 'zipline' ? <ZiplineMap /> : null;
 
   /** Always goes to the explore page (never history.back), but restores its last filters. */
   const backExplore = () => {
@@ -150,7 +155,7 @@ export default function DetailPage() {
         style={{ border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: hBack ? '#FF3358' : '#7333FF', padding: '8px 0' }}
       >{t('← All experiences')}</button>
 
-      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12 }}>
+      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(56vh,520px)', minHeight: 300, background: '#EBE2FF', marginTop: 12 }}>
         {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
         <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.8), rgba(31,0,51,0) 55%)' }} />
@@ -165,51 +170,114 @@ export default function DetailPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(24px,4vw,48px)', marginTop: 'clamp(24px,4vw,40px)', alignItems: 'start' }}>
-        <div>
-          <p style={{ fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.6, color: 'rgba(52,0,87,.82)', margin: 0 }}>{d.blurb}</p>
-
-          {hasPrices && (
-            <div style={{ marginTop: 26, background: '#7333FF', borderRadius: 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
-              <StripesSm height={10} />
-              <div style={{ padding: '16px 20px 18px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>{t('Pricelist')}</span>
-                  <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
-                </div>
-                <div style={{ marginTop: 10 }}>
-                  {prices.map((pr) => {
-                    const on = d.hasAdd && app.isSelected(act.id, pr.n);
-                    return (
-                      <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
-                        <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
-                        <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
-                        {d.hasAdd && (
-                          <button
-                            onClick={() => app.toggleSel(act.id, pr.n)}
-                            title={on ? t('Remove from My Day') : t('Add this option to My Day')}
-                            style={{ border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, padding: '6px 10px', borderRadius: 999, whiteSpace: 'nowrap', minWidth: 68 }}
-                          >{on ? t('✓ Added') : t('+ Add')}</button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE')}</div>
-              </div>
-            </div>
-          )}
-
-          <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
-          <div style={{ marginTop: 10 }}>
-            {act.gtk.map((g) => (
-              <div key={g.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px dashed #D9C9F0', fontSize: 15, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
-                <span style={{ color: d.pulseColor, fontWeight: 800, flexShrink: 0 }}>●</span>
-                <span>{g.t}</span>
-              </div>
-            ))}
+      {/* above the fold: one price, three facts, one Book button */}
+      <div data-testid="detail-book-strip" style={{ background: '#340057', color: '#FFFFFF', borderRadius: 20, overflow: 'hidden', marginTop: 14 }}>
+        <StripesSm height={8} />
+        <div style={{ padding: 'clamp(16px,2.6vw,24px) clamp(18px,3vw,28px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 'clamp(16px,3vw,36px)' }}>
+          <div>
+            <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.14em', opacity: 0.65 }}>{t('PRICE')}</div>
+            <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(24px,3vw,32px)', marginTop: 2, color: '#FFFC33', textTransform: 'uppercase' }}>{d.priceLabel}</div>
           </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'clamp(14px,2.6vw,30px)', fontFamily: MONO, flex: '1 1 260px' }}>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.65 }}>{t('MIN AGE')}</div>
+              <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.age}</div>
+            </div>
+            {showsDuration(act.id) ? (
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.65 }}>{t('DURATION')}</div>
+                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.dur}</div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.65 }}>{t('PULSE')}</div>
+                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4, color: '#FFFC33' }}>{d.pulseName}</div>
+              </div>
+            )}
+            {keyFact && (
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.65 }}>{t('GOOD TO KNOW')}</div>
+                <div style={{ fontFamily: "'Work Sans',sans-serif", fontSize: 13.5, lineHeight: 1.45, marginTop: 4, fontWeight: 500 }}>{keyFact}</div>
+              </div>
+            )}
+            {paused && <div data-testid="activity-paused" style={{ alignSelf: 'center', background: '#FF3358', color: '#FFFFFF', fontSize: 10, letterSpacing: '.14em', fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{t('PAUSED TODAY · WEATHER')}</div>}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 220px', maxWidth: 360 }}>
+            <ValleButton variant="primary" onClick={bookThisNow} className="py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>
+            {d.hasAdd && (
+              <ValleButton onClick={() => d.add()} size="sm" className={cn('border-[1.5px] border-white/50 text-white hover:bg-white/15', d.selOn ? 'bg-valle-green/25' : 'bg-transparent')}>{d.addLabel}</ValleButton>
+            )}
+            <div style={{ fontFamily: MONO, fontSize: 10, opacity: 0.65, textAlign: 'center' }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
+          </div>
+        </div>
+      </div>
 
+      <div style={{ maxWidth: 880, marginTop: 'clamp(24px,4vw,40px)' }}>
+        <p style={{ fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.6, color: 'rgba(52,0,87,.82)', margin: 0 }}>{d.blurb}</p>
+
+        {moreFacts.length > 0 && (
+          <>
+            <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
+            <div style={{ marginTop: 10 }}>
+              {moreFacts.map((g) => (
+                <div key={g.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px dashed #D9C9F0', fontSize: 15, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
+                  <span style={{ color: d.pulseColor, fontWeight: 800, flexShrink: 0 }}>●</span>
+                  <span>{g.t}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {(hasPrices || routeMap) && (
+        <div style={{ marginTop: 28 }}>
+          <Accordion
+            headingLevel={2}
+            items={[{
+              id: 'routes',
+              title: routeMap ? t('See all routes and prices') : t('See all prices'),
+              content: (
+                <div data-testid="detail-more" style={{ display: 'grid', gap: 18 }}>
+                  {hasPrices && (
+                    <div style={{ background: '#7333FF', borderRadius: 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
+                      <StripesSm height={10} />
+                      <div style={{ padding: '16px 20px 18px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>{t('Pricelist')}</span>
+                          <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
+                        </div>
+                        <div style={{ marginTop: 10 }}>
+                          {prices.map((pr) => {
+                            const on = d.hasAdd && app.isSelected(act.id, pr.n);
+                            return (
+                              <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
+                                <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
+                                <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
+                                {d.hasAdd && (
+                                  <button
+                                    onClick={() => app.toggleSel(act.id, pr.n)}
+                                    title={on ? t('Remove from My Day') : t('Add this option to My Day')}
+                                    style={{ border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, padding: '6px 10px', borderRadius: 999, whiteSpace: 'nowrap', minWidth: 68 }}
+                                  >{on ? t('✓ Added') : t('+ Add')}</button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE')}</div>
+                      </div>
+                    </div>
+                  )}
+                  {routeMap && <div data-testid="activity-route-map">{routeMap}</div>}
+                </div>
+              ),
+            }]}
+          />
+        </div>
+      )}
+
+      <div style={{ maxWidth: 880 }}>
           {showReviews && (
             <>
               <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 30 }}>{t('WHAT VISITORS SAY')}</div>
@@ -227,40 +295,6 @@ export default function DetailPage() {
               </div>
             </>
           )}
-        </div>
-
-        <div style={{ background: '#340057', color: '#FFFFFF', borderRadius: 20, padding: '0 0 26px', position: 'sticky', top: 90, overflow: 'hidden' }}>
-          <StripesSm height={8} />
-          <div style={{ padding: '22px 26px 0' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: MONO }}>
-              {showsDuration(act.id) && (
-                <div>
-                  <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('DURATION')}</div>
-                  <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.dur}</div>
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('MIN AGE')}</div>
-                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{act.age}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PULSE')}</div>
-                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4, color: '#FFFC33' }}>{d.pulseName}</div>
-                {paused && <div data-testid="activity-paused" style={{ marginTop: 6, display: 'inline-block', background: '#FF3358', color: '#FFFFFF', fontSize: 10, letterSpacing: '.14em', fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{t('PAUSED TODAY · WEATHER')}</div>}
-              </div>
-              <div>
-                <div style={{ fontSize: 10, letterSpacing: '.14em', opacity: 0.6 }}>{t('PRICE')}</div>
-                <div style={{ fontWeight: 600, fontSize: 16, marginTop: 4 }}>{d.priceLabel}</div>
-              </div>
-            </div>
-            <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
-            {d.hasAdd && (
-              <ValleButton onClick={() => d.add()} size="md" className={cn('border-[1.5px] border-white/50 py-3.5 text-[15px] text-white hover:bg-white/15', d.selOn ? 'bg-valle-green/25' : 'bg-transparent')}>{d.addLabel}</ValleButton>
-            )}
-            <ValleButton variant="primary" onClick={bookThisNow} className="mt-2.5 py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>
-            <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
-          </div>
-        </div>
       </div>
 
       {gal && galLead && (
@@ -316,10 +350,6 @@ export default function DetailPage() {
           </div>
         </div>
       )}
-
-      {/* the route map of this activity: the two quad & buggy loops, the zipline stations */}
-      {(act.id === 'quad' || act.id === 'buggy') && <div data-testid="activity-route-map" style={{ marginTop: 'clamp(36px,5vw,56px)' }}><QuadMap /></div>}
-      {act.id === 'zipline' && <div data-testid="activity-route-map" style={{ marginTop: 'clamp(36px,5vw,56px)' }}><ZiplineMap /></div>}
 
       <nav aria-label={t('Related pages')} style={{ marginTop: 'clamp(36px,5vw,56px)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)' }}>{t('SEE ALSO')}</span>

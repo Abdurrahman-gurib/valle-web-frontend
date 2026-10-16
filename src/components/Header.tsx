@@ -2,7 +2,7 @@ import { Fwd } from '@/components/ui/arrows';
 import { motion } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { paths, useGoto } from '../lib/nav';
@@ -20,7 +20,7 @@ void RATE_WORD_KEYS;
 
 // Shorter wording for the top menu only, where French and Italian run long.
 // English falls back to the plain label.
-const MENU_KEYS = [_t('menu:Plan your visit'), _t('menu:Our story'), _t('menu:Vacancies')];
+const MENU_KEYS = [_t('menu:Plan your visit')];
 void MENU_KEYS;
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
@@ -96,11 +96,8 @@ export function Header() {
     document.fonts?.ready.then(measure).catch(() => {});
   }, [isMobile, lang, winW]);
   const location = useLocation();
-  const navigate = useNavigate();
   const t = useT();
   const menu = (en: string) => { const k = 'menu:' + en; const s = t(k); return s === k ? t(en) : s; };
-  // Careers lives outside the catalog-driven nav helpers, so it routes directly.
-  const gotoVacancies = () => navigate(paths.vacancies());
 
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
@@ -186,12 +183,10 @@ export function Header() {
           {!isMobile && (
             <>
               <nav ref={navRef} className="flex items-center gap-[2px] min-w-0 justify-center overflow-hidden">
-                <NavBtn snug={lang !== 'en'} label={t('Explore')} chev={megaOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaOpen(!megaOpen); setMegaPkgOpen(false); }} />
+                <NavBtn snug={lang !== 'en'} label={t('Activities')} chev={megaOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaOpen(!megaOpen); setMegaPkgOpen(false); }} />
                 <NavBtn snug={lang !== 'en'} label={t('Packages')} chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} onClick={() => { setMegaPkgOpen(!megaPkgOpen); setMegaOpen(false); }} />
-                <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
                 <NavBtn snug={lang !== 'en'} label={t('Dine')} href={paths.dine()} color={headerFg} onClick={go(goto.dine)} />
-                <NavBtn snug={lang !== 'en'} label={menu('Our story')} href={paths.story()} color={headerFg} onClick={go(goto.story)} />
-                <NavBtn snug={lang !== 'en'} label={menu('Vacancies')} href={paths.vacancies()} color={headerFg} onClick={go(gotoVacancies)} />
+                <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
               </nav>
               <div className="flex items-center gap-[10px] justify-self-end">
                 <button
@@ -381,16 +376,14 @@ export function Header() {
             ))}
           </div>
           <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} className={cn(mobileNavRow, '[animation-delay:.1s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Home')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
-          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} className={cn(mobileNavRow, '[animation-delay:.14s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('All {n} experiences', { n: catalog.ACTS.length })}<span className="text-valle-yellow"><Fwd /></span></a>
-          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} className={cn(mobileNavRow, '[animation-delay:.16s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Packages & team building')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} className={cn(mobileNavRow, '[animation-delay:.14s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Activities')}<span className="text-valle-yellow"><Fwd /></span></a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} className={cn(mobileNavRow, '[animation-delay:.16s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Packages')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
           <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')}>
             <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
             <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>
           </div>
-          <a href={paths.plan()} onClick={(e) => { e.preventDefault(); go(goto.plan)(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Plan your visit')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
-          <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} className={cn(mobileNavRow, '[animation-delay:.22s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Dine')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
-          <a href={paths.story()} onClick={(e) => { e.preventDefault(); go(goto.story)(); }} className={cn(mobileNavRow, '[animation-delay:.26s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Our story')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
-          <a href={paths.vacancies()} onClick={(e) => { e.preventDefault(); go(gotoVacancies)(); }} className={cn(mobileNavRow, '[animation-delay:.28s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Vacancies')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.dine()} onClick={(e) => { e.preventDefault(); go(goto.dine)(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Dine')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          <a href={paths.plan()} onClick={(e) => { e.preventDefault(); go(goto.plan)(); }} className={cn(mobileNavRow, '[animation-delay:.22s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Plan your visit')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
           <div onClick={() => { setMobileNavOpen(false); app.openDay(); }} className={cn(mobileNavRow, '[animation-delay:.3s]')}>
             <span className="flex gap-[10px] items-center">
               {t('My Day')}

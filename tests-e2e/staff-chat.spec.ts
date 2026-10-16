@@ -241,6 +241,7 @@ test.describe('staff dashboard', () => {
     const visitor = await context.newPage();
     await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await visitor.goto('/');
+    await visitor.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5)); // the launcher waits for a scroll or 20 s
     await visitor.getByRole('button', { name: /open chat/i }).click();
     const skip = visitor.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
@@ -269,8 +270,10 @@ test.describe('staff dashboard', () => {
     await guest.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_sel', '{}'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await guest.goto('/booking');
     const tag = Math.random().toString(36).slice(2, 8);
+    await guest.getByTestId('step-tab-3').click();
     await guest.getByPlaceholder(/name/i).first().fill(`Ticket Guest ${tag}`);
     await guest.getByPlaceholder(/email/i).first().fill(`ticket-${tag}@example.mu`);
+    await guest.getByTestId('step-tab-4').click();
     await guest.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(guest.getByText(/BOOKING REFERENCE/i)).toBeVisible({ timeout: 15000 });
     const ref = (await guest.getByText(/VAL-\d{4}-26/).first().textContent())!.trim();
@@ -332,6 +335,7 @@ test.describe('staff dashboard', () => {
     const visitor = await context.newPage();
     await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await visitor.goto('/');
+    await visitor.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5)); // the launcher waits for a scroll or 20 s
     await visitor.getByRole('button', { name: /open chat/i }).click();
     const skip = visitor.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
@@ -381,6 +385,7 @@ test.describe('staff dashboard', () => {
     const visitor = await context.newPage();
     await visitor.addInitScript(() => { localStorage.setItem('valle_rate', 'rr'); localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 })); });
     await visitor.goto('/');
+    await visitor.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5)); // the launcher waits for a scroll or 20 s
     await visitor.getByRole('button', { name: /open chat/i }).click();
     const skip = visitor.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
@@ -413,6 +418,7 @@ test.describe('staff dashboard', () => {
 test.describe('public chat widget', () => {
   test('launcher clears the mobile action bar', async ({ page }, testInfo) => {
     await page.goto('/');
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5)); // the launcher waits for a scroll or 20 s
     const launcher = page.getByRole('button', { name: /open chat/i });
     await expect(launcher).toBeVisible();
     const box = await launcher.boundingBox();
