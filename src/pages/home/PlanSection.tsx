@@ -1,5 +1,4 @@
-import { useState, type ReactNode } from 'react';
-import { ParkMap } from './ParkMap';
+import type { ReactNode } from 'react';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
 import { Accordion } from '@/components/ui/accordion';
@@ -17,9 +16,7 @@ function InfoTile({ bg, tag, head, children, caps = true }: { bg: string; tag: s
 /** "Plan your visit": hours, tickets, getting here, contact, plus the awards strip. */
 export function PlanSection() {
   const t = useT();
-  const [map, setMap] = useState(false);
   return (
-    <>
     <section id="plan" data-screen-label="Plan your visit" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
         <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Plan your visit')}</h2>
@@ -47,23 +44,11 @@ export function PlanSection() {
           { id: 'hours', title: t('When is the park open?'), content: '09:00–17:30 · ' + t('Open every day of the week. Last activity departures around 16:00.') },
         ]} />
       </div>
-      <button
-        type="button"
-        onClick={() => setMap((m) => !m)}
-        aria-expanded={map}
-        aria-controls="park-map"
-        data-testid="park-map-toggle"
-        className="mt-4 w-full cursor-pointer rounded-[18px] border-[1.5px] border-solid border-valle-lilac bg-white px-6 py-4 text-start font-display text-[20px] font-black text-valle-purple uppercase italic hover:bg-valle-lilac/40"
-      >
-        {map ? t('Hide the park map') : t('See the park map')} <span aria-hidden>{map ? '▲' : '▼'}</span>
-      </button>
       <div className="mt-4 flex flex-wrap items-center gap-5 rounded-[18px] bg-valle-purple px-[26px] py-5">
         <Img src="/images/wlta-logo-1.png" alt={t('World Luxury Travel Awards 2026 winner')} surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 54, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain', flexShrink: 0 }} />
         <div className="min-w-[220px] flex-1 text-[15px] font-semibold text-white">{t('World Luxury Travel Awards 2026 winner, rated Excellent by visitors on TripAdvisor.')}</div>
         <a href="https://www.tripadvisor.com/Attraction_Review-g2359803-d1994858-Reviews-Valle_Advenature_Park-Chamouny.html" target="_blank" rel="noopener" className="font-mono text-[12.5px] font-semibold text-valle-yellow">{t('READ REVIEWS →')}</a>
       </div>
     </section>
-    {map && <div id="park-map"><ParkMap /></div>}
-    </>
   );
 }

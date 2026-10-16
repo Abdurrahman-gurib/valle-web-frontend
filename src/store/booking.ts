@@ -4,7 +4,7 @@ import { money, partyLabel } from '../lib/format';
 import { parseSelKey } from '../lib/sel';
 import { tr } from '../i18n';
 
-/** Rate-aware "from" price for an activity. Defaults to resident (rr) when no rate is passed (the app store always passes one). */
+/** Rate-aware "from" price for an activity. Defaults to resident (rr) until a rate is chosen. */
 export function priceFor(catalog: Catalog, act: Activity, rate: RateKey | null): number {
   const rp = catalog.RATEP[act.id];
   if (!rp) return act.price;

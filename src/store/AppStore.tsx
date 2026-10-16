@@ -12,10 +12,7 @@ import { tr, useLang } from '../i18n';
 
 interface AppState {
   // rate
-  /** The rate prices are shown in: the guest's choice, else the visitor (nr) rate. */
-  rate: RateKey;
-  /** Has the guest explicitly picked a rate (remembered in localStorage)? */
-  rateChosen: boolean;
+  rate: RateKey | null;
   rateTag: string;              // 'RR' | 'NR'
   rateWord: string;             // 'Resident' | 'Visitor'
   rateGateOpen: boolean;
@@ -33,8 +30,6 @@ interface AppState {
   /** `key` is a sel key (experience id, or id + option; see lib/sel.ts). */
   bumpSel: (key: string, field: 'a' | 'k' | 'u', d: number) => void;
   clearSel: () => void;
-  /** Replace some cart lines by one other line in a single update (package swap). */
-  swapSel: (remove: string[], addKey: string, entry: SelEntry) => void;
   /** Without `variant`: is any line of this experience in the cart. */
   isSelected: (id: string, variant?: string) => boolean;
 
@@ -252,31 +247,21 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearSel = useCallback(() => setSel({}), []);
-  const swapSel = useCallback((remove: string[], addKey: string, entry: SelEntry) => {
-    setSel((s) => {
-      const next = { ...s };
-      for (const k of remove) delete next[k];
-      next[addKey] = entry;
-      return next;
-    });
-  }, []);
 
   const lang = useLang();
   const booking = useMemo(
-    () => computeBooking(catalog, sel, adults, kids, rate ?? 'nr'),
+    () => computeBooking(catalog, sel, adults, kids, rate),
     // currency and fx: the summary lines carry formatted amounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [catalog, sel, adults, kids, rate, currency, fx, lang],
   );
 
   const value = useMemo<AppState>(() => ({
-    // No full-screen question on arrival any more: visitor prices until the guest says otherwise.
-    rate: rate ?? 'nr',
-    rateChosen: !!rate,
-    rateTag: rate === 'rr' ? 'RR' : 'NR',
-    rateWord: rate === 'rr' ? tr('Resident') : tr('Visitor'),
-    rateGateOpen: rateGate,
-    rateGateDismissable: true,
+    rate,
+    rateTag: rate === 'nr' ? 'NR' : 'RR',
+    rateWord: rate === 'nr' ? tr('Visitor') : tr('Resident'),
+    rateGateOpen: !rate || rateGate,
+    rateGateDismissable: !!rate,
     setRate,
     openRateGate: () => setRateGate(true),
     closeRateGate: () => setRateGate(false),
@@ -288,7 +273,6 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     bumpSel,
     loadDraft,
     clearSel,
-    swapSel,
     isSelected: (id: string, variant?: string) => (variant ? !!sel[selKey(id, variant)] : Object.keys(sel).some((k) => parseSelKey(k).id === id)),
 
     adults,
@@ -325,14 +309,14 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     activityPrice: (id: string, variant?: string) => {
       const act = catalog.ACTS.find((a) => a.id === id);
       if (!act) return 0;
-      const vp = variant ? variantPrice(catalog, id, variant, rate ?? 'nr') : null;
-      return vp ?? priceFor(catalog, act, rate ?? 'nr');
+      const vp = variant ? variantPrice(catalog, id, variant, rate) : null;
+      return vp ?? priceFor(catalog, act, rate);
     },
 
     currency: isCurrency(currency, fx) ? currency : 'MUR',
     fx,
     setCurrency,
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, swapSel, currency, fx, setCurrency, lang, loadDraft]);
+  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang, loadDraft]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -27,21 +27,6 @@ async function addFirstOption(page: Page) {
   await sheet.getByRole('button', { name: 'Done' }).click();
 }
 
-/** Open one of the four booking steps (1 choose, 2 date & time, 3 details, 4 pay) from the progress bar. */
-async function bookingStep(page: Page, n: 1 | 2 | 3 | 4) {
-  await page.getByTestId('step-tab-' + n).click();
-  await expect(page.getByTestId('step-tab-' + n)).toHaveAttribute('aria-current', 'step');
-}
-
-/** Fill the details step, then open the pay step and confirm. */
-async function detailsAndConfirm(page: Page, name: string, email: string, button: RegExp = /Confirm and pay on arrival/i) {
-  await bookingStep(page, 3);
-  await page.getByPlaceholder(/name/i).first().fill(name);
-  await page.getByPlaceholder(/email/i).first().fill(email);
-  await bookingStep(page, 4);
-  await page.getByRole('button', { name: button }).click();
-}
-
 async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -49,31 +34,16 @@ async function expectNoHorizontalScroll(page: Page) {
   expect(overflow, 'page must not scroll horizontally').toBeLessThanOrEqual(1);
 }
 
-test.describe('rate choice', () => {
-  test('no question blocks the first visit; the booking asks for the rate in step 1 and remembers it', async ({ page }) => {
-    await page.addInitScript(() => {
-      if (sessionStorage.getItem('pw-fresh')) return;
-      localStorage.clear();
-      localStorage.setItem('valle_consent', JSON.stringify({ level: 'essential', at: '2026-09-28T00:00:00.000Z', v: 1 }));
-      sessionStorage.setItem('pw-fresh', '1');
-    });
+test.describe('rate gate', () => {
+  test('appears on first visit and applies the chosen rate', async ({ page }) => {
+    await page.addInitScript(() => localStorage.clear());
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Feel the/i })).toBeVisible();
-    await expect(page.getByText('Which rate', { exact: false })).toHaveCount(0);
-    await page.goto('/booking');
-    // visitor prices until the guest says otherwise; Continue asks for the rate first
-    await expect(page.getByTestId('rate-nr')).toHaveAttribute('aria-checked', 'false');
-    await page.getByRole('button', { name: /^Continue/ }).click();
-    await expect(page.getByText('Choose your rate to see your prices.')).toBeVisible();
-    await page.getByTestId('rate-rr').click();
-    await expect(page.getByTestId('rate-rr')).toHaveAttribute('aria-checked', 'true');
-    // the same age rule as the admission price list
-    await expect(page.getByText(/UNDER 6 FREE/).first()).toBeVisible();
-    await page.getByRole('button', { name: /^Continue/ }).click();
-    await expect(page.getByTestId('step-tab-2')).toHaveAttribute('aria-current', 'step');
-    expect(await page.evaluate(() => localStorage.getItem('valle_rate'))).toBe('rr');
-    await page.reload();
-    await expect(page.getByTestId('rate-rr')).toHaveAttribute('aria-checked', 'true');
+    await expect(page.getByText('Which rate', { exact: false })).toBeVisible();
+    // the same age rule as the booking page and the admission price list
+    await expect(page.getByText(/under 6 free/).first()).toBeVisible();
+    await expect(page.getByText(/under 5/)).toHaveCount(0);
+    await page.getByText('I live in Mauritius').click();
+    await expect(page.getByText('Which rate', { exact: false })).toBeHidden();
   });
 });
 
@@ -157,7 +127,6 @@ test.describe('date picker shows how busy each slot is', () => {
     expect(res.ok()).toBeTruthy();
 
     await page.goto('/booking');
-    await bookingStep(page, 2);
     // every one of the 14 date chips carries its two dots once the API has answered
     await expect(page.getByTestId('load-dots')).toHaveCount(14, { timeout: 15000 });
     const dots = page.getByTestId('load-dots').nth(5);
@@ -176,9 +145,6 @@ test.describe('chat composer', () => {
   test('emoji picker inserts into the message and the attach and voice buttons are there', async ({ page }) => {
     await preselectRate(page);
     await page.goto('/');
-    // the launcher waits 20 s or for a scroll past the first screen
-    await expect(page.getByRole('button', { name: /open chat/i })).toHaveCount(0);
-    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
     await page.getByRole('button', { name: /open chat/i }).click();
     const skip = page.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
@@ -202,7 +168,9 @@ test.describe('booking desk unreachable', () => {
     await page.goto('/experience/luge');
     await addFirstOption(page);
     await page.goto('/booking');
-    await detailsAndConfirm(page, 'Offline Guest', 'offline@example.com');
+    await page.getByPlaceholder(/name/i).first().fill('Offline Guest');
+    await page.getByPlaceholder(/email/i).first().fill('offline@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/could not reach the booking desk/i)).toBeVisible();
     await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
   });
@@ -214,9 +182,7 @@ test.describe('home', () => {
   test('renders hero and all sections without horizontal overflow', async ({ page }, testInfo) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /Feel the/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Book your day' }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Best value packages/i })).toBeVisible();
-    await expect(page.getByTestId('home-pack-card')).toHaveCount(4);
+    await expect(page.getByRole('heading', { name: /wildest locals/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Taste the soul/i })).toBeVisible();
     await expectNoHorizontalScroll(page);
     await page.screenshot({ path: testInfo.outputPath('home-top.png') });
@@ -224,8 +190,6 @@ test.describe('home', () => {
 
   test('park map pin opens a popup', async ({ page }) => {
     await page.goto('/');
-    // the map sits behind a disclosure in Plan your visit
-    await page.getByTestId('park-map-toggle').click();
     // pin "A": Park Entrance & Reception (the quad and zipline maps have their own "A" pins)
     await page.getByRole('button', { name: 'A', exact: true }).and(page.locator('[title="Park Entrance & Reception"]')).first().click();
     await expect(page.getByText('Park Entrance & Reception')).toBeVisible();
@@ -259,9 +223,6 @@ test.describe('experience detail', () => {
   test('shows pricing table and adds to My Day', async ({ page }) => {
     await page.goto('/experience/zipline');
     await expect(page.getByRole('heading', { name: /Zipline Adventures/i }).first()).toBeVisible();
-    await expect(page.getByTestId('detail-book-strip')).toBeVisible();
-    // routes and full prices wait behind one disclosure
-    await page.getByRole('button', { name: /See all routes and prices/i }).click();
     await expect(page.getByText('The Plunge · 500 m, 1 line')).toBeVisible();
     // Zipline has several tours, so the button opens the option sheet.
     await addFirstOption(page);
@@ -288,14 +249,8 @@ test.describe('booking flow', () => {
     await addFirstOption(page);
     await page.goto('/booking');
     await expect(page.getByRole('heading', { name: /Build your day/i })).toBeVisible();
-    // the guided way: Continue through the four steps
-    await page.getByRole('button', { name: /^Continue/ }).click();
-    await expect(page.getByTestId('step-tab-2')).toHaveAttribute('aria-current', 'step');
-    await page.getByRole('button', { name: /^Continue/ }).click();
     await page.getByPlaceholder(/name/i).first().fill('Playwright Guest');
     await page.getByPlaceholder(/email/i).first().fill('pw@example.com');
-    await page.getByRole('button', { name: /^Continue/ }).click();
-    await expect(page.getByTestId('trust-line')).toContainText('FREE CANCELLATION');
     await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/BOOKING REFERENCE/i)).toBeVisible();
     await expect(page.getByText(/VAL-\d{4}-26/)).toBeVisible();
@@ -311,7 +266,9 @@ test.describe('regressions', () => {
     await page.goto('/experience/luge');
     await addFirstOption(page);
     await page.goto('/booking');
-    await detailsAndConfirm(page, 'Repeat Guest', 'repeat@example.com', /Confirm and pay on arrival|Pay Rs/i);
+    await page.getByPlaceholder(/name/i).first().fill('Repeat Guest');
+    await page.getByPlaceholder(/email/i).first().fill('repeat@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival|Pay Rs/i }).click();
     await expect(page.getByText(/BOOKING REFERENCE/i)).toBeVisible();
 
     // Any booking entry point must leave the receipt and show the form again.
@@ -326,15 +283,16 @@ test.describe('regressions', () => {
     // the option exists only when the API has a payment provider (the e2e stack runs the sandbox; production has none)
     const cfg = await (await page.request.get('/api/payments/config')).json() as { enabled: boolean };
     await page.goto('/booking');
-    await bookingStep(page, 4);
     if (cfg.enabled) {
       await expect(page.getByText(/Pay online now/i)).toBeVisible();
     } else {
       await expect(page.getByText(/Pay online now/i)).toHaveCount(0);
       await expect(page.getByText(/HOW WOULD YOU LIKE TO PAY/i)).toHaveCount(0);
-      await expect(page.getByTestId('trust-line')).toContainText('PAY AT THE GATE');
+      await expect(page.getByText(/PAY AT THE GATE/i).first()).toBeVisible();
     }
-    await detailsAndConfirm(page, 'Gate Payer', 'gate@example.com');
+    await page.getByPlaceholder(/name/i).first().fill('Gate Payer');
+    await page.getByPlaceholder(/email/i).first().fill('gate@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/BOOKING REFERENCE/i)).toBeVisible();
     await expect(page.getByText('PAY ON ARRIVAL', { exact: true })).toBeVisible();
     await expect(page.getByText(/PAID ✓|All paid|Total paid/)).toHaveCount(0);
@@ -515,7 +473,6 @@ test.describe('slot capacity', () => {
       await route.fulfill({ json: out });
     });
     await page.goto('/booking');
-    await bookingStep(page, 2);
     // the default date is tomorrow (index 1): the full morning chip is disabled and the afternoon is selected
     const full = page.getByTestId('slot-full');
     await expect(full).toBeDisabled();
@@ -524,10 +481,10 @@ test.describe('slot capacity', () => {
 
     // the server is the judge: a 409 is shown as a plain sentence and the picker is refreshed
     await page.route('**/api/bookings', (route) => route.fulfill({ status: 409, json: { message: 'That arrival slot is fully booked on this date. Pick the other slot or another day.' } }));
-    await detailsAndConfirm(page, 'Late Guest', 'late@example.com');
+    await page.getByPlaceholder(/name/i).first().fill('Late Guest');
+    await page.getByPlaceholder(/email/i).first().fill('late@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/fully booked on this date/)).toBeVisible();
-    // and the guest is taken back to the date step to pick again
-    await expect(page.getByTestId('step-tab-2')).toHaveAttribute('aria-current', 'step');
     await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
   });
 
@@ -563,13 +520,12 @@ test.describe('promo code race', () => {
     await page.route('**/api/coupons/LASTONE', (route) => route.fulfill({ json: { code: 'LASTONE', kind: 'percent', value: 10, note: 'Partner offer' } }));
     await page.route('**/api/bookings', (route) => route.fulfill({ status: 409, json: { message: 'This code has just been fully used. Remove it or try another.' } }));
     await page.goto('/booking');
-    await bookingStep(page, 3);
-    // the code sits under "More options"
-    await page.getByTestId('more-options').click();
     await page.getByTestId('coupon-input').fill('LASTONE');
     await page.getByRole('button', { name: 'Apply' }).click();
     await expect(page.getByTestId('coupon-msg')).toBeVisible();
-    await detailsAndConfirm(page, 'Late Guest', 'late@example.com');
+    await page.getByPlaceholder(/name/i).first().fill('Late Guest');
+    await page.getByPlaceholder(/email/i).first().fill('late@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/This code has just been fully used/)).toBeVisible();
     await expect(page.getByText(/fully booked on this date/)).toHaveCount(0);
     await expect(page.getByText(/BOOKING REFERENCE/i)).toHaveCount(0);
@@ -587,10 +543,8 @@ test.describe('online payment', () => {
     test.skip(!cfg.enabled, 'no payment provider on this server');
 
     await page.goto('/booking');
-    await bookingStep(page, 3);
     await page.getByPlaceholder(/name/i).first().fill('Card Guest');
     await page.getByPlaceholder(/email/i).first().fill('card@example.com');
-    await bookingStep(page, 4);
     await page.getByText('Pay online now').click();
     await page.getByRole('button', { name: /Pay Rs .* now/ }).click();
     // the stand-in hosted page served by the api
@@ -611,10 +565,8 @@ test.describe('online payment', () => {
     test.skip(!cfg.enabled, 'no payment provider on this server');
 
     await page.goto('/booking');
-    await bookingStep(page, 3);
     await page.getByPlaceholder(/name/i).first().fill('Declined Guest');
     await page.getByPlaceholder(/email/i).first().fill('declined@example.com');
-    await bookingStep(page, 4);
     await page.getByText('Pay online now').click();
     await page.getByRole('button', { name: /Pay Rs .* now/ }).click();
     await expect(page.getByTestId('sandbox-checkout')).toBeVisible({ timeout: 15000 });
@@ -652,13 +604,11 @@ test.describe('closed days and holds on the booking page', () => {
       await route.fulfill({ status: 201, json: { holdId: '11111111-1111-4111-8111-111111111111', expiresAt: new Date(Date.now() + 600_000).toISOString() } });
     });
     await page.goto('/booking');
-    await bookingStep(page, 2);
     const closed = page.getByTestId('slot-closed');
     await expect(closed).toBeDisabled();
     await expect(closed).toContainText('PRIVATE EVENT · Wedding');
     await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
 
-    await bookingStep(page, 3);
     await page.getByPlaceholder(/name/i).first().fill('Holder');
     await expect(page.getByTestId('hold-note')).toContainText('HELD UNTIL', { timeout: 10000 });
     expect(held).toMatchObject({ slot: 'afternoon', adults: 2 });
@@ -741,16 +691,15 @@ test.describe('timed sessions on the booking page', () => {
     // two adults on the zipline, straight into the saved cart
     await page.addInitScript(() => { localStorage.setItem('valle_sel', JSON.stringify({ zipline: { a: 2 } })); });
     await page.goto('/booking');
-    await bookingStep(page, 2);
     const picker = page.getByTestId('session-picker-zipline');
     await expect(picker).toBeVisible();
     await expect(picker.getByRole('button', { name: /09:30/ })).toBeDisabled();
     await expect(picker.getByRole('button', { name: /14:00/ })).toContainText('FEW LEFT');
     // no time yet: the confirm refuses and names the activity
-    await detailsAndConfirm(page, 'Timed Guest', 'timed@example.com');
+    await page.getByPlaceholder(/name/i).first().fill('Timed Guest');
+    await page.getByPlaceholder(/email/i).first().fill('timed@example.com');
+    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
     await expect(page.getByText(/Pick a start time for Zipline/)).toBeVisible();
-    // the confirm sends the guest back to the date step, where the times are
-    await expect(page.getByTestId('step-tab-2')).toHaveAttribute('aria-current', 'step');
     await picker.getByRole('button', { name: /10:30/ }).click();
     await expect(page.getByTestId('hold-note')).toBeVisible({ timeout: 10000 });
     expect(held?.items?.[0]).toMatchObject({ id: 'zipline', time: '10:30' });
@@ -880,14 +829,12 @@ test.describe('restaurant tables and saved drafts', () => {
     test.skip(!(await apiUp(page)), 'API not running');
     await page.addInitScript(() => { localStorage.setItem('valle_sel', JSON.stringify({ zipline: { a: 3 } })); });
     await page.goto('/booking');
-    await bookingStep(page, 3);
     await page.getByPlaceholder(/name/i).first().fill('Draft Guest');
     await page.getByPlaceholder(/email/i).first().fill('draft@example.com');
     await page.getByTestId('draft-save').click();
     await expect(page.getByTestId('draft-sent')).toBeVisible({ timeout: 15000 });
     // details survive a plain reload
     await page.reload();
-    await bookingStep(page, 3);
     await expect(page.getByPlaceholder(/name/i).first()).toHaveValue('Draft Guest');
 
     // the link restores everything in a fresh browser state
@@ -898,11 +845,9 @@ test.describe('restaurant tables and saved drafts', () => {
     await page.addInitScript(() => { localStorage.removeItem('valle_sel'); localStorage.removeItem('valle_draft'); });
     await page.goto('/booking?draft=' + id);
     await expect(page.getByTestId('draft-loaded')).toContainText('Welcome back', { timeout: 15000 });
-    await expect(page.getByTestId('step-1')).toContainText('Quad');
-    await bookingStep(page, 2);
-    await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
-    await bookingStep(page, 3);
     await expect(page.getByPlaceholder(/name/i).first()).toHaveValue('Link Guest');
+    await expect(page.getByText('Quad').nth(1)).toBeVisible();
+    await expect(page.getByRole('button', { name: /Afternoon/ })).toHaveAttribute('aria-pressed', 'true');
     const gone = await request.get('/api/bookings/draft/11111111-1111-4111-8111-111111111111');
     expect(gone.status()).toBe(404);
   });

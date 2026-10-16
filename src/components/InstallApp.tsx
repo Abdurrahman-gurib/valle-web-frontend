@@ -1,19 +1,8 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useT } from '../i18n';
 import { promptInstall, useInstall, useOnline, warmOfflineImages } from '../lib/pwa';
 import { useCatalog } from '../store/CatalogContext';
 import { color, font, mono, radius, shadow } from '../styles/theme';
-
-// The first page a guest lands on never asks them to install: only from the second page view on.
-let firstPath: string | null = null;
-let movedOn = false;
-function useBeyondFirstView(): boolean {
-  const { pathname } = useLocation();
-  if (firstPath === null) firstPath = pathname;
-  if (pathname !== firstPath) movedOn = true;
-  return movedOn;
-}
 
 /** "Share, then Add to Home Screen": the only way to install on iPhone and iPad. */
 function IosHint({ style }: { style?: CSSProperties }) {
@@ -29,8 +18,7 @@ function IosHint({ style }: { style?: CSSProperties }) {
 export function InstallCard({ style }: { style?: CSSProperties }) {
   const t = useT();
   const state = useInstall();
-  const later = useBeyondFirstView();
-  if (!later || (state !== 'prompt' && state !== 'ios')) return null;
+  if (state !== 'prompt' && state !== 'ios') return null;
   return (
     <div data-testid="install-card" data-print-hide="" style={{
       background: color.tint, border: `1.5px solid ${color.border}`, borderRadius: radius.lg, padding: '16px 18px',
@@ -65,8 +53,7 @@ export function InstallFooterLink() {
   const t = useT();
   const state = useInstall();
   const [hint, setHint] = useState(false);
-  const later = useBeyondFirstView();
-  if (!later || (state !== 'prompt' && state !== 'ios')) return null;
+  if (state !== 'prompt' && state !== 'ios') return null;
   return (
     <>
       <button

@@ -30,22 +30,12 @@ function SectionHead({ id, title, tag, marginTop }: { id?: string; title: ReactN
   );
 }
 
-/** The middle tier of a family of two or more carries the "Most popular" badge. */
-const isMiddle = (i: number, n: number) => n >= 2 && i === Math.floor(n / 2);
-
-function PopularBadge({ className }: { className?: string }) {
+function LSCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const t = useT();
-  return <span data-testid="popular-badge" className={'absolute -rotate-4 rounded-full bg-valle-yellow px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em] text-valle-purple ' + (className ?? 'top-3 left-3')}>{t('MOST POPULAR')}</span>;
-}
-
-function LSCard({ pk, onOpen, popular }: { pk: PackTier; onOpen: () => void; popular?: boolean }) {
-  const t = useT();
-  const showPopular = popular && pk.badge !== 'MOST POPULAR' && pk.badge !== t('MOST POPULAR');
   return (
     <ValleCard data-testid="pack-card">
       <CardImage src={pk.img} alt={t('{name} package', { name: pk.name })} onClick={onOpen}>
-        {pk.badge && <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: pk.color, color: pk.fg }}>{pk.badge}</span>}
-        {showPopular && <PopularBadge className={pk.badge ? 'top-12 left-3' : 'top-3 left-3'} />}
+        <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: pk.color, color: pk.fg }}>{pk.badge}</span>
         <PhotoPill>{t('VIEW DETAILS ↗')}</PhotoPill>
       </CardImage>
       <div className="flex flex-1 flex-col px-[22px] pt-[18px] pb-[22px]">
@@ -62,12 +52,11 @@ function LSCard({ pk, onOpen, popular }: { pk: PackTier; onOpen: () => void; pop
   );
 }
 
-function ExCard({ pk, onOpen, popular }: { pk: PackTier; onOpen: () => void; popular?: boolean }) {
+function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
   const t = useT();
   return (
     <ValleCard data-testid="pack-card">
       <CardImage src={pk.img} alt={t('{name} package', { name: pk.name })} onClick={onOpen}>
-        {popular && <PopularBadge />}
         <PhotoPill className="right-2.5 bottom-2.5 text-[9.5px]">{t('VIEW DETAILS ↗')}</PhotoPill>
       </CardImage>
       <div className="h-[7px]" style={{ background: pk.color }} />
@@ -362,8 +351,8 @@ export default function PackagesPage() {
         {show('ls') && (<>
         <SectionHead id="ls" title={t('Light & Standard')} tag={t('01 · START HERE')} marginTop="clamp(40px,6vw,64px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginTop: 26 }}>
-          {catalog.PACKS.ls.map((p, i, all) => (
-            <LSCard key={p.name} pk={p} popular={isMiddle(i, all.length)} onOpen={() => setPk({ ...p, productKey: p.key })} />
+          {catalog.PACKS.ls.map((p) => (
+            <LSCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
 
@@ -372,8 +361,8 @@ export default function PackagesPage() {
         {show('ex') && (<>
         <SectionHead id="ex" title={t('Exclusive')} tag={t('02 · BRONZE TO PLATINUM')} marginTop="clamp(44px,6vw,72px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
-          {catalog.PACKS.ex.map((p, i, all) => (
-            <ExCard key={p.name} pk={p} popular={isMiddle(i, all.length)} onOpen={() => setPk({ ...p, productKey: p.key })} />
+          {catalog.PACKS.ex.map((p) => (
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
         <div style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px' }}>
@@ -442,8 +431,8 @@ export default function PackagesPage() {
         {show('resident') && (<>
         <SectionHead id="resident" title={t('Resident packages')} tag={t('05 · PER PERSON · MAURITIAN ID OR PERMIT')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
-          {(catalog.PACKS.resident || []).map((p, i, all) => (
-            <ExCard key={p.name} pk={p} popular={isMiddle(i, all.length)} onOpen={() => setPk({ ...p, productKey: p.key })} />
+          {(catalog.PACKS.resident || []).map((p) => (
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
         <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(52,0,87,.7)', marginTop: 12 }}>{t('RESIDENT RATES APPLY ON PRESENTATION OF A VALID MAURITIAN NATIONAL ID, RESIDENCE, OCCUPATION, PERMANENT RESIDENCE OR WORK/DEPENDENT PERMIT.')}</div>
@@ -453,8 +442,8 @@ export default function PackagesPage() {
         {show('senior') && (<>
         <SectionHead id="senior" title={t('Senior citizens')} tag={t('06 · AGES 55 AND ABOVE')} marginTop="clamp(48px,7vw,80px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
-          {(catalog.PACKS.senior || []).map((p, i, all) => (
-            <ExCard key={p.name} pk={p} popular={isMiddle(i, all.length)} onOpen={() => setPk({ ...p, productKey: p.key })} />
+          {(catalog.PACKS.senior || []).map((p) => (
+            <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}
         </div>
 

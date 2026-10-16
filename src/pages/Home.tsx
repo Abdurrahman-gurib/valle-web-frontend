@@ -3,11 +3,14 @@ import { useReveal } from '../hooks/useReveal';
 import { Hero } from './home/Hero';
 import { SlopeMarquee } from './home/SlopeMarquee';
 import { QuickPlan } from './home/QuickPlan';
-import { PackagesTeaser } from './home/PackagesTeaser';
+import { ParkMap } from './home/ParkMap';
 import { ClassicsRail } from './home/ClassicsRail';
+import { WildestLocals } from './home/WildestLocals';
 import { DineTeasers } from './home/DineTeasers';
+import { StorySection } from './home/StorySection';
 import { PlanSection } from './home/PlanSection';
 import { CtaBanner } from './home/CtaBanner';
+import { InstallSection } from './home/InstallSection';
 import { useT } from '../i18n';
 
 export default function HomePage() {
@@ -18,11 +21,14 @@ export default function HomePage() {
     <main ref={ref}>
       <Hero />
       <SlopeMarquee />
-      <PackagesTeaser />
       <QuickPlan />
+      <ParkMap />
       <ClassicsRail />
+      <WildestLocals />
       <DineTeasers />
+      <StorySection />
       <PlanSection />
+      <InstallSection />
       <CtaBanner />
     </main>
   );
