@@ -168,16 +168,16 @@ export default function TicketPage() {
             )}
             {canPayOnline && (tk.balance ?? 0) > 0 && tk.status !== 'cancelled' && !payWait && (
               <div data-print-hide="" className="mt-[14px]">
-                <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" className="inline-block cursor-pointer rounded-full border-0 bg-valle-green px-5 py-3 [font-size:inherit] leading-[inherit] font-bold text-valle-purple no-underline [font-family:inherit]">
+                <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" type="button" className="vbtn vbtn-primary">
                   {paying === 'busy' ? t('Opening secure payment…') : t('Pay {amount} online now', { amount: mur(tk.balance ?? 0) })}
                 </button>
                 {paying === 'error' && <div className="mt-1.5 text-[13px] text-[#D91E44]">{t('Online payment is not available right now. You can pay at the gate.')}</div>}
               </div>
             )}
             <div className="mt-[22px] flex flex-wrap justify-center gap-2.5" data-print-hide="">
-              <a href={share} target="_blank" rel="noopener noreferrer" className={cn(BTN, 'bg-[#25D366]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Add to WhatsApp')}</a>
-              <button onClick={() => window.print()} className={cn(BTN, BTN_OUTLINE, 'bg-white text-valle-purple')}>{t('Save / print')}</button>
-              {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" className={cn(BTN, BTN_OUTLINE, 'bg-white')} style={{ color: '#340057', textDecoration: 'none' }}>{t('Receipt (PDF)')}</a>}
+              <a href={share} target="_blank" rel="noopener noreferrer" className={cn(BTN, BTN_OUTLINE)}>{t('Add to WhatsApp')}</a>
+              <button onClick={() => window.print()} type="button" className={cn(BTN, BTN_OUTLINE)}>{t('Save / print')}</button>
+              {tk.receiptUrl && <a href={tk.receiptUrl} target="_blank" rel="noopener noreferrer" className={cn(BTN, BTN_OUTLINE)}>{t('Receipt (PDF)')}</a>}
             </div>
             <ManageBooking tk={tk} token={token} onChanged={(v) => setT(v)} />
             <InstallCard style={{ marginTop: 18 }} />
@@ -203,7 +203,7 @@ function WaiverBlock({ signed, required, href, group }: { signed: number; requir
         <div className="font-mono text-[13px] font-bold">{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
       </div>
       {!all && <p className="mx-0 mt-1.5 mb-2.5 text-[13.5px] leading-[1.5]">{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}
-      <a href={href} className={cn('inline-block cursor-pointer rounded-full px-4 py-[9px] text-[13px] font-bold no-underline [font-family:inherit]', all ? 'mt-2 border-[1.5px] border-valle-purple bg-white' : 'mt-0 bg-valle-purple')} style={{ color: all ? '#340057' : '#FFFFFF', textDecoration: 'none' }}>{all ? t('View waivers') : t('Sign the waivers')}</a>
+      <a href={href} className={cn('vbtn vbtn-sm', all ? 'vbtn-secondary mt-2' : 'vbtn-primary')}>{all ? t('View waivers') : t('Sign the waivers')}</a>
     </div>
   );
 }
@@ -232,5 +232,5 @@ function Fact({ tag, value }: { tag: string; value: string }) {
 }
 
 /** Pill button / link base; colours are added per use (links keep their colour inline: the global `a` rule beats utilities). */
-const BTN = 'inline-block cursor-pointer rounded-full px-5 py-3 text-[14px] font-bold no-underline [font-family:inherit]';
-const BTN_OUTLINE = 'border-[1.5px] border-valle-purple';
+const BTN = 'vbtn';
+const BTN_OUTLINE = 'vbtn-secondary';

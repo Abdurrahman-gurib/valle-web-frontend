@@ -47,16 +47,15 @@ function AddToDay({ productKey, onClose }: { productKey: string; onClose: () => 
   const t = useT();
   const app = useApp();
   const goto = useGoto();
-  const [h, bind] = useHover();
   const id = 'product:' + productKey;
   const inDay = !!app.sel[id];
   return (
     <button
-      {...bind}
       type="button"
       data-testid="pack-add"
       onClick={() => { if (!inDay) app.toggleSel(id); onClose(); goto.booking(); }}
-      style={{ marginTop: 16, border: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999 }}
+      className="vbtn vbtn-primary vbtn-block"
+      style={{ marginTop: 16 }}
     >
       {inDay ? t('In my day · book now') : t('Add to my day and book')} <Fwd />
     </button>
@@ -64,21 +63,9 @@ function AddToDay({ productKey, onClose }: { productKey: string; onClose: () => 
 }
 
 function ReserveLink({ href }: { href: string }) {
-  const [h, bind] = useHover();
   const t = useT();
   return (
-    <a
-      {...bind}
-      href={href}
-      target="_blank"
-      rel="noopener"
-      style={{
-        marginTop: 14, textAlign: 'center', background: h ? '#D91E44' : '#FF3358', color: '#FFFFFF',
-        fontSize: 15.5, fontWeight: 700, padding: '16px 0', borderRadius: 999, display: 'block',
-        boxShadow: '0 10px 24px -6px rgba(255,51,88,.5)',
-        transform: h ? 'translateY(-1px)' : undefined,
-      }}
-    >
+    <a href={href} target="_blank" rel="noopener" className="vbtn vbtn-primary vbtn-block" style={{ marginTop: 14 }}>
       {t('Reserve this package')} <Fwd />
     </a>
   );

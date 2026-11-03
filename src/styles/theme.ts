@@ -13,7 +13,7 @@ export const color = {
   purple: '#340057',
   /** Deepest purple: full-bleed dark sections and the mobile nav. */
   deep: '#260040',
-  /** Action pink: primary CTAs. */
+  /** Brand red: accents and information (errors, sale strikes, badges). Never a button fill: CTAs use the .vbtn classes (purple). */
   pink: '#FF3358',
   pinkDark: '#D91E44',
   /** Nature green: success, "open", confirmations. */

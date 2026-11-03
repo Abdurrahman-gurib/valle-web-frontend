@@ -51,8 +51,7 @@ export function StorySection() {
           <a
             href={paths.story()}
             onClick={(e) => { e.preventDefault(); goto.story(); }}
-            className="mt-[18px] inline-flex items-center gap-2 pb-[3px] font-mono text-xs font-bold tracking-[.14em] text-valle-red"
-            style={{ textDecoration: 'none', borderBottom: '2px solid #FF3358' }}
+            className="mt-[18px] inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.14em] text-[#5B21B6] underline-offset-4 hover:text-[#5B21B6] hover:underline"
           >
             {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden><Fwd /></span>
           </a>

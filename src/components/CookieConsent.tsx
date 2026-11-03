@@ -7,14 +7,10 @@ import { cn } from '@/lib/utils';
 function Btn({ label, primary, onClick, testId }: { label: string; primary?: boolean; onClick: () => void; testId?: string }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       data-testid={testId}
-      className={cn(
-        'cursor-pointer rounded-full px-5 py-3 font-[inherit] text-[14px] font-bold whitespace-nowrap transition-all duration-150 ease-[ease]',
-        primary
-          ? 'border-0 bg-valle-red text-white hover:bg-[#D91E44]'
-          : 'border-[1.5px] border-solid border-valle-purple bg-transparent text-valle-purple hover:bg-valle-purple hover:text-white',
-      )}
+      className={cn('vbtn', primary ? 'vbtn-primary' : 'vbtn-secondary')}
     >{label}</button>
   );
 }
@@ -74,7 +70,7 @@ export function CookieConsent() {
             </div>
             <p className="mx-0 mt-2.5 mb-0 text-[14px] leading-[1.55] text-valle-purple/75">
               {t('We store your rate and your My Day picks in this browser so the site works. No advertising cookies, no tracking, nothing sold on.')}{' '}
-              <button onClick={() => setDetails((d) => !d)} aria-expanded={details} className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-[14px] font-bold text-valle-violet underline">
+              <button onClick={() => setDetails((d) => !d)} aria-expanded={details} className="vbtn-link underline">
                 {details ? t('Hide details') : t('What we store')}
               </button>
             </p>

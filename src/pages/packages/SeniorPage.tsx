@@ -102,7 +102,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
           ))}
         </dl>
         <div className="sr-veg"><Leaf aria-hidden strokeWidth={2.2} />{t('Vegetarian options available')}</div>
-        <Link to={paths.resto('chamouze')} className="sr-link" style={{ color: '#340057' }}>{t('Discover Le Chamouzé')} <Fwd /></Link>
+        <Link to={paths.resto('chamouze')} className="sr-link">{t('Discover Le Chamouzé')} <Fwd /></Link>
       </SupportPanel>
 
       <GoodToKnow

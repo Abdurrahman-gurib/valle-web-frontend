@@ -235,10 +235,7 @@ function SubmitButton({ busy, disabled, onClick }: { busy: boolean; disabled: bo
       disabled={off}
       aria-busy={busy || undefined}
       className={cn(
-        'w-full border-0 font-display italic font-black text-[17px] tracking-[.03em] uppercase text-white py-[15px] px-0 rounded-[999px] flex items-center justify-center gap-[10px] [transition:transform_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
-        off
-          ? 'cursor-not-allowed bg-[#C9B3E8] shadow-none'
-          : 'press cursor-pointer bg-valle-red hover:bg-[#D91E44] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)] hover:[transform:translateY(-1px)]',
+        'vbtn vbtn-primary vbtn-block text-[16px]',
       )}
     >
       {busy && (
@@ -446,7 +443,7 @@ export default function VacancyDetailPage() {
               const el = document.getElementById('apply');
               if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 84), behavior: 'smooth' });
             }}
-            className="press mt-[18px] w-full border-0 bg-valle-red cursor-pointer font-display italic font-black text-[16px] tracking-[.03em] uppercase text-white py-[14px] px-0 rounded-[999px] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]"
+            className="vbtn vbtn-primary vbtn-block mt-[18px]"
           >
             {t('Apply for this role ↓')}
           </button>

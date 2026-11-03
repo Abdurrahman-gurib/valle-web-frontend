@@ -79,7 +79,8 @@ export function InstallSection() {
               <div>
                 <button
                   data-testid="install-button"
-                  className="press cursor-pointer rounded-full border-0 bg-valle-red px-[34px] py-4 font-[inherit] text-[16px] font-bold text-white shadow-[0_10px_28px_-6px_rgba(255,51,88,.6)] transition-[transform,background] duration-[.18s] ease-[ease] hover:bg-[#D91E44] hover:[transform:translateY(-2px)]"
+                  type="button"
+                  className="vbtn vbtn-on-dark px-8"
                   onClick={() => { void promptInstall(); }}
                 >
                   {t('Install the app')}

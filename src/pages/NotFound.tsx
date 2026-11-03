@@ -33,7 +33,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
       </p>
       <div className="mt-7 flex flex-wrap gap-2.5">
         {links.map(([label, href]) => (
-          <Link key={href} to={href} className="rounded-full border-[1.5px] border-solid border-valle-purple px-[18px] py-[11px] text-[14px] font-bold" style={{ color: '#340057', textDecoration: 'none' }}>{label} <Fwd /></Link>
+          <Link key={href} to={href} className="vbtn vbtn-secondary">{label} <Fwd /></Link>
         ))}
       </div>
       <p className="mt-10 font-mono text-[11px] tracking-[.1em] text-valle-purple/50">

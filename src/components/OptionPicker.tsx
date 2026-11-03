@@ -21,7 +21,7 @@ function RowBtn({ on, onClick }: { on: boolean; onClick: () => void }) {
       onClick={onClick}
       style={{
         border: on ? 0 : '1.5px solid #340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap',
-        background: on ? '#33FF74' : (h ? '#340057' : 'transparent'), color: on ? '#340057' : (h ? '#FFFFFF' : '#340057'),
+        background: on ? '#33FF74' : (h ? '#F4EEFF' : '#FFFFFF'), color: '#340057',
         padding: '9px 14px', borderRadius: 999, transition: 'all .15s', flexShrink: 0,
       }}
     >{on ? t('✓ Added') : t('+ Add')}</button>
@@ -43,8 +43,6 @@ export function OptionPicker() {
   const act = id ? catalog.ACTS.find((a) => a.id === id) : undefined;
   const rows = id ? catalog.PL[id] || [] : [];
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
-  const [hDone, bindDone] = useHover();
-  const [hBook, bindBook] = useHover();
 
   useEffect(() => {
     if (!id) return;
@@ -95,8 +93,8 @@ export function OptionPicker() {
           <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.1em', color: 'rgba(52,0,87,.6)', flex: 1 }}>
             {chosen === 0 ? t('NOTHING ADDED YET') : chosen > 1 ? t('{n} OPTIONS IN MY DAY', { n: chosen }) : t('{n} OPTION IN MY DAY', { n: chosen })}
           </span>
-          <button {...bindDone} onClick={app.closeOptions} style={{ border: '1.5px solid #340057', background: hDone ? '#340057' : 'transparent', color: hDone ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999 }}>{t('Done')}</button>
-          <button {...bindBook} onClick={() => { app.closeOptions(); goto.booking(); }} style={{ border: 0, background: hBook ? '#D91E44' : '#FF3358', color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)' }}>{t('Book now')} <Fwd /></button>
+          <button type="button" onClick={app.closeOptions} className="vbtn vbtn-secondary vbtn-sm">{t('Done')}</button>
+          <button type="button" onClick={() => { app.closeOptions(); goto.booking(); }} className="vbtn vbtn-primary vbtn-sm">{t('Book now')} <Fwd /></button>
         </div>
       </div>
     </div>

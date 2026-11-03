@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils';
 
 const input = 'rounded-[12px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-[14px] py-2.5 text-[14px] text-valle-purple outline-none [font-family:inherit]';
 /** Pill button base; add the colours (and `PILL_OUTLINE` or `border-0`) per use. */
-const PILL = 'cursor-pointer rounded-full px-[18px] py-2.5 text-[13.5px] font-bold [font-family:inherit]';
-const PILL_OUTLINE = 'border-[1.5px] border-valle-purple';
+const PILL = 'vbtn vbtn-sm';
+const PILL_OUTLINE = 'vbtn-secondary';
 const fieldLabel = 'grid gap-1 font-mono text-[10px] tracking-[.1em] text-valle-purple/60';
 
 type Line = { id: string; name: string; variant: string; mode: 'pp' | 'flat'; adults: number; kids: number; units: number; time?: string };
@@ -109,7 +109,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
           <div className="text-[15px] font-extrabold">{t('Manage my booking')}</div>
           <div className="mt-0.5 text-[13px] text-valle-purple/65">{t('Change the date, the arrival time, your party or your experiences, or cancel. Free, up to the day of your visit.')}</div>
         </div>
-        <button type="button" onClick={() => { setErr(''); setDone(''); if (open) setOpen(false); else openEditor(); }} className={cn(PILL, open ? cn(PILL_OUTLINE, 'bg-white text-valle-purple') : 'border-0 bg-valle-purple text-white')} data-testid="manage-toggle">{open ? t('Close') : t('Change or cancel')}</button>
+        <button type="button" onClick={() => { setErr(''); setDone(''); if (open) setOpen(false); else openEditor(); }} className={cn(PILL, open ? PILL_OUTLINE : 'vbtn-primary')} data-testid="manage-toggle">{open ? t('Close') : t('Change or cancel')}</button>
       </div>
       {done && <div role="status" data-testid="manage-done" className="mt-2.5 text-[13.5px] font-bold text-[#1E9E4A]">{done}</div>}
       {open && (
@@ -148,18 +148,18 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
                 <option value="">{t('Add an experience…')}</option>
                 {acts.filter((a) => !lines.some((l) => l.id === a.id && l.variant === '')).map((a) => <option key={a.id} value={a.id}>{a.name} · {t('from')} {mur(a.price)}</option>)}
               </select>
-              <button type="button" onClick={addLine} disabled={!addId} className={cn(PILL, PILL_OUTLINE, 'bg-white text-valle-purple', addId ? 'opacity-100' : 'opacity-50')} data-testid="manage-add">{t('Add')}</button>
+              <button type="button" onClick={addLine} disabled={!addId} className={cn(PILL, PILL_OUTLINE)} data-testid="manage-add">{t('Add')}</button>
             </div>
           </div>
           {err && <div role="alert" data-testid="manage-error" className="rounded-[12px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-[14px] py-2.5 text-[13.5px] font-semibold text-valle-purple">{err}</div>}
           <div className="flex flex-wrap items-center gap-2.5">
-            <button type="button" onClick={() => { void save(); }} disabled={busy} className={cn(PILL, 'border-0 bg-valle-red text-white')} data-testid="manage-save">{busy ? t('Saving…') : t('Save changes')}</button>
+            <button type="button" onClick={() => { void save(); }} disabled={busy} className={cn(PILL, 'vbtn-primary')} data-testid="manage-save">{busy ? t('Saving…') : t('Save changes')}</button>
             {!confirmCancel
-              ? <button type="button" onClick={() => setConfirmCancel(true)} disabled={busy} className={cn(PILL, PILL_OUTLINE, 'bg-white text-[#D91E44]')} data-testid="manage-cancel">{t('Cancel my booking')}</button>
+              ? <button type="button" onClick={() => setConfirmCancel(true)} disabled={busy} className={cn(PILL, 'border-[#B8163A] bg-white text-[#B8163A] hover:bg-[#FFF0F3]')} data-testid="manage-cancel">{t('Cancel my booking')}</button>
               : <span className="inline-flex flex-wrap items-center gap-2 text-[13.5px] font-semibold">
                   {t('Cancel booking {ref}? Your places are released.', { ref: tk.refCode })}
-                  <button type="button" onClick={() => { void cancel(); }} disabled={busy} className={cn(PILL, 'border-0 bg-[#D91E44] text-white')} data-testid="manage-cancel-confirm">{t('Yes, cancel')}</button>
-                  <button type="button" onClick={() => setConfirmCancel(false)} className={cn(PILL, PILL_OUTLINE, 'bg-white text-valle-purple')}>{t('Keep it')}</button>
+                  <button type="button" onClick={() => { void cancel(); }} disabled={busy} className={cn(PILL, 'border-[#B8163A] bg-white text-[#B8163A] hover:bg-[#FFF0F3]')} data-testid="manage-cancel-confirm">{t('Yes, cancel')}</button>
+                  <button type="button" onClick={() => setConfirmCancel(false)} className={cn(PILL, 'vbtn-primary')}>{t('Keep it')}</button>
                 </span>}
           </div>
           {(tk.paidAmount ?? 0) > 0 && <div className="text-[12.5px] text-valle-purple/65">{t('If your change lowers the total, the difference is refunded by the desk; if it raises it, you pay the balance at the gate or online.')}</div>}

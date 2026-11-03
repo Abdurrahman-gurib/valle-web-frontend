@@ -202,7 +202,7 @@ export function Header() {
                 <button
                   onClick={app.openRateGate}
                   title={t('Change your rate')}
-                  className="border-[1.5px] border-solid border-[rgba(115,51,255,.5)] bg-transparent cursor-pointer font-mono text-[11px] font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-violet hover:bg-valle-violet hover:text-white"
+                  className={cn("border-[1.5px] border-solid bg-transparent cursor-pointer font-mono text-[11px]", headerFg === "#FFFFFF" ? "border-white/55" : "border-[rgba(115,51,255,.5)]", " font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-violet hover:bg-valle-violet hover:text-white")}
                 >
                   {app.rateTag} ⇄
                 </button>
@@ -221,7 +221,7 @@ export function Header() {
                 </button>
                 <button
                   onClick={go(goto.booking)}
-                  className="border-0 bg-[#D91E44] hover:bg-[#B8163A] cursor-pointer [font-family:inherit] text-[14px] font-bold text-white py-[11px] px-[20px] rounded-[999px] shadow-[0_4px_14px_rgba(255,51,88,.35)] whitespace-nowrap hover:[transform:translateY(-1px)]"
+                  className={cn('vbtn min-h-[44px] px-5 text-[14px]', headerFg === '#FFFFFF' ? 'vbtn-on-dark' : 'vbtn-primary')}
                 >
                   {t('Book now')}
                 </button>
@@ -251,7 +251,7 @@ export function Header() {
               )}
               <button
                 onClick={go(goto.booking)}
-                className="border-0 bg-[#D91E44] cursor-pointer [font-family:inherit] text-[13px] font-bold text-white py-[9px] px-[14px] rounded-[999px] whitespace-nowrap shrink-0"
+                className={cn('vbtn vbtn-sm shrink-0 px-3.5 text-[13px]', headerFg === '#FFFFFF' ? 'vbtn-on-dark' : 'vbtn-primary')}
               >
                 {t('Book')}
               </button>
@@ -365,7 +365,7 @@ export function Header() {
             <button
               onClick={searchGo}
               aria-label={t('Search')}
-              className="press-sm border-0 bg-valle-red text-white w-[44px] h-[44px] rounded-[999px] cursor-pointer text-[16px] shrink-0"
+              className="vbtn vbtn-on-dark size-[44px] shrink-0 p-0"
             >
               <Fwd />
             </button>
@@ -429,7 +429,7 @@ export function Header() {
           </div>
           <button
             onClick={go(goto.booking)}
-            className="press mt-[14px] border-0 bg-[#D91E44] cursor-pointer font-display italic font-extrabold text-[16px] tracking-[.04em] uppercase text-white py-[14px] px-0 w-full rounded-[999px] shadow-[0_8px_20px_rgba(255,51,88,.35)] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
+            className="vbtn vbtn-on-dark vbtn-block mt-[14px] text-[16px] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
           >
             {t('Book now')} <Fwd />
           </button>

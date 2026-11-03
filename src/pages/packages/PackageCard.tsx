@@ -82,7 +82,7 @@ export function PackageCard({
               <div className="pk-prices">
                 <div>
                   <Eyebrow color="rgba(52,0,87,.7)">{singleLabel ?? (pair ? t('SINGLE') : t('PER PERSON'))}</Eyebrow>
-                  <div data-testid={priceTestId} dir="ltr" style={{ ...PRICE, fontSize: priceSize, lineHeight: 1, color: '#D91E44', marginTop: 4, unicodeBidi: 'isolate' }}>{single}</div>
+                  <div data-testid={priceTestId} dir="ltr" style={{ ...PRICE, fontSize: priceSize, lineHeight: 1, color: '#340057', marginTop: 4, unicodeBidi: 'isolate' }}>{single}</div>
                 </div>
                 {pair && (
                   <div>

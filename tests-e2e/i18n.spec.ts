@@ -119,7 +119,8 @@ test.describe('booking in another language', () => {
     await page.goto('/fr/booking');
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    // the confirm button carries the French label
-    await expect(page.getByRole('button', { name: d['Confirm and pay on arrival →'] ?? /__missing__/ })).toBeVisible();
+    // the confirm button carries the French label (its text arrow is drawn as an icon)
+    const label = (d['Confirm and pay on arrival →'] ?? '__missing__').replace(/\s*[→←]\s*$/, '');
+    await expect(page.getByRole('button', { name: label })).toBeVisible();
   });
 });

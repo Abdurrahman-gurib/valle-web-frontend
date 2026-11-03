@@ -101,7 +101,7 @@ export default function PhotoVideoPage() {
           <ul className="pk-rows" style={{ width: '100%', marginTop: 20 }}>
             {cine.map((c) => <CineRow key={c.key ?? c.n} item={c} />)}
           </ul>
-          <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener" className="sr-link" style={{ color: '#340057' }}>{t('Book a shooter for my day →')}</a>
+          <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener" className="sr-link">{t('Book a shooter for my day →')}</a>
         </SupportPanel>
       </div>
 
@@ -125,7 +125,7 @@ export default function PhotoVideoPage() {
               );
             })}
           </ul>
-          <Link to={paths.detail('swing')} className="sr-link" style={{ color: '#340057' }}>{t('See the Waterfall Swing')} <Fwd /></Link>
+          <Link to={paths.detail('swing')} className="sr-link">{t('See the Waterfall Swing')} <Fwd /></Link>
         </SupportPanel>
         <div data-testid="cine-gallery" className="pk-gallery">
           {GALLERY.map((g) => (

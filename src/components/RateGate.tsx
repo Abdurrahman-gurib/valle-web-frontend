@@ -26,7 +26,7 @@ function RateCard({ tag, title, body, cta, onClick }: {
       <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#7333FF' }}>{tag}</span>
       <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 26, textTransform: 'uppercase', color: '#340057', marginTop: 6 }}>{title}</div>
       <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.7)', marginTop: 6, lineHeight: 1.45 }}>{body}</div>
-      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', color: '#FF3358', marginTop: 12 }}>{cta}</div>
+      <div style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', color: '#5B21B6', marginTop: 12 }}>{cta}</div>
     </button>
   );
 }
@@ -37,7 +37,6 @@ export function RateGate() {
   const rr = entryPrices(catalog, 'rr');
   const nr = entryPrices(catalog, 'nr');
   const t = useT();
-  const [hKeep, bindKeep] = useHover();
   const { pathname } = useLocation();
   // Escape closes the rate question once a rate is already chosen (the first visit has to pick one)
   useEscape(app.rateGateOpen && app.rateGateDismissable, app.closeRateGate);
@@ -91,15 +90,7 @@ export function RateGate() {
               {t('YOU CAN SWITCH ANY TIME FROM THE MENU')}
             </span>
             {app.rateGateDismissable && (
-              <button
-                {...bindKeep}
-                onClick={app.closeRateGate}
-                style={{
-                  border: '1.5px solid #340057', background: hKeep ? '#340057' : 'transparent',
-                  cursor: 'pointer', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700,
-                  color: hKeep ? '#FFFFFF' : '#340057', padding: '10px 20px', borderRadius: 999,
-                }}
-              >
+              <button type="button" onClick={app.closeRateGate} className="vbtn vbtn-secondary vbtn-sm">
                 {t('Keep {rate}', { rate: t(app.rateWord) })}
               </button>
             )}

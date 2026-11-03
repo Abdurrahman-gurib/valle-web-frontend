@@ -64,7 +64,7 @@ function CartRow({ line }: { line: SelLine }) {
         <button
           onClick={() => app.toggleSel(a.id, line.variant)}
           title={t('Remove')}
-          className="h-[22px] w-[22px] cursor-pointer rounded-full border border-valle-lilac bg-transparent p-0 text-[12px] leading-none text-valle-purple/50 hover:border-valle-red hover:text-valle-red"
+          className="h-[22px] w-[22px] cursor-pointer rounded-full border border-valle-lilac bg-transparent p-0 text-[12px] leading-none text-valle-purple/50 hover:border-valle-purple hover:text-valle-purple"
         >
           ×
         </button>
@@ -125,7 +125,8 @@ export function MyDayDrawer() {
               <div className="mt-1.5 text-[13px] leading-[1.5] text-valle-purple/60">{t('Tap + on any experience card to build your day.')}</div>
               <button
                 onClick={() => { app.closeDay(); goto.explore('all'); }}
-                className="mt-[14px] cursor-pointer rounded-full border-2 border-valle-purple bg-transparent px-[22px] py-[11px] text-[13px] font-bold text-valle-purple [font-family:inherit] hover:bg-valle-purple hover:text-white"
+                type="button"
+                className="vbtn vbtn-secondary vbtn-sm mt-[14px]"
               >
                 {t('Explore experiences')} <Fwd />
               </button>
@@ -138,8 +139,9 @@ export function MyDayDrawer() {
             <span className="font-display text-[26px] font-black italic">{money(app.booking.total)}</span>
           </div>
           <button
+            type="button"
             onClick={() => { app.closeDay(); goto.booking(); }}
-            className="mt-2.5 w-full cursor-pointer rounded-full border-0 bg-valle-red px-0 py-[15px] text-[15px] font-bold text-white shadow-[0_8px_20px_rgba(255,51,88,.35)] [font-family:inherit] hover:bg-[#D91E44]"
+            className="vbtn vbtn-primary vbtn-block mt-2.5"
           >
             {t('Check out')} <Fwd />
           </button>

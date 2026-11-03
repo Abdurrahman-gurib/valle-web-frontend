@@ -42,7 +42,7 @@ export function LanguagePicker({ fg, compact }: { fg: string; compact?: boolean 
         aria-label={tr('Language: {name}. Change language', { name: LANG_META[lang].name })}
         data-testid="language-picker"
         style={{
-          border: `1.5px solid ${h || open ? '#7333FF' : 'rgba(115,51,255,.5)'}`,
+          border: `1.5px solid ${h || open ? '#7333FF' : (fg === '#FFFFFF' ? 'rgba(255,255,255,.55)' : 'rgba(115,51,255,.5)')}`,
           background: h || open ? '#7333FF' : 'transparent', cursor: 'pointer',
           fontFamily: MONO, fontSize: compact ? 10 : 11, fontWeight: 700, letterSpacing: compact ? '.06em' : '.1em',
           color: h || open ? '#FFFFFF' : fg, padding: compact ? '8px 9px' : '9px 12px', borderRadius: 999,

@@ -13,6 +13,7 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { Img } from '../components/Img';
+import { BtnLabel } from '@/components/ui/valle';
 import { _t, isRtl, useLang, useT } from '../i18n';
 
 const PULSE_RANGES: Record<string, [number, number]> = {
@@ -109,8 +110,6 @@ export default function ExplorePage() {
   const nature = useCarousel();
   const lang = useLang();
   const [hRate, bindRate] = useHover();
-  const [hClear, bindClear] = useHover();
-  const [hCta, bindCta] = useHover();
 
   const setParam = (key: 'cat' | 'q', value: string, replace = false) => {
     const next = new URLSearchParams(params);
@@ -292,21 +291,10 @@ export default function ExplorePage() {
           }}>{t('Nothing matches that')}</div>
           <div style={{ fontSize: 15, marginTop: 8 }}>{t('Try a different search, or clear the filters.')}</div>
           <button
-            {...bindClear}
+            type="button"
             onClick={clearFilters}
-            style={{
-              marginTop: 18,
-              border: '2px solid #340057',
-              background: 'transparent',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontSize: 14,
-              fontWeight: 700,
-              color: '#340057',
-              padding: '12px 24px',
-              borderRadius: 999,
-              ...(hClear ? { background: '#340057', color: '#FFFFFF' } : undefined),
-            }}
+            className="vbtn vbtn-secondary"
+            style={{ marginTop: 18 }}
           >{t('Clear filters')}</button>
         </div>
       )}
@@ -324,21 +312,7 @@ export default function ExplorePage() {
             {t('Add experiences to My Day, then book them all in one step, pay on arrival.')}
           </div>
         </div>
-        <button
-          {...bindCta}
-          onClick={goto.booking}
-          style={{
-            border: 0,
-            background: hCta ? '#D91E44' : '#FF3358',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            fontSize: 15,
-            fontWeight: 700,
-            color: '#FFFFFF',
-            padding: '15px 28px',
-            borderRadius: 999,
-          }}
-        >{exploreCtaLabel}</button>
+        <button type="button" onClick={goto.booking} className="vbtn vbtn-on-dark"><BtnLabel>{exploreCtaLabel}</BtnLabel></button>
       </div>
     </main>
   );

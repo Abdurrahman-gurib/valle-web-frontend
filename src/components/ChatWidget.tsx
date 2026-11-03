@@ -127,17 +127,17 @@ function Launcher({ onClick, unread, bottom, right, reduced }: {
     >
       <span
         className={cn(
-          'absolute inset-0 rounded-[999px] bg-valle-red group-hover:bg-[#D91E44] flex items-center justify-center',
-          'shadow-[0_18px_40px_-10px_rgba(217,30,68,.6)] group-hover:shadow-[0_22px_46px_-10px_rgba(217,30,68,.72)]',
+          'absolute inset-0 rounded-[999px] bg-valle-purple group-hover:bg-[#4A0F75] flex items-center justify-center',
+          'shadow-[0_10px_26px_-8px_rgba(23,0,40,.45)] group-hover:shadow-[0_14px_30px_-8px_rgba(23,0,40,.5)]',
           '[transition:background_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]',
           !reduced && 'animate-[vfloat_4.2s_ease-in-out_infinite]',
         )}
       >
-        {/* Soft ring that widens on hover, so the pink reads as a live control. */}
+        {/* Soft ring that widens on hover, so the launcher reads as a live control. */}
         <span
           aria-hidden="true"
           className={cn(
-            'absolute -inset-[4px] rounded-[999px] pointer-events-none border-[1.5px] border-solid border-[rgba(255,51,88,.45)]',
+            'absolute -inset-[4px] rounded-[999px] pointer-events-none border-[1.5px] border-solid border-[rgba(115,51,255,.45)]',
             'opacity-0 [transform:scale(.86)] [transition:opacity_.28s_cubic-bezier(.2,.7,.2,1),transform_.42s_cubic-bezier(.16,1.06,.3,1.12)]',
             !reduced && 'group-hover:opacity-100 group-hover:[transform:scale(1)]',
           )}
@@ -460,13 +460,15 @@ export function ChatWidget() {
           <div className="flex gap-[9px]">
             <button
               onClick={() => { setName(''); setEmail(''); beginChat(); }}
-              className="press flex-1 border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple cursor-pointer [font-family:inherit] text-[14px] font-bold py-[11px] px-0 rounded-[999px] [transition:background_.18s_cubic-bezier(.2,.7,.2,1)]"
+              type="button"
+              className="vbtn vbtn-secondary vbtn-sm flex-1 px-0"
             >
               {t('Skip')}
             </button>
             <button
               onClick={beginChat}
-              className="press flex-[1.4] border-0 bg-valle-red text-white cursor-pointer [font-family:inherit] text-[14px] font-bold py-[11px] px-0 rounded-[999px] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]"
+              type="button"
+              className="vbtn vbtn-primary vbtn-sm flex-[1.4] px-0"
             >
               {t('Start chat')} <Fwd />
             </button>
@@ -530,9 +532,7 @@ export function ChatWidget() {
               type="submit"
               disabled={!draft.trim()}
               className={cn(
-                'press border-0 bg-valle-red text-white rounded-[999px] [font-family:inherit] text-[13.5px] font-bold py-0 px-[18px] shrink-0',
-                '[transition:opacity_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]',
-                draft.trim() ? 'cursor-pointer opacity-100 shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]' : 'cursor-default opacity-45 shadow-none',
+                'vbtn vbtn-primary vbtn-sm shrink-0 px-[18px]',
               )}
             >
               {t('Send')}

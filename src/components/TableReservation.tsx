@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { useT } from '../i18n';
+import { BtnLabel } from '@/components/ui/valle';
 import { reserveTable } from '../lib/api';
 import { todayIso } from '../lib/format';
 import { useApp } from '../store/AppStore';
@@ -61,8 +62,8 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
   return (
     <div data-testid="table-reservation">
       {!open && (
-        <button type="button" onClick={() => setOpen(true)} data-testid="table-open" style={{ display: 'block', width: '100%', textAlign: 'center', background: '#FF3358', color: '#FFFFFF', fontSize: 15, fontWeight: 700, padding: '15px 0', borderRadius: 999, border: 0, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 8px 20px rgba(255,51,88,.35)' }}>
-          {t('Reserve a table →')}
+        <button type="button" onClick={() => setOpen(true)} data-testid="table-open" className="vbtn vbtn-primary vbtn-block">
+          <BtnLabel>{t('Reserve a table →')}</BtnLabel>
         </button>
       )}
       {open && (
@@ -101,8 +102,8 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
           <label style={label}>{t('ANYTHING ELSE')}<input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('Allergies, a birthday, a high chair…')} style={input} /></label>
           {err && <div role="alert" data-testid="table-error" style={{ background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: 12, padding: '10px 14px', fontSize: 13.5, fontWeight: 600 }}>{err}</div>}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="table-submit" style={{ border: 0, background: busy ? '#B98AA7' : '#FF3358', color: '#FFFFFF', fontFamily: 'inherit', fontSize: 14.5, fontWeight: 700, padding: '13px 24px', borderRadius: 999, cursor: busy ? 'wait' : 'pointer' }}>{busy ? t('Sending…') : t('Request the table →')}</button>
-            <button type="button" onClick={() => setOpen(false)} style={{ border: '1.5px solid #340057', background: 'transparent', color: '#340057', fontFamily: 'inherit', fontSize: 13.5, fontWeight: 700, padding: '11px 18px', borderRadius: 999, cursor: 'pointer' }}>{t('Close')}</button>
+            <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="table-submit" className="vbtn vbtn-primary" style={busy ? { cursor: 'wait' } : undefined}><BtnLabel>{busy ? t('Sending…') : t('Request the table →')}</BtnLabel></button>
+            <button type="button" onClick={() => setOpen(false)} className="vbtn vbtn-secondary">{t('Close')}</button>
           </div>
           <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(52,0,87,.7)' }}>{t('OPEN DAILY 11:30 – 16:30 · CONFIRMED BY THE TEAM, USUALLY WITHIN THE HOUR')}</div>
         </div>

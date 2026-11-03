@@ -108,13 +108,9 @@ function SkeletonCard({ delay }: { delay: number }) {
   );
 }
 
-function PinkLink({ label, href }: { label: string; href: string }) {
+function PinkLink({ label, href, onDark }: { label: string; href: string; onDark?: boolean }) {
   return (
-    <a
-      href={href}
-      className="press border-0 bg-valle-red hover:bg-[#D91E44] cursor-pointer font-sans text-[15px] font-bold py-[14px] px-[26px] rounded-[999px] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)] inline-block whitespace-nowrap hover:[transform:translateY(-1px)] [transition:transform_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]"
-      style={{ color: '#FFFFFF', textDecoration: 'none' }}
-    >
+    <a href={href} className={cn('vbtn', onDark ? 'vbtn-on-dark' : 'vbtn-primary')}>
       {label}
     </a>
   );
@@ -271,7 +267,7 @@ export default function VacanciesPage() {
               {t('Tell us what you do best. We read every message, and we come back to good people when the right role opens up.')}
             </p>
           </div>
-          <PinkLink label={t('Send an open application')} href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
+          <PinkLink onDark label={t('Send an open application')} href={'mailto:' + CAREERS_EMAIL + '?subject=Speculative%20application'} />
         </div>
       </section>
 

@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { CalendarDays, Check, Minus, Plus } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ValleButton } from '@/components/ui/valle';
+import { BtnLabel, ValleButton } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
@@ -167,8 +167,8 @@ function CartLine({ line }: { line: SelLine }) {
         title={t('Remove')}
         {...bindX}
         style={{
-          border: '1.5px solid ' + (hx ? '#FF3358' : '#EBE2FF'), background: 'transparent',
-          color: hx ? '#FF3358' : 'rgba(52,0,87,.7)', width: '28px', height: '28px', borderRadius: '999px',
+          border: '1.5px solid ' + (hx ? '#340057' : '#EBE2FF'), background: hx ? '#F4EEFF' : 'transparent',
+          color: hx ? '#340057' : 'rgba(52,0,87,.7)', width: '28px', height: '28px', borderRadius: '999px',
           cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: 0,
         }}
       >×</button>
@@ -291,7 +291,7 @@ function PayCard({ on, bgOn, title, note, onClick }: { on: boolean; bgOn: string
 
 /* Confirm button in the sticky summary bar */
 function ConfirmBtn({ label, onClick }: { label: string; onClick: () => void }) {
-  return <ValleButton variant="primary" size="lg" onClick={onClick} className="px-[26px] py-3.5 text-[14.5px]">{label}</ValleButton>;
+  return <ValleButton variant="onDark" size="lg" onClick={onClick}><BtnLabel>{label}</BtnLabel></ValleButton>;
 }
 
 export default function BookingPage() {
@@ -369,7 +369,6 @@ export default function BookingPage() {
   };
   const [submitting, setSubmitting] = useState(false);
   const [natFocus, setNatFocus] = useState(false);
-  const [backHov, backBind] = useHover();
 
   // Every booking entry point returned to the form in the original
   // (_nav('booking', { confirmed: false }) + scrollTo(0,0)).
@@ -796,7 +795,7 @@ export default function BookingPage() {
                     dir="ltr"
                     style={{ ...inputStyle, flex: '1 1 220px', fontFamily: MONO, textTransform: 'uppercase', borderColor: offer ? '#33FF74' : '#EBE2FF' }}
                   />
-                  <button type="button" onClick={() => { void tryCoupon(); }} style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '11px 16px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>{t('Apply')}</button>
+                  <button type="button" onClick={() => { void tryCoupon(); }} className="vbtn vbtn-secondary">{t('Apply')}</button>
                   {couponMsg && <span data-testid="coupon-msg" style={{ fontSize: '13px', fontWeight: 600, color: offer ? '#1E9E4A' : '#D91E44', flex: '1 1 100%' }}>{couponMsg}{offer?.note ? ' · ' + offer.note : ''}</span>}
                 </div>
               </div>
@@ -831,7 +830,7 @@ export default function BookingPage() {
               : <>
                   <span>{t('Not finishing now?')}</span>
                   {draftState === 'ask' && <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder={t('Your e-mail')} aria-label={t('Your e-mail')} data-testid="draft-email" style={{ ...inputStyle, flex: '1 1 200px', padding: '9px 12px' }} />}
-                  <button type="button" onClick={() => { void saveForLater(); }} disabled={draftState === 'busy'} data-testid="draft-save" style={{ border: '1.5px solid #340057', background: '#FFFFFF', color: '#340057', borderRadius: '999px', padding: '8px 14px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <button type="button" onClick={() => { void saveForLater(); }} disabled={draftState === 'busy'} data-testid="draft-save" className="vbtn vbtn-secondary vbtn-sm" style={{ whiteSpace: 'normal' }}>
                     {draftState === 'busy' ? t('Saving…') : t('E-mail me a link to come back to this day')}
                   </button>
                   {draftState === 'error' && <span style={{ color: '#D91E44', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
@@ -884,7 +883,7 @@ export default function BookingPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginTop: '18px' }}>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontFamily: MONO, fontSize: '10.5px', fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('BOOKING REFERENCE')}</div>
-                <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '28px', letterSpacing: '.04em', marginTop: '6px', color: '#FF3358' }}>{refCode}</div>
+                <div style={{ fontFamily: MONO, fontWeight: 700, fontSize: '28px', letterSpacing: '.04em', marginTop: '6px', color: '#340057' }}>{refCode}</div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(52,0,87,.75)', marginTop: '6px' }}>{guestLine}</div>
               </div>
               <span style={{ background: payStampBg, color: '#340057', fontFamily: MONO, fontSize: '10.5px', fontWeight: 700, borderRadius: '999px', padding: '8px 13px', transform: 'rotate(-4deg)', whiteSpace: 'nowrap', flexShrink: 0 }}>{payStamp}</span>
@@ -901,9 +900,9 @@ export default function BookingPage() {
             )}
             {ticket.ticketUrl && (
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '14px' }}>
-                <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" style={{ border: '1.5px solid #340057', color: '#340057', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Open my ticket')}</a>
-                <a href={waiverHref(ticket.ticketUrl)} target="_blank" rel="noopener noreferrer" data-testid="receipt-waiver" style={{ background: '#340057', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Sign the waivers')}</a>
-                <a href={`https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot}', { ref: refCode, date: dateSummary, slot: slotName }) + '\n' + ticket.ticketUrl)}`} target="_blank" rel="noopener noreferrer" style={{ background: '#25D366', color: '#FFFFFF', borderRadius: '999px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>{t('Send to my WhatsApp')}</a>
+                <a href={ticket.ticketUrl} target="_blank" rel="noopener noreferrer" className="vbtn vbtn-secondary vbtn-sm">{t('Open my ticket')}</a>
+                <a href={waiverHref(ticket.ticketUrl)} target="_blank" rel="noopener noreferrer" data-testid="receipt-waiver" className="vbtn vbtn-primary vbtn-sm">{t('Sign the waivers')}</a>
+                <a href={`https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot}', { ref: refCode, date: dateSummary, slot: slotName }) + '\n' + ticket.ticketUrl)}`} target="_blank" rel="noopener noreferrer" className="vbtn vbtn-secondary vbtn-sm">{t('Send to my WhatsApp')}</a>
               </div>
             )}
             <InstallCard style={{ marginTop: 16 }} />
@@ -933,13 +932,13 @@ export default function BookingPage() {
               href="https://api.whatsapp.com/send/?phone=23052928841"
               target="_blank"
               rel="noopener"
-              style={{ border: '2px solid #340057', color: '#340057', fontSize: '14px', fontWeight: 700, padding: '13px 24px', borderRadius: '999px', display: 'inline-block' }}
+              className="vbtn vbtn-secondary"
             >{t('Questions? WhatsApp us')}</a>
             <button
+              type="button"
               onClick={startOver}
-              {...backBind}
-              style={{ border: 0, background: backHov ? '#7333FF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: 700, color: '#FFFFFF', padding: '14px 26px', borderRadius: '999px' }}
-            >{t('Back to the park →')}</button>
+              className="vbtn vbtn-primary"
+            ><BtnLabel>{t('Back to the park →')}</BtnLabel></button>
           </div>
         </div>
       )}

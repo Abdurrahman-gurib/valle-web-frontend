@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Stripes } from '../components/Stripes';
 import { cn } from '../lib/utils';
+import { BtnLabel } from '@/components/ui/valle';
 import { isRtl, useT } from '../i18n';
 import { createBooking, fetchAvailability, newAttemptKey, type AvailabilityDay } from '../lib/api';
 import { money, mur, todayIso } from '../lib/format';
@@ -231,8 +232,8 @@ export default function GroupsPage() {
 
           {err && <div role="alert" data-testid="group-error" className="mt-[14px] bg-[#FFE2E7] border-[1.5px] border-solid border-valle-red rounded-[12px] py-3 px-4 text-[14px] font-semibold">{err}</div>}
           <div className="flex gap-3 items-center mt-[18px] flex-wrap">
-            <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="group-submit" className={cn('border-0 text-white [font-family:inherit] text-[15px] font-bold py-[15px] px-[30px] rounded-[999px]', busy ? 'bg-[#B98AA7] cursor-wait' : 'bg-valle-red cursor-pointer')}>
-              {busy ? t('Booking…') : t('Book the group →')}
+            <button type="button" onClick={() => { void submit(); }} disabled={busy} data-testid="group-submit" className={cn('vbtn vbtn-primary', busy && 'cursor-wait')}>
+              <BtnLabel>{busy ? t('Booking…') : t('Book the group →')}</BtnLabel>
             </button>
             <span className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)]">{t('FREE TO BOOK · DEPOSIT WITHIN 7 DAYS · ONE WAIVER PACK FOR THE LEADER')}</span>
           </div>
@@ -248,8 +249,8 @@ export default function GroupsPage() {
             {t('{org}: {n} people on {date}. Total {total}; deposit {deposit} to confirm, by transfer or at the desk within 7 days. The leader signs the waiver pack from the ticket link, which also carries the participant list.', { org: org, n: headcount, date, total: mur(done.total), deposit: mur(done.depositAmount ?? deposit) })}
           </p>
           <div className="flex gap-[10px] justify-center flex-wrap mt-5">
-            {done.ticketUrl && <a href={done.ticketUrl} className="bg-valle-purple rounded-[999px] py-[13px] px-[22px] font-bold" style={{ color: '#FFFFFF', textDecoration: 'none' }} data-testid="group-ticket">{t('Open the ticket')}</a>}
-            {done.ticketUrl && <a href={done.ticketUrl.replace('/ticket/', '/waiver/')} className="bg-white border-[1.5px] border-solid border-valle-purple rounded-[999px] py-[13px] px-[22px] font-bold" style={{ color: '#340057', textDecoration: 'none' }}>{t('Sign the waiver pack')}</a>}
+            {done.ticketUrl && <a href={done.ticketUrl} className="vbtn vbtn-primary" data-testid="group-ticket">{t('Open the ticket')}</a>}
+            {done.ticketUrl && <a href={done.ticketUrl.replace('/ticket/', '/waiver/')} className="vbtn vbtn-secondary">{t('Sign the waiver pack')}</a>}
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@ import { Fwd } from '@/components/ui/arrows';
 import { motion } from 'motion/react';
 import { Check, Pause, Play, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { ValleButton, ValleCard } from '@/components/ui/valle';
+import { BtnLabel, ValleButton, ValleCard } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import NotFoundPage from './NotFound';
@@ -148,11 +148,7 @@ export default function DetailPage() {
   const navigate = useNavigate();
   const card = useCardModel();
   const ref = useReveal<HTMLElement>();
-  const [hBack, bBack] = useHover();
-  const [hAdd, bAdd] = useHover();
-  const [hBook, bBook] = useHover();
   const [hLead, bLead] = useHover();
-  const [hCta, bCta] = useHover();
 
   const act = catalog.ACTS.find((a) => a.id === id);
   const catName = act ? catalog.CAT[act.cat].name : '';
@@ -213,9 +209,10 @@ export default function DetailPage() {
   return (
     <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
       <button
+        type="button"
         onClick={backExplore}
-        {...bBack}
-        style={{ border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: hBack ? '#FF3358' : '#7333FF', padding: '8px 0' }}
+        className="vbtn-link"
+        style={{ padding: '8px 0' }}
       >{t('← All experiences')}</button>
 
       <div style={{ position: 'relative', borderRadius: kids ? 30 : 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12, ...(kids ? { boxShadow: `0 0 0 5px ${KP.lime}, 0 0 0 9px ${KP.purple}`, margin: '17px 9px 0' } : null) }}>
@@ -331,11 +328,11 @@ export default function DetailPage() {
             </div>
             <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
             {d.hasAdd && (
-              <ValleButton onClick={() => d.add()} size="md" className={cn('border-[1.5px] border-white/50 py-3.5 text-[15px] text-white hover:bg-white/15', d.selOn ? 'bg-valle-green/25' : 'bg-transparent')}>{d.addLabel}</ValleButton>
+              <ValleButton onClick={() => d.add()} variant="ghost" className={cn(d.selOn && 'bg-valle-green/25 hover:bg-valle-green/35')}>{d.addLabel}</ValleButton>
             )}
             {kids
               ? <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={bookThisNow} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ ...kpButton('yellow'), width: '100%', marginTop: 12 }}>{t('Book this now →')}</motion.button>
-              : <ValleButton variant="primary" onClick={bookThisNow} className="mt-2.5 py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>}
+              : <ValleButton variant="onDark" onClick={bookThisNow} className="mt-2.5"><BtnLabel>{t('Book this now →')}</BtnLabel></ValleButton>}
             <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
           </div>
         </div>
@@ -382,16 +379,7 @@ export default function DetailPage() {
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 20 }}>
               <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>{gal.foot}</span>
-              <button
-                onClick={bookThisNow}
-                {...bCta}
-                style={{
-                  marginLeft: 'auto', border: 0, background: hCta ? '#D91E44' : '#FF3358', cursor: 'pointer',
-                  fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 28px',
-                  borderRadius: 999, boxShadow: '0 10px 24px -8px rgba(255,51,88,.6)',
-                  ...(hCta ? { transform: 'translateY(-1px)' } : undefined),
-                }}
-              >{gal.cta}</button>
+              <button type="button" onClick={bookThisNow} className="vbtn vbtn-on-dark" style={{ marginInlineStart: 'auto' }}><BtnLabel>{gal.cta}</BtnLabel></button>
             </div>
           </div>
         </div>

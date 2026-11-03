@@ -6,6 +6,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useReveal } from '../hooks/useReveal';
 import { fwd, isRtl, useT, _t } from '../i18n';
 import { paths } from '../lib/nav';
+import { BtnLabel } from '@/components/ui/valle';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { color } from '../styles/theme';
 
@@ -154,7 +155,7 @@ function ThenNow() {
             if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setPos((p) => Math.max(4, p - 4));
             if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setPos((p) => Math.min(96, p + 4));
           }}
-          className="absolute top-1/2 w-[52px] h-[52px] -mt-[26px] rounded-[50%] bg-valle-red text-white grid place-items-center shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)] font-mono font-bold tracking-[.14em] text-[14px] outline-offset-[3px]"
+          className="absolute top-1/2 w-[52px] h-[52px] -mt-[26px] rounded-[50%] bg-valle-yellow text-valle-purple grid place-items-center shadow-[0_6px_18px_-6px_rgba(23,0,40,.45)] font-mono font-bold tracking-[.14em] text-[14px] outline-offset-[3px]"
           style={{ left: `calc(${pos}% - 26px)` }}
         >⇔</div>
         <span className={cn('absolute top-[14px] left-[14px] bg-valle-yellow text-valle-purple py-[6px] px-[9px] rounded-[8px]', MONO)}>1998</span>
@@ -176,10 +177,7 @@ function UniqueCard({ n, title, text }: { n: string; title: string; text: string
 
 function Pill({ label, href, primary }: { label: string; href: string; primary?: boolean }) {
   return (
-    <a href={href} className={cn(
-      'press inline-block font-sans font-bold text-[15px] py-[14px] px-[26px] rounded-[999px] hover:[transform:translateY(-1px)] [transition:transform_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
-      primary ? 'bg-[#D91E44] hover:bg-[#B8163A] shadow-[0_10px_28px_-6px_rgba(255,51,88,.5)]' : 'bg-[rgba(255,255,255,.12)] shadow-[inset_0_0_0_1.5px_rgba(255,255,255,.4)]',
-    )} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{label}</a>
+    <a href={href} className={cn('vbtn', primary ? 'vbtn-on-dark' : 'vbtn-ghost')}><BtnLabel>{label}</BtnLabel></a>
   );
 }
 

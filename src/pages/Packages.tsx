@@ -6,13 +6,12 @@ import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
 import { paths, useGoto } from '../lib/nav';
-import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
 import { money, shortDateFromIso, todayIso } from '../lib/format';
 import { dealSaving, liveDeals } from '../lib/deals';
 import { createQuote } from '../lib/api';
 import { PackageModal, type PackModalData } from '../components/PackageModal';
-import { CardImage, ValleButton, ValleCard, valleButton } from '../components/ui/valle';
+import { BtnLabel, CardImage, ValleButton, ValleCard, valleButton } from '../components/ui/valle';
 import { CurrencyPicker } from '../components/CurrencyPicker';
 import type { Product, RateKey } from '../types';
 import { useT } from '../i18n';
@@ -94,7 +93,7 @@ function DealCard({ deal, accent, rate, inDay, onBook, onSwitchRate }: { deal: P
           )}
           <div className="text-end">
             <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-purple/70">{t('DEAL · PER PERSON')}</div>
-            <div data-testid="deal-price" className="mt-0.5 font-display text-[clamp(34px,3.6vw,42px)] leading-none font-black text-[#D91E44] italic">{money(deal.rr)}</div>
+            <div data-testid="deal-price" className="mt-0.5 font-display text-[clamp(34px,3.6vw,42px)] leading-none font-black text-valle-purple italic">{money(deal.rr)}</div>
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -109,7 +108,7 @@ function DealCard({ deal, accent, rate, inDay, onBook, onSwitchRate }: { deal: P
             <ValleButton variant="outline" size="sm" onClick={onSwitchRate} className="mt-2.5">{t('I am a resident: switch to the resident rate')}</ValleButton>
           </div>
         ) : (
-          <ValleButton data-testid="deal-book" variant="primary" onClick={onBook} className="mt-3.5">{inDay ? t('In my day · continue to booking →') : t('Book this deal →')}</ValleButton>
+          <ValleButton data-testid="deal-book" variant="primary" onClick={onBook} className="mt-4"><BtnLabel>{inDay ? t('In my day · continue to booking →') : t('Book this deal →')}</BtnLabel></ValleButton>
         )}
       </div>
     </ValleCard>
@@ -141,17 +140,15 @@ function QInput({ value, onChange, placeholder, type, min, title, style }: {
 
 function QuoteSubmitBtn({ onClick, busy }: { onClick: () => void; busy?: boolean }) {
   const t = useT();
-  const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} disabled={busy} aria-busy={busy || undefined} style={{ border: 0, background: busy ? '#B98AA7' : h ? '#D91E44' : '#FF3358', cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: '#FFFFFF', padding: '15px 30px', borderRadius: 999, boxShadow: '0 8px 20px rgba(255,51,88,.35)', transform: h ? 'translateY(-1px)' : undefined }}>{busy ? t('Sending…') : t('Request a quote →')}</button>
+    <button type="button" className="vbtn vbtn-primary" onClick={onClick} disabled={busy} aria-busy={busy || undefined} style={busy ? { cursor: 'wait' } : undefined}><BtnLabel>{busy ? t('Sending…') : t('Request a quote →')}</BtnLabel></button>
   );
 }
 
 function QuoteAgainBtn({ onClick }: { onClick: () => void }) {
   const t = useT();
-  const [h, bind] = useHover();
   return (
-    <button {...bind} onClick={onClick} style={{ marginTop: 18, border: '1.5px solid #340057', background: h ? '#340057' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: h ? '#FFFFFF' : '#340057', padding: '12px 24px', borderRadius: 999 }}>{t('Send another request')}</button>
+    <button type="button" className="vbtn vbtn-secondary" onClick={onClick} style={{ marginTop: 18 }}>{t('Send another request')}</button>
   );
 }
 
@@ -248,7 +245,7 @@ export default function PackagesPage() {
               <Link key={g.slug} to={paths.packageGroup(g.slug)} data-testid={`class-${g.slug}`} style={{ textDecoration: 'none', color: on ? '#FFFFFF' : '#340057', background: on ? '#340057' : '#FFFFFF', boxShadow: on ? 'none' : '0 0 0 1.5px #EBE2FF', borderRadius: group ? 999 : 18, padding: group ? '10px 14px' : '18px 20px', display: 'flex', flexDirection: 'column', gap: 6, textAlign: group ? 'center' : 'start' }}>
                 <span style={{ ...BARLOW, fontSize: group ? 14 : 22, textTransform: 'uppercase', lineHeight: 1 }}>{t(g.title)}</span>
                 {!group && <span style={{ fontSize: 13.5, lineHeight: 1.5, color: 'rgba(52,0,87,.72)' }}>{t(g.intro)}</span>}
-                {!group && <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', color: '#FF3358', marginTop: 'auto' }}>{t('SEE THE PRICES →')}</span>}
+                {!group && <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', color: '#5B21B6', marginTop: 'auto' }}>{t('SEE THE PRICES →')}</span>}
               </Link>
             );
           })}
@@ -279,7 +276,7 @@ export default function PackagesPage() {
           <div data-testid="deals-ended" style={{ marginTop: 26, background: '#F7F3FF', borderRadius: 16, padding: '22px 24px' }}>
             <div style={{ ...BARLOW, fontSize: 24, textTransform: 'uppercase' }}>{t('No deal on sale today')}</div>
             <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', margin: '8px 0 14px' }}>{t('The expo deals are only bookable for visits inside their validity dates. The resident packages are available all year.')}</p>
-            <Link to={paths.packageGroup('resident')} className={valleButton({ variant: 'dark', size: 'lg' })} style={{ textDecoration: 'none', color: '#FFFFFF' }}>{t('See the resident packages →')}</Link>
+            <Link to={paths.packageGroup('resident')} className={valleButton({ variant: 'primary', size: 'lg' })}><BtnLabel>{t('See the resident packages →')}</BtnLabel></Link>
           </div>
         )}
         </>)}

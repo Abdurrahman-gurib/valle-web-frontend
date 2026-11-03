@@ -70,7 +70,7 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
 export function CallButton({ testId }: { testId?: string }) {
   const t = useT();
   return (
-    <a href={TEL} data-testid={testId} className="sr-btn sr-btn-ghost sr-btn-lg" aria-label={t('Call VALLÉ on {phone}', { phone: PHONE })} style={{ color: '#FFFFFF', textDecoration: 'none' }}>
+    <a href={TEL} data-testid={testId} className="sr-btn sr-btn-ghost sr-btn-lg" aria-label={t('Call VALLÉ on {phone}', { phone: PHONE })}>
       <Phone aria-hidden strokeWidth={2.2} style={{ width: '1em', height: '1em' }} />{t('Call')} <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{PHONE}</span>
     </a>
   );

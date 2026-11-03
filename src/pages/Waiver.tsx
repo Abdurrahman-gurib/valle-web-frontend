@@ -229,7 +229,7 @@ export default function WaiverPage() {
             <div data-testid="waiver-none" className="mt-[18px] rounded-[16px] bg-[#E6FFEE] px-5 py-[18px]">
               <div className="font-display text-[24px] font-black uppercase italic">{t('No waiver needed for this booking')}</div>
               <p className="mx-0 mt-1.5 mb-3 text-[14px] leading-[1.5]">{t('The Disclaimer Form is only for ziplines, quads, buggies, the luge kart and the Nepalese bridge. Your booking has none of these: just show your ticket at the gate.')}</p>
-              <a href={ticketHref} className={cn(PILL, 'bg-valle-purple')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Open my ticket')}</a>
+              <a href={ticketHref} className={cn(PILL, 'vbtn-primary')}>{t('Open my ticket')}</a>
             </div>
           )}
 
@@ -238,8 +238,8 @@ export default function WaiverPage() {
               <div className="font-display text-[24px] font-black uppercase italic">{t('Everyone is signed. See you at the gate!')}</div>
               <p className="mx-0 mt-1.5 mb-3 text-[14px] leading-[1.5]">{t('Show your ticket QR code on arrival and head straight to your first activity.')}</p>
               <div className="flex flex-wrap gap-2.5">
-                <a href={ticketHref} className={cn(PILL, 'bg-valle-purple')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Open my ticket')}</a>
-                <button type="button" onClick={() => { setCorrecting(true); setDone(''); }} className={cn(PILL, 'border-[1.5px] border-valle-purple bg-white text-valle-purple')}>{t('Correct a waiver')}</button>
+                <a href={ticketHref} className={cn(PILL, 'vbtn-primary')}>{t('Open my ticket')}</a>
+                <button type="button" onClick={() => { setCorrecting(true); setDone(''); }} className={cn(PILL, 'vbtn-secondary')}>{t('Correct a waiver')}</button>
               </div>
             </div>
           )}
@@ -317,7 +317,7 @@ export default function WaiverPage() {
               </Section>
 
               {err && <div role="alert" className="mt-[14px] rounded-[12px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-[14px] py-2.5 text-[14px] font-semibold">{err}</div>}
-              <button type="button" onClick={submit} disabled={busy} data-testid="w-submit" className={cn('mt-[18px] inline-block w-full cursor-pointer rounded-full border-0 px-5 py-[15px] text-[16px] font-bold text-white no-underline [font-family:inherit]', hasInk ? 'bg-valle-red' : 'bg-[#FF8FA3]', busy ? 'opacity-70' : 'opacity-100')}>
+              <button type="button" onClick={submit} disabled={busy} data-testid="w-submit" className={cn('vbtn vbtn-primary vbtn-block mt-[18px] text-[16px]', (!hasInk || busy) && 'opacity-60')}>
                 {busy ? t('Saving…') : t('Sign the waiver')}
               </button>
             </div>
@@ -363,4 +363,4 @@ function Check({ checked, onChange, children, testId }: { checked: boolean; onCh
 const input = 'box-border w-full rounded-[12px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-[14px] py-3 text-[16px] text-valle-purple outline-none [font-family:inherit]';
 
 /** Pill button / link base; colours per use (links keep their colour inline: the global `a` rule beats utilities). */
-const PILL = 'inline-block cursor-pointer rounded-full px-5 py-[11px] text-[14px] font-bold no-underline [font-family:inherit]';
+const PILL = 'vbtn';

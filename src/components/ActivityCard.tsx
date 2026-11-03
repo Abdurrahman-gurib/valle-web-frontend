@@ -45,12 +45,8 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
           <motion.button
             type="button"
             onClick={a.add}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            className={cn(
-              'mt-[11px] w-full cursor-pointer rounded-full border-[1.5px] py-[11px] font-sans text-[13.5px] font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet',
-              a.selOn ? 'border-valle-purple bg-valle-purple text-white' : 'border-[#C9B3E8] bg-transparent text-valle-purple hover:border-valle-purple',
-            )}
+            whileTap={{ scale: 0.98 }}
+            className={cn('vbtn vbtn-sm vbtn-block mt-[11px]', a.selOn ? 'vbtn-primary' : 'vbtn-secondary')}
           >
             {a.addLabel}
           </motion.button>

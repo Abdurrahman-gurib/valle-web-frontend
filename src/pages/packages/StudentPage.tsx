@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Baby, Backpack, CalendarDays, FileSignature, GraduationCap, Leaf, School, UtensilsCrossed, Users, type LucideIcon } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
+import { BtnLabel } from '@/components/ui/valle';
 import { Img } from '../../components/Img';
 import { useCatalog } from '../../store/CatalogContext';
 import { paths } from '../../lib/nav';
@@ -55,7 +56,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
         currency
         photo={{ src: '/images/packages/student/student-zipline-kid.webp', alt: t('A young student cheering on a zipline in a blue helmet'), width: 961, height: 469, position: '42% 30%' }}
         actions={<>
-          <Link to={paths.groups()} data-testid="student-hero-book" className="sr-btn sr-btn-primary sr-btn-lg" style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Book a school visit')} <Fwd /></Link>
+          <Link to={paths.groups()} data-testid="student-hero-book" className="sr-btn sr-btn-primary sr-btn-lg">{t('Book a school visit')} <Fwd /></Link>
           <CallButton />
         </>}
       />
@@ -150,7 +151,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
           <li><span aria-hidden>3</span><div><b>{t('Participants and waivers')}</b>{t('Add the list now or later from the ticket; the leader signs one waiver pack for the group.')}</div></li>
         </ol>
         <div className="sr-hero-actions" style={{ marginTop: 24 }}>
-          <Link to={paths.groups()} data-testid="book-school" className="sr-btn sr-btn-primary sr-btn-lg" style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Book a school visit online →')}</Link>
+          <Link to={paths.groups()} data-testid="book-school" className="sr-btn sr-btn-primary sr-btn-lg"><BtnLabel>{t('Book a school visit online →')}</BtnLabel></Link>
           <button type="button" className="sr-btn sr-btn-outline sr-btn-lg" onClick={onQuote}>{t('Request a quote')}</button>
         </div>
       </SupportPanel>

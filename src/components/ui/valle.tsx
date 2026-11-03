@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { motion } from 'motion/react';
+import { Fwd } from './arrows';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Img } from '../Img';
 import { cn } from '@/lib/utils';
@@ -25,24 +26,40 @@ export function ValleCard({ className, children, ...rest }: ComponentProps<typeo
   );
 }
 
-export const valleButton = cva(
-  'inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full font-sans font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet disabled:cursor-not-allowed disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        dark: 'bg-valle-purple text-white hover:bg-valle-violet',
-        outline: 'border-[1.5px] border-valle-purple bg-transparent text-valle-purple hover:bg-valle-purple hover:text-white',
-        primary: 'bg-[#D91E44] text-white shadow-[0_8px_20px_rgba(255,51,88,.4)] hover:bg-[#B8163A]',
-      },
-      size: { md: 'py-[13px] text-sm', sm: 'py-[11px] text-[13.5px]', lg: 'w-auto px-7 py-[15px] text-[15px]' },
+/**
+ * The site's one button system (the .vbtn classes in src/styles/global.css):
+ * primary = solid purple, outline = purple outline, onDark = yellow on purple
+ * sections, ghost = white outline on purple. `dark` is kept as an alias of
+ * primary for older call sites. Red is never a button colour.
+ */
+export const valleButton = cva('vbtn w-full', {
+  variants: {
+    variant: {
+      dark: 'vbtn-primary',
+      primary: 'vbtn-primary',
+      outline: 'vbtn-secondary',
+      onDark: 'vbtn-on-dark',
+      ghost: 'vbtn-ghost',
     },
-    defaultVariants: { variant: 'dark', size: 'md' },
+    size: { md: '', sm: 'vbtn-sm', lg: 'w-auto px-7' },
   },
-);
+  defaultVariants: { variant: 'primary', size: 'md' },
+});
 
-/** Pill button in the VALLÉ styles: dark (default), outline or primary red. */
+/** Pill button in the VALLÉ styles: primary purple (default), outline, onDark or ghost. */
 export function ValleButton({ className, variant, size, ...rest }: ComponentProps<typeof motion.button> & VariantProps<typeof valleButton>) {
   return <motion.button type="button" whileTap={{ scale: 0.97 }} className={cn(valleButton({ variant, size }), className)} {...rest} />;
+}
+
+/**
+ * A button label whose translated text ends in an arrow ("Book this deal →",
+ * Arabic "… ←"): the text arrow is swapped for a Lucide arrow icon (Fwd: it
+ * points left in Arabic). Strings without an arrow render unchanged.
+ */
+export function BtnLabel({ children }: { children: string }) {
+  const m = /\s*[→←]\s*$/.exec(children);
+  if (!m) return <>{children}</>;
+  return <><span>{children.slice(0, m.index)}</span><Fwd /></>;
 }
 
 /** Photo area that zooms gently when its card is hovered. */

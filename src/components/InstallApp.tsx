@@ -35,11 +35,8 @@ export function InstallCard({ style }: { style?: CSSProperties }) {
       {state === 'prompt' && (
         <button
           onClick={() => { void promptInstall(); }}
-          className="press"
-          style={{
-            border: 0, background: color.pink, color: color.white, fontFamily: font.body, fontWeight: 700, fontSize: 14,
-            padding: '11px 20px', borderRadius: radius.pill, cursor: 'pointer', boxShadow: shadow.pink, whiteSpace: 'nowrap',
-          }}
+          type="button"
+          className="vbtn vbtn-primary vbtn-sm"
         >
           {t('Install the app')}
         </button>

@@ -230,7 +230,7 @@ function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () =>
 function GlassBtn({ label, onClick, primary, on, small, style }: { label: string; onClick: () => void; primary?: boolean; on?: boolean; small?: boolean; style?: CSSProperties }) {
   const [h, bind] = useHover();
   const bg = primary
-    ? (h ? '#D91E44' : '#FF3358')
+    ? (h ? '#F2EE1F' : '#FFFC33')
     : on ? '#33FF74' : (h ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.12)');
   return (
     <button
@@ -238,8 +238,8 @@ function GlassBtn({ label, onClick, primary, on, small, style }: { label: string
       onClick={onClick}
       style={{
         border: primary || on ? 0 : '1px solid rgba(255,255,255,.3)', background: bg, cursor: 'pointer', fontFamily: 'inherit',
-        color: on ? '#340057' : '#FFFFFF', fontSize: small ? 11 : 12.5, fontWeight: 700, padding: small ? '8px 12px' : '11px 16px', borderRadius: 999,
-        transition: 'all .18s ease', boxShadow: primary ? '0 10px 24px -8px rgba(255,51,88,.6)' : 'none', whiteSpace: 'nowrap',
+        color: on || primary ? '#340057' : '#FFFFFF', fontSize: small ? 11 : 12.5, fontWeight: 700, padding: small ? '8px 12px' : '11px 16px', borderRadius: 999,
+        transition: 'background-color .15s ease', boxShadow: 'none', whiteSpace: 'nowrap',
         ...style,
       }}
     >{label}</button>
@@ -273,7 +273,7 @@ function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string
           onClick={onClose}
           aria-label={t('Close')}
           style={{
-            position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? '#FF3358' : 'rgba(255,255,255,.12)',
+            position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? 'rgba(255,255,255,.26)' : 'rgba(255,255,255,.12)',
             color: '#FFFFFF', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
           }}
         >
