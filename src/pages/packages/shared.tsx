@@ -1,7 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { Fwd } from '@/components/ui/arrows';
 import {
-  Bike, Binoculars, Cable, Camera, Car, Check, Clapperboard, Coffee, ConciergeBell, CupSoda, Flame, Flag, Footprints, Gift,
+  Bike, Binoculars, Cable, CalendarDays, Camera, Car, Check, Clapperboard, Coffee, ConciergeBell, CupSoda, Flame, Flag, Footprints, Gift,
   GlassWater, Images, Mountain, Printer, Salad, Ticket, Trophy, UtensilsCrossed, Waves, type LucideIcon,
 } from 'lucide-react';
 import { useCatalog } from '../../store/CatalogContext';
@@ -18,7 +19,9 @@ import type { Product } from '../../types';
  */
 
 export const MONO = "'Chivo Mono',monospace";
-export const DISPLAY: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, textTransform: 'uppercase', textWrap: 'balance' } as CSSProperties;
+/** Barlow black italic: every package heading starts from it. */
+export const BLACK_ITALIC: CSSProperties = { fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900 };
+export const DISPLAY: CSSProperties = { ...BLACK_ITALIC, textTransform: 'uppercase', textWrap: 'balance' };
 /** Prices keep their "Rs" casing. */
 export const PRICE: CSSProperties = { ...DISPLAY, textTransform: 'none' };
 export const PHONE = '+230 660 4477';
@@ -26,6 +29,32 @@ export const TEL = 'tel:+2306604477';
 export const H2: CSSProperties = { ...DISPLAY, margin: '10px 0 0', fontSize: 'clamp(32px,4vw,52px)', lineHeight: 0.92, color: '#340057' };
 
 export const rupees = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
+
+/** A photo filling its positioned frame (card photos, heroes, mosaics). */
+export const cover = (position = 'center'): CSSProperties => ({ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: position });
+
+/** Purple text on the light accents, white on the dark ones. */
+export const fgOn = (c: string) => (['#7333FF', '#340057'].includes(c.toUpperCase()) ? '#FFFFFF' : '#340057');
+
+/** A package photo chosen for the page (alt still to translate). */
+export interface PagePhoto { src: string; alt: string; position: string }
+
+/** The page's own photo of a package, or the catalog image with a generic alt. */
+export function photoFor(photos: Record<string, PagePhoto>, key: string | undefined, fallback: string, name: string, t: (s: string, vars?: Record<string, string | number>) => string): PagePhoto {
+  const p = key ? photos[key] : undefined;
+  return p ? { src: p.src, alt: t(p.alt), position: p.position } : { src: fallback, alt: t('{name} package', { name }), position: 'center' };
+}
+
+/** The text button that scrolls to the quote form ("Request a group quote →"). */
+export function QuoteLink({ onClick, label }: { onClick: () => void; label: string }) {
+  return <button type="button" className="sr-link sr-link-btn" onClick={onClick}>{label} <Fwd /></button>;
+}
+
+/** The validity note every class page closes its "Good to know" with. */
+export function useValidityItem(): { icon: LucideIcon; title: string; text: string } {
+  const t = useT();
+  return { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') };
+}
 
 export function Eyebrow({ children, color = '#7333FF', className }: { children: ReactNode; color?: string; className?: string }) {
   return <div className={className} style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.16em', color }}>{children}</div>;

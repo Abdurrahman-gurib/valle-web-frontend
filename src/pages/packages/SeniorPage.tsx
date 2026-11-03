@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, CupSoda, Footprints, IceCreamCone, Leaf, Salad, UserCheck, Users, UtensilsCrossed, type LucideIcon } from 'lucide-react';
+import { CupSoda, Footprints, IceCreamCone, Leaf, Salad, UserCheck, Users, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { paths } from '../../lib/nav';
@@ -9,7 +9,7 @@ import { ClassHero } from './ClassHero';
 import { BookActions, PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, SectionHeader, cardItems, rupees, scrollToId } from './shared';
+import { Eyebrow, H2, QuoteLink, SectionHeader, cardItems, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
 
 /**
  * The senior citizen class page (/packages/senior), after the official
@@ -20,7 +20,7 @@ import { Eyebrow, H2, SectionHeader, cardItems, rupees, scrollToId } from './sha
  */
 
 /** Photos that show what each package is; the catalog image stays the fallback. */
-const PHOTOS: Record<string, { src: string; alt: string; position: string }> = {
+const PHOTOS: Record<string, PagePhoto> = {
   'pkg:senior:0': { src: '/images/valle-giant-tortoise-park-mauritius.avif', alt: _t('A senior couple walking past a giant tortoise in the park'), position: '30% 45%' },
   'pkg:senior:1': { src: '/images/expedition-convoy-meadow.webp', alt: _t('Guests seated in a VALLÉ jeep on a meadow track'), position: '55% 55%' },
 };
@@ -38,6 +38,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
   const t = useT();
   const catalog = useCatalog();
   const raw = useRawCatalog();
+  const validity = useValidityItem();
   const packs = catalog.PACKS.senior ?? [];
   const from = packs.length ? packs.reduce((a, b) => (rupees(b.single) < rupees(a.single) ? b : a)) : undefined;
   // the sheet's own labels for the menu, translated
@@ -110,8 +111,8 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         items={[
           { icon: UserCheck, title: t('Who it is for'), text: t('Guests aged 55 and above. Companions aged 12 and over pay the same package price.') },
           { icon: Footprints, title: t('What to bring'), text: t('Comfortable walking shoes and sun protection. The jeep visit is seated.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <button type="button" className="sr-link sr-link-btn" onClick={onQuote}>{t('Request a group quote')} <Fwd /></button> },
-          { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') },
+          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={onQuote} label={t('Request a group quote')} /> },
+          validity,
         ]}
       />
     </div>

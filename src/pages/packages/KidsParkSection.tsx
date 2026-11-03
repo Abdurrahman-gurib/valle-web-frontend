@@ -6,7 +6,7 @@ import { useApp } from '../../store/AppStore';
 import { paths } from '../../lib/nav';
 import { money } from '../../lib/format';
 import { useT } from '../../i18n';
-import { MONO } from './shared';
+import { MONO, cover } from './shared';
 
 /** The Kids Park pricelist, in the park's own look (entrance arch, confetti, points); shown on the resident page. */
 export function KidsParkSection() {
@@ -41,7 +41,7 @@ export function KidsParkSection() {
           </div>
         </div>
         <div style={{ flex: '1 1 280px', minHeight: 300, maxHeight: 480, borderRadius: 26, overflow: 'hidden', position: 'relative', background: KP.lime, boxShadow: `0 0 0 4px ${KP.lime}` }}>
-          <Img src="/images/miniquad.avif" alt={t('Mini Quad at Vallé Kids Park')} surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Img src="/images/miniquad.avif" alt={t('Mini Quad at Vallé Kids Park')} surface="dark" style={cover()} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(58,10,70,.9), rgba(58,10,70,0) 58%)' }} />
           <div style={{ position: 'absolute', left: 20, right: 20, bottom: 20 }}>
             <div style={{ ...KP_FONT, color: '#FFFFFF', fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.95 }}>{t('Little feet')}<br /><span style={{ color: KP.yellow }}>{t('lead the way')}</span></div>

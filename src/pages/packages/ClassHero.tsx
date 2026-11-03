@@ -3,7 +3,7 @@ import { ArrowDown, Phone } from 'lucide-react';
 import { Img } from '../../components/Img';
 import { CurrencyPicker } from '../../components/CurrencyPicker';
 import { useT } from '../../i18n';
-import { DISPLAY, Eyebrow, PHONE, PRICE, TEL } from './shared';
+import { DISPLAY, Eyebrow, PHONE, PRICE, TEL, cover } from './shared';
 
 export interface HeroPhoto { src: string; alt: string; width: number; height: number; position: string }
 
@@ -37,7 +37,7 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
   return (
     <section className="sr-hero" aria-labelledby={id} data-testid={testId}>
       <div className="sr-hero-photo">
-        <Img src={photo.src} alt={photo.alt} priority surface="dark" width={photo.width} height={photo.height} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: photo.position }} />
+        <Img src={photo.src} alt={photo.alt} priority surface="dark" width={photo.width} height={photo.height} style={cover(photo.position)} />
       </div>
       <div className="sr-hero-text">
         <div className="sr-logo">

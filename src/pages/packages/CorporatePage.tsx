@@ -6,7 +6,7 @@ import { ClassHero, CallButton } from './ClassHero';
 import { PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, SectionHeader, cardItems, splitDuration } from './shared';
+import { Eyebrow, H2, QuoteLink, SectionHeader, cardItems, splitDuration } from './shared';
 
 /**
  * The corporate class page (/packages/corporate), after the team-building
@@ -93,7 +93,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
           ))}
         </dl>
         <p className="sr-lunch-intro" style={{ fontSize: 14.5 }}>{t('*HRDC refund conditions apply. The events team confirms what applies to your programme with the quote.')}</p>
-        <button type="button" className="sr-link sr-link-btn" onClick={onQuote}>{t('Request a quote')} <Fwd /></button>
+        <QuoteLink onClick={onQuote} label={t('Request a quote')} />
       </SupportPanel>
 
       <GoodToKnow
@@ -101,7 +101,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
         items={[
           { icon: Users, title: t('Group size'), text: t('Programmes scale from 10 to more than 300 people.') },
           { icon: CloudRain, title: t('If it rains'), text: t('An indoor backup is ready, so the day goes ahead.') },
-          { icon: MessageSquareQuote, title: t('Your quote'), text: t('Tell us about your group and we will send a tailored quote.'), action: <button type="button" className="sr-link sr-link-btn" onClick={onQuote}>{t('Request a quote')} <Fwd /></button> },
+          { icon: MessageSquareQuote, title: t('Your quote'), text: t('Tell us about your group and we will send a tailored quote.'), action: <QuoteLink onClick={onQuote} label={t('Request a quote')} /> },
           { icon: UtensilsCrossed, title: t('Lunch and logistics'), text: t('A wellness lunch and water are included; menus and logistics are tailored to your group.') },
         ]}
       />

@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
-import { DISPLAY, Eyebrow, PRICE, inclusionIcon, splitDuration, useProductBooking } from './shared';
+import { DISPLAY, Eyebrow, PRICE, cover, inclusionIcon, splitDuration, useProductBooking } from './shared';
 
 export interface CardPhoto { src: string; alt: string; position?: string }
 /** One inclusion: the line shown (page language) and the English catalog line its icon is read from. */
@@ -11,6 +11,36 @@ export interface CardItem { text: string; english: string }
 
 /** "45 min", "1 h", "3 rides": only times get the clock. */
 const isTime = (s: string) => /\d\s*(h|min|hour|hr)\b/i.test(s);
+
+/** The numbered inclusions with their icons and hint chips (times get a clock with `clock`). */
+export function InclusionList({ items, clock, className }: { items: CardItem[]; clock?: boolean; className?: string }) {
+  return (
+    <ol className={className ? 'sr-incl ' + className : 'sr-incl'}>
+      {items.map((it, i) => {
+        const Icon = inclusionIcon(it.english);
+        const [text, hint] = splitDuration(it.text);
+        return (
+          <li key={it.text + i}>
+            <span aria-hidden className="sr-incl-n">{i + 1}</span>
+            <Icon aria-hidden className="sr-incl-icon" strokeWidth={1.9} />
+            <span className="sr-incl-text">{text}</span>
+            {hint && <span className="sr-chip">{clock && isTime(hint) && <Clock aria-hidden strokeWidth={2.2} />}{hint}</span>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** A price with its mono label above ("SINGLE", "PER PERSON"). */
+export function PriceFigure({ label, value, testId, size, color = '#340057', labelColor = 'rgba(52,0,87,.7)' }: { label: string; value?: string; testId?: string; size: string; color?: string; labelColor?: string }) {
+  return (
+    <div>
+      <Eyebrow color={labelColor}>{label}</Eyebrow>
+      <div data-testid={testId} dir="ltr" style={{ ...PRICE, fontSize: size, lineHeight: 1, color, marginTop: 4, unicodeBidi: 'isolate' }}>{value}</div>
+    </div>
+  );
+}
 
 /**
  * A package card, after the official sheets: a large photo with the package
@@ -51,7 +81,7 @@ export function PackageCard({
   return (
     <article data-testid={testId} data-key={dataKey} aria-labelledby={titleId} className={'sr-card' + (compact ? ' pk-compact' : '')}>
       <div className="sr-card-photo">
-        <Img src={photo.src} alt={photo.alt} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: photo.position ?? 'center' }} />
+        <Img src={photo.src} alt={photo.alt} style={cover(photo.position)} />
         <span className="sr-card-tag" style={{ background: tagColor, color: tagFg }}>{tag}</span>
         {badge && <span className="pk-badge">{badge}</span>}
       </div>
@@ -59,37 +89,14 @@ export function PackageCard({
         <h3 id={titleId} style={{ ...DISPLAY, margin: 0, fontSize: compact ? 'clamp(22px,2vw,26px)' : 'clamp(28px,2.8vw,36px)', lineHeight: 0.95, color: '#340057' }}>{title}</h3>
         {subtitle && <p className="pk-sub">{subtitle}</p>}
         {items.length > 0 && <Eyebrow className="sr-card-label">{label ?? t('WHAT IS INCLUDED')}</Eyebrow>}
-        {items.length > 0 && (
-          <ol className="sr-incl">
-            {items.map((it, i) => {
-              const Icon = inclusionIcon(it.english);
-              const [text, hint] = splitDuration(it.text);
-              return (
-                <li key={it.text + i}>
-                  <span aria-hidden className="sr-incl-n">{i + 1}</span>
-                  <Icon aria-hidden className="sr-incl-icon" strokeWidth={1.9} />
-                  <span className="sr-incl-text">{text}</span>
-                  {hint && <span className="sr-chip">{isTime(hint) && <Clock aria-hidden strokeWidth={2.2} />}{hint}</span>}
-                </li>
-              );
-            })}
-          </ol>
-        )}
+        {items.length > 0 && <InclusionList items={items} clock />}
         {children}
         <div className="sr-card-foot">
           {single && (
             <div className="sr-price-row">
               <div className="pk-prices">
-                <div>
-                  <Eyebrow color="rgba(52,0,87,.7)">{singleLabel ?? (pair ? t('SINGLE') : t('PER PERSON'))}</Eyebrow>
-                  <div data-testid={priceTestId} dir="ltr" style={{ ...PRICE, fontSize: priceSize, lineHeight: 1, color: '#340057', marginTop: 4, unicodeBidi: 'isolate' }}>{single}</div>
-                </div>
-                {pair && (
-                  <div>
-                    <Eyebrow color="rgba(52,0,87,.7)">{t('DOUBLE · 2 PEOPLE')}</Eyebrow>
-                    <div data-testid={priceTestId ? priceTestId + '-double' : undefined} dir="ltr" style={{ ...PRICE, fontSize: priceSize, lineHeight: 1, color: '#340057', marginTop: 4, unicodeBidi: 'isolate' }}>{dbl}</div>
-                  </div>
-                )}
+                <PriceFigure label={singleLabel ?? (pair ? t('SINGLE') : t('PER PERSON'))} value={single} testId={priceTestId} size={priceSize} />
+                {pair && <PriceFigure label={t('DOUBLE · 2 PEOPLE')} value={dbl} testId={priceTestId ? priceTestId + '-double' : undefined} size={priceSize} />}
               </div>
               <div className="sr-price-note">
                 {t('VAT inclusive')}
@@ -120,11 +127,12 @@ export function BookActions({ productKey, name, onDetails, bookTestId = 'pkg-boo
 }) {
   const t = useT();
   const b = useProductBooking(productKey);
-  if (b.blocked) {
+  const blocked = b.blocked;
+  if (blocked) {
     return (
       <div className="sr-visitor" data-testid="pkg-rate-note">
-        <p style={{ margin: 0 }}>{blockedText ?? (b.blocked === 'rr' ? t('This package is sold at the resident rate. You are browsing at the visitor rate.') : t('This package is sold at the visitor rate. You are browsing at the resident rate.'))}</p>
-        <button type="button" className="sr-btn sr-btn-outline" onClick={() => b.setRate(b.blocked!)}>{b.blocked === 'rr' ? t('I am a resident: switch to the resident rate') : t('I am visiting: switch to the visitor rate')}</button>
+        <p style={{ margin: 0 }}>{blockedText ?? (blocked === 'rr' ? t('This package is sold at the resident rate. You are browsing at the visitor rate.') : t('This package is sold at the visitor rate. You are browsing at the resident rate.'))}</p>
+        <button type="button" className="sr-btn sr-btn-outline" onClick={() => b.setRate(blocked)}>{blocked === 'rr' ? t('I am a resident: switch to the resident rate') : t('I am visiting: switch to the visitor rate')}</button>
       </div>
     );
   }

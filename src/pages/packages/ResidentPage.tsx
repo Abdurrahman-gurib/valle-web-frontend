@@ -1,5 +1,4 @@
-import { CalendarDays, IdCard, Shuffle, Users } from 'lucide-react';
-import { Fwd } from '@/components/ui/arrows';
+import { IdCard, Shuffle, Users } from 'lucide-react';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { money } from '../../lib/format';
 import { _t, useT } from '../../i18n';
@@ -8,7 +7,7 @@ import { ClassHero } from './ClassHero';
 import { ProductCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { KidsParkSection } from './KidsParkSection';
-import { SectionHeader, cardItems, rupees, scrollToId } from './shared';
+import { QuoteLink, SectionHeader, cardItems, fgOn, photoFor, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
 
 /**
  * The resident class page (/packages/resident), after the official 2026
@@ -16,18 +15,18 @@ import { SectionHeader, cardItems, rupees, scrollToId } from './shared';
  * Kids Park pricelist in the park's own look. Catalog data: PACKS.resident, PL.kids.
  */
 
-const PHOTOS: Record<string, { src: string; alt: string; position: string }> = {
+const PHOTOS: Record<string, PagePhoto> = {
   'pkg:resident:0': { src: '/images/luge-family.webp', alt: _t('A father and his son laughing on a luge kart'), position: 'center 18%' },
   'pkg:resident:1': { src: '/images/zipline-waterfall.webp', alt: _t('A guest flying the Waterfall Zipline past the falls'), position: '45% 40%' },
   'pkg:resident:2': { src: '/images/zipline-superman.webp', alt: _t('A guest flying The Signature zipline superman-style'), position: 'center 35%' },
   'pkg:resident:3': { src: '/images/zipline-duo.webp', alt: _t('Two guests flying a zipline over the forest'), position: 'center 40%' },
 };
-const fgOn = (c: string) => (['#7333FF', '#340057'].includes(c.toUpperCase()) ? '#FFFFFF' : '#340057');
 
 export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => void; onDetails: (p: PackModalData) => void }) {
   const t = useT();
   const catalog = useCatalog();
   const raw = useRawCatalog();
+  const validity = useValidityItem();
   const packs = catalog.PACKS.resident ?? [];
   const from = packs.length ? packs.reduce((a, b) => (rupees(b.single) < rupees(a.single) ? b : a)) : undefined;
 
@@ -49,8 +48,7 @@ export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => vo
         <SectionHeader id="resident-packages-title" eyebrow={t('FOUR PACKAGES · ONE PRICE PER PERSON')} title={t('Choose your package')} intro={t('Every package is per person at the resident rate. Where a package says OR, you choose one of the two on the day.')} />
         <div className="sr-cards">
           {packs.map((pk, i) => {
-            const p = pk.key ? PHOTOS[pk.key] : undefined;
-            const photo = p ? { src: p.src, alt: t(p.alt), position: p.position } : { src: pk.img, alt: t('{name} package', { name: pk.name }) };
+            const photo = photoFor(PHOTOS, pk.key, pk.img, pk.name, t);
             return (
               <ProductCard key={pk.key ?? pk.name} testId="resident-package" productKey={pk.key} name={pk.name} titleId={`resident-pkg-${i}`} photo={photo}
                 tag={pk.name} tagColor={pk.color} tagFg={fgOn(pk.color)} title={pk.hero ?? pk.name}
@@ -69,8 +67,8 @@ export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => vo
         items={[
           { icon: IdCard, title: t('Who qualifies'), text: t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.') },
           { icon: Shuffle, title: t('Your choice on the day'), text: t('Where a package offers the Nepalese Bridge OR the Bicycle Zipline, pick the one you prefer at the park.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <button type="button" className="sr-link sr-link-btn" onClick={onQuote}>{t('Request a group quote')} <Fwd /></button> },
-          { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') },
+          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={onQuote} label={t('Request a group quote')} /> },
+          validity,
         ]}
       />
     </div>

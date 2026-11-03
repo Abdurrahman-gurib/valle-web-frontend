@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, Clapperboard, Images, Printer, Ticket, Users } from 'lucide-react';
+import { Clapperboard, Images, Printer, Ticket, Users } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { Img } from '../../components/Img';
 import { useCatalog } from '../../store/CatalogContext';
@@ -12,7 +12,7 @@ import { ClassHero } from './ClassHero';
 import { ProductCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, SectionHeader, rupees, scrollToId, useProductBooking } from './shared';
+import { Eyebrow, H2, SectionHeader, cover, rupees, scrollToId, useProductBooking, useValidityItem } from './shared';
 
 /**
  * The photo & video class page (/packages/photo-video): the park photographer's
@@ -31,6 +31,7 @@ const GALLERY = ['cine-02', 'cine-03', 'cine-04', 'cine-06'];
 
 export default function PhotoVideoPage() {
   const t = useT();
+  const validity = useValidityItem();
   const catalog = useCatalog();
   const app = useApp();
   const goto = useGoto();
@@ -129,7 +130,7 @@ export default function PhotoVideoPage() {
         </SupportPanel>
         <div data-testid="cine-gallery" className="pk-gallery">
           {GALLERY.map((g) => (
-            <div key={g}><Img src={`/images/shoot/${g}.webp`} alt={t('Cinematic shoot at Vallé: the swing by the waterfall')} width={1600} height={899} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '65% 35%' }} /></div>
+            <div key={g}><Img src={`/images/shoot/${g}.webp`} alt={t('Cinematic shoot at Vallé: the swing by the waterfall')} width={1600} height={899} style={cover('65% 35%')} /></div>
           ))}
         </div>
       </div>
@@ -141,7 +142,7 @@ export default function PhotoVideoPage() {
           { icon: Ticket, title: t('How you get them'), text: t('Edited photos and film of your day are delivered on your ticket page.') },
           { icon: Users, title: t('Single or double'), text: t('The single price is for one guest; the double price is for two guests booked together.') },
           { icon: Printer, title: t('Prints'), text: t('One print is included with every photo package; extra prints are in the add-ons.') },
-          { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') },
+          validity,
         ]}
       />
     </div>

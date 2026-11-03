@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Baby, Backpack, CalendarDays, FileSignature, GraduationCap, Leaf, School, UtensilsCrossed, Users, type LucideIcon } from 'lucide-react';
+import { Baby, Backpack, FileSignature, GraduationCap, Leaf, School, UtensilsCrossed, Users, type LucideIcon } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { BtnLabel } from '@/components/ui/valle';
 import { Img } from '../../components/Img';
@@ -11,7 +11,7 @@ import type { PriceRow } from '../../types';
 import { ClassHero, CallButton } from './ClassHero';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { DISPLAY, Eyebrow, H2, PRICE, SectionHeader } from './shared';
+import { DISPLAY, Eyebrow, H2, PRICE, SectionHeader, cover, useValidityItem } from './shared';
 
 /**
  * The student class page (/packages/student), after the official 2026
@@ -39,6 +39,7 @@ const parts = (s: string) => { const i = s.indexOf(' · '); return i < 0 ? [s, '
 export default function StudentPage({ onQuote }: { onQuote: () => void }) {
   const t = useT();
   const catalog = useCatalog();
+  const validity = useValidityItem();
   const rows: PriceRow[] = catalog.PL.student ?? [];
   const byGroup = (g: GroupKey) => rows.filter((r) => groupOf(r.n) === g);
   const entrance = byGroup('visit')[0];
@@ -74,7 +75,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
             return (
               <article key={g.key} className="sr-card" data-testid="student-group" data-group={g.key} aria-labelledby={`student-group-${gi}`}>
                 <div className="sr-card-photo">
-                  <Img src={g.photo.src} alt={t(g.photo.alt)} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: g.photo.position }} />
+                  <Img src={g.photo.src} alt={t(g.photo.alt)} style={cover(g.photo.position)} />
                   <span className="sr-card-tag" style={{ background: g.color, textTransform: 'none' }}>{t('From {price}', { price: money(Math.min(...list.filter((r) => !/top-up/i.test(r.n)).map((r) => r.rr))) })}</span>
                 </div>
                 <div className="sr-card-body">
@@ -162,7 +163,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
           { icon: Users, title: t('Group size'), text: t('A group booking is for 10 people or more. For fewer, book a day the usual way.') },
           { icon: School, title: t('Deposit'), text: t('Free to book; the deposit is paid within 7 days and the balance on the day.') },
           { icon: FileSignature, title: t('Waivers'), text: t('One waiver pack for the leader to sign, from the group’s ticket.') },
-          { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') },
+          validity,
         ]}
       />
     </div>
