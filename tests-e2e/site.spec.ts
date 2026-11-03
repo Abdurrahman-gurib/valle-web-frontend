@@ -877,3 +877,83 @@ test.describe('idempotent booking submit', () => {
     expect(((await d.json()) as { refCode: string }).refCode).not.toBe(ra.refCode);
   });
 });
+
+test.describe('special deals (expo)', () => {
+  test.beforeEach(async ({ page }) => {
+    await preselectRate(page);
+    await page.addInitScript(() => localStorage.removeItem('valle_draft'));
+  });
+  const DEALS = [['GO-PACKAGE', 'Rs 3,225', 'Rs 1,975', 'SAVE Rs 1,250'], ['PLUS-PACKAGE', 'Rs 3,025', 'Rs 2,175', 'SAVE Rs 850'], ['PRO-PACKAGE', 'Rs 3,900', 'Rs 3,000', 'SAVE Rs 900'], ['ELITE-PACKAGE', 'Rs 5,150', 'Rs 3,700', 'SAVE Rs 1,450']];
+  const inWindow = () => { const d = new Date().toISOString().slice(0, 10); return d >= '2026-10-23' && d <= '2027-01-15'; };
+
+  test('/packages/deals shows the four deals; a resident books one at the deal price with no entry line', async ({ page, request }, info) => {
+    test.skip(!inWindow(), 'the expo deals are only on sale from 23 Oct 2026 to 15 Jan 2027');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const catalogLoaded = page.waitForResponse((r) => r.url().includes('/api/catalog') && r.ok());
+    await page.goto('/packages/deals');
+    await catalogLoaded;
+    const cards = page.getByTestId('deal-card');
+    await expect(cards).toHaveCount(4);
+    for (const [i, [name, was, deal, save]] of DEALS.entries()) {
+      const card = cards.nth(i);
+      await expect(card).toContainText(name);
+      await expect(card.getByTestId('deal-was')).toContainText(was);
+      await expect(card.getByTestId('deal-price')).toHaveText(deal);
+      await expect(card.getByTestId('deal-save')).toHaveText(save);
+      await expect(card).toContainText('RESIDENT RATE · ID REQUIRED');
+    }
+    await expect(page.getByTestId('deals-notes')).toContainText('valid Mauritian National ID card');
+    await expect(page.getByTestId('deals-notes')).toContainText('NON REFUNDABLE');
+    await expectNoHorizontalScroll(page);
+
+    // book the GO deal: two adults (the default party) at Rs 1,975, park entry included
+    await cards.first().getByTestId('deal-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    await expect(page.getByText('GO-PACKAGE').first()).toBeVisible();
+    await expect(page.getByTestId('entry-note')).toContainText('INCLUDED WITH THE EXPO DEAL');
+    await expect(page.getByText(/1 experience \+ entry · Rs 3,950/).first()).toBeVisible();
+
+    // the server agrees: deal price × party, entry 0; refused for visitors and outside the dates
+    const day = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+    const body = (over: Record<string, unknown>) => ({ visitDate: day, slot: 'afternoon', adults: 2, kids: 0, rate: 'rr', items: [{ id: 'product:expo:go', adults: 2, kids: 0 }], name: 'Expo Guest', email: 'expo@example.com', payMode: 'gate', ...over });
+    const booked = await request.post('/api/bookings', { data: body({}) });
+    expect(booked.status()).toBe(201);
+    const b = (await booked.json()) as { total: number; lines: { label: string; amount: number }[] };
+    expect(b.total).toBe(3950);
+    expect(b.lines.find((l) => l.label.startsWith('Park entry'))?.amount ?? 0).toBe(0);
+    expect((await request.post('/api/bookings', { data: body({ rate: 'nr' }) })).status()).toBe(400);
+    expect((await request.post('/api/bookings', { data: body({ visitDate: '2027-01-16' }) })).status()).toBe(400);
+  });
+
+  test('a visitor sees the deals but is offered the resident rate instead of a Book button', async ({ page }) => {
+    test.skip(!inWindow(), 'the expo deals are only on sale from 23 Oct 2026 to 15 Jan 2027');
+    await page.addInitScript(() => localStorage.setItem('valle_rate', 'nr'));
+    await page.goto('/packages/deals');
+    const first = page.getByTestId('deal-card').first();
+    await expect(first.getByTestId('deal-visitor')).toBeVisible();
+    await expect(first.getByTestId('deal-book')).toHaveCount(0);
+    await first.getByRole('button', { name: /switch to the resident rate/ }).click();
+    await expect(first.getByTestId('deal-book')).toBeVisible();
+  });
+
+  test('the packages menu and index list the special deals first', async ({ page }, info) => {
+    test.skip(!inWindow(), 'the expo deals are only on sale from 23 Oct 2026 to 15 Jan 2027');
+    test.skip(info.project.name !== 'desktop', 'class strip checked once');
+    await page.goto('/packages');
+    await expect(page.getByTestId('package-classes').locator('a').first()).toHaveAttribute('data-testid', 'class-deals');
+  });
+});
+
+test.describe('Le Chamouzé kids menu', () => {
+  test.beforeEach(async ({ page }) => { await preselectRate(page); });
+  test('the menu shows the kids menu with its allergens and the included dessert', async ({ page }) => {
+    await page.goto('/dine/chamouze');
+    const group = page.getByTestId('menu-group').filter({ hasText: 'KIDS MENU' });
+    await expect(group).toBeVisible();
+    for (const dish of ['Chicken burger', 'Chicken farfalle pasta', 'Chicken skewers']) await expect(group).toContainText(dish);
+    await expect(group).toContainText('Rs 600');
+    await expect(group.getByTestId('menu-group-note')).toContainText('Desserts included: 2 scoops of ice cream');
+    await expect(group.getByText('LACT', { exact: true }).first()).toBeVisible();
+    await expect(group).toContainText('GL = GLUTEN');
+  });
+});

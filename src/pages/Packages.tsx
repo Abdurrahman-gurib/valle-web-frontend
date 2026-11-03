@@ -8,13 +8,15 @@ import { useApp } from '../store/AppStore';
 import { paths, useGoto } from '../lib/nav';
 import { useHover } from '../hooks/useHover';
 import { useReveal } from '../hooks/useReveal';
-import { money, todayIso } from '../lib/format';
+import { money, shortDateFromIso, todayIso } from '../lib/format';
+import { dealSaving, liveDeals } from '../lib/deals';
 import { createQuote } from '../lib/api';
 import { PackageModal, type PackModalData } from '../components/PackageModal';
 import { Img } from '../components/Img';
 import { BulletList, CardImage, CardTitle, PhotoPill, PriceCol, PriceRow, ValleButton, ValleCard, valleButton } from '../components/ui/valle';
 import { CurrencyPicker } from '../components/CurrencyPicker';
-import type { PackTier, PhotoTier, RateKey, TeamPack } from '../types';
+import { KP, KP_CONFETTI, KP_FONT, KidsParkEntrance, KidsProfile, kpButton } from '../components/KidsPark';
+import type { PackTier, PhotoTier, Product, RateKey, TeamPack } from '../types';
 import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
@@ -73,6 +75,68 @@ function ExCard({ pk, onOpen }: { pk: PackTier; onOpen: () => void }) {
         </PriceRow>
         {pk.note && <div className="mt-2 text-xs text-valle-purple/70">{pk.note}</div>}
         <ValleButton variant="outline" size="sm" onClick={onOpen} className="mt-[11px]">{t('View details →')}</ValleButton>
+      </div>
+    </ValleCard>
+  );
+}
+
+/** One expo deal, after the flyer: numbered contents, the struck "was" price, the deal price and what it saves. */
+const DEAL_ACCENTS = ['#33FF74', '#FFFC33', '#FF3358', '#7333FF'];
+function DealCard({ deal, accent, rate, inDay, onBook, onSwitchRate }: { deal: Product; accent: string; rate: RateKey | null; inDay: boolean; onBook: () => void; onSwitchRate: () => void }) {
+  const t = useT();
+  const saving = dealSaving(deal);
+  const visitor = rate === 'nr';
+  const accentFg = accent === '#7333FF' ? '#FFFFFF' : '#340057';
+  return (
+    <ValleCard data-testid="deal-card" data-deal={deal.key}>
+      <CardImage src={deal.image || '/images/vip-ultimate-buggy-coloured-earth.avif'} alt={t('{name} package', { name: deal.name })} className="aspect-[16/9]">
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,0,51,.88)] via-[rgba(31,0,51,.25)] to-transparent" />
+        {saving > 0 && (
+          <span data-testid="deal-save" className="absolute top-3 left-3 -rotate-4 rounded-lg bg-valle-yellow px-3 py-[7px] font-mono text-[11px] font-bold tracking-[.08em] text-valle-purple shadow-[0_6px_16px_rgba(31,0,51,.35)]">
+            {t('SAVE {amount}', { amount: money(saving) })}
+          </span>
+        )}
+        <div className="absolute right-4 bottom-3 left-4 origin-bottom-left -rotate-3 font-display text-[clamp(28px,3.2vw,36px)] leading-[.9] font-black text-white uppercase italic">{deal.name}</div>
+      </CardImage>
+      <div className="h-[7px]" style={{ background: accent }} />
+      <div className="flex flex-1 flex-col px-5 pt-4 pb-5">
+        <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70">{t('WHAT IS INCLUDED')}</div>
+        <ol className="m-0 mt-2 flex-1 list-none p-0">
+          {(deal.contents ?? []).map((c, i) => (
+            <li key={c} className="flex items-center gap-2.5 py-[5px] text-[14px] text-valle-purple/85" style={{ borderBottom: '1px dashed #EBE2FF' }}>
+              <span aria-hidden className="flex size-[22px] shrink-0 items-center justify-center rounded-full font-mono text-[10.5px] font-bold" style={{ background: accent, color: accentFg }}>{i + 1}</span>
+              <span>{c}</span>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-3.5 flex items-end justify-between gap-3">
+          {deal.was != null && (
+            <div>
+              <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-purple/70">{t('WAS')}</div>
+              <div data-testid="deal-was" className="mt-0.5 font-display text-[19px] font-black text-valle-purple/60 italic line-through decoration-valle-red decoration-2">
+                <span className="sr-only">{t('Was')} </span>{money(deal.was)}
+              </div>
+            </div>
+          )}
+          <div className="text-end">
+            <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-purple/70">{t('DEAL · PER PERSON')}</div>
+            <div data-testid="deal-price" className="mt-0.5 font-display text-[clamp(34px,3.6vw,42px)] leading-none font-black text-[#D91E44] italic">{money(deal.rr)}</div>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-valle-purple px-2.5 py-[5px] font-mono text-[9.5px] font-bold tracking-[.08em] text-valle-yellow">{t('RESIDENT RATE · ID REQUIRED')}</span>
+          {deal.validFrom && deal.validTo && (
+            <span className="rounded-full bg-[#F7F3FF] px-2.5 py-[5px] font-mono text-[9.5px] font-bold tracking-[.08em] text-valle-purple">{t('VALID {from} – {to}', { from: shortDateFromIso(deal.validFrom).toUpperCase(), to: shortDateFromIso(deal.validTo).toUpperCase() })}</span>
+          )}
+        </div>
+        {visitor ? (
+          <div data-testid="deal-visitor" className="mt-3.5 rounded-xl bg-[#FFE2E7] px-3.5 py-3">
+            <div className="text-[13px] leading-[1.45] font-semibold text-valle-purple">{t('This deal is for residents of Mauritius. You are browsing at the visitor rate.')}</div>
+            <ValleButton variant="outline" size="sm" onClick={onSwitchRate} className="mt-2.5">{t('I am a resident: switch to the resident rate')}</ValleButton>
+          </div>
+        ) : (
+          <ValleButton data-testid="deal-book" variant="primary" onClick={onBook} className="mt-3.5">{inDay ? t('In my day · continue to booking →') : t('Book this deal →')}</ValleButton>
+        )}
       </div>
     </ValleCard>
   );
@@ -162,6 +226,40 @@ function TeamCard({ tp, onQuote }: { tp: TeamPack; onQuote: () => void }) {
         <ValleButton onClick={onQuote} className="mt-3">{t('Request a quote')}</ValleButton>
       </div>
     </ValleCard>
+  );
+}
+
+/**
+ * The corporate hero, after the team-building magazine ad: the goggles photo
+ * under a purple wash with the white headline, then the yellow band with a
+ * purple/white diagonal edge carrying the phone line and the quote CTA.
+ */
+function TeamHero({ onQuote }: { onQuote: () => void }) {
+  const t = useT();
+  const [h, bind] = useHover();
+  const [before, after = ''] = t('Start at {brand}.').split('{brand}');
+  return (
+    <section id="team" className="team-hero" data-testid="team-hero" aria-labelledby="team-hero-title" style={{ marginTop: 'clamp(40px,6vw,64px)', borderRadius: 26, overflow: 'hidden', background: '#FFFC33', boxShadow: '0 22px 50px -24px rgba(52,0,87,.55)' }}>
+      <div style={{ position: 'relative', minHeight: 'clamp(380px,46vw,560px)', background: '#340057' }}>
+        <Img src="/images/team-building-goggles.webp" alt={t('Colleagues in goggles cheering during a team challenge at Vallé')} surface="dark" width={781} height={977} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(52,0,87,.94) 0%, rgba(52,0,87,.62) 42%, rgba(52,0,87,.22) 75%)' }} />
+        <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(20px,3vw,34px)', color: '#FFFFFF' }}>
+          <span style={{ display: 'inline-block', background: '#FFFC33', color: '#340057', fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '7px 13px', transform: 'rotate(-3deg)' }}>{t('TEAM BUILDING EXPERIENCES')}</span>
+          <h2 id="team-hero-title" style={{ ...BARLOW, color: '#FFFFFF', fontSize: 'clamp(40px,6.2vw,84px)', lineHeight: 0.86, margin: '16px 0 0', textTransform: 'uppercase', transform: 'rotate(-3deg)', transformOrigin: 'left bottom', textShadow: '0 4px 24px rgba(31,0,51,.45)' }}>
+            {t('Need a stronger team?')}<br />{before}<span style={{ color: '#FFFC33' }}>VALLÉ</span>{after}
+          </h2>
+        </div>
+      </div>
+      <div aria-hidden className="team-hero-edge" />
+      <div style={{ padding: 'clamp(22px,3.2vw,40px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 14, color: '#340057' }}>
+        <p style={{ margin: 0, fontSize: 'clamp(15.5px,1.6vw,18px)', lineHeight: 1.55, fontWeight: 500 }}>{t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}</p>
+        <a href="tel:+2306604477" data-testid="team-phone" style={{ ...BARLOW, color: '#340057', fontSize: 'clamp(28px,3.4vw,40px)', lineHeight: 1, textDecoration: 'none', direction: 'ltr', unicodeBidi: 'isolate', alignSelf: 'flex-start' }}>
+          <span style={{ display: 'block', fontFamily: MONO, fontStyle: 'normal', fontWeight: 700, fontSize: 10.5, letterSpacing: '.14em', marginBottom: 6 }}>{t('CALL THE EVENTS TEAM')}</span>
+          +230 660 4477
+        </a>
+        <button {...bind} type="button" onClick={onQuote} data-testid="team-hero-quote" style={{ alignSelf: 'flex-start', border: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 15.5, fontWeight: 700, color: '#FFFFFF', background: h ? '#5A1E86' : '#340057', padding: '15px 28px', borderRadius: 999, boxShadow: '0 8px 20px -8px rgba(52,0,87,.6)' }}>{t('Request a quote →')}</button>
+      </div>
+    </section>
   );
 }
 
@@ -320,6 +418,9 @@ export default function PackagesPage() {
   const group: PackageGroup | undefined = groupSlug ? PACKAGE_GROUPS.find((g) => g.slug === groupSlug) : undefined;
   /** A section shows on its own class page only; the index shows the classes. */
   const show = (key: string) => !!group && group.keys.includes(key);
+  /** The expo deals on sale today; outside their window the class is hidden and its page says so. */
+  const deals = liveDeals(catalog);
+  const classes = PACKAGE_GROUPS.filter((g) => g.slug !== 'deals' || deals.length > 0 || group?.slug === 'deals');
   const qReplyTo = qEmail.trim() || qPhone.trim() || t('your inbox');
 
   if (groupSlug && !group) return <NotFoundPage />;
@@ -335,7 +436,7 @@ export default function PackagesPage() {
 
         {/* the six classes, each on its own page; on a class page the strip doubles as the way to the others */}
         <nav aria-label={t('Package classes')} data-testid="package-classes" style={{ display: 'grid', gridTemplateColumns: group ? 'repeat(auto-fit,minmax(150px,1fr))' : 'repeat(auto-fit,minmax(240px,1fr))', gap: group ? 8 : 14, marginTop: group ? 22 : 30 }}>
-          {PACKAGE_GROUPS.map((g) => {
+          {classes.map((g) => {
             const on = group?.slug === g.slug;
             return (
               <Link key={g.slug} to={paths.packageGroup(g.slug)} data-testid={`class-${g.slug}`} style={{ textDecoration: 'none', color: on ? '#FFFFFF' : '#340057', background: on ? '#340057' : '#FFFFFF', boxShadow: on ? 'none' : '0 0 0 1.5px #EBE2FF', borderRadius: group ? 999 : 18, padding: group ? '10px 14px' : '18px 20px', display: 'flex', flexDirection: 'column', gap: 6, textAlign: group ? 'center' : 'start' }}>
@@ -347,6 +448,35 @@ export default function PackagesPage() {
           })}
         </nav>
 
+        {/* SPECIAL DEALS (the expo flyer) */}
+        {show('deals') && (<>
+        <SectionHead id="deals" title={t('Expo deals')} tag={t('RESIDENTS ONLY · PER PERSON')} marginTop="clamp(40px,6vw,64px)" />
+        {deals.length > 0 ? (<>
+        <div data-testid="deals-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,265px),1fr))', gap: 14, marginTop: 26 }}>
+          {deals.map((d, i) => (
+            <DealCard
+              key={d.key}
+              deal={d}
+              accent={DEAL_ACCENTS[i % DEAL_ACCENTS.length]}
+              rate={rate}
+              inDay={!!app.sel['product:' + d.key]}
+              onBook={() => { if (!app.sel['product:' + d.key]) app.toggleSel('product:' + d.key); goto.booking(); }}
+              onSwitchRate={() => setRate('rr')}
+            />
+          ))}
+        </div>
+        <div data-testid="deals-notes" style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 13.5, lineHeight: 1.55, color: '#340057' }}>{t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.')}</div>
+          <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.75)' }}>{t('ALL PRICES ARE VAT INCLUSIVE · ALL ACTIVITIES SOLD ARE NON REFUNDABLE · TERMS AND CONDITIONS APPLY')}</div>
+        </div>
+        </>) : (
+          <div data-testid="deals-ended" style={{ marginTop: 26, background: '#F7F3FF', borderRadius: 16, padding: '22px 24px' }}>
+            <div style={{ ...BARLOW, fontSize: 24, textTransform: 'uppercase' }}>{t('No deal on sale today')}</div>
+            <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', margin: '8px 0 14px' }}>{t('The expo deals are only bookable for visits inside their validity dates. The resident packages are available all year.')}</p>
+            <Link to={paths.packageGroup('resident')} className={valleButton({ variant: 'dark', size: 'lg' })} style={{ textDecoration: 'none', color: '#FFFFFF' }}>{t('See the resident packages →')}</Link>
+          </div>
+        )}
+        </>)}
         {/* LIGHT & STANDARD */}
         {show('ls') && (<>
         <SectionHead id="ls" title={t('Light & Standard')} tag={t('01 · START HERE')} marginTop="clamp(40px,6vw,64px)" />
@@ -462,19 +592,45 @@ export default function PackagesPage() {
         <div className="mt-4"><Link to={paths.groups()} data-testid="book-school" className={valleButton({ variant: 'dark', size: 'lg' })} style={{ textDecoration: 'none' }}>{t('Book a school visit online →')}</Link></div>
 
         </>)}
-        {/* KIDS PARK PRICELIST */}
-        {show('kids') && (<>
-        <SectionHead id="kids" title={t('Vallé Kids Park')} tag={t('08 · PAY WITH POINTS · 10 POINTS = RS 100')} marginTop="clamp(48px,7vw,80px)" />
-        <PriceTable
-          title={<>{t('Little feet')}<br /><span style={{ color: '#FFFC33' }}>{t('lead the way')}</span></>}
-          badge={t('KIDS PARK PRICELIST · {rate}', { rate: rateTag })}
-          rows={(catalog.PL.kids || []).map((r) => ({ n: r.n, p: t('{price} · 20 pts', { price: money(r[rk]) }) }))}
-          foot={t('TOP-UP CARD RS 50 · OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE')}
-          accent="#FFFC33"
-          image="/images/miniquad.avif"
-        />
-
-        </>)}
+        {/* KIDS PARK: its own look, after the park's entrance arch and signage */}
+        {show('kids') && (
+        <div id="kids" style={{ marginTop: 'clamp(48px,7vw,80px)' }}>
+          <KidsParkEntrance as="h2" />
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 18, alignItems: 'stretch' }}>
+            <div data-testid="kids-pricelist" style={{ flex: '1 1 340px', background: KP.purple, borderRadius: 26, overflow: 'hidden', color: '#FFFFFF', boxShadow: '0 18px 40px -18px rgba(58,10,70,.55)' }}>
+              <div aria-hidden style={{ height: 22, ...KP_CONFETTI }} />
+              <div style={{ padding: '18px 22px 22px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 13, borderRadius: 12, padding: '8px 13px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{t('KIDS PARK PRICELIST · {rate}', { rate: rateTag })}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', color: KP.lime }}>{t('PAY WITH POINTS · 10 POINTS = RS 100')}</span>
+                </div>
+                <div style={{ marginTop: 14 }}>
+                  {(catalog.PL.kids || []).map((r) => (
+                    <div key={r.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '9px 0', borderBottom: '2px dotted rgba(166,206,57,.55)' }}>
+                      <span style={{ fontSize: 15, fontWeight: 600 }}>{t(r.n)}</span>
+                      <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 15, borderRadius: 999, padding: '6px 12px', whiteSpace: 'nowrap' }}>{t('{price} · 20 pts', { price: money(r[rk]) })}</span>
+                    </div>
+                  ))}
+                </div>
+                <div data-testid="kids-topup" style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12, background: KP.lime, color: '#3A0A46', borderRadius: 18, padding: '12px 16px', boxShadow: '0 4px 0 #6E8F1A' }}>
+                  <span aria-hidden style={{ ...KP_FONT, flexShrink: 0, width: 42, height: 42, borderRadius: 999, background: KP.purple, color: KP.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>+</span>
+                  <span style={{ ...KP_FONT, fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.1 }}>{t('Grab the top-up card for just Rs 50')}</span>
+                </div>
+                <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.75)', marginTop: 12 }}>{t('OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE')}</div>
+              </div>
+            </div>
+            <div style={{ flex: '1 1 280px', minHeight: 300, maxHeight: 480, borderRadius: 26, overflow: 'hidden', position: 'relative', background: KP.lime, boxShadow: `0 0 0 4px ${KP.lime}` }}>
+              <Img src="/images/miniquad.avif" alt={t('Mini Quad at Vallé Kids Park')} surface="dark" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(58,10,70,.9), rgba(58,10,70,0) 58%)' }} />
+              <div style={{ position: 'absolute', left: 20, right: 20, bottom: 20 }}>
+                <div style={{ ...KP_FONT, color: '#FFFFFF', fontSize: 'clamp(24px,3vw,34px)', lineHeight: 0.95 }}>{t('Little feet')}<br /><span style={{ color: KP.yellow }}>{t('lead the way')}</span></div>
+                <Link to={paths.explore('kids')} data-testid="kids-rides" style={{ ...kpButton('yellow'), marginTop: 14 }}>{t('Meet the Kids Park rides →')}</Link>
+              </div>
+            </div>
+          </div>
+          <KidsProfile />
+        </div>
+        )}
         {/* COMBO PACKAGES */}
         {show('combo') && (<>
 
@@ -553,8 +709,8 @@ export default function PackagesPage() {
         </>)}
         {/* TEAM BUILDING */}
         {show('team') && (<>
-        <SectionHead id="team" title={t('Team building')} tag={t('12 · FROM RS 2,850 PER PERSON')} marginTop="clamp(48px,7vw,80px)" />
-        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}</p>
+        <TeamHero onQuote={quoteGo} />
+        <SectionHead title={t('Team building')} tag={t('12 · FROM RS 2,850 PER PERSON')} marginTop="clamp(40px,6vw,64px)" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16, marginTop: 26 }}>
           {catalog.TEAM.map((tp, i) => (
             <TeamCard key={i} tp={tp} onQuote={quoteGo} />

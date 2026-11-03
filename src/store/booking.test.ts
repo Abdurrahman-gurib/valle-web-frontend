@@ -94,3 +94,21 @@ describe('computeBooking', () => {
     expect(b.total).toBe(2 * 550 + 2 * 4975);
   });
 });
+
+describe('expo deals', () => {
+  it('charge the deal price per person and no park entry', () => {
+    const b = computeBooking(catalog, { 'product:expo:go': { a: 2, k: 1 } }, 2, 1, 'rr');
+    expect(b.entry).toBe(0);
+    expect(b.entryIncludedBy).toBe('expo');
+    expect(b.lines[0].label).toBe('Park entry · included with the expo deal');
+    expect(b.total).toBe(1975 * 3);
+  });
+
+  it('are listed only inside their validity window', async () => {
+    const { liveDeals, dealSaving } = await import('../lib/deals');
+    expect(liveDeals(catalog, '2026-11-03').map((p) => p.key)).toEqual(['expo:go', 'expo:plus', 'expo:pro', 'expo:elite']);
+    expect(liveDeals(catalog, '2026-10-22')).toEqual([]);
+    expect(liveDeals(catalog, '2027-01-16')).toEqual([]);
+    expect(liveDeals(catalog, '2026-11-03').map(dealSaving)).toEqual([1250, 850, 900, 1450]);
+  });
+});

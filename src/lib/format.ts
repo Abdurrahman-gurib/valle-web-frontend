@@ -95,6 +95,14 @@ export function fullDateFromIso(iso: string): string {
   return DOWS[d.getDay()] + ' ' + d.getDate() + ' ' + MONS[d.getMonth()] + ' ' + d.getFullYear();
 }
 
+/** Format an ISO date as "6 Aug 2026" (no weekday); returns '' when invalid. */
+export function shortDateFromIso(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  if (isNaN(d.getTime())) return '';
+  if (currentLang() !== 'en') return intl({ day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+  return d.getDate() + ' ' + MONS[d.getMonth()] + ' ' + d.getFullYear();
+}
+
 export const NATC: Record<string, string> = {
   'Mauritius': '+230',
   'Réunion / France': '+262',

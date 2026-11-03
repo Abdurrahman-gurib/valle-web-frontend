@@ -15,7 +15,9 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(root, 'src');
 const SKIP_DIRS = new Set(['staff', 'hr', 'i18n']);
-const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind', 'family', 'rateOnly']);
+const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind', 'family', 'rateOnly', 'allergens', 'noteAllergens', 'validFrom', 'validTo']);
+/** Arrays whose entries are codes, not text (allergen codes like GL, LACT). */
+const CODE_LIST_KEYS = new Set(['allergens', 'noteAllergens']);
 
 function files(dir) {
   const out = [];
@@ -50,7 +52,7 @@ export function collectKeys() {
   const looksLikeText = (s) => /[A-Za-zÀ-ÿ]/.test(s) && !/^(\/|https?:|#[0-9a-f]{3,8}$|rgba?\()/i.test(s) && !/\.(avif|webp|png|jpe?g|svg|pdf|mp4)$/i.test(s);
   const walk = (v, key, path) => {
     if (typeof v === 'string') { if (!(key && NON_TEXT_KEYS.has(key)) && looksLikeText(v)) add(v, 'catalog:' + path); return; }
-    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, key === 'gallery' ? 'src' : undefined, path + '[' + i + ']')); return; }
+    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, key === 'gallery' ? 'src' : key && CODE_LIST_KEYS.has(key) ? key : undefined, path + '[' + i + ']')); return; }
     if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) walk(x, k, path + '.' + k);
   };
   walk(cat, undefined, '');

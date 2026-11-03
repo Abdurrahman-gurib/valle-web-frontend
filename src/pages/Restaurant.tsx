@@ -7,7 +7,7 @@ import { useGoto } from '../lib/nav';
 import { useReveal } from '../hooks/useReveal';
 import { StripesSm } from '../components/Stripes';
 import { Img } from '../components/Img';
-import { isRtl, useLang, useT } from '../i18n';
+import { _t, isRtl, useLang, useT } from '../i18n';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { TableReservation } from '../components/TableReservation';
 
@@ -21,6 +21,23 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 const H2 = 'm-0 origin-bottom-left -rotate-2 font-display text-[clamp(26px,3.4vw,42px)] font-black tracking-[-0.01em] uppercase italic';
+/** Allergen codes as small tags; the full word is read out to screen readers. */
+const ALLERGEN_NAMES: Record<string, string> = { GL: _t('Contains gluten'), LACT: _t('Contains lactose') };
+function Allergens({ codes }: { codes?: string[] }) {
+  const t = useT();
+  if (!codes?.length) return null;
+  return (
+    <span className="mt-1 flex flex-wrap gap-1">
+      {codes.map((c) => (
+        <span key={c} title={ALLERGEN_NAMES[c] ? t(ALLERGEN_NAMES[c]) : c} className="rounded-[5px] border border-solid border-valle-purple/30 px-1.5 py-px font-mono text-[9.5px] font-bold tracking-[.06em] text-valle-purple">
+          <span aria-hidden>{c}</span>
+          <span className="sr-only">{ALLERGEN_NAMES[c] ? t(ALLERGEN_NAMES[c]) : c}</span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 const HEAD = 'flex flex-wrap items-baseline justify-between gap-4 border-0 border-b-2 border-solid border-valle-purple pb-3.5';
 
 export default function RestaurantPage() {
@@ -118,8 +135,8 @@ export default function RestaurantPage() {
         </div>
       </div>
 
-      {/* Menu & prices */}
-      <div className="mt-[clamp(32px,5vw,52px)]">
+      {/* Menu & prices (the header's "menu" links land here) */}
+      <div id="menu" className="mt-[clamp(32px,5vw,52px)]">
         <div className={HEAD + ' mb-[18px]'}>
           <h2 className={H2}>{t('Menu & prices')}</h2>
           {rMenuPdf !== '' && (
@@ -128,17 +145,27 @@ export default function RestaurantPage() {
         </div>
         <div className="grid [grid-template-columns:repeat(auto-fit,minmax(295px,1fr))] items-start gap-3.5">
           {rMenuGroups.map((mg) => (
-            <div key={mg.title} className="rounded-[18px] bg-white px-[22px] pt-[18px] pb-5 shadow-[0_0_0_1.5px_#EBE2FF]">
+            <div key={mg.title} id={mg.title === t('KIDS MENU') ? 'kids-menu' : undefined} data-testid="menu-group" className="rounded-[18px] bg-white px-[22px] pt-[18px] pb-5 shadow-[0_0_0_1.5px_#EBE2FF]">
               <div className="font-mono text-[11px] font-bold tracking-[.14em] text-valle-violet">{mg.title}</div>
               {mg.items.map((mi) => (
                 <div key={mi.n} className="flex items-baseline justify-between gap-3 px-0 py-[9px]" style={{ borderBottom: '1px dashed #EBE2FF' }}>
                   <div className="min-w-0">
                     <div className="text-[14.5px] font-semibold">{mi.n}</div>
                     <div className="text-[12px] leading-[1.45] text-valle-purple/60">{mi.note}</div>
+                    <Allergens codes={mi.allergens} />
                   </div>
                   <div className="font-mono text-[13px] font-bold whitespace-nowrap text-valle-purple">{mi.p}</div>
                 </div>
               ))}
+              {mg.note && (
+                <div data-testid="menu-group-note" className="mt-3 rounded-xl bg-[#F7F3FF] px-3.5 py-2.5 text-[13px] font-semibold text-valle-purple">
+                  {mg.note}
+                  <Allergens codes={mg.noteAllergens} />
+                </div>
+              )}
+              {[...(mg.items.flatMap((i) => i.allergens ?? [])), ...(mg.noteAllergens ?? [])].length > 0 && (
+                <div className="mt-2.5 font-mono text-[10px] tracking-[.06em] text-valle-purple/70">{t('ALLERGENS: GL = GLUTEN · LACT = LACTOSE')}</div>
+              )}
             </div>
           ))}
         </div>

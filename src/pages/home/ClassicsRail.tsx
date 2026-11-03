@@ -92,7 +92,9 @@ export function ClassicsRail() {
       </div>
       <div id="vrail" data-reveal="1" style={{ padding: '0 clamp(16px,calc((100vw - 1320px)/2 + 40px),calc((100vw - 1320px)/2 + 40px))' }}>
         <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[18px]" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
-          {items.map((a) => <RailCard key={a.id} a={a} rateTag={rateTag} />)}
+          {/* Embla moves each slide with its own transform when it loops, so the slide is a
+              plain wrapper: the card's Motion hover transform would otherwise overwrite it. */}
+          {items.map((a) => <div key={a.id} className="shrink-0"><RailCard a={a} rateTag={rateTag} /></div>)}
         </CarouselTrack>
       </div>
     </section>

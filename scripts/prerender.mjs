@@ -24,7 +24,7 @@ await prepare();
 const catalog = JSON.parse(readFileSync(join(root, 'src/data/fallback.json'), 'utf8'));
 
 const baseRoutes = [
-  '/', '/explore', '/packages', '/packages/exclusive', '/packages/resident', '/packages/senior', '/packages/student', '/packages/corporate', '/packages/photo-video', '/booking', '/vacancies', '/story', '/privacy', '/terms', '/groups',
+  '/', '/explore', '/packages', '/packages/deals', '/packages/exclusive', '/packages/resident', '/packages/senior', '/packages/student', '/packages/corporate', '/packages/photo-video', '/booking', '/vacancies', '/story', '/privacy', '/terms', '/groups',
   ...catalog.ACTS.map((a) => `/activities/${a.id}`),
   ...Object.keys(catalog.RESTOS).map((id) => `/dine/${id}`),
 ];

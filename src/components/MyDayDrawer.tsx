@@ -1,10 +1,8 @@
 import { useEscape } from '../hooks/useEscape';
 import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../store/AppStore';
-import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { money } from '../lib/format';
-import { entryPrices } from '../store/booking';
 import { Img } from './Img';
 import { useT, fwd } from '../i18n';
 import type { SelLine } from '../types';
@@ -77,7 +75,6 @@ function CartRow({ line }: { line: SelLine }) {
 
 export function MyDayDrawer() {
   const app = useApp();
-  const catalog = useCatalog();
   const goto = useGoto();
   const t = useT();
 
@@ -91,8 +88,7 @@ export function MyDayDrawer() {
       : cartActs.length > 1
         ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length })
         : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length });
-  const ep = entryPrices(catalog, app.rate);
-  const entryAmt = money(ep.adult * app.adults + ep.child * app.kids);
+  const entryAmt = money(app.booking.entry);
 
   return (
     <>
@@ -116,7 +112,7 @@ export function MyDayDrawer() {
           <div className="flex flex-wrap items-center gap-2 py-3" style={{ borderBottom: '1px dashed #EBE2FF' }}>
             <div className="min-w-[110px] flex-1">
               <div className="text-[13.5px] font-bold">{t('Park entry')}</div>
-              <div className="mt-0.5 font-mono text-[9px] text-valle-purple/60">{t('TRAILS INCLUDED')}</div>
+              <div className="mt-0.5 font-mono text-[9px] text-valle-purple/60">{app.booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') + ' · ' : ''}{t('TRAILS INCLUDED')}</div>
             </div>
             <Qty tag={t('AD')} val={app.adults} dec={() => app.setAdults(app.adults - 1)} inc={() => app.setAdults(app.adults + 1)} />
             <Qty tag={t('CH')} val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />

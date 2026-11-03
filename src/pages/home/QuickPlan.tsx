@@ -29,6 +29,8 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
       <Img src={w.img} alt={t('{name} at Vallé Advenature™ Park', { name: t(w.alt) })} placeholder={w.bg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       <div className="absolute inset-0" style={{ background: w.gradient }} />
       <span className="absolute top-3.5 left-3.5 -rotate-4 rounded-full bg-white/95 px-[11px] py-1.5 font-mono text-[11px] font-bold text-valle-purple">{w.num}</span>
+      {/* the Kids Park tile carries the park's own logo (decorative: the tile is already named) */}
+      {w.cat === 'kids' && <Img src="/images/kids-park/kids-park-logo.webp" alt="" width={900} height={641} placeholder="transparent" className="absolute top-3 right-3 rotate-3" style={{ width: 96, height: 'auto', aspectRatio: '900 / 641', filter: 'drop-shadow(0 6px 10px rgba(31,0,51,.35))' }} />}
       <div className={'absolute right-5 bottom-[18px] left-5 ' + (w.light ? 'text-white' : 'text-valle-purple')}>
         <div className="origin-bottom-left -rotate-4 font-display text-[30px] font-black uppercase italic">{t(w.title)}</div>
         <div className={'mt-[7px] text-[13.5px] leading-[1.45] ' + (w.light ? 'opacity-95' : 'opacity-90')}>{t(w.sub)}</div>

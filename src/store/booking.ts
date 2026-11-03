@@ -1,5 +1,5 @@
 import type { Activity, BookingSummary, Catalog, RateKey, Sel, SelLine } from '../types';
-import { PRODUCT_PREFIX, productAmount } from '../types';
+import { ENTRY_INCLUDED_FAMILIES, PRODUCT_PREFIX, productAmount } from '../types';
 import { money, partyLabel } from '../lib/format';
 import { parseSelKey } from '../lib/sel';
 import { tr } from '../i18n';
@@ -64,8 +64,13 @@ export function computeBooking(
   const selActs = selLines.map((l) => l.act).filter((a, i, arr) => arr.indexOf(a) === i);
   const lines: { label: string; amt: string }[] = [];
   const ep = entryPrices(catalog, rate);
-  const entry = ep.adult * adults + ep.child * kids;
-  lines.push({ label: tr('Park entry · {party}', { party: partyLabel(adults, kids) }), amt: money(entry) });
+  // The student price list and the expo deals already include the entrance fee (as the server prices it).
+  const entryIncludedBy = selLines.map((l) => l.product?.family).find((f) => !!f && ENTRY_INCLUDED_FAMILIES.has(f)) ?? null;
+  const entry = entryIncludedBy ? 0 : ep.adult * adults + ep.child * kids;
+  lines.push({
+    label: entryIncludedBy === 'expo' ? tr('Park entry · included with the expo deal') : entryIncludedBy ? tr('Park entry · included with the student rate') : tr('Park entry · {party}', { party: partyLabel(adults, kids) }),
+    amt: money(entry),
+  });
   let total = entry;
   let advSubtotal = 0;
   const advIds = new Set<string>();
@@ -98,5 +103,5 @@ export function computeBooking(
   const hasDiscount = advCount >= 3;
   const discount = hasDiscount ? Math.round(advSubtotal * 0.15) : 0;
   total -= discount;
-  return { selActs, selLines, lines, hasDiscount, discount, total, advCount };
+  return { selActs, selLines, lines, hasDiscount, discount, total, advCount, entry, entryIncludedBy };
 }

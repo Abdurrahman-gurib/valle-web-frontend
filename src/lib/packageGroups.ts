@@ -1,12 +1,14 @@
 import { _t } from '../i18n';
 
 /**
- * The six classes the park sells its packages under. Each has its own page
+ * The classes the park sells its packages under (the special deals first,
+ * shown only while a deal is on sale). Each has its own page
  * (/packages/<slug>) carrying the price-list sections listed in `keys`; the
  * header menu, the index page and the section anchors all read this.
  */
 export interface PackageGroup { slug: string; title: string; intro: string; keys: string[] }
 export const PACKAGE_GROUPS: PackageGroup[] = [
+  { slug: 'deals', title: _t('Special deals'), intro: _t('The expo deals: four adventure packages at a special resident price, park entrance included. For visits from 23 October 2026 to 15 January 2027.'), keys: ['deals'] },
   { slug: 'exclusive', title: _t('Exclusive package'), intro: _t('Curated adventure days from a relaxed first taste of the valley to the VIP and Diamond escapes, plus the quad + zipline combos.'), keys: ['ls', 'ex', 'vip', 'diamond', 'combo'] },
   { slug: 'resident', title: _t('Resident package'), intro: _t('Per-person days at the resident rate, with a Mauritian ID or permit, and the Kids Park points pricelist.'), keys: ['resident', 'kids'] },
   { slug: 'senior', title: _t('Senior citizen'), intro: _t('Gentler days in the valley for guests aged 55 and above.'), keys: ['senior'] },

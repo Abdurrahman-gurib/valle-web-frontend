@@ -21,6 +21,7 @@ import { isRtl, localizePath, useLang, useT, fwd } from '../i18n';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useParkStatus } from '../components/WeatherCard';
 import { QuadMap, ZiplineMap } from './home/ActivityMaps';
+import { KP, KP_CONFETTI, KP_PATTERN, KidsParkLogo, KidsProfile, kpButton } from '../components/KidsPark';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";
@@ -125,6 +126,8 @@ export default function DetailPage() {
   const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
   const hasPrices = pl.length > 0;
   const showReviews = act.id === 'zipline';
+  /** Kids Park activities wear the Kids Park identity (logo, lime squiggles, purple cards, sunflower prices). */
+  const kids = act.cat === 'kids';
 
   /** Always goes to the explore page (never history.back), but restores its last filters. */
   const backExplore = () => {
@@ -150,13 +153,15 @@ export default function DetailPage() {
         style={{ border: 0, background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, color: hBack ? '#FF3358' : '#7333FF', padding: '8px 0' }}
       >{t('← All experiences')}</button>
 
-      <div style={{ position: 'relative', borderRadius: 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12 }}>
+      <div style={{ position: 'relative', borderRadius: kids ? 30 : 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12, ...(kids ? { boxShadow: `0 0 0 5px ${KP.lime}, 0 0 0 9px ${KP.purple}`, margin: '17px 9px 0' } : null) }}>
         {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
         <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.8), rgba(31,0,51,0) 55%)' }} />
         <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(18px,3vw,30px)', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <span style={{ background: d.catColor, color: d.catFg, fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{d.catBadge}</span>
+            {kids
+              ? <Link to={paths.explore('kids')} style={{ display: 'inline-block', transform: 'rotate(-4deg)' }}><KidsParkLogo width="clamp(110px,14vw,170px)" priority /></Link>
+              : <span style={{ background: d.catColor, color: d.catFg, fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{d.catBadge}</span>}
             <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom', marginTop: 16 }}>
               <h1 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(38px,5.8vw,80px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase' }}>{d.name}</h1>
             </div>
@@ -170,11 +175,11 @@ export default function DetailPage() {
           <p style={{ fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.6, color: 'rgba(52,0,87,.82)', margin: 0 }}>{d.blurb}</p>
 
           {hasPrices && (
-            <div style={{ marginTop: 26, background: '#7333FF', borderRadius: 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
-              <StripesSm height={10} />
+            <div data-testid={kids ? 'kids-detail-pricelist' : undefined} style={{ marginTop: 26, background: kids ? KP.purple : '#7333FF', borderRadius: kids ? 24 : 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
+              {kids ? <div aria-hidden style={{ height: 18, ...KP_CONFETTI }} /> : <StripesSm height={10} />}
               <div style={{ padding: '16px 20px 18px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: '#FFFC33' }}>{t('Pricelist')}</span>
+                  <span style={{ fontFamily: BARLOW, fontStyle: kids ? 'normal' : 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: kids ? KP.yellow : '#FFFC33' }}>{t('Pricelist')}</span>
                   <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
                 </div>
                 <div style={{ marginTop: 10 }}>
@@ -183,7 +188,7 @@ export default function DetailPage() {
                     return (
                       <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
                         <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
-                        <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: 6, padding: '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
+                        <span style={{ background: kids ? KP.yellow : '#FFFC33', color: kids ? '#3A0A46' : '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: kids ? 999 : 6, padding: kids ? '5px 11px' : '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
                         {d.hasAdd && (
                           <button
                             onClick={() => app.toggleSel(act.id, pr.n)}
@@ -200,11 +205,17 @@ export default function DetailPage() {
             </div>
           )}
 
+          {kids && <KidsProfile only={act.id} headingAs="h2" />}
+          {kids && act.mode === 'pp' && (
+            <div data-testid="kids-topup" style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, ...KP_PATTERN, color: '#3A0A46', borderRadius: 18, padding: '12px 16px', fontFamily: BARLOW, fontWeight: 900, textTransform: 'uppercase', fontSize: 17, lineHeight: 1.1, boxShadow: `0 4px 0 ${KP.purple}` }}>
+              <span style={{ background: '#FFFFFF', borderRadius: 12, padding: '6px 10px' }}>{t('Grab the top-up card for just Rs 50')}</span>
+            </div>
+          )}
           <div style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)', marginTop: 28 }}>{t('GOOD TO KNOW')}</div>
           <div style={{ marginTop: 10 }}>
             {act.gtk.map((g) => (
               <div key={g.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px dashed #D9C9F0', fontSize: 15, lineHeight: 1.5, color: 'rgba(52,0,87,.8)' }}>
-                <span style={{ color: d.pulseColor, fontWeight: 800, flexShrink: 0 }}>●</span>
+                <span style={{ color: kids ? KP.purple : d.pulseColor, fontWeight: 800, flexShrink: 0 }}>●</span>
                 <span>{g.t}</span>
               </div>
             ))}
@@ -229,8 +240,8 @@ export default function DetailPage() {
           )}
         </div>
 
-        <div style={{ background: '#340057', color: '#FFFFFF', borderRadius: 20, padding: '0 0 26px', position: 'sticky', top: 90, overflow: 'hidden' }}>
-          <StripesSm height={8} />
+        <div style={{ background: kids ? KP.purple : '#340057', color: '#FFFFFF', borderRadius: kids ? 26 : 20, padding: '0 0 26px', position: 'sticky', top: 90, overflow: 'hidden' }}>
+          {kids ? <div aria-hidden style={{ height: 18, ...KP_CONFETTI }} /> : <StripesSm height={8} />}
           <div style={{ padding: '22px 26px 0' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: MONO }}>
               {showsDuration(act.id) && (
@@ -257,7 +268,9 @@ export default function DetailPage() {
             {d.hasAdd && (
               <ValleButton onClick={() => d.add()} size="md" className={cn('border-[1.5px] border-white/50 py-3.5 text-[15px] text-white hover:bg-white/15', d.selOn ? 'bg-valle-green/25' : 'bg-transparent')}>{d.addLabel}</ValleButton>
             )}
-            <ValleButton variant="primary" onClick={bookThisNow} className="mt-2.5 py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>
+            {kids
+              ? <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={bookThisNow} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ ...kpButton('yellow'), width: '100%', marginTop: 12 }}>{t('Book this now →')}</motion.button>
+              : <ValleButton variant="primary" onClick={bookThisNow} className="mt-2.5 py-[15px] text-[15px]">{t('Book this now →')}</ValleButton>}
             <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
           </div>
         </div>

@@ -127,3 +127,11 @@ html[dir="rtl"] body *, html[lang="hi"] body * { letter-spacing: normal !importa
 
 /* a11y: visible focus for every form field (several had outline:none) */
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #7333FF !important; outline-offset: 2px; }
+
+/* corporate hero (Packages): photo | purple/white diagonal edge | yellow band; stacked on phones */
+.team-hero { display: grid; grid-template-columns: 1fr; }
+.team-hero-edge { height: 18px; background: repeating-linear-gradient(-45deg, #340057 0 10px, #FFFFFF 10px 20px); }
+@media (min-width: 820px) {
+  .team-hero { grid-template-columns: minmax(0, 1.2fr) 22px minmax(0, 1fr); }
+  .team-hero-edge { height: auto; }
+}

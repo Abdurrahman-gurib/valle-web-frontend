@@ -136,7 +136,9 @@ export function useT(): (s: string, vars?: Record<string, string | number>) => s
 }
 
 /** Keys that identify things rather than describe them: never translated in catalog data. */
-const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind', 'family', 'rateOnly']);
+const NON_TEXT_KEYS = new Set(['id', 'n', 'cat', 'img', 'image', 'src', 'mode', 'pdf', 'key', 'variant', 'href', 'url', 'act', 'color', 'c', 'f', 'bg', 'rr', 'nr', 'menuPdf', 'flatLabel', 'go', 'kind', 'family', 'rateOnly', 'allergens', 'noteAllergens', 'validFrom', 'validTo']);
+/** Arrays whose entries are codes, not text (allergen codes like GL, LACT). */
+const CODE_LIST_KEYS = new Set(['allergens', 'noteAllergens']);
 
 /** Deep copy of a catalog-like object with every descriptive string translated. */
 export function localizeData<T>(data: T, lang: Lang): T {
@@ -146,7 +148,7 @@ export function localizeData<T>(data: T, lang: Lang): T {
       if (key && NON_TEXT_KEYS.has(key)) return v;
       return DICTS[lang][v] || v;
     }
-    if (Array.isArray(v)) return v.map((x) => walk(x, key === 'gallery' ? 'src' : undefined));
+    if (Array.isArray(v)) return v.map((x) => walk(x, key === 'gallery' ? 'src' : key && CODE_LIST_KEYS.has(key) ? key : undefined));
     if (v && typeof v === 'object') {
       const out: Record<string, unknown> = {};
       for (const [k, x] of Object.entries(v as Record<string, unknown>)) out[k] = walk(x, k);

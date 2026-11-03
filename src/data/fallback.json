@@ -386,14 +386,14 @@
    "cat": "kids",
    "thrill": 1,
    "dur": "15 MIN",
-   "age": "3–12",
+   "age": "12+",
    "price": 200,
    "mode": "pp",
    "img": "/images/pirateship.avif",
    "blurb": "Set sail on gentle thrills: pirate adventures for the smallest buccaneers.",
    "gtk": [
     {
-     "t": "Gentle swings suited to young kids"
+     "t": "Minimum height 1.2 m"
     },
     {
      "t": "Adult supervision required"
@@ -423,6 +423,9 @@
     },
     {
      "t": "In the Kids Park zone"
+    },
+    {
+     "t": "Weight limit: chair under 50 kg, bicycle under 80 kg"
     }
    ]
   },
@@ -442,7 +445,7 @@
      "t": "The Kids Park favourite"
     },
     {
-     "t": "Height requirements apply"
+     "t": "Minimum height 1.2 m"
     },
     {
      "t": "Adult supervision required"
@@ -455,7 +458,7 @@
    "cat": "kids",
    "thrill": 1,
    "dur": "OPEN PLAY",
-   "age": "3–12",
+   "age": "3–14",
    "price": 0,
    "mode": "entry",
    "img": "/images/outdoorplayground.avif",
@@ -478,7 +481,7 @@
    "cat": "kids",
    "thrill": 2,
    "dur": "15 MIN",
-   "age": "6–12",
+   "age": "7–16",
    "price": 200,
    "mode": "pp",
    "img": "/images/miniquad.avif",
@@ -501,7 +504,7 @@
    "cat": "kids",
    "thrill": 1,
    "dur": "15 MIN",
-   "age": "4–12",
+   "age": "5+",
    "price": 200,
    "mode": "pp",
    "img": "/images/miniexcavator.avif",
@@ -775,11 +778,6 @@
        "n": "Mussels Pot",
        "note": "A couple’s break, with bread & gravy",
        "p": "Rs 2,500"
-      },
-      {
-       "n": "Kids Menu",
-       "note": "Chicken burger, penne or fish beignet",
-       "p": "Rs 600"
       }
      ]
     },
@@ -826,6 +824,40 @@
        "note": "Yellowfin tuna or dorado",
        "p": "Rs 1,010"
       }
+     ]
+    },
+    {
+     "title": "KIDS MENU",
+     "items": [
+      {
+       "n": "Chicken burger",
+       "note": "Chicken patty, soft bun, fries",
+       "p": "Rs 600",
+       "allergens": [
+        "GL"
+       ]
+      },
+      {
+       "n": "Chicken farfalle pasta",
+       "note": "Creamy chicken or tomato sauce",
+       "p": "Rs 600",
+       "allergens": [
+        "GL",
+        "LACT"
+       ]
+      },
+      {
+       "n": "Chicken skewers",
+       "note": "Chicken sticks, fries, salad",
+       "p": "Rs 600",
+       "allergens": [
+        "GL"
+       ]
+      }
+     ],
+     "note": "Desserts included: 2 scoops of ice cream",
+     "noteAllergens": [
+      "LACT"
      ]
     }
    ]
@@ -1588,6 +1620,96 @@
    "rateOnly": null,
    "image": "",
    "note": "School groups · per student"
+  },
+  {
+   "key": "expo:go",
+   "family": "expo",
+   "name": "GO-PACKAGE",
+   "mode": "pp",
+   "rr": 1975,
+   "nr": 1975,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": "rr",
+   "image": "/images/shoot/cine-03.webp",
+   "note": "Expo deal · resident rate · per person",
+   "was": 3225,
+   "contents": [
+    "Giant Swing (1 ride)",
+    "Mountain Luge Kart (1 ride)",
+    "Nepalese Bridge",
+    "The Plunge Zipline (500 m)",
+    "Free entrance"
+   ],
+   "validFrom": "2026-10-23",
+   "validTo": "2027-01-15"
+  },
+  {
+   "key": "expo:plus",
+   "family": "expo",
+   "name": "PLUS-PACKAGE",
+   "mode": "pp",
+   "rr": 2175,
+   "nr": 2175,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": "rr",
+   "image": "/images/map/zip-selfie-cheer.webp",
+   "note": "Expo deal · resident rate · per person",
+   "was": 3025,
+   "contents": [
+    "Mountain Luge Kart (1 ride)",
+    "Waterfall Zipline (300 m · 2 lines)",
+    "Group Expedition",
+    "Free entrance"
+   ],
+   "validFrom": "2026-10-23",
+   "validTo": "2027-01-15"
+  },
+  {
+   "key": "expo:pro",
+   "family": "expo",
+   "name": "PRO-PACKAGE",
+   "mode": "pp",
+   "rr": 3000,
+   "nr": 3000,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": "rr",
+   "image": "/images/quadbuggy.avif",
+   "note": "Expo deal · resident rate · per person",
+   "was": 3900,
+   "contents": [
+    "The Discovery Tour (1.6 km · 7 lines)",
+    "Giant Swing (1 ride)",
+    "Mountain Luge Kart (1 ride)",
+    "Free entrance"
+   ],
+   "validFrom": "2026-10-23",
+   "validTo": "2027-01-15"
+  },
+  {
+   "key": "expo:elite",
+   "family": "expo",
+   "name": "ELITE-PACKAGE",
+   "mode": "pp",
+   "rr": 3700,
+   "nr": 3700,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": "rr",
+   "image": "/images/vip-ultimate-buggy-coloured-earth.avif",
+   "note": "Expo deal · resident rate · per person",
+   "was": 5150,
+   "contents": [
+    "Giant Swing (1 ride)",
+    "Nepalese Bridge",
+    "Mountain Luge Kart (1 ride)",
+    "Quad Adventure (1 h)",
+    "Free entrance"
+   ],
+   "validFrom": "2026-10-23",
+   "validTo": "2027-01-15"
   }
  ],
  "PACKS": {

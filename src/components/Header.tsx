@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { paths, useGoto } from '../lib/nav';
+import { liveDeals } from '../lib/deals';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { cn } from '@/lib/utils';
 import { StripesSm, Stripes } from './Stripes';
@@ -146,13 +147,17 @@ export function Header() {
   const go = (fn: () => void) => () => { closeAll(); fn(); };
 
   /** The packages menu, classified the way the park sells them. */
-  const pkgGroups: { title: string; links: [string, string][] }[] = [
-    { title: t('EXCLUSIVE PACKAGE'), links: [[t('Light & Standard'), 'ls'], [t('Exclusive tiers'), 'ex'], [t('VIP Ultimate'), 'vip'], [t('Diamond'), 'diamond'], [t('Combo packages'), 'combo']] },
-    { title: t('RESIDENT PACKAGE'), links: [[t('Resident packages'), 'resident'], [t('Kids Park pricelist'), 'kids']] },
-    { title: t('SENIOR CITIZEN'), links: [[t('Senior citizens 55+'), 'senior']] },
-    { title: t('STUDENT PACKAGE'), links: [[t('Student offer'), 'student']] },
-    { title: t('CORPORATE PACKAGE'), links: [[t('Team building'), 'team']] },
-    { title: t('PHOTO & VIDEO PACKAGE'), links: [[t('Photo pricelist'), 'photo'], [t('Cinematic experience'), 'cine']] },
+  const pk = (name: string, key: string): [string, string] => [name, paths.packages(key)];
+  const pkgGroups: { title: string; kids?: boolean; links: [string, string][] }[] = [
+    ...(liveDeals(catalog).length ? [{ title: t('SPECIAL DEALS'), links: [pk(t('Expo deals'), 'deals')] }] : []),
+    { title: t('EXCLUSIVE PACKAGE'), links: [pk(t('Light & Standard'), 'ls'), pk(t('Exclusive tiers'), 'ex'), pk(t('VIP Ultimate'), 'vip'), pk(t('Diamond'), 'diamond'), pk(t('Combo packages'), 'combo')] },
+    { title: t('RESIDENT PACKAGE'), links: [pk(t('Resident packages'), 'resident')] },
+    { title: t('KIDS PARK'), kids: true, links: [pk(t('Vallé Kids Park pricelist'), 'kids'), [t('Kids Park activities'), paths.explore('kids')]] },
+    { title: t('SENIOR CITIZEN'), links: [pk(t('Senior citizens 55+'), 'senior')] },
+    { title: t('STUDENT PACKAGE'), links: [pk(t('Student offer'), 'student')] },
+    { title: t('CORPORATE PACKAGE'), links: [pk(t('Team building'), 'team')] },
+    { title: t('PHOTO & VIDEO PACKAGE'), links: [pk(t('Photo pricelist'), 'photo'), pk(t('Cinematic experience'), 'cine')] },
+    { title: t('RESTAURANTS & MENUS'), links: [[t('Le Chamouzé menu'), paths.resto('chamouze') + '#menu'], [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'], [t('La Citronelle menu'), paths.resto('citronelle') + '#menu']] },
   ];
 
   const searchGo = () => { closeAll(); goto.explore('all', searchQ.trim() || undefined); };
@@ -276,9 +281,12 @@ export function Header() {
                 <div className="[column-width:170px] [column-gap:24px]" data-testid="packages-menu">
                   {pkgGroups.map((g) => (
                     <div key={g.title} className="break-inside-avoid mb-[16px]">
-                      <div className="font-mono text-[12.5px] font-bold tracking-[.14em] text-valle-violet mb-[6px]">{g.title}</div>
-                      {g.links.map(([name, key]) => (
-                        <MegaLink key={key} name={name} href={paths.packages(key)} onClick={go(() => goto.packages(key))} />
+                      <div className="font-mono text-[12.5px] font-bold tracking-[.14em] text-valle-violet mb-[6px] flex items-center gap-2">
+                        {g.title}
+                        {g.kids && <Img src="/images/kids-park/kids-park-logo.webp" alt="" width={900} height={641} placeholder="transparent" style={{ width: 40, height: 'auto', aspectRatio: '900 / 641' }} />}
+                      </div>
+                      {g.links.map(([name, href]) => (
+                        <MegaLink key={href} name={name} href={href} onClick={go(() => navigate(href))} />
                       ))}
                     </div>
                   ))}
@@ -383,6 +391,23 @@ export function Header() {
           <a href={paths.home()} onClick={(e) => { e.preventDefault(); go(goto.home)(); }} className={cn(mobileNavRow, '[animation-delay:.1s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Home')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
           <a href={paths.explore('all')} onClick={(e) => { e.preventDefault(); go(() => goto.explore('all'))(); }} className={cn(mobileNavRow, '[animation-delay:.14s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('All {n} experiences', { n: catalog.ACTS.length })}<span className="text-valle-yellow"><Fwd /></span></a>
           <a href={paths.packages()} onClick={(e) => { e.preventDefault(); go(() => goto.packages())(); }} className={cn(mobileNavRow, '[animation-delay:.16s]')} style={{ color: '#FFFFFF', textDecoration: 'none' }}>{t('Packages & team building')}<span className="text-[rgba(255,252,51,.7)]"><Fwd /></span></a>
+          {/* the packages menu's groups, folded so the overlay stays short */}
+          <details data-testid="mobile-packages-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.17s]">
+            <summary className="cursor-pointer py-[12px] font-mono text-[11.5px] font-bold tracking-[.12em] text-valle-yellow">{t('ALL PACKAGE GROUPS & MENUS')}</summary>
+            <div className="grid grid-cols-[1fr_1fr] gap-x-[14px] gap-y-[12px] pb-[14px]">
+              {pkgGroups.map((g) => (
+                <div key={g.title} className="min-w-0">
+                  <div className="font-mono text-[10.5px] font-bold tracking-[.12em] text-valle-green mb-[3px] flex items-center gap-1.5">
+                    {g.title}
+                    {g.kids && <Img src="/images/kids-park/kids-park-logo.webp" alt="" width={900} height={641} placeholder="transparent" style={{ width: 30, height: 'auto', aspectRatio: '900 / 641' }} />}
+                  </div>
+                  {g.links.map(([name, href]) => (
+                    <a key={href} href={href} onClick={(e) => { e.preventDefault(); go(() => navigate(href))(); }} className="block py-[5px] text-[14px] font-medium leading-[1.3]" style={{ color: '#FFFFFF', textDecoration: 'none' }}>{name}</a>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </details>
           <div onClick={() => { setMobileNavOpen(false); app.openRateGate(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')}>
             <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
             <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>

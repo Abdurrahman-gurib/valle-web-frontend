@@ -15,8 +15,8 @@ import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from '../lib/nav';
 import { useCardModel, type CardModel } from '../lib/card';
 import { createBooking } from '../lib/api';
-import { productAmount } from '../types';
-import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, NATC, type DateOpt } from '../lib/format';
+import { productAmount, productValidOn } from '../types';
+import { money, mur, partyLabel, dateOpts, todayIso, fullDateFromIso, shortDateFromIso, NATC, type DateOpt } from '../lib/format';
 import { checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, newAttemptKey, readDraft, releaseHold, saveDraft, type AvailabilityDay, type BusyLevel } from '../lib/api';
 import { entryPrices } from '../store/booking';
 import { useHover } from '../hooks/useHover';
@@ -418,7 +418,8 @@ export default function BookingPage() {
     : (cartActs.length > 1 ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length }) : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length }));
   const ep = entryPrices(catalog, rate);
   const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD (6 TO 11) · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
-  const entryAmt = money(ep.adult * adults + ep.child * kids);
+  const entryAmt = money(booking.entry);
+  const entryIncludedNote = booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') : booking.entryIncludedBy ? t('INCLUDED WITH THE STUDENT RATE') : '';
   const passHint = booking.hasDiscount
     ? t('✓ Explorer Pass applied · 15% off your adventures.')
     : t('Tip: pick any 3 adventures and the Explorer Pass takes 15% off them automatically.');
@@ -482,10 +483,21 @@ export default function BookingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wantsHold, holdKey]);
   useEffect(() => () => { if (hold) void releaseHold(hold.id); }, [hold]);
+  // Dated products (the expo deals) can only be booked for a visit inside their window; the server refuses the rest.
+  const outOfDate = booking.selLines.find((l) => l.product && !productValidOn(l.product, selectedIso));
+  const dealDateMsg = outOfDate?.product
+    ? t('{name} is valid for visits from {from} to {to}. Pick a date inside those dates.', { name: outOfDate.act.name, from: shortDateFromIso(outOfDate.product.validFrom || selectedIso), to: shortDateFromIso(outOfDate.product.validTo || selectedIso) })
+    : '';
+  const wrongRate = booking.selLines.find((l) => l.product?.rateOnly && l.product.rateOnly !== (rate ?? 'rr'));
   const refreshAvail = (iso: string) => fetchAvailability(iso, 1).then(mergeAvail).catch(() => { /* ignore */ });
 
   const confirmNow = async () => {
     if (submitting) return;
+    if (dealDateMsg) { setApiErr(dealDateMsg); return; }
+    if (wrongRate) {
+      setApiErr(wrongRate.product!.rateOnly === 'rr' ? t('{name} is for residents only: choose the resident rate or remove it from your day.', { name: wrongRate.act.name }) : t('{name} is for visitors only: choose the non-resident rate or remove it from your day.', { name: wrongRate.act.name }));
+      return;
+    }
     if (needsTime.length > 0) {
       setApiErr(t('Pick a start time for {names}.', { names: needsTime.join(', ') }));
       return;
@@ -621,7 +633,7 @@ export default function BookingPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 18px', flexWrap: 'wrap', background: '#F7F3FF' }}>
                     <div style={{ flex: 1, minWidth: '150px' }}>
                       <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{t('Park entry')}</div>
-                      <div style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryNote} · {t('ALL NATURE TRAILS INCLUDED')}</div>
+                      <div data-testid="entry-note" style={{ fontFamily: MONO, fontSize: '10px', color: 'rgba(52,0,87,.6)', marginTop: '3px' }}>{entryIncludedNote || entryNote} · {t('ALL NATURE TRAILS INCLUDED')}</div>
                     </div>
                     <Stepper tag={t('ADULTS')} val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
                     <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
@@ -667,6 +679,7 @@ export default function BookingPage() {
               {/* 3 · WHEN */}
               <div style={{ marginTop: '34px' }}>
                 <div style={stepLabel}>{t('3 · WHEN ARE YOU COMING?')}</div>
+                {dealDateMsg && <div role="alert" data-testid="deal-date-warning" style={{ marginTop: '12px', background: '#FFE2E7', borderRadius: '12px', padding: '11px 14px', fontSize: '13.5px', fontWeight: 600, color: '#B8163A' }}>{dealDateMsg}</div>}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(86px,1fr))', gap: '8px', marginTop: '12px' }}>
                   {dOpts.map((o) => (
                     <DateChip

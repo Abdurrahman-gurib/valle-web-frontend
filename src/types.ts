@@ -41,8 +41,10 @@ export interface Pin {
   go?: string;              // nav target: plan | chamouze | citronelle | kids
 }
 
-export interface MenuItem { n: string; note: string; p: string; }
-export interface MenuGroup { title: string; items: MenuItem[]; }
+/** allergens: codes such as GL (gluten) and LACT (lactose). */
+export interface MenuItem { n: string; note: string; p: string; allergens?: string[]; }
+/** note: a line under the group ("Desserts included: ..."), noteAllergens its allergen codes. */
+export interface MenuGroup { title: string; items: MenuItem[]; note?: string; noteAllergens?: string[]; }
 
 export interface Restaurant {
   name: string;
@@ -121,7 +123,16 @@ export interface TeamPack { img: string; items: PackItem[]; }
 export interface Product {
   key: string; family: string; name: string; mode: 'pp' | 'pair' | 'flat';
   rr: number; nr: number; dblRr: number | null; dblNr: number | null; rateOnly: 'rr' | 'nr' | null; image: string; note: string;
+  /** Deals: struck-through "was" price per person, and what the deal includes. */
+  was?: number; contents?: string[];
+  /** Bookable for visits from / to these dates (YYYY-MM-DD, inclusive); absent = open-ended. */
+  validFrom?: string; validTo?: string;
 }
+/** Product families whose price already includes park entry (mirrors Backend ENTRY_INCLUDED_FAMILIES). */
+export const ENTRY_INCLUDED_FAMILIES = new Set(['student', 'expo']);
+/** Whether a product can be booked for a visit on `iso` (YYYY-MM-DD). */
+export const productValidOn = (p: Pick<Product, 'validFrom' | 'validTo'>, iso: string): boolean =>
+  (!p.validFrom || iso >= p.validFrom) && (!p.validTo || iso <= p.validTo);
 export const PRODUCT_PREFIX = 'product:';
 /** Only the motorised loops advertise a duration; everything else runs at the guest's pace. */
 export const showsDuration = (id: string) => id === 'quad' || id === 'buggy';
@@ -180,6 +191,10 @@ export interface BookingSummary {
   discount: number;
   total: number;
   advCount: number;
+  /** Park entry charged (0 when a product in the cart includes it). */
+  entry: number;
+  /** The family whose price includes park entry ('expo', 'student'), or null. */
+  entryIncludedBy: string | null;
 }
 
 export interface BookingRequest {

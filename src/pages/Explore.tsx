@@ -3,7 +3,8 @@ import { breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ActivityCard } from '../components/ActivityCard';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { KidsParkEntrance, kpButton } from '../components/KidsPark';
 import { useCatalog } from '../store/CatalogContext';
 import { useApp } from '../store/AppStore';
 import { useCardModel, type CardModel } from '../lib/card';
@@ -165,6 +166,15 @@ export default function ExplorePage() {
 
   return (
     <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+      {/* the Kids Park category opens on its own entrance arch, the logo as the page heading */}
+      {cat === 'kids' ? (
+        <KidsParkEntrance as="h1" priority>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+            <Link to={paths.packageGroup('resident') + '#kids'} style={kpButton('purple')}>{t('Kids Park prices →')}</Link>
+            <span style={{ alignSelf: 'center', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', color: '#3A0A46' }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
+          </div>
+        </KidsParkEntrance>
+      ) : (
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <h1 style={{
           fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
@@ -177,6 +187,7 @@ export default function ExplorePage() {
           letterSpacing: '.16em', color: 'rgba(52,0,87,.7)',
         }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
       </div>
+      )}
 
       <div style={{ marginTop: 20, background: '#340057', borderRadius: 18, overflow: 'hidden' }}>
         <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
@@ -268,7 +279,7 @@ export default function ExplorePage() {
           display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 16, marginTop: 24,
         }}>
           {cards.map((a) => (
-            <ResultCard key={a.id} a={a} rateTag={app.rateTag} />
+            <ResultCard key={a.id} a={a} rateTag={app.rateTag} kids={cat === 'kids'} />
           ))}
         </div>
       )}
