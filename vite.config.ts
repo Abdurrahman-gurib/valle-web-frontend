@@ -1,7 +1,6 @@
 import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { fileURLToPath } from 'node:url';
 import { nginxLikeRoutes } from './scripts/preview-routes';
 
@@ -18,27 +17,9 @@ const proxy = {
   '/socket.io': { target: API_TARGET, changeOrigin: true, ws: true },
 };
 
-/**
- * Source maps go to Sentry, never to visitors: when SENTRY_AUTH_TOKEN is present
- * at build time (Railway build variable) the build emits hidden maps, the plugin
- * uploads them under the release stamped by CI, then deletes them from dist.
- */
-const sentryUpload = Boolean(process.env.SENTRY_AUTH_TOKEN);
 // nginxLikeRoutes makes `vite preview` behave like production nginx (prerendered
 // pages, redirects, real 404s) so the e2e suite checks what crawlers see.
 const plugins: PluginOption[] = [react(), tailwindcss(), nginxLikeRoutes()];
-if (sentryUpload) {
-  plugins.push(
-    sentryVitePlugin({
-      org: 'valle-advenature-park',
-      project: 'valle-web',
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      release: { name: process.env.VITE_SENTRY_RELEASE || undefined, deploy: { env: process.env.VITE_SENTRY_ENVIRONMENT || 'production' } },
-      sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
-      telemetry: false,
-    }),
-  );
-}
 
 export default defineConfig({
   plugins,
@@ -51,7 +32,7 @@ export default defineConfig({
   preview: { port: 4173, proxy },
   build: {
     outDir: 'dist',
-    sourcemap: sentryUpload ? 'hidden' : false,
+    sourcemap: false,
     chunkSizeWarningLimit: 900,
   },
   test: {

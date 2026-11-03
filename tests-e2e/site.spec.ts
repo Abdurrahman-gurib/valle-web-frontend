@@ -59,7 +59,7 @@ test.describe('cookie consent', () => {
     await page.goto('/');
     const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
     await expect(banner).toBeVisible();
-    await banner.getByTestId('consent-essential').click();
+    await banner.getByTestId('consent-ok').click();
     await expect(banner).toBeHidden();
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('essential');
     await page.reload();
@@ -67,16 +67,18 @@ test.describe('cookie consent', () => {
     await expect(page.getByRole('dialog', { name: /Cookies and storage/i })).toHaveCount(0);
   });
 
-  test('footer link reopens the settings and the toggle saves "all"', async ({ page }) => {
+  test('footer link reopens the notice with only essential storage, no monitoring', async ({ page }) => {
     await preselectRate(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'COOKIE SETTINGS' }).click();
     const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
     await expect(banner).toBeVisible();
-    await banner.getByRole('switch', { name: /Performance monitoring/i }).click();
-    await banner.getByTestId('consent-save').click();
+    await expect(banner.getByRole('switch')).toHaveCount(1);
+    await expect(banner.getByRole('switch', { name: /Essential storage/i })).toBeDisabled();
+    await expect(banner).not.toContainText(/monitoring|analytics/i);
+    await banner.getByTestId('consent-ok').click();
     await expect(banner).toBeHidden();
-    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('all');
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('essential');
   });
 });
 

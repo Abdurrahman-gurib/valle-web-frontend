@@ -4,21 +4,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund
 COPY . .
-# Sentry is compiled in at build time. Railway passes service variables as build
-# args, so set VITE_SENTRY_DSN (and optionally VITE_SENTRY_ENVIRONMENT) on the web
-# service; unset = monitoring off (compose, local builds).
-ARG VITE_SENTRY_DSN=
-ARG VITE_SENTRY_ENVIRONMENT=
-ARG VITE_SENTRY_RELEASE=
-# Build-time only (this stage is discarded): lets vite.config.ts upload source maps.
-ARG SENTRY_AUTH_TOKEN=
 # Canonical public origin baked into <link rel=canonical>, Open Graph and JSON-LD
 # of the prerendered pages. Set VITE_SITE_URL to the public origin on the web service.
 ARG VITE_SITE_URL=
-ENV VITE_SENTRY_DSN=$VITE_SENTRY_DSN
-ENV VITE_SENTRY_ENVIRONMENT=$VITE_SENTRY_ENVIRONMENT
-ENV VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE
-ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 ENV VITE_SITE_URL=$VITE_SITE_URL
 RUN npm run build
 

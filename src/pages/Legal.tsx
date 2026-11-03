@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
  * the waiver and the backend notifications); update them when that changes.
  */
 
-const UPDATED = '2026-10-06';
+const UPDATED = '2026-11-03';
 
 type Section = { h: string; p: string[] };
 
@@ -26,11 +26,11 @@ const PRIVACY: Section[] = [
     _t('Group quotes and job applications: what you type into those forms, including a link to your CV. They go to the sales team and to the people who hire.'),
     _t('Your choices on this device: your rate (resident or visitor), the experiences in “My Day”, your language and currency, and your cookie choice are kept in your browser’s storage, not on our servers.'),
   ] },
-  { h: _t('Cookies and analytics'), p: [
-    _t('The site sets no advertising cookies and no third-party tracking. With “Accept all” we also measure page speed and record a short, masked replay when a page fails, through Sentry, to fix problems. Error reports without personal data are sent in every case so the site keeps working. You can change this any time under “Cookie settings” in the footer.'),
+  { h: _t('Cookies and storage'), p: [
+    _t('The site sets no advertising cookies, runs no analytics or monitoring tools and allows no third-party tracking. It only keeps what it needs to work in your browser’s storage, as described above. You can review this any time under “Cookie settings” in the footer.'),
   ] },
   { h: _t('Who else sees your data'), p: [
-    _t('Only the providers that make the site run, each bound to use your data for us alone: Railway (hosting in the European Union), Resend (e-mail delivery), 360dialog and Meta (WhatsApp messages, if you asked for them), and Sentry (error monitoring). Exchange rates come from the Bank of Mauritius without any personal data. We never sell your data.'),
+    _t('Only the providers that make the site run, each bound to use your data for us alone: Railway (hosting in the European Union), Resend (e-mail delivery), and 360dialog and Meta (WhatsApp messages, if you asked for them). Exchange rates come from the Bank of Mauritius without any personal data. We never sell your data.'),
   ] },
   { h: _t('Messages we send'), p: [
     _t('Your ticket, the evening-before reminder and a copy of your signed waiver are sent by e-mail and, when you gave a mobile number, by WhatsApp. We send marketing only if you ticked the box for it on the waiver; you can withdraw that at any time by writing to us.'),
