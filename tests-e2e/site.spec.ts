@@ -360,6 +360,29 @@ test.describe('packages', () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test('/packages/senior shows both senior packages and books Package 1 into My Day', async ({ page }) => {
+    await page.goto('/packages/senior');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Senior citizen/i);
+    const cards = page.getByTestId('senior-package');
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0)).toContainText('Package 1');
+    await expect(cards.nth(0).getByTestId('senior-price')).toHaveText('Rs 1,100');
+    await expect(cards.nth(1)).toContainText('Package 2');
+    await expect(cards.nth(1).getByTestId('senior-price')).toHaveText('Rs 1,500');
+    await expect(cards.nth(1)).toContainText('45 min');
+    await expect(page.getByRole('heading', { name: 'Lunch menu' })).toBeVisible();
+    await expect(page.getByText('Chicken blanquette with vegetables')).toBeVisible();
+    await expect(page.getByRole('link', { name: /Call VALLÉ on \+230 660 4477/ })).toHaveAttribute('href', 'tel:+2306604477');
+    await expectNoHorizontalScroll(page);
+
+    await cards.nth(0).getByTestId('senior-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    await expect(page.getByText('Package 1').first()).toBeVisible();
+    const sel = await page.evaluate(() => JSON.parse(localStorage.getItem('valle_sel') || '{}') as Record<string, unknown>);
+    expect(Object.keys(sel)).toContain('product:pkg:senior:0');
+  });
+
   test('team quote form validates and submits', async ({ page }) => {
     await page.goto('/packages#quote');
     const name = page.getByPlaceholder(/name/i).first();

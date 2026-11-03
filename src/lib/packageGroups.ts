@@ -11,7 +11,7 @@ export const PACKAGE_GROUPS: PackageGroup[] = [
   { slug: 'deals', title: _t('Special deals'), intro: _t('The expo deals: four adventure packages at a special resident price, park entrance included. For visits from 23 October 2026 to 15 January 2027.'), keys: ['deals'] },
   { slug: 'exclusive', title: _t('Exclusive package'), intro: _t('Curated adventure days from a relaxed first taste of the valley to the VIP and Diamond escapes, plus the quad + zipline combos.'), keys: ['ls', 'ex', 'vip', 'diamond', 'combo'] },
   { slug: 'resident', title: _t('Resident package'), intro: _t('Per-person days at the resident rate, with a Mauritian ID or permit, and the Kids Park points pricelist.'), keys: ['resident', 'kids'] },
-  { slug: 'senior', title: _t('Senior citizen'), intro: _t('Gentler days in the valley for guests aged 55 and above.'), keys: ['senior'] },
+  { slug: 'senior', title: _t('Senior citizen'), intro: _t('Two gentle day packages for guests aged 55 and above: a visit of the park on foot or by jeep, lunch and a tea break.'), keys: ['senior'] },
   { slug: 'student', title: _t('Student package'), intro: _t('School outings from pre-primary to secondary: entry and activities at the student rate.'), keys: ['student'] },
   { slug: 'corporate', title: _t('Corporate package'), intro: _t('Team building days for companies, from Rs 2,850 per person, with a quote within one working day.'), keys: ['team'] },
   { slug: 'photo-video', title: _t('Photo & video package'), intro: _t('The park photographer and the cinematic shoot: edited photos and film of your day, delivered on your ticket page.'), keys: ['photo', 'cine'] },
