@@ -110,5 +110,3 @@ function Row({ item, open, reduced, headingLevel, headerId, panelId, bind, onTog
     </div>
   );
 }
-
-export default Accordion;

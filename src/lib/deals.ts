@@ -9,8 +9,5 @@ export const dealProducts = (catalog: Catalog): Product[] => (catalog.PRODUCTS ?
 export const liveDeals = (catalog: Catalog, today = todayIso()): Product[] =>
   dealProducts(catalog).filter((p) => productValidOn(p, today));
 
-/** Whether a deal can be booked for a visit on `iso`. */
-export const dealValidOn = (p: Product, iso: string) => productValidOn(p, iso);
-
 /** "Rs X" saving per person, from the data (was − deal); 0 when there is no was-price. */
 export const dealSaving = (p: Product) => (p.was != null ? Math.max(0, p.was - p.rr) : 0);

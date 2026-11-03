@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useState } from 'react';
 
 export interface HoverBind {
   onMouseEnter: () => void;
@@ -17,9 +17,4 @@ export function useHover(): [boolean, HoverBind] {
     onMouseLeave: () => setHovered(false),
   }), []);
   return [hovered, bind];
-}
-
-/** Convenience for style merging without repeating the ternary everywhere. */
-export function hov(hovered: boolean, style: CSSProperties): CSSProperties | undefined {
-  return hovered ? style : undefined;
 }

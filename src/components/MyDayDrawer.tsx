@@ -4,7 +4,7 @@ import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
 import { money } from '../lib/format';
 import { Img } from './Img';
-import { useT, fwd } from '../i18n';
+import { useT } from '../i18n';
 import type { SelLine } from '../types';
 
 const qtyBtn = 'h-[22px] w-[22px] cursor-pointer rounded-[6px] border-0 bg-white p-0 text-[12px] leading-none font-bold text-valle-purple';

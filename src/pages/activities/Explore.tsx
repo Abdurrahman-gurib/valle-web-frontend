@@ -1,0 +1,317 @@
+import { breadcrumbs, useSeo } from '../../lib/seo';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { ActivityCard } from '../../components/ActivityCard';
+import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
+import { Link, useSearchParams } from 'react-router-dom';
+import { KidsParkEntrance, kpButton } from '../../components/KidsPark';
+import { useCatalog } from '../../store/CatalogContext';
+import { useApp } from '../../store/AppStore';
+import { useCardModel } from '../../lib/card';
+import { paths, useGoto } from '../../lib/nav';
+import { money } from '../../lib/format';
+import { useHover } from '../../hooks/useHover';
+import { useReveal } from '../../hooks/useReveal';
+import { BtnLabel } from '@/components/ui/valle';
+import { _t, isRtl, useLang, useT } from '../../i18n';
+
+const PULSE_RANGES: Record<string, [number, number]> = {
+  any: [1, 5], serene: [1, 2], moderate: [3, 3], extreme: [4, 5],
+};
+
+const CAT_CHIPS = [
+  { key: 'all', label: _t('Everything'), c: '#340057', f: '#FFFFFF' },
+  { key: 'adventure', label: _t('Adventure'), c: '#FF3358', f: '#FFFFFF' },
+  { key: 'nature', label: _t('Nature'), c: '#33FF74', f: '#340057' },
+  { key: 'kids', label: _t('Kids Park'), c: '#FFFC33', f: '#340057' },
+  { key: 'tours', label: _t('Tours & Groups'), c: '#7333FF', f: '#FFFFFF' },
+];
+
+const PULSE_CHIPS = [
+  { key: 'any', label: _t('Any') },
+  { key: 'serene', label: _t('● Serene') },
+  { key: 'moderate', label: _t('●●● Moderate') },
+  { key: 'extreme', label: _t('●●●●● Extreme') },
+];
+
+/** chip(on, c, f): same colouring rule as the original template */
+function chipColors(on: boolean, c?: string, f?: string) {
+  return {
+    bg: on ? (c || '#340057') : '#FFFFFF',
+    fg: on ? (f || '#FFFFFF') : '#340057',
+    bd: on ? (c || '#340057') : '#EBE2FF',
+  };
+}
+
+function Chip({ label, onClick, bg, fg, bd, small }: {
+  label: string; onClick: () => void; bg: string; fg: string; bd: string; small?: boolean;
+}) {
+  const [h, bind] = useHover();
+  return (
+    <button
+      {...bind}
+      onClick={onClick}
+      style={{
+        border: `1.5px solid ${bd}`,
+        background: bg,
+        color: fg,
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        fontSize: small ? '12.5px' : '13.5px',
+        fontWeight: 700,
+        padding: small ? '8px 15px' : '10px 17px',
+        borderRadius: 999,
+        transition: 'all .15s',
+        ...(h ? { transform: 'translateY(-1px)' } : undefined),
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Explore uses the site-wide activity card. */
+const ResultCard = ActivityCard;
+
+export default function ExplorePage() {
+  const t = useT();
+  const catalog = useCatalog();
+  const app = useApp();
+  const goto = useGoto();
+  const card = useCardModel();
+  const ref = useReveal<HTMLElement>();
+
+  const [params, setParams] = useSearchParams();
+  const cat = params.get('cat') || 'all';
+  const q = params.get('q') || '';
+  const pulseLvl = params.get('pulse') || 'any';
+  const catName = cat !== 'all' && catalog.CAT[cat as keyof typeof catalog.CAT] ? catalog.CAT[cat as keyof typeof catalog.CAT].name : '';
+  useSeo({
+    title: catName ? t('{name} experiences · VALLÉ Advenature™ Park', { name: catName }) : t('All {count} experiences · VALLÉ Advenature™ Park', { count: catalog.ACTS.length }),
+    description: catName
+      ? t('{name} at Vallé Advenature Park, Chamouny: every {lower} experience with prices, age limits and thrill level.', { name: catName, lower: catName.toLowerCase() })
+      : t('Every experience in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.'),
+    canonicalPath: catName ? `/explore?cat=${cat}` : '/explore',
+    noindex: Boolean(q) || pulseLvl !== 'any',
+    jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, ...(catName ? [{ name: catName, path: `/explore?cat=${cat}` }] : [])])],
+  });
+
+  /** Detail's "← All experiences" reads this to come back to the same filtered list. */
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('exploreQS', params.toString());
+    } catch {
+      /* private mode can throw, so filters simply won't be restored */
+    }
+  }, [params]);
+
+  const [searchFocus, setSearchFocus] = useState(false);
+  const nature = useCarousel();
+  const lang = useLang();
+  const [hRate, bindRate] = useHover();
+
+  const setParam = (key: 'cat' | 'q', value: string, replace = false) => {
+    const next = new URLSearchParams(params);
+    if (!value || (key === 'cat' && value === 'all')) next.delete(key);
+    else next.set(key, value);
+    setParams(next, { replace });
+  };
+
+  const setPulseLvl = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v === 'any') next.delete('pulse');
+    else next.set('pulse', v);
+    setParams(next);
+  };
+
+  const rk = app.rate === 'nr' ? 'nr' : 'rr';
+  const admissionRows = (catalog.PL.admission || []).map((r) => ({
+    n: r.n,
+    p: r[rk] ? money(r[rk]) : t('FREE'),
+  }));
+
+  const results = useMemo(() => {
+    const rg = PULSE_RANGES[pulseLvl] || PULSE_RANGES.any;
+    const query = q.trim().toLowerCase();
+    return catalog.ACTS.filter((a) =>
+      (cat === 'all' || a.cat === cat) &&
+      a.thrill >= rg[0] && a.thrill <= rg[1] &&
+      (!query || (a.name + ' ' + a.blurb + ' ' + catalog.CAT[a.cat].name).toLowerCase().includes(query)),
+    );
+  }, [catalog, cat, pulseLvl, q]);
+
+  const cards = results.map((a) => card(a));
+  const noResults = results.length === 0;
+  const resultCount = t('{shown} OF {total}', { shown: results.length, total: catalog.ACTS.length });
+  const exploreCtaLabel = app.selCount > 0 ? t('Book My Day · {count}', { count: app.selCount }) : t('Start booking');
+
+  const clearFilters = () => {
+    setParams(new URLSearchParams(), { replace: true });
+  };
+
+  const searchStyle: CSSProperties = {
+    flex: 1,
+    minWidth: 220,
+    border: `1.5px solid ${searchFocus ? '#7333FF' : '#EBE2FF'}`,
+    background: '#FFFFFF',
+    borderRadius: 999,
+    padding: '13px 22px',
+    fontFamily: 'inherit',
+    fontSize: 15,
+    color: '#340057',
+    outline: 'none',
+  };
+
+  return (
+    <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+      {/* the Kids Park category opens on its own entrance arch, the logo as the page heading */}
+      {cat === 'kids' ? (
+        <KidsParkEntrance as="h1" priority>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
+            <Link to={paths.packageGroup('resident') + '#kids'} style={kpButton('purple')}>{t('Kids Park prices →')}</Link>
+            <span style={{ alignSelf: 'center', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', color: '#3A0A46' }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
+          </div>
+        </KidsParkEntrance>
+      ) : (
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <h1 style={{
+          fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
+          // the nature title is a sentence, so it runs smaller, level and with room under the header
+          fontSize: cat === 'nature' ? 'clamp(26px,3.4vw,48px)' : 'clamp(42px,6.4vw,90px)', lineHeight: cat === 'nature' ? 0.95 : 0.82, letterSpacing: '-0.01em',
+          margin: cat === 'nature' ? '14px 0 0' : 0, maxWidth: '18ch', textTransform: 'uppercase', transform: cat === 'nature' ? 'none' : 'rotate(-4deg)', transformOrigin: 'left bottom',
+        }}>{cat === 'nature' ? t('Already included in entrance admission fees') : t('Explore Vallé')}</h1>
+        <span style={{
+          fontFamily: "'Chivo Mono',monospace", fontSize: 12, fontWeight: 600,
+          letterSpacing: '.16em', color: 'rgba(52,0,87,.7)',
+        }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
+      </div>
+      )}
+
+      <div style={{ marginTop: 20, background: '#340057', borderRadius: 18, overflow: 'hidden' }}>
+        <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
+        <div style={{ padding: '14px 20px 16px', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{
+              fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700,
+              letterSpacing: '.14em', color: '#FFFC33',
+            }}>{t('ADMISSION FEE')} · {app.rateTag}</div>
+            <div style={{
+              fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
+              fontSize: 22, textTransform: 'uppercase', color: '#FFFFFF', marginTop: 2,
+            }}>{t('{rate} prices', { rate: app.rateWord })}</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
+            {admissionRows.map((ar) => (
+              <span key={ar.n} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)',
+                borderRadius: 10, padding: '8px 12px', fontSize: 13, color: 'rgba(255,255,255,.9)',
+              }}>
+                {t(ar.n)}
+                <span style={{
+                  background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace",
+                  fontWeight: 700, fontSize: 12, borderRadius: 5, padding: '3px 7px',
+                }}>{ar.p}</span>
+              </span>
+            ))}
+          </div>
+          <button
+            {...bindRate}
+            onClick={app.openRateGate}
+            style={{
+              border: '1.5px solid rgba(255,255,255,.4)',
+              background: 'transparent',
+              cursor: 'pointer',
+              fontFamily: "'Chivo Mono',monospace",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '.1em',
+              color: '#FFFFFF',
+              padding: '10px 16px',
+              borderRadius: 999,
+              ...(hRate ? { background: '#FFFFFF', color: '#340057' } : undefined),
+            }}
+          >{t('CHANGE RATE ⇄')}</button>
+        </div>
+      </div>
+
+      {/* the search box and category chips went: categories come from the Explore menu, the search from the header */}
+      <div style={{ margin: '22px 0 0', padding: '14px 0', borderBottom: '1px solid #EBE2FF' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+          <span style={{
+            fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 600,
+            letterSpacing: '.12em', color: 'rgba(52,0,87,.7)', marginRight: 4,
+          }}>{t('PULSE LEVEL')}</span>
+          {PULSE_CHIPS.map((c) => {
+            const cc = chipColors(pulseLvl === c.key);
+            return (
+              <Chip
+                key={c.key}
+                label={t(c.label)}
+                onClick={() => setPulseLvl(c.key)}
+                bg={cc.bg}
+                fg={cc.fg}
+                bd={cc.bd}
+                small
+              />
+            );
+          })}
+          <span style={{
+            marginLeft: 'auto', fontFamily: "'Chivo Mono',monospace", fontSize: 12, color: 'rgba(52,0,87,.7)',
+          }}>{resultCount}</span>
+        </div>
+      </div>
+
+      {cat === 'nature' ? (
+        <div style={{ marginTop: 24 }} data-testid="nature-carousel">
+          <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in entrance admission fees')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
+            {cards.map((a) => (
+              <div key={a.id} className="min-w-0 shrink-0 grow-0 basis-[min(300px,82vw)] py-2">
+                <ResultCard a={a} rateTag={app.rateTag} eager />
+              </div>
+            ))}
+          </CarouselTrack>
+          {cards.length > 1 && <CarouselArrows className="mt-3 justify-end" prev={nature.prev} next={nature.next} canPrev={nature.canPrev} canNext={nature.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />}
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 16, marginTop: 24,
+        }}>
+          {cards.map((a) => (
+            <ResultCard key={a.id} a={a} rateTag={app.rateTag} kids={cat === 'kids'} />
+          ))}
+        </div>
+      )}
+
+      {noResults && (
+        <div style={{ textAlign: 'center', padding: '70px 20px', color: 'rgba(52,0,87,.6)' }}>
+          <div style={{
+            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900,
+            fontSize: 28, color: '#340057', textTransform: 'uppercase',
+          }}>{t('Nothing matches that')}</div>
+          <div style={{ fontSize: 15, marginTop: 8 }}>{t('Try a different search, or clear the filters.')}</div>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="vbtn vbtn-secondary"
+            style={{ marginTop: 18 }}
+          >{t('Clear filters')}</button>
+        </div>
+      )}
+
+      <div style={{
+        marginTop: 'clamp(48px,6vw,72px)', background: '#340057', borderRadius: 20,
+        padding: '26px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
+      }}>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{
+            fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800,
+            fontSize: 24, color: '#FFFFFF', textTransform: 'uppercase',
+          }}>{t("Can't decide? Build your day as you go.")}</div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,.75)', marginTop: 5 }}>
+            {t('Add experiences to My Day, then book them all in one step, pay on arrival.')}
+          </div>
+        </div>
+        <button type="button" onClick={goto.booking} className="vbtn vbtn-on-dark"><BtnLabel>{exploreCtaLabel}</BtnLabel></button>
+      </div>
+    </main>
+  );
+}

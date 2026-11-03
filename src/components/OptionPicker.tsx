@@ -7,7 +7,7 @@ import { money } from '../lib/format';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
 import { StripesSm } from './Stripes';
-import { useT, fwd } from '../i18n';
+import { useT } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
 const BARLOW = "'Barlow',sans-serif";

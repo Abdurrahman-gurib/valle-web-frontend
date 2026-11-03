@@ -20,10 +20,6 @@ export function mur(n: number): string {
   return 'Rs ' + n.toLocaleString('en-US');
 }
 
-export function plural(n: number, word: string, pluralWord?: string): string {
-  return n + ' ' + (n === 1 ? word : (pluralWord || word + 's'));
-}
-
 /** "2 adults · 1 child" party label, in the page's language. */
 export function partyLabel(adults: number, kids: number): string {
   const a = adults === 1 ? tr('1 adult') : tr('{n} adults', { n: adults });

@@ -3,7 +3,7 @@ import { Fwd } from '@/components/ui/arrows';
 import { Link } from 'react-router-dom';
 import { useSeo } from '../lib/seo';
 import { paths } from '../lib/nav';
-import { useT, fwd } from '../i18n';
+import { useT } from '../i18n';
 
 /**
  * The 404 page. nginx serves this markup with a real 404 status for unknown

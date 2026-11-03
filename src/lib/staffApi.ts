@@ -368,10 +368,6 @@ export function resendTicket(refCode: string): Promise<{ email: boolean; whatsap
   return request<{ email: boolean; whatsapp: boolean }>('/staff/bookings/' + encodeURIComponent(refCode) + '/resend-ticket', { method: 'POST' });
 }
 
-export function setBookingStatus(refCode: string, status: BookingStatus): Promise<BookingUpdated> {
-  return updateBooking(refCode, { status });
-}
-
 // ---- quotes & stats ----
 
 export interface ReservationRow {
@@ -415,13 +411,6 @@ export function uploadStaffAttachment(conversationId: string, file: File, captio
   form.append('file', file, file.name);
   if (caption) form.append('caption', caption);
   return upload<{ message: ChatMessage }>(`/staff/chat/conversations/${encodeURIComponent(conversationId)}/attachments`, form);
-}
-
-export function closeConversation(conversationId: string): Promise<{ ok: true }> {
-  return request<{ ok: true }>(
-    `/staff/chat/conversations/${encodeURIComponent(conversationId)}/close`,
-    { method: 'POST' },
-  );
 }
 
 export function listConversationMessages(id: string): Promise<{ messages: ChatMessage[] }> {

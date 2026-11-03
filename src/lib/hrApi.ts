@@ -75,9 +75,6 @@ function qs(params: Record<string, QueryValue>): string {
 
 // ---------------------------------------------------------------- roles ----
 
-/** `staff_users.role` since v3. */
-export type OperatorRole = 'agent' | 'hr' | 'manager';
-
 /**
  * Role checks take a plain `string` on purpose: `StaffUser.role` is typed in
  * `types.ts`, which this feature does not own, so comparing against the v3
@@ -200,11 +197,6 @@ export const APPLICATION_STATUSES: readonly { value: ApplicationStatus; label: s
   { value: 'rejected', label: 'Rejected' },
   { value: 'hired', label: 'Hired' },
 ];
-
-export function applicationStatusLabel(v: string): string {
-  const hit = APPLICATION_STATUSES.find((s) => s.value === v);
-  return hit ? hit.label : v;
-}
 
 /**
  * One row of GET /api/hr/applications. Contact details and `hrNote` are HR-only:

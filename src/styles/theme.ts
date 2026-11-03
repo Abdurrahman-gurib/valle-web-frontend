@@ -70,22 +70,6 @@ export const shadow = {
   panel: '0 40px 90px -20px rgba(0,0,0,.6)',
 } as const;
 
-/** The caution-stripe fill used as a section rule throughout the site. */
-export const stripes = 'repeating-linear-gradient(-45deg,#33FF74 0 14px,#340057 14px 28px)';
-export const stripesSm = 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)';
-
-/** Motion. Keep durations short: the brand reads as energetic, not floaty. */
-export const motion = {
-  fast: '.18s cubic-bezier(.2,.7,.2,1)',
-  base: '.28s cubic-bezier(.2,.7,.2,1)',
-  slow: '.45s cubic-bezier(.2,.7,.2,1)',
-  /** Overshoot for elements that pop in (chat panel, badges). */
-  spring: '.42s cubic-bezier(.16,1.06,.3,1.12)',
-} as const;
-
-/** Single breakpoint the whole site uses. */
-export const MOBILE_BREAKPOINT = 1080;
-
 /** Status pill colours shared by the back office. */
 export const statusColor: Record<string, { bg: string; fg: string }> = {
   confirmed: { bg: '#E2FFEB', fg: '#12B54A' },

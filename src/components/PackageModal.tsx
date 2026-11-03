@@ -2,7 +2,7 @@ import { Fwd } from '@/components/ui/arrows';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { Img } from './Img';
-import { useT, fwd } from '../i18n';
+import { useT } from '../i18n';
 import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
 

@@ -8,7 +8,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { Stripes } from './Stripes';
 import { color } from '../styles/theme';
 import { AttachmentView, ComposerTools, MAX_BYTES, attachmentUrl, kindOf, linkify } from './chatParts';
-import { useT, fwd } from '../i18n';
+import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
 
 /**

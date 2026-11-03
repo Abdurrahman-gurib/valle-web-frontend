@@ -24,12 +24,27 @@ with dual resident/non-resident pricing.
   15% Explorer Pass). Mirrored server-side in `Backend/src/bookings/pricing.ts`; change both.
 - `src/lib/`: api client, semantic navigation (`useGoto`), card decorator, formatting.
 - `src/hooks/`: `useIsMobile` (1080px breakpoint), `useHover`, `useReveal` (scroll reveals).
-- `src/pages/`: Home (10 sections under `home/`), Explore, Detail, Packages, Restaurant, Booking.
+- `src/pages/`: one folder per area, loaded per route through `src/lib/lazyPage.tsx` (see `src/App.tsx`):
+  `Home.tsx` + `home/` (its sections), `activities/` (Explore, Detail), `Packages.tsx` + `packages/`,
+  `dine/` (Restaurant), `booking/` (Booking, Ticket, ManageBooking, Waiver), `careers/` (Vacancies,
+  VacancyDetail), Groups, Story, Legal, NotFound; the back office under `staff/` and `hr/`.
 - Styling is inline per component (ported 1:1 from the original design) over a small
   `src/styles/global.css` (fonts, keyframes, resets).
 
-Static assets live in `public/`: `images/` (69 photos), `fonts/` (15 woff2 subsets),
-`menus/` (restaurant PDF).
+Static assets live in `public/`: `images/` (photos, map art, videos), `fonts/` (woff2 subsets),
+`menus/` (restaurant PDFs).
+
+## Build variables
+
+Read by Vite at build time (`import.meta.env`); none is required, and there is no
+`.env` file in this repository. Set them in the shell or as Docker build args.
+
+| Variable        | Default | Purpose |
+| --------------- | ------- | ------- |
+| `VITE_API_URL`  | `/api`  | Base URL of the API. The default works with the dev-server proxy (`vite.config.ts`) and the nginx proxy in production; set an absolute URL only when the API lives on another host |
+| `VITE_SITE_URL` | resolved at runtime | Canonical origin baked into the prerendered pages (canonical, Open Graph, sitemap links); the Railway `web` service and the e2e stack set it |
+| `VITE_ONLINE_PAYMENT` | unset | `1` shows the online-payment step even before the API reports a payment provider |
+| `VITE_API_PROXY` | `http://localhost:3001` | Where `npm run dev` / `npm run preview` proxy `/api` (dev server only) |
 
 ## Container and deployment
 

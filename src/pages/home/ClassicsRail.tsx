@@ -7,7 +7,7 @@ import { useCardModel, type CardModel } from '../../lib/card';
 import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
-import { useT, fwd, isRtl, useLang } from '../../i18n';
+import { useT, isRtl, useLang } from '../../i18n';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 

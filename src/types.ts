@@ -394,9 +394,6 @@ export interface ConversationSummary {
 // Values mirror the CHECK constraints on job_vacancies / job_applications.
 
 export type EmploymentType = 'full-time' | 'part-time' | 'seasonal' | 'internship';
-export type VacancyStatus = 'draft' | 'published' | 'closed';
-export type ApplicationStatus =
-  'new' | 'reviewing' | 'shortlisted' | 'interviewed' | 'offered' | 'rejected' | 'hired';
 
 /** One row of GET /api/vacancies: everything the listing card shows. */
 export interface VacancyCard {

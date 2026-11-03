@@ -13,7 +13,7 @@ import { StripesSm, Stripes } from './Stripes';
 import { MobileBar } from './MobileBar';
 import { Img } from './Img';
 import { LanguagePicker, LanguageSuggest } from './LanguagePicker';
-import { useLang, useT, _t, fwd } from '../i18n';
+import { useLang, useT, _t } from '../i18n';
 
 // app.rateWord is one of these; listed so the extractor picks them up.
 const RATE_WORD_KEYS = [_t('Resident'), _t('Visitor')];

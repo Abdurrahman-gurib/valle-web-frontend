@@ -52,12 +52,3 @@ export function conditionIcon(c: Condition, isDay = true): string {
     case 'snow': return '🌨️';
   }
 }
-/** A hint the park can act on: wind and storms pause the ziplines, heavy rain the trails. */
-export function conditionAdvice(now: WeatherNow): string | null {
-  if (now.condition === 'thunderstorm' || now.condition === 'thunder-hail') return _t('Storms pause the ziplines and the quads until they pass.');
-  if (now.gustKmh >= 45) return _t('Strong gusts: the ziplines may pause until the wind drops.');
-  if (now.condition === 'rain-heavy' || now.condition === 'showers-heavy') return _t('Heavy rain: trails get slippery and some activities wait for it to pass.');
-  if (now.condition === 'rain' || now.condition === 'showers' || now.condition === 'rain-light' || now.condition === 'drizzle') return _t('Showers in the valley come and go; bring a light rain jacket.');
-  if (now.tempC >= 31) return _t('Hot day: water, a hat and sunscreen.');
-  return null;
-}

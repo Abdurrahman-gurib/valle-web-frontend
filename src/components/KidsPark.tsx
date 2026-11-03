@@ -149,8 +149,3 @@ export function KidsProfile({ only, headingAs: H = 'h3' }: { only?: string; head
     </section>
   );
 }
-
-/** Small round logo badge for photo tiles. */
-export function KidsParkBadge({ size = 92 }: { size?: number }) {
-  return <KidsParkLogo width={size} style={{ filter: 'drop-shadow(0 6px 10px rgba(31,0,51,.35))' }} />;
-}
