@@ -6,7 +6,7 @@ import {
 import { color } from '../../styles/theme';
 import { Btn, EmptyState, Spinner, shortDate } from '../staff/ui';
 import { cn } from '@/lib/utils';
-import { FilterSelect, MetaPill, Notice, Pill } from './hrUi';
+import { FilterSelect, MetaPill, Notice, Pill, cardCls, tdCls, thCls } from './hrUi';
 import VacancyForm from './VacancyForm';
 
 /**
@@ -17,14 +17,8 @@ import VacancyForm from './VacancyForm';
  * keeps the applicant history intact, which is the whole point of the audit.
  */
 
-const thCls =
-  'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left py-[10px] px-[12px] whitespace-nowrap';
 
-const tdCls = 'py-[11px] px-[12px] text-[13.5px] border-t border-solid border-valle-lilac whitespace-nowrap';
-
-const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
-
-const FILTERS = [{ value: 'all', label: 'All statuses' }, ...VACANCY_STATUSES.map((s) => ({ value: s.value as string, label: s.label }))];
+const FILTERS: readonly { value: VacancyStatus | 'all'; label: string }[] = [{ value: 'all', label: 'All statuses' }, ...VACANCY_STATUSES];
 
 /** Compact action button, sized for a table cell. */
 function MiniBtn({ children, onClick, tone = 'ghost', disabled, title }: {
@@ -159,7 +153,7 @@ export default function VacanciesPanel({ narrow, onChanged }: {
   onChanged: (force?: boolean) => void;
 }) {
   const [items, setItems] = useState<HrVacancy[]>([]);
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState<VacancyStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [notice, setNotice] = useState('');
@@ -169,7 +163,7 @@ export default function VacanciesPanel({ narrow, onChanged }: {
 
   const load = useCallback(() => {
     setLoading(true);
-    return listVacancies(status === 'all' ? 'all' : (status as VacancyStatus))
+    return listVacancies(status)
       .then((res) => { setItems(res.items || []); setErr(''); })
       .catch((e: unknown) => setErr(errorText(e, 'Could not load the vacancies.')))
       .finally(() => setLoading(false));

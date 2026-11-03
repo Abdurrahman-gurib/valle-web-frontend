@@ -188,7 +188,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
           <div className="mt-[7px]">
             <Segmented
               value={f.status === 'closed' ? 'closed' : f.status}
-              onChange={(v) => set('status', v as VacancyStatus)}
+              onChange={(v) => set('status', v)}
               disabled={busy}
               options={
                 f.status === 'closed'
@@ -242,7 +242,7 @@ export default function VacancyForm({ vacancy, onClose, onSaved, narrow }: {
               id="vac-employment"
               label="Employment"
               value={f.employment}
-              onChange={(v) => set('employment', v as EmploymentType)}
+              onChange={(v) => set('employment', v)}
               disabled={busy}
               options={EMPLOYMENT_TYPES}
             />

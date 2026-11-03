@@ -8,7 +8,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { Stripes } from '../../components/Stripes';
 import { Spinner } from '../staff/ui';
 import { cn } from '@/lib/utils';
-import { NARROW } from './hrUi';
+import { NARROW, cardCls } from './hrUi';
 import VacanciesPanel from './VacanciesPanel';
 import ApplicantsPanel from './ApplicantsPanel';
 
@@ -23,7 +23,6 @@ import ApplicantsPanel from './ApplicantsPanel';
 
 type Tab = 'vacancies' | 'applicants';
 
-const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
 
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
   return (

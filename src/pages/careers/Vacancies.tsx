@@ -8,45 +8,10 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { Img } from '../../components/Img';
 import { Stripes } from '../../components/Stripes';
 import { listVacancies } from '../../lib/careersApi';
-import { fullDateFromIso } from '../../lib/format';
-import type { EmploymentType, VacancyCard } from '../../types';
-import { color } from '../../styles/theme';
+import type { VacancyCard } from '../../types';
 import { paths } from '../../lib/nav';
-import { tr, useT, _t } from '../../i18n';
-
-/** Where a speculative application goes when nothing is open (or nothing fits). */
-export const CAREERS_EMAIL = 'sales@vallepark.com';
-
-const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {
-  'full-time': _t('FULL TIME'),
-  'part-time': _t('PART TIME'),
-  seasonal: _t('SEASONAL'),
-  internship: _t('INTERNSHIP'),
-};
-
-const EMPLOYMENT_COLOR: Record<EmploymentType, { bg: string; fg: string }> = {
-  'full-time': { bg: color.green, fg: color.purple },
-  'part-time': { bg: color.yellow, fg: color.purple },
-  seasonal: { bg: color.violet, fg: color.white },
-  internship: { bg: color.pink, fg: color.white },
-};
-
-function employmentPillColors(employment: EmploymentType) {
-  const c = EMPLOYMENT_COLOR[employment] || { bg: color.tint, fg: color.purple };
-  return { background: c.bg, color: c.fg };
-}
-
-/** Mono label: Chivo Mono 10.5px bold, letter-spaced. */
-const MONO = 'font-mono text-[10.5px] font-bold tracking-[.14em]';
-/** Display heading: Barlow italic 900, uppercase, tight. */
-const DISPLAY = 'font-display italic font-black tracking-[-0.01em] leading-[0.9] uppercase';
-
-/** "Closes Thu 30 Sep 2026", or an evergreen line when the role has no end date. */
-function closesLabel(closesOn: string | null): string {
-  if (!closesOn) return tr('OPEN UNTIL FILLED');
-  const full = fullDateFromIso(closesOn.slice(0, 10));
-  return full ? tr('CLOSES {date}', { date: full.toUpperCase() }) : tr('OPEN UNTIL FILLED');
-}
+import { useT } from '../../i18n';
+import { CAREERS_EMAIL, DISPLAY, EMPLOYMENT_LABEL, MONO, PAGE, closesLabel, employmentStyle } from './shared';
 
 const eyebrow = cn(MONO, 'text-valle-yellow');
 
@@ -66,7 +31,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
     >
       <div className="flex items-center gap-[10px] justify-between">
         <span className={cn(MONO, 'text-valle-violet')}>{(v.department || t('VALLÉ PARK')).toUpperCase()}</span>
-        <span className={cn(MONO, 'rounded-[999px] py-[6px] px-[11px] whitespace-nowrap leading-none')} style={employmentPillColors(v.employment)}>{EMPLOYMENT_LABEL[v.employment] ? t(EMPLOYMENT_LABEL[v.employment]) : t('ROLE')}</span>
+        <span className={cn(MONO, 'rounded-[999px] py-[6px] px-[11px] whitespace-nowrap leading-none')} style={employmentStyle(v.employment)}>{EMPLOYMENT_LABEL[v.employment] ? t(EMPLOYMENT_LABEL[v.employment]) : t('ROLE')}</span>
       </div>
 
       <div className={cn(DISPLAY, 'text-[clamp(21px,2.2vw,26px)] text-valle-purple')}>{v.title}</div>
@@ -149,7 +114,7 @@ export default function VacanciesPage() {
     : t('LOADING ROLES…');
 
   return (
-    <main ref={ref} className="max-w-[1320px] mx-auto pt-[104px] px-[clamp(16px,3.5vw,40px)] pb-0">
+    <main ref={ref} className={PAGE}>
       {/* ---- hero ---- */}
       <section
         data-reveal

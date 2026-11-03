@@ -13,7 +13,7 @@ const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge
 
 function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
   const t = useT();
-  const [h, bind] = useHover();
+  const [, bind] = useHover();
   const [hTick, bindTick] = useHover();
   return (
     <motion.div

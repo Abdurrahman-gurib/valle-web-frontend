@@ -15,6 +15,12 @@ import { cn } from '@/lib/utils';
 /** Below this the drawer goes full width and every two-column grid stacks. */
 export const NARROW = 900;
 
+/** Table header and cell, and the white lilac-ringed card, shared by the HR panels. */
+export const thCls =
+  'font-mono text-[9.5px] font-bold tracking-[.13em] uppercase text-valle-violet text-left py-[10px] px-[12px] whitespace-nowrap';
+export const tdCls = 'py-[11px] px-[12px] text-[13.5px] border-t border-solid border-valle-lilac whitespace-nowrap';
+export const cardCls = 'bg-white border-[1.5px] border-solid border-valle-lilac rounded-[18px]';
+
 /** Mono uppercase field label. */
 export const labelCls =
   'block font-mono text-[10px] font-bold tracking-[.13em] text-valle-violet uppercase';
@@ -143,15 +149,23 @@ export function TextArea({
   );
 }
 
-export function SelectField({
+/** One option of a select or segmented control; the value type flows through to onChange. */
+export type Option<T extends string> = { value: T; label: string };
+
+/** The typed value of the option a <select> landed on (always one of `options`). */
+export function optionValue<T extends string>(options: readonly Option<T>[], raw: string): T {
+  return options.find((o) => o.value === raw)?.value ?? options[0].value;
+}
+
+export function SelectField<T extends string>({
   id, label, value, onChange, error, hint, disabled, options,
-}: BaseFieldProps & { options: readonly { value: string; label: string }[] }) {
+}: Omit<BaseFieldProps, 'value' | 'onChange'> & { value: T; onChange: (v: T) => void; options: readonly Option<T>[] }) {
   return (
     <Shell id={id} label={label} error={error} hint={hint}>
       <select
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(optionValue(options, e.target.value))}
         disabled={disabled}
         aria-invalid={error ? true : undefined}
         className={cn(fieldCls, 'appearance-auto', disabled ? 'cursor-default' : 'cursor-pointer', fieldBorder(error))}
@@ -163,17 +177,17 @@ export function SelectField({
 }
 
 /** Bare filter <select>, no label block: used in the filter bars. */
-export function FilterSelect({ value, onChange, ariaLabel, options, width }: {
-  value: string;
-  onChange: (v: string) => void;
+export function FilterSelect<T extends string>({ value, onChange, ariaLabel, options, width }: {
+  value: T;
+  onChange: (v: T) => void;
   ariaLabel: string;
-  options: readonly { value: string; label: string }[];
+  options: readonly Option<T>[];
   width?: number | string;
 }) {
   return (
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(optionValue(options, e.target.value))}
       aria-label={ariaLabel}
       className={cn(fieldCls, 'cursor-pointer appearance-auto')}
       style={{ width: width ?? 'auto' }}
@@ -184,10 +198,10 @@ export function FilterSelect({ value, onChange, ariaLabel, options, width }: {
 }
 
 /** Draft / Published segmented control, shaped like the site's rate switch. */
-export function Segmented({ value, onChange, options, disabled }: {
-  value: string;
-  onChange: (v: string) => void;
-  options: readonly { value: string; label: string }[];
+export function Segmented<T extends string>({ value, onChange, options, disabled }: {
+  value: T;
+  onChange: (v: T) => void;
+  options: readonly Option<T>[];
   disabled?: boolean;
 }) {
   return (

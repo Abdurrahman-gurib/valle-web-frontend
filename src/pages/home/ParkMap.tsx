@@ -20,7 +20,8 @@ interface SelPinModel {
   btnClick: () => void;
 }
 
-export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pin; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void; scale?: number }) {
+/** One numbered map pin; it only reads the pin's code, place, size and name. */
+export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pick<Pin, 'n' | 'px' | 'py' | 'kind' | 'name'>; i: number; on: boolean; isMobile: boolean; onClick: (i: number) => void; scale?: number }) {
   const sub = p.kind === 'sub';
   const base = (isMobile ? (sub ? 17 : 21) : (sub ? 30 : 36)) * scale;
   const dim = on ? base + (isMobile ? 4 : 10) * scale : base;

@@ -1,35 +1,22 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent } from 'react';
-import { useCatalog } from '../../store/CatalogContext';
+import { useMemo, useState } from 'react';
 import { useApp } from '../../store/AppStore';
 import { useGoto } from '../../lib/nav';
-import { money } from '../../lib/format';
-import { PULSE_NAMES } from '../../lib/card';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { useHover } from '../../hooks/useHover';
-import { Img } from '../../components/Img';
-import { Stripes } from '../../components/Stripes';
 import { PinButton } from './ParkMap';
 import type { MapKeyItem, MapLine, MapPin, MapRoute } from '../../data/maps';
 import type { TrailArrow, TrailEdge } from '../../data/quadTrails';
-import type { MapGallery, MapShot } from '../../data/mapGalleries';
+import type { MapGallery } from '../../data/mapGalleries';
 import { _t, useT, fwd } from '../../i18n';
+import { GLASS, HEAD, MONO, ZoomBtn } from './activityMap/glass';
+import { Compass, MapKey } from './activityMap/sheet';
+import { useBookables, useMapZoom } from './activityMap/hooks';
+import { MapPopup, RouteCard, RouteTab, type Fact, type Popup } from './activityMap/RouteCard';
+import { PhotoWall, ValleLightbox } from './activityMap/Gallery';
+import { MapLayers, type Segment } from './activityMap/MapLayers';
 
 /** Price-option labels built from data at runtime (priceCat.toUpperCase()); registered so the dictionaries cover them. */
 const DYNAMIC_OPTION_LABELS = [_t('QUAD'), _t('ZIPLINE'), _t('BUGGY')];
 void DYNAMIC_OPTION_LABELS;
-
-const MONO = "'Chivo Mono',monospace";
-const HEAD = "'Barlow',sans-serif";
-
-/** Frosted panel over the map (Vallé purple glass). */
-const GLASS: CSSProperties = {
-  background: 'linear-gradient(155deg, rgba(52,0,87,.58), rgba(31,0,51,.74))',
-  backdropFilter: 'blur(18px) saturate(1.45)',
-  WebkitBackdropFilter: 'blur(18px) saturate(1.45)',
-  border: '1px solid rgba(255,255,255,.22)',
-  boxShadow: '0 30px 60px -24px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.28)',
-  color: '#FFFFFF',
-};
 
 export interface ActivityMapProps {
   eyebrow: string;             // e.g. "03 · QUAD & BUGGY · 2 LOOPS"
@@ -61,384 +48,6 @@ export interface ActivityMapProps {
   sheet: { title: string; subtitle: string; keyItems: MapKeyItem[]; foot: string };
 }
 
-/** The sheet's key column, laid out like the walking-trail sitemap's "KEY / LÉGENDE". */
-function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
-  const t = useT();
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: compact ? '6px 14px' : 10 }}>
-      {items.map((k) => (
-        <div key={k.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {k.icon ? (
-            <img src={k.icon} alt="" style={{ width: compact ? 26 : 34, height: compact ? 26 : 34, objectFit: 'contain', flexShrink: 0, borderRadius: 4 }} />
-          ) : k.dashed !== undefined ? (
-            <span style={{ width: compact ? 26 : 34, borderTop: `3px ${k.dashed ? 'dashed' : 'solid'} ${k.swatch}`, flexShrink: 0 }} />
-          ) : (
-            <span style={{ width: 14, height: 14, borderRadius: 999, background: k.swatch, border: '2px solid #FFFFFF', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,.35)' }} />
-          )}
-          <span style={{ fontSize: compact ? 10.5 : 12, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
-            {t(k.label)}{k.fr && <span style={{ opacity: 0.6, fontWeight: 400 }}> | {k.fr}</span>}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Compass({ size }: { size: number }) {
-  const t = useT();
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-label={t('Compass rose, north up')} style={{ display: 'block' }}>
-      <circle cx="50" cy="50" r="46" fill="none" stroke="#FFFC33" strokeWidth="2.5" />
-      <path d="M50 8 L58 50 L50 92 L42 50 Z" fill="#FFFC33" />
-      <path d="M8 50 L50 42 L92 50 L50 58 Z" fill="#FFFC33" opacity="0.75" />
-      <path d="M50 8 L58 50 L50 50 Z" fill="#340057" opacity="0.45" />
-      <text x="50" y="6" textAnchor="middle" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">N</text>
-      <text x="50" y="100" textAnchor="middle" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">S</text>
-      <text x="2" y="54" textAnchor="start" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">W</text>
-      <text x="98" y="54" textAnchor="end" fontSize="11" fontWeight="700" fill="#FFFC33" fontFamily="'Chivo Mono',monospace">E</text>
-    </svg>
-  );
-}
-
-interface Fact { k: string; v: string }
-
-interface Popup {
-  name: string;
-  sub: string;
-  img: string;
-  badge: string;
-  badgeColor: string;
-  badgeFg: string;
-  facts: Fact[];
-  btnLabel: string;
-  btnClick: () => void;
-}
-
-/** One bookable option of a route: the experience id plus the exact price-list row. */
-interface Bookable { id: string; variant: string; price: string; label: string }
-
-/** Resolves a route's price-list rows (by label prefix) into bookable options at the visitor's rate. */
-function useBookables() {
-  const catalog = useCatalog();
-  const app = useApp();
-  const rk = app.rate === 'nr' ? 'nr' : 'rr';
-  const find = (cat: string, prefix: string, label: string): Bookable | null => {
-    const row = (catalog.PL[cat] || []).find((r) => r.n.toLowerCase().startsWith(prefix.toLowerCase()));
-    if (!row) return null;
-    return { id: cat, variant: row.n, price: money(row[rk]) + (app.rate ? '' : ' (RR)'), label };
-  };
-  return (r: MapRoute): Bookable[] => {
-    const out: Bookable[] = [];
-    const a = find(r.priceCat, r.priceRow, r.priceCat === 'zipline' ? _t('ZIPLINE') : r.priceCat.toUpperCase());
-    if (a) out.push(a);
-    if (r.priceCat2 && r.priceRow2) {
-      const b = find(r.priceCat2, r.priceRow2, r.priceLabel2 || r.priceCat2.toUpperCase());
-      if (b) out.push(b);
-    }
-    return out;
-  };
-}
-
-/** Zoom + drag-to-pan for the map. Pan is clamped so the map always fills the frame. */
-function useMapZoom() {
-  const [zoom, setZoomState] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const frame = useRef<HTMLDivElement | null>(null);
-  const drag = useRef<{ x: number; y: number; px: number; py: number; moved: boolean } | null>(null);
-  const clamp = (z: number, x: number, y: number) => {
-    const el = frame.current; if (!el) return { x, y };
-    const w = el.clientWidth, h = el.clientHeight;
-    return { x: Math.min(0, Math.max(w - w * z, x)), y: Math.min(0, Math.max(h - h * z, y)) };
-  };
-  const setZoom = (z: number) => {
-    const nz = Math.min(3, Math.max(1, Math.round(z * 4) / 4));
-    const el = frame.current;
-    // keep the frame centre fixed while zooming
-    const cx = el ? el.clientWidth / 2 : 0, cy = el ? el.clientHeight / 2 : 0;
-    setPan((p) => clamp(nz, cx - (cx - p.x) * (nz / zoom), cy - (cy - p.y) * (nz / zoom)));
-    setZoomState(nz);
-  };
-  const reset = () => { setZoomState(1); setPan({ x: 0, y: 0 }); };
-  const onPointerDown = (e: RPointerEvent<HTMLDivElement>) => {
-    if (zoom === 1 || (e.target as HTMLElement).closest('button, aside')) return;
-    drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y, moved: false };
-    setDragging(true);
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: RPointerEvent<HTMLDivElement>) => {
-    const d = drag.current; if (!d) return;
-    const dx = e.clientX - d.x, dy = e.clientY - d.y;
-    if (Math.abs(dx) + Math.abs(dy) > 3) d.moved = true;
-    setPan(clamp(zoom, d.px + dx, d.py + dy));
-  };
-  const onPointerUp = () => { drag.current = null; setDragging(false); };
-  return { zoom, pan, dragging, frame, setZoom, reset, bind: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp } };
-}
-
-function Pulse({ n, color = '#FFFC33', size = 13 }: { n: number; color?: string; size?: number }) {
-  const t = useT();
-  return (
-    <span style={{ fontSize: size, letterSpacing: '.18em', color, fontWeight: 700 }} title={t('{name} pulse', { name: t(PULSE_NAMES[n]) })}>
-      {'●'.repeat(n)}<span style={{ opacity: 0.35 }}>{'○'.repeat(5 - n)}</span>
-    </span>
-  );
-}
-
-function WallArrow({ side, onClick }: { side: 'left' | 'right'; onClick: () => void }) {
-  const [h, bind] = useHover();
-  const t = useT();
-  return (
-    <button {...bind} onClick={onClick} aria-label={side === 'left' ? t('Previous photos') : t('Next photos')} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 6, transform: 'translateY(-60%)', width: 44, height: 44, borderRadius: 999, cursor: 'pointer', fontSize: 24, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? '#FFFC33' : GLASS.background, color: h ? '#340057' : '#FFFFFF', zIndex: 3 }}>{side === 'left' ? '‹' : '›'}</button>
-  );
-}
-
-function ZoomBtn({ label, title, onClick }: { label: string; title: string; onClick: () => void }) {
-  const [h, bind] = useHover();
-  return (
-    <button {...bind} onClick={onClick} title={title} aria-label={title} style={{ ...GLASS, width: 34, height: 34, borderRadius: 999, cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: h ? 'rgba(255,255,255,.22)' : GLASS.background }}>{label}</button>
-  );
-}
-
-function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick: () => void }) {
-  const [h, bind] = useHover();
-  const t = useT();
-  return (
-    <button
-      {...bind}
-      onClick={onClick}
-      style={{
-        flexShrink: 0, cursor: 'pointer', borderRadius: 999, padding: '9px 16px 9px 11px', display: 'flex', alignItems: 'center', gap: 9,
-        fontFamily: 'inherit', textAlign: 'left', transition: 'all .2s ease',
-        border: '1px solid ' + (on ? r.color : (h ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.22)')),
-        background: on ? r.color : (h ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.07)'),
-        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-        color: on ? r.fg : '#FFFFFF',
-        boxShadow: on ? `0 10px 26px -10px ${r.color}` : 'inset 0 1px 0 rgba(255,255,255,.12)',
-        transform: h && !on ? 'translateY(-1px)' : 'none',
-      }}
-    >
-      <span style={{ width: 12, height: 12, borderRadius: 999, background: r.color, border: '2px solid ' + (on ? r.fg : '#FFFFFF'), flexShrink: 0, boxShadow: on ? 'none' : `0 0 10px ${r.color}` }} />
-      <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
-        <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13.5, textTransform: 'uppercase' }}>{t(r.name)}</span>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{t(r.tag)}</span>
-      </span>
-    </button>
-  );
-}
-
-function GlassBtn({ label, onClick, primary, on, small, style }: { label: string; onClick: () => void; primary?: boolean; on?: boolean; small?: boolean; style?: CSSProperties }) {
-  const [h, bind] = useHover();
-  const bg = primary
-    ? (h ? '#F2EE1F' : '#FFFC33')
-    : on ? '#33FF74' : (h ? 'rgba(255,255,255,.22)' : 'rgba(255,255,255,.12)');
-  return (
-    <button
-      {...bind}
-      onClick={onClick}
-      style={{
-        border: primary || on ? 0 : '1px solid rgba(255,255,255,.3)', background: bg, cursor: 'pointer', fontFamily: 'inherit',
-        color: on || primary ? '#340057' : '#FFFFFF', fontSize: small ? 11 : 12.5, fontWeight: 700, padding: small ? '8px 12px' : '11px 16px', borderRadius: 999,
-        transition: 'background-color .15s ease', boxShadow: 'none', whiteSpace: 'nowrap',
-        ...style,
-      }}
-    >{label}</button>
-  );
-}
-
-function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left: string; top: string; transform: string; onClose: () => void }) {
-  const [hX, bindX] = useHover();
-  const t = useT();
-  return (
-    <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 7, width: 'min(360px,94%)' }}>
-      <div style={{ ...GLASS, pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', borderRadius: 16, overflow: 'hidden', animation: 'vfadeup .22s ease both' }}>
-        <div style={{ width: 108, flexShrink: 0, background: 'rgba(255,255,255,.08)' }}>
-          <Img src={p.img} alt={p.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0, padding: '12px 14px 13px' }}>
-          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
-          <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', marginTop: 7, lineHeight: 1 }}>{p.name}</div>
-          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.78)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.sub}</div>
-          {p.facts.length > 0 && (
-            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: '3px 10px', fontFamily: MONO, fontSize: 9.5 }}>
-              {p.facts.map((f) => (
-                <span key={f.k}><span style={{ opacity: 0.6 }}>{f.k} </span><b style={{ color: '#FFFC33' }}>{f.v}</b></span>
-              ))}
-            </div>
-          )}
-          <GlassBtn small label={p.btnLabel} onClick={p.btnClick} style={{ marginTop: 9 }} />
-        </div>
-        <button
-          {...bindX}
-          onClick={onClose}
-          aria-label={t('Close')}
-          style={{
-            position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? 'rgba(255,255,255,.26)' : 'rgba(255,255,255,.12)',
-            color: '#FFFFFF', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
-          }}
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/** The chosen route: photo, copy, price, limits and the booking controls. Floats over the map on desktop. */
-function RouteCard({ route, options, overlay }: { route: MapRoute; options: Bookable[]; overlay: boolean }) {
-  const app = useApp();
-  const goto = useGoto();
-  const [hImg, bindImg] = useHover();
-  const t = useT();
-  const added = options.map((o) => app.isSelected(o.id, o.variant));
-  const anyAdded = added.some(Boolean);
-  const bookNow = () => {
-    if (!anyAdded && options[0]) app.toggleSel(options[0].id, options[0].variant);
-    goto.booking();
-  };
-  return (
-    <aside
-      key={route.id}
-      style={{
-        ...GLASS, borderRadius: 20, overflow: 'hidden', animation: 'vfadeup .3s ease both',
-        ...(overlay ? { position: 'absolute', right: 18, bottom: 18, width: 312, zIndex: 6 } : { marginTop: 14 }),
-      }}
-    >
-      <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
-        <Img src={route.img} alt={t(route.name)} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
-        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
-        <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>
-      </div>
-      <div style={{ padding: '12px 15px 15px' }}>
-        <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,.8)', margin: 0, display: '-webkit-box', WebkitLineClamp: overlay ? 3 : 6, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t(route.blurb)}</p>
-        <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,.25)', paddingTop: 9, display: 'grid', gap: 4, fontFamily: MONO, fontSize: 10.5 }}>
-          {options.map((o) => (
-            <div key={o.variant} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.65 }}>{options.length > 1 ? t(o.label) : t('FROM')}</span><b style={{ color: '#FFFC33' }}>{o.price}</b></div>
-          ))}
-          {route.facts.filter((f) => f.k !== 'NOTE').map((f) => (
-            <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.65, textAlign: 'left', flexShrink: 0 }}>{t(f.k)}</span><b>{t(f.v)}</b></div>
-          ))}
-          {route.facts.filter((f) => f.k === 'NOTE').map((f) => (
-            <div key={f.k} style={{ fontSize: 9.5, opacity: 0.7, lineHeight: 1.4 }}>{t(f.v)}</div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
-          {options.map((o, i) => (
-            <GlassBtn
-              key={o.variant}
-              small
-              on={added[i]}
-              label={added[i] ? '✓ ' + (options.length > 1 ? t(o.label) : t('Added')) : '+ ' + (options.length > 1 ? t(o.label) : t('Add to My Day'))}
-              onClick={() => app.toggleSel(o.id, o.variant)}
-              style={{ flex: 1, minWidth: 0 }}
-            />
-          ))}
-          <GlassBtn primary small label={anyAdded ? t('Book →') : t('Book now →')} onClick={bookNow} style={{ flex: 1 }} />
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big?: boolean }) {
-  const [h, bind] = useHover();
-  const t = useT();
-  return (
-    <button
-      {...bind}
-      onClick={onClick}
-      style={{
-        border: '1px solid rgba(255,255,255,.14)', padding: 0, background: 'rgba(255,255,255,.04)', cursor: 'pointer', position: 'relative',
-        borderRadius: 14, overflow: 'hidden', scrollSnapAlign: 'start', gridRow: big ? '1 / span 2' : undefined, gridColumn: big ? 'span 2' : undefined,
-        boxShadow: h ? '0 18px 40px -18px rgba(0,0,0,.8)' : 'none', transition: 'box-shadow .3s ease',
-      }}
-    >
-      <Img src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
-      <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 9 }}><Pulse n={s.thrill} size={9} /></span>
-      <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{t(s.tag)}</span>
-        {big && <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 16, color: '#FFFFFF', textTransform: 'uppercase', lineHeight: 1.05, display: 'block', marginTop: 4 }}>{t(s.cap)}</span>}
-      </span>
-    </button>
-  );
-}
-
-/** Photo view in the Vallé template: eyebrow, tilted headline, copy, pulse level, tagged photo and thumbnails. */
-function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: { g: MapGallery; idx: number; onClose: () => void; onStep: (d: number) => void; onPick: (i: number) => void; cta: string; onCta: () => void }) {
-  const s = g.shots[idx];
-  const isMobile = useIsMobile();
-  const [hLead, bindLead] = useHover();
-  const t = useT();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowRight') onStep(1);
-      else if (e.key === 'ArrowLeft') onStep(-1);
-    };
-    window.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [onClose, onStep]);
-  const navBtn = (d: number, side: 'left' | 'right') => (
-    <button onClick={(e) => { e.stopPropagation(); onStep(d); }} aria-label={d < 0 ? t('Previous photo') : t('Next photo')} style={{ ...GLASS, position: 'absolute', top: '50%', [side]: 14, transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: 999, fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>{d < 0 ? '‹' : '›'}</button>
-  );
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(20,0,40,.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', overflowY: 'auto', padding: 'clamp(10px,3vw,40px)', animation: 'vfade .2s ease both' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: 1180, margin: '0 auto', background: '#340057', borderRadius: 26, overflow: 'hidden', boxShadow: '0 50px 120px -40px rgba(0,0,0,.9)', animation: 'vfadeup .3s ease both' }}>
-        <Stripes height={12} />
-        <div style={{ padding: 'clamp(18px,3vw,34px)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 320px' }}>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{t(g.eyebrow)}</span>
-              <div style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom', marginTop: 12 }}>
-                <h2 style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.4vw,58px)', lineHeight: 0.84, margin: 0, textTransform: 'uppercase', color: '#FFFFFF' }}>
-                  {t(g.t1)}<br /><span style={{ color: '#FFFC33' }}>{t(g.t2)}</span>
-                </h2>
-              </div>
-            </div>
-            <div style={{ flex: '1 1 300px', maxWidth: 460 }}>
-              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0 }}>{t(g.copy)}</p>
-              <div style={{ ...GLASS, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '8px 16px 8px 14px', marginTop: 14 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.14em', opacity: 0.8 }}>{t('THRILL WITH VALLÉ')}</span>
-                <Pulse n={s.thrill} />
-                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, color: '#FFFC33', textTransform: 'uppercase' }}>{t(PULSE_NAMES[s.thrill])}</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 20, position: 'relative', height: isMobile ? 'min(62vh,420px)' : 'min(58vh,560px)', borderRadius: 18, overflow: 'hidden', background: '#260040' }}>
-            <Img key={s.src} src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} priority surface="dark" {...bindLead} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .7s ease', transform: hLead ? 'scale(1.03)' : 'scale(1)', animation: 'vfade .35s ease both' }} />
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '18px 20px', background: 'linear-gradient(to top,rgba(31,0,51,.88),transparent)' }}>
-              <span style={{ background: '#FF3358', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{t(s.tag)}</span>
-              <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{t(s.cap)}</div>
-            </div>
-            <span style={{ ...GLASS, position: 'absolute', top: 12, right: 12, borderRadius: 999, padding: '6px 12px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.1em' }}>{idx + 1} / {g.shots.length}</span>
-            {navBtn(-1, 'left')}
-            {navBtn(1, 'right')}
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12, padding: '2px 0 6px', scrollbarWidth: 'none' }}>
-            {g.shots.map((sh, i) => (
-              <button key={sh.src} onClick={() => onPick(i)} aria-label={t(sh.tag)} style={{ flexShrink: 0, width: 92, height: 62, borderRadius: 10, overflow: 'hidden', padding: 0, cursor: 'pointer', border: '2px solid ' + (i === idx ? '#FFFC33' : 'rgba(255,255,255,.12)'), opacity: i === idx ? 1 : 0.65, transition: 'all .2s', background: '#260040' }}>
-                <Img src={sh.src} alt="" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              </button>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
-            <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(255,255,255,.6)' }}>{t(g.foot)}</span>
-            <GlassBtn primary label={cta} onClick={onCta} style={{ marginLeft: 'auto', padding: '14px 26px', fontSize: 14.5 }} />
-          </div>
-        </div>
-        <button onClick={onClose} aria-label={t('Close')} style={{ position: 'absolute', top: 22, right: 18, width: 38, height: 38, borderRadius: 999, border: 0, background: '#FFFC33', color: '#340057', fontWeight: 800, cursor: 'pointer', fontSize: 18, boxShadow: '0 8px 20px rgba(0,0,0,.4)' }}>×</button>
-      </div>
-    </div>
-  );
-}
-
 /**
  * Interactive activity map (Quad & Buggy, Ziplines): the official route map at full width with
  * glass route tabs, tappable numbered pins (photo + limits + price), a floating route card that
@@ -454,10 +63,6 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const [sel, setSel] = useState<string>('');     // selected pin code
   const [shot, setShot] = useState(-1);
   const mz = useMapZoom();
-  const wall = useRef<HTMLDivElement | null>(null);
-  const [wallPos, setWallPos] = useState<'start' | 'mid' | 'end'>('start');
-  const scrollWall = (d: number) => { const el = wall.current; if (el) el.scrollBy({ left: d * el.clientWidth * 0.8, behavior: 'smooth' }); };
-  const onWallScroll = () => { const el = wall.current; if (!el) return; setWallPos(el.scrollLeft < 8 ? 'start' : el.scrollLeft + el.clientWidth >= el.scrollWidth - 8 ? 'end' : 'mid'); };
 
   const route = routes.find((r) => r.id === routeId) || routes[0];
   const options = bookables(route);
@@ -477,18 +82,17 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const stationIndex = (code: string) => (route.stations ? route.stations.indexOf(code) : -1);
 
   // Split the selected route into cable segments (flown) and walks (between platforms).
-  const isCable = (a: string, b: string) => !lines || lines.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
   const segments = useMemo(() => {
+    const isCable = (a: string, b: string) => !lines || lines.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
     const st = route.stations || [];
-    const out: { a: MapPin; b: MapPin; cable: boolean }[] = [];
+    const out: Segment[] = [];
     for (let i = 0; i + 1 < st.length; i++) {
       const a = byCode[st[i]], b = byCode[st[i + 1]];
       if (a && b) out.push({ a, b, cable: isCable(st[i], st[i + 1]) });
     }
     return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, byCode, lines]);
-  const totalLines = segments.filter((s) => s.cable).length;
+  const cables = segments.filter((s) => s.cable);
   /** Number of cables flown to reach stop `i` of the route. */
   const linesBefore = (i: number) => segments.slice(0, i).filter((s) => s.cable).length;
 
@@ -506,11 +110,11 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
     };
     let badge = t('LANDMARK');
     if (isRoutePin) {
+      const name = t(route.name).toUpperCase();
       if (si >= 0) {
-        const last = (route.stations as string[]).length - 1;
-        const n = linesBefore(si);
-        badge = si === 0 ? t('{name} · START', { name: t(route.name).toUpperCase() }) : si === last ? t('{name} · FINISH', { name: t(route.name).toUpperCase() }) : t('{name} · AFTER LINE {n} OF {total}', { name: t(route.name).toUpperCase(), n, total: totalLines });
-      } else badge = t(route.name).toUpperCase();
+        const last = (route.stations ?? []).length - 1;
+        badge = si === 0 ? t('{name} · START', { name }) : si === last ? t('{name} · FINISH', { name }) : t('{name} · AFTER LINE {n} OF {total}', { name, n: linesBefore(si), total: cables.length });
+      } else badge = name;
     } else if (pp.facts) badge = t('SUSPENDED THRILL');
     const facts: Fact[] = [];
     if (isRoutePin) {
@@ -519,7 +123,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
       facts.push(...route.facts.filter((f) => f.k !== 'NOTE').map((f) => ({ k: t(f.k), v: t(f.v) })));
     } else {
       if (pp.priceCat && pp.priceRow) {
-        const o = bookables({ ...route, priceCat: pp.priceCat, priceRow: pp.priceRow, priceCat2: undefined, priceRow2: undefined })[0];
+        const o = bookables({ priceCat: pp.priceCat, priceRow: pp.priceRow })[0];
         if (o) facts.push({ k: t('FROM'), v: o.price });
       }
       if (pp.facts) facts.push(...pp.facts.map((f) => ({ k: t(f.k), v: t(f.v) })));
@@ -536,28 +140,13 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
   const popTop = pp ? (isMobile ? '8px' : pp.py + '%') : '0%';
   const popTransform = pp ? (isMobile ? 'translateX(-50%)' : (pp.py < 36 ? 'translate(-50%, 22px)' : 'translate(-50%, calc(-100% - 22px))')) : 'none';
 
-  // Route geometry (zipline) in image-percentage space.
-  const sigPts = drawRoutes && signature && route.signature ? [byCode[signature[0]], byCode[signature[1]]] : null;
-  const seg = (s: { a: MapPin; b: MapPin }) => ({ x1: s.a.px, y1: s.a.py, x2: s.b.px, y2: s.b.py });
-  // Cables only, in flying order, each traced after the previous one (dash animation, see global.css).
-  const cables = segments.filter((s) => s.cable);
-  const TRACE = 0.55; // seconds per cable
-  const traceStyle = (i: number, extra: CSSProperties = {}): CSSProperties => ({
-    strokeDasharray: 1, strokeDashoffset: 1, animation: `vtrace ${TRACE}s ease-out ${i * TRACE}s forwards`, ...extra,
-  });
-  // Quad: trail centrelines for the chosen loop(s), traced outward from the base. A route without its
-  // own trail (the 2 h Advenature Tour) traces every loop.
-  const trailSets = trails ? (trails[route.id] ? [route.id] : Object.keys(trails)) : [];
-  // Each loop is one continuous ride (see quadTrails.ts); several loops ride one after the other.
-  const loopReach = (id: string) => Math.max(1, ...(trails as Record<string, TrailEdge[]>)[id].map((e) => e.d0 + e.len));
-  const loopOffset: Record<string, number> = {};
-  let trailReach = 0;
-  for (const id of trailSets) { loopOffset[id] = trailReach; trailReach += loopReach(id); }
-  const trailSpeed = Math.max(1, trailReach) / (trailSets.length > 1 ? 7 : 4.5);   // px per second
-  const trailColor = (id: string) => routes.find((r) => r.id === id)?.color || '#FFFFFF';
+  // The Signature line (zipline) between its two stations, in image-percentage space.
+  const sigPts: [MapPin | undefined, MapPin | undefined] | null = drawRoutes && signature && route.signature ? [byCode[signature[0]], byCode[signature[1]]] : null;
 
-  const ctaLabel = options[0] && app.isSelected(options[0].id, options[0].variant) ? t('✓ {name} is in My Day →', { name: t(route.name) }) : t('Add {name} to my day →', { name: t(route.name) });
-  const onCta = () => { if (options[0] && !app.isSelected(options[0].id, options[0].variant)) app.toggleSel(options[0].id, options[0].variant); setShot(-1); app.openDay(); };
+  const first = options[0];
+  const firstAdded = !!first && app.isSelected(first.id, first.variant);
+  const ctaLabel = firstAdded ? t('✓ {name} is in My Day →', { name: t(route.name) }) : t('Add {name} to my day →', { name: t(route.name) });
+  const onCta = () => { if (first && !firstAdded) app.toggleSel(first.id, first.variant); setShot(-1); app.openDay(); };
 
   return (
     <section style={{ background: '#260040', padding: 'clamp(40px,6vw,80px) 0 clamp(48px,7vw,88px)', position: 'relative', overflow: 'hidden' }}>
@@ -596,115 +185,36 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                 )}
               </div>
               <div style={{ padding: isMobile ? '8px 10px 14px' : '22px 22px 22px 12px', minWidth: 0 }}>
-            <div ref={mz.frame} {...mz.bind} style={{ position: 'relative', overflow: 'hidden', borderRadius: 12, touchAction: mz.zoom > 1 ? 'none' : 'pan-y', cursor: mz.zoom > 1 ? (mz.dragging ? 'grabbing' : 'grab') : 'default', background: '#2E0A4E' }}>
-              <div style={{ position: 'relative', aspectRatio: `${map.width} / ${map.height}`, transform: `translate(${mz.pan.x}px, ${mz.pan.y}px) scale(${mz.zoom})`, transformOrigin: '0 0', transition: mz.dragging ? 'none' : 'transform .35s ease', willChange: 'transform' }}>
-                {/* The map and every overlay live in ONE svg, so all layers are sampled identically (no double image). */}
-                <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={alt} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', display: 'block' }}>
-                    <image href={map.img} x="0" y="0" width="100" height="100" preserveAspectRatio="none" />
-                    <defs>
-                      <filter id="amglow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="0.6" />
-                      </filter>
-                    </defs>
-                    {extraLines?.filter((l) => l.label !== route.extra).map((l) => (
-                      <g key={l.label}>
-                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeOpacity={0.35} filter="url(#amglow)" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 7 }} />
-                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} stroke={l.color} strokeDasharray={l.dashed ? '3 2.5' : undefined} strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: isMobile ? 2 : 2.5 }} />
-                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.6} textAnchor="middle" fill={l.color} style={{ fontFamily: MONO, fontSize: isMobile ? 2.4 : 1.7, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.6 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{t(l.label)}</text>
-                      </g>
-                    ))}
-                    {/* Quad trails: the trace is a mask that uncovers the designer's own trail artwork (the full-colour
-                        map over the dimmed one), so what appears is the printed loop, not a drawn stroke. A faint
-                        glow under it follows the same path. */}
-                    {/* Quad loops: the chosen loop is traced over the original artwork as a glowing stroke
-                        in its own colour, one continuous ride from the base (see quadTrails.ts). */}
-                    {trails && trailSets.map((id) => {
-                      const anim = (e: TrailEdge, w: number): CSSProperties => ({
-                        strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
-                        animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${(e.d0 + loopOffset[id]) / trailSpeed}s forwards`,
-                      });
-                      const pts = (e: TrailEdge) => e.pts.map((p) => p.join(',')).join(' ');
+                <div ref={mz.frame} {...mz.bind} style={{ position: 'relative', overflow: 'hidden', borderRadius: 12, touchAction: mz.zoom > 1 ? 'none' : 'pan-y', cursor: mz.zoom > 1 ? (mz.dragging ? 'grabbing' : 'grab') : 'default', background: '#2E0A4E' }}>
+                  <div style={{ position: 'relative', aspectRatio: `${map.width} / ${map.height}`, transform: `translate(${mz.pan.x}px, ${mz.pan.y}px) scale(${mz.zoom})`, transformOrigin: '0 0', transition: mz.dragging ? 'none' : 'transform .35s ease', willChange: 'transform' }}>
+                    <MapLayers
+                      key={route.id}
+                      img={map.img} alt={alt} route={route} routes={routes} extraLines={extraLines}
+                      trails={trails} arrows={arrows} cables={drawRoutes ? cables : []} signature={sigPts} isMobile={isMobile}
+                    />
+                    {visible.map((p) => {
+                      const si = stationIndex(p.n);
                       return (
-                        <g key={'loop' + id}>
-                          <g opacity={0.38} filter="url(#amglow)">
-                            {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 2.8 : 2.3)} />)}
-                          </g>
-                          {trails[id].map((e, i) => <polyline key={i} points={pts(e)} pathLength={1} fill="none" stroke={trailColor(id)} strokeLinecap="round" strokeLinejoin="round" style={anim(e, isMobile ? 1.3 : 1.1)} />)}
-                          {/* Direction of travel, as printed on the official map. Each chevron pops in the moment the
-                              trace reaches it (time = when the pen passes the nearest trail point), in the loop's colour. */}
-                          {arrows?.[id]?.map((a, i) => {
-                            let best = Infinity, at = 0;
-                            for (const e of trails[id]) {
-                              const n = e.pts.length;
-                              for (let k = 0; k < n; k++) {
-                                const d = (e.pts[k][0] - a.x) ** 2 + (e.pts[k][1] - a.y) ** 2;
-                                if (d < best) { best = d; at = e.d0 + e.len * (n > 1 ? k / (n - 1) : 0); }
-                              }
-                            }
-                            const delay = (loopOffset[id] + at) / trailSpeed;
-                            const d = isMobile ? 'M -1.7 -1.6 L 0.3 0 L -1.7 1.6' : 'M -1.35 -1.25 L 0.25 0 L -1.35 1.25';
-                            return (
-                              <g key={'a' + i} transform={`translate(${a.x} ${a.y}) rotate(${a.a})`}>
-                                {/* the CSS scale lives on an inner group so it never overrides the placement transform above */}
-                                <g style={{ opacity: 0, animation: `vpop .35s cubic-bezier(.2,1.4,.5,1) ${delay}s forwards` }}>
-                                  <path d={d} fill="none" stroke="#260040" strokeWidth={isMobile ? 1.3 : 1.0} strokeLinecap="round" strokeLinejoin="round" />
-                                  <path d={d} fill="none" stroke={trailColor(id)} strokeWidth={isMobile ? 0.7 : 0.5} strokeLinecap="round" strokeLinejoin="round" />
-                                </g>
-                              </g>
-                            );
-                          })}
-                        </g>
+                        <PinButton
+                          key={route.id + ':' + p.n}
+                          p={{ ...p, n: si >= 0 ? String(si + 1) : p.n, name: t(p.name) }}
+                          i={0}
+                          on={sel === p.n}
+                          isMobile={isMobile}
+                          scale={0.72 / mz.zoom}
+                          onClick={() => setSel((cur) => (cur === p.n ? '' : p.n))}
+                        />
                       );
                     })}
-                    {extraLines?.filter((l) => l.label === route.extra).map((l) => (
-                      <g key={'trace' + l.label}>
-                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={{ strokeWidth: isMobile ? 2.4 : 1.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
-                        <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeLinecap="round" style={{ strokeWidth: isMobile ? 0.7 : 0.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
-                        <text x={(l.from[0] + l.to[0]) / 2} y={(l.from[1] + l.to[1]) / 2 - 1.8} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 2.6 : 1.9, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.7 }} transform={`rotate(${Math.atan2(l.to[1] - l.from[1], l.to[0] - l.from[0]) * 180 / Math.PI} ${(l.from[0] + l.to[0]) / 2} ${(l.from[1] + l.to[1]) / 2})`}>{t(l.label)}</text>
-                      </g>
-                    ))}
-                    {/* Cables use viewBox units (no non-scaling-stroke): Chrome ignores pathLength for dashes otherwise, which breaks the trace. */}
-                    {drawRoutes && cables.map((s, i) => (
-                      <line key={'g' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 2.4 : 1.3 })} />
-                    ))}
-                    {drawRoutes && cables.map((s, i) => (
-                      <line key={'c' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 0.6 : 0.34 })} />
-                    ))}
-                    {drawRoutes && cables.map((s, i) => (
-                      <circle key={'s' + i} cx={s.b.px} cy={s.b.py} r={0.9} fill="#FFFFFF" style={{ opacity: 0, animation: `vspark .6s ease-out ${(i + 1) * TRACE - 0.1}s forwards` }} />
-                    ))}
-                    {sigPts && sigPts[0] && sigPts[1] && (
-                      <>
-                        <line x1={sigPts[0].px} y1={sigPts[0].py} x2={sigPts[1].px} y2={sigPts[1].py} stroke="#FFFFFF" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 2 }} />
-                        <text x={(sigPts[0].px + sigPts[1].px) / 2} y={(sigPts[0].py + sigPts[1].py) / 2 - 2.2} textAnchor="middle" fill="#FFFFFF" style={{ fontFamily: MONO, fontSize: isMobile ? 3.2 : 2.3, fontWeight: 700, letterSpacing: '.08em', paintOrder: 'stroke', stroke: '#260040', strokeWidth: 0.8 }} transform={`rotate(${Math.atan2(sigPts[1].py - sigPts[0].py, sigPts[1].px - sigPts[0].px) * 180 / Math.PI} ${(sigPts[0].px + sigPts[1].px) / 2} ${(sigPts[0].py + sigPts[1].py) / 2})`}>{t('THE SIGNATURE · 1.5 KM')}</text>
-                      </>
-                    )}
-                  </svg>
-                {visible.map((p) => {
-                  const si = stationIndex(p.n);
-                  const label = si >= 0 ? String(si + 1) : p.n;
-                  const pin = { ...p, n: label, name: t(p.name), sub: p.sub as string | null, act: null } as unknown as Parameters<typeof PinButton>[0]['p'];
-                  return (
-                    <PinButton
-                      key={route.id + ':' + p.n}
-                      p={pin}
-                      i={0}
-                      on={sel === p.n}
-                      isMobile={isMobile}
-                      scale={0.72 / mz.zoom}
-                      onClick={() => setSel((cur) => (cur === p.n ? '' : p.n))}
-                    />
-                  );
-                })}
-                {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform + ` scale(${1 / mz.zoom})`} onClose={() => setSel('')} />}
-              </div>
-              <div style={{ position: 'absolute', left: 12, top: 12, zIndex: 6, display: 'flex', gap: 6 }}>
-                <ZoomBtn label="+" title={t('Zoom in')} onClick={() => mz.setZoom(mz.zoom + 0.5)} />
-                <ZoomBtn label="−" title={t('Zoom out')} onClick={() => mz.setZoom(mz.zoom - 0.5)} />
-                {mz.zoom > 1 && <ZoomBtn label="⟲" title={t('Reset view')} onClick={mz.reset} />}
-                {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{t('{z}× · DRAG TO PAN', { z: mz.zoom.toFixed(2).replace(/\.?0+$/, '') })}</span>}
-              </div>
-            </div>
+                    {popup && <MapPopup p={popup} left={popLeft} top={popTop} transform={popTransform + ` scale(${1 / mz.zoom})`} onClose={() => setSel('')} />}
+                  </div>
+                  <div style={{ position: 'absolute', left: 12, top: 12, zIndex: 6, display: 'flex', gap: 6 }}>
+                    <ZoomBtn label="+" title={t('Zoom in')} onClick={() => mz.setZoom(mz.zoom + 0.5)} />
+                    <ZoomBtn label="−" title={t('Zoom out')} onClick={() => mz.setZoom(mz.zoom - 0.5)} />
+                    {mz.zoom > 1 && <ZoomBtn label="⟲" title={t('Reset view')} onClick={mz.reset} />}
+                    {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{t('{z}× · DRAG TO PAN', { z: mz.zoom.toFixed(2).replace(/\.?0+$/, '') })}</span>}
+                  </div>
+                </div>
               </div>
               {/* Vallé band along the bottom of the sheet */}
               <div style={{ gridColumn: '1 / -1', background: '#FFFC33', color: '#340057', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '10px 22px', clipPath: 'polygon(0 22%, 100% 0, 100% 100%, 0 100%)', marginTop: -6 }}>
@@ -721,25 +231,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
           {isMobile && <RouteCard route={route} options={options} overlay={false} />}
         </div>
 
-        {gallery && gallery.shots.length > 0 && (
-          <div style={{ marginTop: 22 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em', color: '#33FF74' }}>{t(gallery.eyebrow)}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: '.12em', color: 'rgba(255,255,255,.55)' }}>{t('{n} PHOTOS · TAP TO OPEN', { n: gallery.shots.length })}</span>
-            </div>
-            <div style={{ position: 'relative' }}>
-              <div ref={wall} dir="ltr" onScroll={onWallScroll} style={{ display: 'grid', gridTemplateRows: `repeat(2, ${isMobile ? 124 : 156}px)`, gridAutoFlow: 'column', gridAutoColumns: isMobile ? '186px' : '234px', gap: 10, overflowX: 'auto', padding: '2px 2px 12px', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', scrollBehavior: 'smooth' }}>
-                {gallery.shots.map((s, i) => <GalleryTile key={s.src} s={s} big={i === 0} onClick={() => setShot(i)} />)}
-              </div>
-              {wallPos !== 'start' && <WallArrow side="left" onClick={() => scrollWall(-1)} />}
-              {wallPos !== 'end' && <WallArrow side="right" onClick={() => scrollWall(1)} />}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 2 }}>
-              <GlassBtn small label={t('‹  Previous')} onClick={() => scrollWall(-1)} />
-              <GlassBtn small label={t('Next photos  ›')} onClick={() => scrollWall(1)} />
-            </div>
-          </div>
-        )}
+        {gallery && gallery.shots.length > 0 && <PhotoWall gallery={gallery} onOpen={setShot} />}
 
         <div style={{ ...GLASS, borderRadius: 16, padding: '16px 22px', marginTop: 10, display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <div style={{ fontSize: 13.5, lineHeight: 1.55, flex: 1, minWidth: 260, color: 'rgba(255,255,255,.85)' }}>{footNote}</div>
