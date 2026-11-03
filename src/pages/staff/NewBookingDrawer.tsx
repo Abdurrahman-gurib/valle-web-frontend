@@ -7,6 +7,7 @@ import { NATC, mur } from '../../lib/format';
 import { createStaffBooking, type BookingChannel } from '../../lib/staffApi';
 import { Btn, Field, SectionLabel, Spinner, inputStyle, textareaStyle } from './ui';
 import { todayIsoPark } from './reportUi';
+import { errorMessage } from '../../lib/errors';
 
 const CHANNELS: { key: BookingChannel; label: string }[] = [
   { key: 'phone', label: 'Phone' }, { key: 'desk', label: 'Front desk' }, { key: 'whatsapp', label: 'WhatsApp' },
@@ -83,7 +84,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
       });
       onCreated(b);
     } catch (e) {
-      setErr((e as Error).message || 'Could not create the booking.');
+      setErr(errorMessage(e, 'Could not create the booking.'));
       setSaving(false);
     }
   };

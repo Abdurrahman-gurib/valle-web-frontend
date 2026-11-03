@@ -24,6 +24,7 @@ import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
 import TeamPanel from './TeamPanel';
 import SecurityPanel from './SecurityPanel';
+import { onLive } from './liveEvents';
 
 type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat' | 'calendar' | 'team' | 'security';
 
@@ -103,25 +104,21 @@ export default function StaffDashboard() {
   const [toast, setToast] = useState('');
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const h = (e: Event) => {
-      const b = (e as CustomEvent<{ refCode: string; guestName: string; visitDate: string; slot: string }>).detail;
+    const offBooking = onLive('valle:booking-new', (b) => {
       if (!b?.refCode) return;
       reloadStats(true);
       setToast(`New booking ${b.refCode} · ${b.guestName} · ${b.visitDate} ${b.slot}`);
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => setToast(''), 9000);
-    };
+    });
     // A quote request from the packages page: same toast, so it is not missed until someone opens Quotes.
-    const q = (e: Event) => {
-      const d = (e as CustomEvent<{ id: string; name: string; company: string; groupSize: string; preferredDate: string }>).detail;
+    const offQuote = onLive('valle:quote-new', (d) => {
       if (!d?.id) return;
       setToast(`New quote request · ${d.name}${d.company ? ' · ' + d.company : ''}${d.groupSize ? ' · ' + d.groupSize + ' people' : ''}${d.preferredDate ? ' · ' + d.preferredDate : ''} · see Quotes`);
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => setToast(''), 12000);
-    };
-    window.addEventListener('valle:booking-new', h);
-    window.addEventListener('valle:quote-new', q);
-    return () => { window.removeEventListener('valle:booking-new', h); window.removeEventListener('valle:quote-new', q); if (timer) clearTimeout(timer); };
+    });
+    return () => { offBooking(); offQuote(); if (timer) clearTimeout(timer); };
   }, [reloadStats]);
 
   const signOut = async () => {

@@ -7,6 +7,7 @@ import { ValleButton } from '../../components/ui/valle';
 import { Panel } from './reportUi';
 import { cn } from '../../lib/utils';
 import { Spinner, fieldLabelCls, inputCls } from './ui';
+import { errorMessage } from '../../lib/errors';
 
 
 function CodeForm({ id, labelText, submitText, busy, onSubmit, variant = 'dark' }: {
@@ -53,7 +54,7 @@ export default function SecurityPanel() {
 
   const run = async <T,>(fn: () => Promise<T>, then: (v: T) => void) => {
     setBusy(true); setError(''); setNote('');
-    try { then(await fn()); } catch (e) { setError((e as Error).message || 'That did not work'); }
+    try { then(await fn()); } catch (e) { setError(errorMessage(e, 'That did not work')); }
     finally { setBusy(false); }
   };
 

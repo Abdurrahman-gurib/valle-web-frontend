@@ -4,6 +4,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { cn } from '../../lib/utils';
 import { Btn, Spinner } from './ui';
 import { Panel } from './reportUi';
+import { errorMessage } from '../../lib/errors';
 
 const LABEL = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
 const INPUT = 'w-full border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[14px] py-[11px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
@@ -34,7 +35,7 @@ export default function ParkStatusPanel() {
       const s = await setParkStatus({ state: st, message: msg, pausedActivities: Object.entries(pz).filter(([, on]) => on).map(([id]) => id) });
       setStatus(s); setState(s.state); setMessage(s.message); setPaused(Object.fromEntries(s.pausedActivities.map((id) => [id, true])));
       setSaved(`Saved · guests now see "${s.state === 'open' ? 'open' : s.state === 'partial' ? 'partly open' : 'closed'}"${s.pausedNames.length ? ' · paused ' + s.pausedNames.join(', ') : ''}.`);
-    } catch (e) { setErr((e as Error).message || 'Could not save.'); } finally { setBusy(false); }
+    } catch (e) { setErr(errorMessage(e, 'Could not save.')); } finally { setBusy(false); }
   };
   const activities = catalog.ACTS.filter((a) => a.mode === 'pp' || a.mode === 'flat');
   const stateBtn = (s: 'open' | 'partial' | 'closed', label: string, color: string) => (

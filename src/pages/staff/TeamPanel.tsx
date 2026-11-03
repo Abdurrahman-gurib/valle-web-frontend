@@ -7,6 +7,7 @@ import { ValleButton } from '../../components/ui/valle';
 import { cn } from '../../lib/utils';
 import { Panel, tdCls, thCls } from './reportUi';
 import { Spinner, fieldLabelCls, inputCls, shortDate } from './ui';
+import { errorMessage } from '../../lib/errors';
 
 const ROLES: TeamRole[] = ['agent', 'hr', 'manager'];
 
@@ -27,7 +28,7 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
   const act = async (id: string, fn: () => Promise<unknown>, ok: string) => {
     setBusyId(id); setError(''); setNote('');
     try { await fn(); setNote(ok); load(); }
-    catch (e) { setError((e as Error).message || 'That did not work'); }
+    catch (e) { setError(errorMessage(e, 'That did not work')); }
     finally { setBusyId(null); }
   };
 
@@ -43,7 +44,7 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
       setForm({ name: '', email: '', role: 'agent' });
       load();
     } catch (err) {
-      setError((err as Error).message || 'Could not add the account');
+      setError(errorMessage(err, 'Could not add the account'));
     } finally {
       setCreating(false);
     }

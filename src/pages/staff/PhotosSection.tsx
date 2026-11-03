@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { deletePhoto, getPhotos, photosReady, uploadPhoto, type StaffPhotoSet } from '../../lib/staffApi';
 import { Btn, SectionLabel, Spinner, card } from './ui';
+import { errorMessage } from '../../lib/errors';
 
 /**
  * Visit photos in the booking drawer: upload the shoot (one file at a time,
@@ -27,11 +28,11 @@ export function PhotosSection({ refCode }: { refCode: string }) {
       }
       if (last) setSet(last);
       setMsg(`${files.length} photo${files.length === 1 ? '' : 's'} uploaded.`);
-    } catch (e) { setErr((e as Error).message || 'Upload failed.'); } finally { setBusy(null); setProgress(''); if (fileInput.current) fileInput.current.value = ''; }
+    } catch (e) { setErr(errorMessage(e, 'Upload failed.')); } finally { setBusy(null); setProgress(''); if (fileInput.current) fileInput.current.value = ''; }
   };
   const remove = async (id: string) => {
     setBusy(id); setErr('');
-    try { setSet(await deletePhoto(refCode, id)); } catch (e) { setErr((e as Error).message); } finally { setBusy(null); }
+    try { setSet(await deletePhoto(refCode, id)); } catch (e) { setErr(errorMessage(e)); } finally { setBusy(null); }
   };
   const ready = async () => {
     setBusy('ready'); setErr(''); setMsg('');
@@ -39,7 +40,7 @@ export function PhotosSection({ refCode }: { refCode: string }) {
       const r = await photosReady(refCode);
       setSet((s) => (s ? { ...s, photosReadyAt: r.photosReadyAt } : s));
       setMsg(`Guest told: e-mail ${r.email ? 'sent' : 'not sent'}, WhatsApp ${r.whatsapp ? 'sent' : 'not sent (outside the 24-hour window or no number)'}.`);
-    } catch (e) { setErr((e as Error).message || 'Could not notify.'); } finally { setBusy(null); }
+    } catch (e) { setErr(errorMessage(e, 'Could not notify.')); } finally { setBusy(null); }
   };
 
   return (

@@ -3,6 +3,7 @@ import { getCalendar, saveCalendar, type CalendarClosure, type CalendarView } fr
 import { cn } from '../../lib/utils';
 import { Btn, Spinner } from './ui';
 import { Panel, todayIsoPark } from './reportUi';
+import { errorMessage } from '../../lib/errors';
 
 /**
  * Calendar & capacity (managers): what one arrival slot can take, park wide
@@ -80,7 +81,7 @@ export default function CalendarPanel() {
       const d = await saveCalendar({ slotCapacity: cap > 0 ? cap : undefined, closures, activityCapacity, sessions: sessionPlans });
       setData(d);
       setSaved('Saved. New bookings are checked against this from now on.');
-    } catch (e) { setErr((e as Error).message || 'Could not save.'); } finally { setBusy(false); }
+    } catch (e) { setErr(errorMessage(e, 'Could not save.')); } finally { setBusy(false); }
   };
 
   const today = todayIsoPark();

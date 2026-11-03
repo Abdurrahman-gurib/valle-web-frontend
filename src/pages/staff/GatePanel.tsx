@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { Btn, StatusChip, clockTime, shortDate } from './ui';
 import { gateCheckIn, gateWaiverPdfUrl, getGateDay, getGateView, isHttpError, type GateDayRow, type GateView } from '../../lib/staffApi';
+import { errorMessage } from '../../lib/errors';
 
 const money = (n: number) => 'Rs ' + n.toLocaleString('en-US');
 
@@ -47,7 +48,7 @@ function Scanner({ onRef, onClose }: { onRef: (ref: string) => void; onClose: ()
       if (!v || stopped) return;
       v.srcObject = stream;
       await v.play().catch(() => {});
-      const BD = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => Detector }).BarcodeDetector;
+      const BD = (window as Window & { BarcodeDetector?: new (o: { formats: string[] }) => Detector }).BarcodeDetector;
       const detector = BD ? new BD({ formats: ['qr_code'] }) : null;
       const jsQR = detector ? null : (await import('jsqr')).default;
       let busy = false;
@@ -121,7 +122,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
       setView(await getGateView(ref));
     } catch (e) {
       setView(null);
-      setErr(isHttpError(e) && e.status === 404 ? `No booking ${ref}` : (e as Error).message);
+      setErr(isHttpError(e) && e.status === 404 ? `No booking ${ref}` : errorMessage(e));
     }
   }, []);
 
@@ -137,7 +138,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
       const v = await gateCheckIn(view.refCode, withOverride, withOverride ? reason : undefined);
       setView(v); setOverride(false); loadDay(); onChanged?.();
     } catch (e) {
-      setErr((e as Error).message);
+      setErr(errorMessage(e));
     } finally {
       setBusy(false);
     }

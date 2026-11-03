@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Btn, Field, shortDate } from './ui';
 import { createCoupon, listCoupons, setCouponActive, type CouponRow } from '../../lib/staffApi';
+import { errorMessage } from '../../lib/errors';
 
 const CARD = 'bg-white border-[1.5px] border-valle-lilac rounded-[18px]';
 const LABEL = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
@@ -38,7 +39,7 @@ export default function CouponsPanel() {
       setCode(''); setNote(''); setValidTo(''); setMaxUses('');
       load();
     } catch (e) {
-      setErr((e as Error).message);
+      setErr(errorMessage(e));
     } finally {
       setBusy(false);
     }

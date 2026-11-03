@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getLiveOps, setLiveOps, type LiveOpsView } from '../../lib/staffApi';
 import { Btn, Spinner } from './ui';
 import { Panel } from './reportUi';
+import { errorMessage } from '../../lib/errors';
 
 const INPUT = 'w-full border-[1.5px] border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[10px] py-[7px] [font-family:inherit] text-[14.5px] outline-none text-valle-purple';
 
@@ -24,7 +25,7 @@ export default function LiveOpsPanel() {
       const activities = Object.fromEntries(Object.entries(draft).map(([id, d]) => [id, { waitMin: d.waitMin.trim() === '' ? null : Number(d.waitMin), meetingPoint: d.meetingPoint, note: d.note }]));
       load(await setLiveOps(activities));
       setSaved('Published · tickets update within a minute.');
-    } catch (e) { setErr((e as Error).message || 'Could not save.'); } finally { setBusy(false); }
+    } catch (e) { setErr(errorMessage(e, 'Could not save.')); } finally { setBusy(false); }
   };
   const clearWaits = () => setDraft((d) => Object.fromEntries(Object.entries(d).map(([id, x]) => [id, { ...x, waitMin: '' }])));
 
