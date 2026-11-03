@@ -1,6 +1,7 @@
 import { Fwd } from '@/components/ui/arrows';
 import { motion } from 'motion/react';
-import { Check, Plus } from 'lucide-react';
+import { Check, Pause, Play, Plus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { ValleButton, ValleCard } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -41,6 +42,69 @@ function GalRestShot({ g }: { g: GalleryShot }) {
         <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '5px 10px' }}>{g.tag}</span>
         <div style={{ fontSize: 13.5, color: '#FFFFFF', marginTop: 8, lineHeight: 1.35 }}>{g.cap}</div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The activity's clip, in place of the gallery's lead photo: muted, looping and
+ * inline, playing only while on screen. It never starts by itself for
+ * prefers-reduced-motion users (the poster still shows; the button plays it),
+ * and the pause button always stays visible.
+ */
+function GalleryVideo({ src, poster, label }: { src: string; poster: string; label: string }) {
+  const t = useT();
+  const ref = useRef<HTMLVideoElement>(null);
+  const userPaused = useRef(false);
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => {
+      if (userPaused.current) return;
+      if (e.isIntersecting) v.play().catch(() => undefined);
+      else v.pause();
+    }, { threshold: 0.25 });
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  const toggle = () => {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) {
+      userPaused.current = false;
+      v.play().catch(() => undefined);
+    } else {
+      userPaused.current = true;
+      v.pause();
+    }
+  };
+  return (
+    <div style={{ position: 'relative', width: '100%', minWidth: 0, aspectRatio: '848 / 406', minHeight: 'clamp(200px,30vw,520px)', borderRadius: 18, overflow: 'hidden', background: '#1F0033' }}>
+      <video
+        ref={ref}
+        data-testid="activity-video"
+        src={src}
+        poster={poster}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={label}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? t('Pause the video') : t('Play the video')}
+        title={playing ? t('Pause the video') : t('Play the video')}
+        className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        style={{ position: 'absolute', top: 12, insetInlineEnd: 12, width: 44, height: 44, borderRadius: 999, border: '1.5px solid rgba(255,255,255,.7)', background: 'rgba(31,0,51,.62)', backdropFilter: 'blur(6px)', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+      >{playing ? <Pause size={18} strokeWidth={2.5} aria-hidden /> : <Play size={18} strokeWidth={2.5} aria-hidden />}</button>
     </div>
   );
 }
@@ -117,10 +181,11 @@ export default function DetailPage() {
   const gal = catalog.GAL[act.id];
   // never repeat the page's cover photo inside its own gallery
   const galShots = gal ? gal.shots.filter((s) => s.src !== act.img) : [];
+  const galVideo = gal?.video;
   const galLead = galShots[0];
   const galLeadPos = (galLead && galLead.pos) || '50% 18%';
-  // a lead photo, then every other shot in a carousel
-  const galRest = galShots.slice(1);
+  // a lead photo (or the activity's clip), then every other shot in a carousel
+  const galRest = galVideo ? galShots : galShots.slice(1);
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const pl = catalog.PL[act.id] || [];
   const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
@@ -276,7 +341,7 @@ export default function DetailPage() {
         </div>
       </div>
 
-      {gal && galLead && (
+      {gal && (galVideo || galLead) && (
         <div style={{ marginTop: 'clamp(40px,5.5vw,64px)', background: '#340057', borderRadius: 26, overflow: 'hidden' }}>
           <Stripes height={12} />
           <div style={{ padding: 'clamp(22px,3.4vw,38px)' }}>
@@ -292,6 +357,7 @@ export default function DetailPage() {
               <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0, maxWidth: '44ch' }}>{gal.copy}</p>
             </div>
             <div style={{ marginTop: 22 }}>
+              {galVideo ? <GalleryVideo src={galVideo.src} poster={galVideo.poster} label={t('Video: {name}', { name: act.name })} /> : galLead && (
               <div style={{ position: 'relative', minWidth: 0, minHeight: 'clamp(260px,38vw,520px)', borderRadius: 18, overflow: 'hidden' }}>
                 <Img
                   src={galLead.src}
@@ -305,6 +371,7 @@ export default function DetailPage() {
                   <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{galLead.cap}</div>
                 </div>
               </div>
+              )}
               {/* the rest of the shoot: 4 across on desktop, 2 on a phone, swipe or arrows for more */}
               <div style={{ marginTop: 12 }} data-testid="gallery-carousel">
                 <CarouselTrack viewportRef={galCar.viewportRef} label={act.name} gap="gap-3" onKeyDown={carouselKeys(galCar.prev, galCar.next, isRtl(lang))}>

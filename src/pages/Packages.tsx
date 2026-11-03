@@ -427,7 +427,7 @@ export default function PackagesPage() {
 
   return (
     <>
-      <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
+      <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: `${groupSlug ? 128 : 104}px clamp(16px,3.5vw,40px) 0` }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <h1 style={{ ...BARLOW, fontSize: group ? 'clamp(34px,5vw,72px)' : 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{group ? t(group.title) : t('Packages')}</h1>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('ALL PRICES VAT INCLUSIVE')}<CurrencyPicker fg="#340057" /></span>
@@ -571,7 +571,7 @@ export default function PackagesPage() {
         {/* SENIOR CITIZENS */}
         {show('senior') && (<>
         <SectionHead id="senior" title={t('Senior citizens')} tag={t('06 · AGES 55 AND ABOVE')} marginTop="clamp(48px,7vw,80px)" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 14, marginTop: 26 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(245px,1fr))', gap: 14, marginTop: 26 }}>
           {(catalog.PACKS.senior || []).map((p) => (
             <ExCard key={p.name} pk={p} onOpen={() => setPk({ ...p, productKey: p.key })} />
           ))}

@@ -99,6 +99,8 @@ export interface Gallery {
   foot: string;
   cta: string;
   shots: GalleryShot[];
+  /** A short muted clip shown in place of the lead photo, with its poster still. */
+  video?: { src: string; poster: string };
 }
 
 export interface Combo {

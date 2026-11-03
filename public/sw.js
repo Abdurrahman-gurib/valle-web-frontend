@@ -11,6 +11,8 @@
  *           rates) and the guest's own ticket + QR, network first so prices are
  *           fresh online and still there offline.
  *   media   photos and menus, cache first, trimmed to a fixed number of entries.
+ *           Video clips are left to the network: players ask for byte ranges
+ *           (206), which the Cache API cannot store, and a clip is too big to keep.
  *
  * Never touched: anything that is not a same-origin GET, the back office
  * (/staff, /hr), the chat socket, bookings, waivers, the sitemap.
@@ -31,6 +33,7 @@ const LANG_PREFIX = /^\/(fr|de|it|ar|ru|es|hi)(?=\/|$)/;
 const PRIVATE_PAGE = /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//;
 const OFFLINE_API = /^\/api\/(catalog|fx)$/;
 const TICKET_API = /^\/api\/tickets\/[^/]+(\/qr\.png)?$/;
+const VIDEO = /\.(mp4|webm|mov|m4v)$/i;
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
@@ -128,6 +131,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(cacheFirst(event, SHELL));
     return;
   }
+  if (VIDEO.test(path) || request.headers.has('range')) return;
   if (path.startsWith('/images/') || path.startsWith('/menus/')) {
     event.respondWith(cacheFirst(event, MEDIA, MEDIA_MAX));
   }
@@ -137,7 +141,7 @@ self.addEventListener('fetch', (event) => {
 async function warm(urls) {
   const cache = await caches.open(MEDIA);
   for (const url of urls) {
-    if (typeof url !== 'string' || !url.startsWith('/images/')) continue;
+    if (typeof url !== 'string' || !url.startsWith('/images/') || VIDEO.test(url)) continue;
     try {
       if (await caches.match(url)) continue;
       const response = await fetch(url);

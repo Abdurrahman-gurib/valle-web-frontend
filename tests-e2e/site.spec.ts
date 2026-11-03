@@ -240,6 +240,24 @@ test.describe('experience detail', () => {
     await page.getByRole('main').getByRole('link', { name: /All \d+ experiences/i }).click();
     await expect(page).toHaveURL(/\/explore$/);
   });
+
+  test('the Giant Swing shows its price, age and a muted inline clip with a pause control', async ({ page }) => {
+    await page.goto('/activities/giantswing');
+    await expect(page.getByRole('heading', { level: 1, name: /The Giant Swing/i })).toBeVisible();
+    await expect(page.getByText('Giant Swing · 2 rides', { exact: true })).toBeVisible();
+    await expect(page.getByText('Rs 700').first()).toBeVisible();
+    await expect(page.getByText('12+', { exact: true }).first()).toBeVisible();
+    const video = page.getByTestId('activity-video');
+    await expect(video).toBeAttached();
+    expect(await video.evaluate((v: HTMLVideoElement) => ({ muted: v.muted, loop: v.loop, inline: v.playsInline, preload: v.preload, poster: !!v.poster }))).toEqual({ muted: true, loop: true, inline: true, preload: 'metadata', poster: true });
+    await expect(page.getByRole('button', { name: /(Pause|Play) the video/ })).toBeVisible();
+    const box = (await video.boundingBox())!;
+    expect(box.x + box.width, 'the clip stays inside the viewport').toBeLessThanOrEqual(page.viewportSize()!.width);
+    const clip = await page.request.get('/images/giant-swing/giant-swing.mp4', { headers: { Range: 'bytes=0-99' } });
+    expect(clip.status()).toBe(206);
+    expect(clip.headers()['content-type']).toBe('video/mp4');
+    await expectNoHorizontalScroll(page);
+  });
 });
 
 test.describe('booking flow', () => {

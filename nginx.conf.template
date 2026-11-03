@@ -232,8 +232,9 @@ server {
         try_files $uri =404;
     }
 
-    # Long-lived caching for hashed assets and media.
-    location ~* \.(js|css|woff2|jpg|jpeg|png|webp|avif|svg|ico|pdf|webmanifest)$ {
+    # Long-lived caching for hashed assets and media. Video clips (.mp4) get their
+    # video/mp4 type from mime.types and byte ranges (206) from the static module.
+    location ~* \.(js|css|woff2|jpg|jpeg|png|webp|avif|svg|ico|pdf|webmanifest|mp4)$ {
         expires 30d;
         include /etc/nginx/security-headers.conf;
         add_header Cache-Control "public, max-age=2592000, immutable" always;
