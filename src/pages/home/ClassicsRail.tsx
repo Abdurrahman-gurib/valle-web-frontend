@@ -24,9 +24,11 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
       style={{
         cursor: 'pointer', flex: '0 0 auto', width: 'min(330px,80vw)', background: '#FFFFFF',
         borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF', margin: '8px 0 24px',
+        // stretches with its slide (flex parents) so every card in the rail is the same height
+        display: 'flex', flexDirection: 'column',
       }}
     >
-      <div style={{ position: 'relative', height: 225, background: '#EBE2FF' }}>
+      <div style={{ position: 'relative', height: 225, flexShrink: 0, background: '#EBE2FF' }}>
         <Img eager src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span style={{ position: 'absolute', top: 12, left: 12, background: a.catColor, color: a.catFg, fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)' }}>{a.catBadge}</span>
         <span style={{ position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: '7px 10px', boxShadow: '0 6px 16px -6px rgba(0,0,0,.5)' }}>
@@ -50,13 +52,13 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
           </button>
         )}
       </div>
-      <div style={{ padding: '16px 18px 18px' }}>
+      <div style={{ padding: '16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
           <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 21, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
           <div title={t('Pulse level')} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: a.pulseColor, whiteSpace: 'nowrap' }}>{a.pulseStr}</div>
         </div>
-        <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40 }}>{a.blurb}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
+        <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40, marginBottom: 12 }}>{a.blurb}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
           <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</span>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>{t('Details →')}</span>
         </div>
@@ -94,7 +96,7 @@ export function ClassicsRail() {
         <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[18px]" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
           {/* Embla moves each slide with its own transform when it loops, so the slide is a
               plain wrapper: the card's Motion hover transform would otherwise overwrite it. */}
-          {items.map((a) => <div key={a.id} className="shrink-0"><RailCard a={a} rateTag={rateTag} /></div>)}
+          {items.map((a) => <div key={a.id} className="flex shrink-0"><RailCard a={a} rateTag={rateTag} /></div>)}
         </CarouselTrack>
       </div>
     </section>
