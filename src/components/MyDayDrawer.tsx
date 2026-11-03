@@ -2,7 +2,7 @@ import { useEscape } from '../hooks/useEscape';
 import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
-import { money } from '../lib/format';
+import { flatUnitName, money } from '../lib/format';
 import { Img } from './Img';
 import { useT } from '../i18n';
 import type { SelLine } from '../types';
@@ -31,10 +31,7 @@ function CartRow({ line }: { line: SelLine }) {
   const amt = isFlat
     ? price * (c.u || 0)
     : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
-  const unitName =
-    ({ buggy: t('BUGGIES'), group: t('GROUPS') } as Record<string, string>)[
-      a.flatLabel ? a.flatLabel.replace('/', '').trim().toLowerCase() : ''
-    ] || t('UNITS');
+  const unitName = flatUnitName(a.flatLabel, t);
 
   return (
     <div className="flex items-center gap-2.5 py-[11px]" style={{ borderBottom: '1px dashed #EBE2FF' }}>

@@ -5,6 +5,7 @@ import { reserveTable } from '../lib/api';
 import { todayIso } from '../lib/format';
 import { useApp } from '../store/AppStore';
 import type { MenuGroup } from '../types';
+import { errorMessage, httpStatus } from '../lib/errors';
 
 /**
  * A table at one of the park's restaurants: date, time, party, an optional
@@ -45,8 +46,8 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
       await reserveTable(restaurantId, { name: name.trim(), email: email.trim() || undefined, phone: phone.trim() || undefined, visitDate: date, visitTime: time, party, preorder, notes: notes.trim() || undefined });
       setDone(true);
     } catch (e) {
-      const status = (e as { status?: number }).status;
-      setErr(status === 429 ? t('Too many requests from this connection. Please try again in a few minutes, or call us.') : status ? ((e as Error).message || t('We could not send your request. Please try again.')) : t('We could not reach the restaurant desk. Check your connection and try again.'));
+      const status = httpStatus(e);
+      setErr(status === 429 ? t('Too many requests from this connection. Please try again in a few minutes, or call us.') : status ? errorMessage(e, t('We could not send your request. Please try again.')) : t('We could not reach the restaurant desk. Check your connection and try again.'));
     } finally { setBusy(false); }
   };
 

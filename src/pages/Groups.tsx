@@ -10,7 +10,8 @@ import { paths } from '../lib/nav';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
-import { productAmount, type Activity, type BookingRequest, type BookingResponse, type Product } from '../types';
+import { productAmount, type BookingRequest, type BookingResponse } from '../types';
+import { errorMessage, httpStatus } from '../lib/errors';
 
 /**
  * /groups: schools, companies and clubs book online with per-head pricing,
@@ -92,11 +93,11 @@ export default function GroupsPage() {
     for (const [id, on] of Object.entries(picked)) {
       if (!on) continue;
       if (id.startsWith('product:')) {
-        const p = students.find((x) => 'product:' + x.key === id) as Product | undefined;
+        const p = students.find((x) => 'product:' + x.key === id);
         if (!p) continue;
         out.push({ id, name: p.name, perHead: mur(rate === 'nr' ? p.nr : p.rr), amount: productAmount(p, rate, adults, kids, 0) });
       } else {
-        const a = activities.find((x) => x.id === id) as Activity | undefined;
+        const a = activities.find((x) => x.id === id);
         if (!a) continue;
         const rp = catalog.RATEP[a.id];
         const price = rp ? (rate === 'nr' ? rp[1] : rp[0]) : a.price;
@@ -141,8 +142,8 @@ export default function GroupsPage() {
       setDone({ ...res, total: res.total });
       window.scrollTo(0, 0);
     } catch (e) {
-      const status = (e as { status?: number }).status;
-      setErr(status ? ((e as Error).message || t('We could not confirm your booking. Please try again.')) : t('We could not reach the booking desk. Check your connection and try again.'));
+      const status = httpStatus(e);
+      setErr(status ? errorMessage(e, t('We could not confirm your booking. Please try again.')) : t('We could not reach the booking desk. Check your connection and try again.'));
     } finally { setBusy(false); }
   };
 

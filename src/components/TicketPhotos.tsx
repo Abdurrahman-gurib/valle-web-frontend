@@ -5,6 +5,7 @@ import { fetchPhotos, type PhotoSet } from '../lib/day';
 import { mur } from '../lib/format';
 import { useCatalog } from '../store/CatalogContext';
 import { productAmount, type RateKey } from '../types';
+import { errorMessage } from '../lib/errors';
 
 const MONO = "'Chivo Mono',monospace";
 
@@ -26,7 +27,7 @@ export function TicketPhotos({ tk, token, onChanged }: { tk: TicketView; token: 
     return () => { dead = true; };
   }, [tk.refCode, token, tk.lines]);
 
-  const rate = (tk.rate === 'nr' ? 'nr' : 'rr') as RateKey;
+  const rate: RateKey = tk.rate === 'nr' ? 'nr' : 'rr';
   const hasPackage = tk.lines.some((l) => l.productKey?.startsWith('photo:'));
   const tiers = (catalog.PRODUCTS ?? []).filter((p) => p.family === 'photo' && (p.rateOnly === null || p.rateOnly === rate));
   const canAdd = !hasPackage && tiers.length > 0 && (tk.status === 'confirmed' || tk.status === 'postponed');
@@ -39,7 +40,7 @@ export function TicketPhotos({ tk, token, onChanged }: { tk: TicketView; token: 
         : { id: 'product:' + l.productKey, adults: l.adults, kids: l.kids, units: l.units }));
       items.push({ id: 'product:' + key, adults: tk.adults, kids: tk.kids, units: 1 });
       onChanged(await changeBooking(tk.refCode, token, { items }));
-    } catch (e) { setErr((e as Error).message || t('Could not add the package.')); } finally { setBusy(null); }
+    } catch (e) { setErr(errorMessage(e, t('Could not add the package.'))); } finally { setBusy(null); }
   };
 
   if (!set) return null;

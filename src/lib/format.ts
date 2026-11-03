@@ -112,3 +112,9 @@ export const NATC: Record<string, string> = {
   'Australia': '+61',
   'USA': '+1',
 };
+
+/** What the stepper of a flat-priced experience counts: BUGGIES, GROUPS or UNITS (`t` is the page's translator). */
+export function flatUnitName(flatLabel: string | undefined, t: (s: string) => string): string {
+  const key = flatLabel ? flatLabel.replace('/', '').trim().toLowerCase() : '';
+  return key === 'buggy' ? t('BUGGIES') : key === 'group' ? t('GROUPS') : t('UNITS');
+}

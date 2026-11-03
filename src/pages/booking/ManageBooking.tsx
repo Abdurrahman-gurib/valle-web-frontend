@@ -4,6 +4,7 @@ import { cancelBooking, changeBooking, type TicketView } from '../../lib/api';
 import { mur, todayIso } from '../../lib/format';
 import { useCatalog } from '../../store/CatalogContext';
 import { cn } from '@/lib/utils';
+import { errorMessage, httpStatus } from '../../lib/errors';
 
 /**
  * "Manage my booking" on the ticket page: date, arrival slot, party and
@@ -86,8 +87,8 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
       setDone(t('Saved. Your updated ticket is on its way by e-mail; the desk has been told.'));
       setOpen(false);
     } catch (e) {
-      const status = (e as { status?: number }).status;
-      setErr(status ? ((e as Error).message || t('We could not save the change. Please try again.')) : t('We could not reach the booking desk. Check your connection and try again.'));
+      const status = httpStatus(e);
+      setErr(status ? errorMessage(e, t('We could not save the change. Please try again.')) : t('We could not reach the booking desk. Check your connection and try again.'));
     } finally { setBusy(false); }
   };
   const cancel = async () => {
@@ -98,7 +99,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
       setDone(t('Your booking is cancelled. Nothing more to do; we hope to see you another day.'));
       setOpen(false);
     } catch (e) {
-      setErr((e as Error).message || t('We could not cancel the booking. Please call us.'));
+      setErr(errorMessage(e, t('We could not cancel the booking. Please call us.')));
     } finally { setBusy(false); setConfirmCancel(false); }
   };
 

@@ -8,6 +8,7 @@ import { Stripes } from '../../components/Stripes';
 import { SignaturePad, type SignaturePadHandle } from '../../components/SignaturePad';
 import { localizePath, tr, useLang, useT, _t } from '../../i18n';
 import { cn } from '@/lib/utils';
+import { errorMessage } from '../../lib/errors';
 
 
 /**
@@ -161,7 +162,7 @@ export default function WaiverPage() {
       pad.current?.clear();
       formTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
-      setErr((e as Error).message || t('Could not save the waiver. Please try again.'));
+      setErr(errorMessage(e, t('Could not save the waiver. Please try again.')));
     } finally {
       setBusy(false);
     }

@@ -36,7 +36,7 @@ export const Img = forwardRef<HTMLImageElement, ImgProps>(function Img(
   const setRef = useCallback(
     (node: HTMLImageElement | null) => {
       if (typeof ref === 'function') ref(node);
-      else if (ref) (ref as React.MutableRefObject<HTMLImageElement | null>).current = node;
+      else if (ref) ref.current = node;
       if (node && node.complete && node.naturalWidth > 0) setState('loaded');
     },
     [ref],
