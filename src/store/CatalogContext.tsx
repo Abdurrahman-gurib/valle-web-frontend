@@ -38,3 +38,8 @@ export function useCatalog(): Catalog {
 export function useCatalogLive(): boolean {
   return useContext(Ctx).live;
 }
+
+/** The catalog as the API sends it (English): for reading meaning from text, e.g. which icon an inclusion gets. */
+export function useRawCatalog(): Catalog {
+  return useContext(Ctx).catalog;
+}

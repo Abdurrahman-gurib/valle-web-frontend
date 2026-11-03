@@ -351,12 +351,16 @@ test.describe('packages', () => {
   test('opens a package modal with prices', async ({ page }) => {
     await page.goto('/packages/exclusive');
     await expect(page.getByRole('heading', { name: /Packages/i }).first()).toBeVisible();
-    await page.getByText('MOST POPULAR', { exact: false }).first().click();
-    await expect(page.getByText('WHAT IS INCLUDED', { exact: true })).toBeVisible();
+    // every card lists its inclusions now; the modal is the one with the Close button
+    const closers = await page.getByTitle('Close').count();
+    await page.getByRole('button', { name: /View details of Standard/ }).click();
+    await expect(page.getByTitle('Close')).toHaveCount(closers + 1);
+    const close = page.getByTitle('Close').last();
+    await expect(close).toBeVisible();
     // bookable online when the API lists products; a WhatsApp reservation otherwise (bundled fallback catalog)
     await expect(page.getByText(/Reserve this package →|Add to my day and book|In my day · book now/)).toBeVisible();
-    await page.getByTitle('Close').first().click();
-    await expect(page.getByText('WHAT IS INCLUDED', { exact: true })).toBeHidden();
+    await close.click();
+    await expect(page.getByTitle('Close')).toHaveCount(closers);
     await expectNoHorizontalScroll(page);
   });
 
@@ -381,6 +385,109 @@ test.describe('packages', () => {
     await expect(page.getByText('Package 1').first()).toBeVisible();
     const sel = await page.evaluate(() => JSON.parse(localStorage.getItem('valle_sel') || '{}') as Record<string, unknown>);
     expect(Object.keys(sel)).toContain('product:pkg:senior:0');
+  });
+
+  /** The catalog the pages read (live API, same shape as the bundled fallback). */
+  async function catalogOf(page: Page) {
+    const r = await page.request.get('/api/catalog');
+    expect(r.ok()).toBeTruthy();
+    return r.json() as Promise<{
+      PACKS: Record<string, { key?: string; name: string; single: string; dbl: string }[]>;
+      PRODUCTS: { key: string; rr: number; dblRr: number | null }[];
+      PL: Record<string, { n: string; rr: number; nr: number }[]>;
+      PHOTO: { rr: { tiers: { key?: string; name: string; single: string; dbl: string }[] } };
+      TEAM: unknown[];
+    }>;
+  }
+  const rs = (n: number) => 'Rs ' + n.toLocaleString('en-US');
+  const selKeys = (page: Page) => page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('valle_sel') || '{}') as Record<string, unknown>));
+
+  test('/packages/exclusive shows every family with catalog prices and books a tier into My Day', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await catalogOf(page);
+    await page.goto('/packages/exclusive');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Exclusive packages/i);
+    const cards = page.getByTestId('pack-card');
+    await expect(cards).toHaveCount(cat.PACKS.ls.length + cat.PACKS.ex.length);
+    const std = cards.filter({ hasText: cat.PACKS.ls[1].name }).first();
+    await expect(std).toContainText(cat.PACKS.ls[1].single);
+    await expect(std).toContainText(cat.PACKS.ls[1].dbl);
+    const vip = cat.PRODUCTS.find((p) => p.key === 'vip')!;
+    await expect(page.getByTestId('vip-feature-single')).toHaveText(rs(vip.rr));
+    await expect(page.getByTestId('vip-feature-double')).toHaveText(rs(vip.dblRr!));
+    // Diamond is sold at the visitor rate: a resident sees the rate switch, not a Book button
+    await expect(page.getByTestId('diamond-feature').getByTestId('pkg-rate-note')).toBeVisible();
+    await expect(page.getByTestId('combo-card')).toHaveCount(2);
+    await expectNoHorizontalScroll(page);
+
+    const gold = cat.PACKS.ex[2];
+    await cards.filter({ hasText: gold.single }).getByTestId('pkg-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    expect(await selKeys(page)).toContain('product:' + gold.key);
+  });
+
+  test('/packages/resident lists the four resident packages and books one into My Day', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await catalogOf(page);
+    await page.goto('/packages/resident');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Resident packages/i);
+    const cards = page.getByTestId('resident-package');
+    await expect(cards).toHaveCount(cat.PACKS.resident.length);
+    for (const [i, p] of cat.PACKS.resident.entries()) await expect(cards.nth(i).getByTestId('resident-price')).toHaveText(p.single);
+    await expect(page.getByTestId('kids-pricelist')).toBeVisible();
+    await expectNoHorizontalScroll(page);
+    await cards.nth(0).getByTestId('pkg-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    expect(await selKeys(page)).toContain('product:' + cat.PACKS.resident[0].key);
+  });
+
+  test('/packages/student shows the student price list, the lunch prices and leads to the school booking', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await catalogOf(page);
+    const lunch = cat.PL.student.filter((r) => /^Lunch/.test(r.n));
+    await page.goto('/packages/student');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Student special offer/i);
+    await expect(page.getByTestId('student-row')).toHaveCount(cat.PL.student.length - lunch.length);
+    await expect(page.getByTestId('student-lunch-price')).toHaveText(lunch.map((r) => rs(r.rr)));
+    await expect(page.getByTestId('student-group').filter({ hasText: 'Kids Park' })).toContainText(/Top-up card/);
+    await expectNoHorizontalScroll(page);
+    await page.getByTestId('book-school').click();
+    await expect(page).toHaveURL(/\/groups$/);
+  });
+
+  test('/packages/corporate opens on the team-building hero and lists the catalog programmes', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await catalogOf(page);
+    await page.goto('/packages/corporate');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Need a stronger team\?/i);
+    await expect(page.getByTestId('team-phone')).toHaveAttribute('href', 'tel:+2306604477');
+    await expect(page.getByTestId('team-card')).toHaveCount(cat.TEAM.length);
+    await expectNoHorizontalScroll(page);
+    await page.getByTestId('team-hero-quote').click();
+    await expect(page.getByPlaceholder('Name *')).toBeInViewport();
+  });
+
+  test('/packages/photo-video shows the photo tiers, cinematic items and the Waterfall Swing, and books them into My Day', async ({ page }) => {
+    test.skip(!(await apiUp(page)), 'API not running');
+    const cat = await catalogOf(page);
+    await page.goto('/packages/photo-video');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Photo & video/i);
+    const tiers = page.getByTestId('photo-tier');
+    await expect(tiers).toHaveCount(cat.PHOTO.rr.tiers.length);
+    await expect(tiers.nth(0)).toContainText(cat.PHOTO.rr.tiers[0].single);
+    await expect(tiers.nth(0)).toContainText(cat.PHOTO.rr.tiers[0].dbl);
+    const swing = page.getByTestId('swing-row');
+    await expect(swing).toHaveCount(cat.PL.swing.length);
+    for (const [i, r] of cat.PL.swing.entries()) await expect(swing.nth(i)).toContainText(rs(r.rr));
+    await expect(page.getByRole('link', { name: 'See the Waterfall Swing' })).toHaveAttribute('href', '/activities/swing');
+    await expectNoHorizontalScroll(page);
+    await swing.nth(1).getByTestId('swing-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    expect(await selKeys(page)).toContain('swing::' + cat.PL.swing[1].n);
+    await page.goto('/packages/photo-video');
+    await tiers.nth(0).getByTestId('photo-book').click();
+    await expect(page).toHaveURL(/\/booking$/);
+    expect(await selKeys(page)).toContain('product:' + cat.PHOTO.rr.tiers[0].key);
   });
 
   test('team quote form validates and submits', async ({ page }) => {
