@@ -1523,6 +1523,71 @@
    "rateOnly": null,
    "image": "",
    "note": "School groups · per student"
+  },
+  {
+   "key": "student:14",
+   "family": "student",
+   "name": "Kids Park · Mini Quad",
+   "mode": "pp",
+   "rr": 100,
+   "nr": 100,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": null,
+   "image": "",
+   "note": "School groups · per student"
+  },
+  {
+   "key": "student:15",
+   "family": "student",
+   "name": "Kids Park · Roller Coaster Express",
+   "mode": "pp",
+   "rr": 100,
+   "nr": 100,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": null,
+   "image": "",
+   "note": "School groups · per student"
+  },
+  {
+   "key": "student:16",
+   "family": "student",
+   "name": "Kids Park · Mini Excavator",
+   "mode": "pp",
+   "rr": 100,
+   "nr": 100,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": null,
+   "image": "",
+   "note": "School groups · per student"
+  },
+  {
+   "key": "student:17",
+   "family": "student",
+   "name": "Kids Park · Pirate Ship",
+   "mode": "pp",
+   "rr": 100,
+   "nr": 100,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": null,
+   "image": "",
+   "note": "School groups · per student"
+  },
+  {
+   "key": "student:18",
+   "family": "student",
+   "name": "Kids Park · top-up card",
+   "mode": "pp",
+   "rr": 50,
+   "nr": 50,
+   "dblRr": null,
+   "dblNr": null,
+   "rateOnly": null,
+   "image": "",
+   "note": "School groups · per student"
   }
  ],
  "PACKS": {
@@ -3332,6 +3397,31 @@
     "n": "Lunch menu · 12 yrs and over",
     "rr": 300,
     "nr": 300
+   },
+   {
+    "n": "Kids Park · Mini Quad",
+    "rr": 100,
+    "nr": 100
+   },
+   {
+    "n": "Kids Park · Roller Coaster Express",
+    "rr": 100,
+    "nr": 100
+   },
+   {
+    "n": "Kids Park · Mini Excavator",
+    "rr": 100,
+    "nr": 100
+   },
+   {
+    "n": "Kids Park · Pirate Ship",
+    "rr": 100,
+    "nr": 100
+   },
+   {
+    "n": "Kids Park · top-up card",
+    "rr": 50,
+    "nr": 50
    }
   ],
   "kids": [
