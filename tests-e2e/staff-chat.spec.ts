@@ -170,7 +170,7 @@ test.describe('staff dashboard', () => {
 
     await page.getByRole('button', { name: /sales & reports/i }).click();
     const reports = page.getByTestId('reports-panel');
-    await expect(reports.getByText('REVENUE', { exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(reports.getByText(/^REVENUEⓘ?$/)).toBeVisible({ timeout: 15000 });
     await expect(reports.getByText('WHERE GUESTS COME FROM')).toBeVisible();
     await expect(reports.getByText('WHAT SELLS')).toBeVisible();
     await reports.getByRole('button', { name: '90 days' }).click();

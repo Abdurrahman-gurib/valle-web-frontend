@@ -76,6 +76,8 @@ test.describe('weather and park status', () => {
     try {
       await page.goto('/staff');
       await page.getByRole('button', { name: /gate/i }).first().click();
+      // the park-status editor folds away under the gate's look-up
+      await page.getByTestId('gate-editors').locator('summary').click();
       const panel = page.getByTestId('park-status-panel');
       await expect(panel).toBeVisible();
       await panel.getByTestId('pause-zipline').check();

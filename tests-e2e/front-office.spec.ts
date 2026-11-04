@@ -117,7 +117,7 @@ test.describe('front office', () => {
   test('a booking without ziplines, quads, buggies or luge needs no waiver', async ({ page }) => {
     test.skip(!(await apiUp(page)), 'API not running');
     const booked = await page.request.post('/api/bookings', {
-      data: { visitDate: tomorrow(), slot: 'morning', adults: 2, kids: 1, rate: 'nr', items: [{ id: 'private', units: 1 }, { id: 'pirate', kids: 1 }], name: 'Walker Family', email: 'walk@example.mu', payMode: 'gate' },
+      data: { visitDate: tomorrow(), slot: 'morning', adults: 2, kids: 1, rate: 'nr', items: [{ id: 'private', units: 1 }, { id: 'coaster', kids: 1 }], name: 'Walker Family', email: 'walk@example.mu', payMode: 'gate' },
     });
     expect(booked.ok(), await booked.text()).toBeTruthy();
     const b = (await booked.json()) as { refCode: string; ticketUrl: string };
@@ -160,7 +160,7 @@ test.describe('online payment refunds', () => {
     await expect(page.getByText(b.refCode).first()).toBeVisible({ timeout: 15000 });
     await page.getByText(b.refCode).first().click();
     const dialog = page.getByRole('dialog', { name: 'Booking ' + b.refCode });
-    await expect(dialog.getByTestId('money-paid')).toContainText('online');
+    await expect(dialog.getByTestId('money-paid')).toContainText(/online/i);
     await expect(dialog.getByText('Fully paid')).toBeVisible();
 
     await dialog.getByRole('button', { name: 'Refund online payment' }).click();

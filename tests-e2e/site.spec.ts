@@ -23,7 +23,7 @@ async function apiUp(page: Page): Promise<boolean> {
 async function addFirstOption(page: Page) {
   await page.getByRole('button', { name: /Choose an option/i }).first().click();
   const sheet = page.getByRole('dialog', { name: /Choose your/i });
-  await sheet.getByRole('button', { name: /^\+ Add$/ }).first().click();
+  await sheet.getByRole('button', { name: /^\+ Add/ }).first().click();
   await sheet.getByRole('button', { name: 'Done' }).click();
 }
 
@@ -57,21 +57,21 @@ test.describe('cookie consent', () => {
       sessionStorage.setItem('pw-fresh', '1');
     });
     await page.goto('/');
-    const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
+    const banner = page.getByRole('region', { name: /Cookies and storage/i });
     await expect(banner).toBeVisible();
     await banner.getByTestId('consent-ok').click();
     await expect(banner).toBeHidden();
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('valle_consent') || 'null')?.level)).toBe('essential');
     await page.reload();
     await expect(page.getByRole('heading', { name: /Feel the/i })).toBeVisible();
-    await expect(page.getByRole('dialog', { name: /Cookies and storage/i })).toHaveCount(0);
+    await expect(page.getByRole('region', { name: /Cookies and storage/i })).toHaveCount(0);
   });
 
   test('footer link reopens the notice with only essential storage, no monitoring', async ({ page }) => {
     await preselectRate(page);
     await page.goto('/');
     await page.getByRole('button', { name: 'COOKIE SETTINGS' }).click();
-    const banner = page.getByRole('dialog', { name: /Cookies and storage/i });
+    const banner = page.getByRole('region', { name: /Cookies and storage/i });
     await expect(banner).toBeVisible();
     await expect(banner.getByRole('switch')).toHaveCount(1);
     await expect(banner.getByRole('switch', { name: /Essential storage/i })).toBeDisabled();
