@@ -76,6 +76,8 @@ export default function TicketPage() {
     return () => { dead = true; };
   }, [ref, token, reload]);
 
+  // a group still owing its deposit settles it with the team: no full online payment, no photo upsell
+  const depositDue = !!tk?.group && (tk.group.depositAmount ?? 0) > (tk.paidAmount ?? 0);
   const share = tk ? `https://wa.me/?text=${encodeURIComponent(t('My VALLÉ Advenature™ Park ticket {ref} · {date} · {slot} arrival', { ref: tk.refCode, date: fullDateFromIso(tk.visitDate) || tk.visitDate, slot: t(SLOT_WORDS[tk.slot] ?? tk.slot) }) + '\n' + tk.ticketUrl)}` : '';
 
   return (
@@ -104,7 +106,7 @@ export default function TicketPage() {
             <div className="mt-[22px] grid grid-cols-2 gap-3 text-left">
               <Fact tag={t('VISIT')} value={fullDateFromIso(tk.visitDate) || tk.visitDate} />
               <Fact tag={t('ARRIVAL')} value={tk.slot === 'morning' ? t('Morning · 09:00–12:00') : t('Afternoon · 12:00–15:30')} />
-              <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids)} />
+              <Fact tag={t('PARTY')} value={partyLabel(tk.adults, tk.kids, tk.infants ?? 0)} />
               <Fact tag={t('RATE')} value={tk.rate === 'nr' ? t('Visitor') : t('Resident (bring an ID)')} />
             </div>
             <DayForecast date={tk.visitDate} style={{ marginTop: 12, justifyContent: 'center' }} />
@@ -114,8 +116,9 @@ export default function TicketPage() {
                 <div data-testid="ticket-group" className="mt-4 rounded-[14px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-4 py-3 text-start text-[13.5px] leading-[1.55]">
                   <h2 className="m-0 font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</h2>
                   <div className="mt-1 text-[15px] font-extrabold">{tk.group.organisation}</div>
-                  <div>{t('Leader: {name} · {n} people · {listed} names listed', { name: tk.group.leaderName, n: tk.adults + tk.kids, listed: tk.group.participants.length })}</div>
-                  {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div className="mt-1 font-bold text-[#D91E44]">{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
+                  <div>{t('Leader: {name} · {n} people · {listed} names listed', { name: tk.group.leaderName, n: tk.adults + tk.kids + (tk.infants ?? 0), listed: tk.group.participants.length })}</div>
+                  {depositDue && <div data-testid="ticket-deposit" className="mt-1 font-bold text-valle-purple">{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur((tk.group.depositAmount ?? 0) - (tk.paidAmount ?? 0)) })}</div>}
+                  {depositDue && <div className="mt-1 whitespace-pre-line text-[13px] text-valle-purple/75">{tk.group.bankDetails?.trim() ? tk.group.bankDetails : t('Our team sends you the payment details within one working day.')}</div>}
                 </div>
             )}
             {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && tk.status !== 'arrived' && (
@@ -124,7 +127,7 @@ export default function TicketPage() {
             <div className="my-[18px] h-px bg-valle-lilac" />
             <h2 className="sr-only">{t('Your day and booking summary')}</h2>
             {tk.status !== 'cancelled' && <TicketDay tk={tk} />}
-            {tk.status !== 'cancelled' && <TicketPhotos tk={tk} token={token} onChanged={(v) => setT(v)} />}
+            {tk.status !== 'cancelled' && !depositDue && <TicketPhotos tk={tk} token={token} onChanged={(v) => setT(v)} />}
             {tk.lines.some((l) => l.time) && (
               <div data-testid="itinerary" className="mx-0 mt-[14px] mb-2.5 rounded-[14px] border-[1.5px] border-[#FFE94D] bg-[#FFFDE0] px-4 py-3 text-start">
                 <h3 className="m-0 font-mono text-[10px] font-bold tracking-[.14em] text-[#8A6A00]">{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</h3>
@@ -170,7 +173,7 @@ export default function TicketPage() {
                 <span className="font-mono">{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
               </div>
             )}
-            {canPayOnline && (tk.balance ?? 0) > 0 && tk.status !== 'cancelled' && !payWait && (
+            {canPayOnline && (tk.balance ?? 0) > 0 && tk.status !== 'cancelled' && !payWait && !depositDue && (
               <div data-print-hide="" className="mt-[14px]">
                 <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" type="button" className="vbtn vbtn-primary">
                   {paying === 'busy' ? t('Opening secure payment…') : t('Pay {amount} online now', { amount: mur(tk.balance ?? 0) })}

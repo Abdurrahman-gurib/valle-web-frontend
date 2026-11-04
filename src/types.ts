@@ -131,7 +131,7 @@ export interface Product {
   validFrom?: string; validTo?: string;
 }
 /** Product families whose price already includes park entry (mirrors Backend ENTRY_INCLUDED_FAMILIES). */
-export const ENTRY_INCLUDED_FAMILIES = new Set(['student', 'expo']);
+export const ENTRY_INCLUDED_FAMILIES = new Set(['student', 'expo', 'senior']);
 /** Whether a product can be booked for a visit on `iso` (YYYY-MM-DD). */
 export const productValidOn = (p: Pick<Product, 'validFrom' | 'validTo'>, iso: string): boolean =>
   (!p.validFrom || iso >= p.validFrom) && (!p.validTo || iso <= p.validTo);
@@ -195,8 +195,10 @@ export interface BookingSummary {
   advCount: number;
   /** Park entry charged (0 when a product in the cart includes it). */
   entry: number;
-  /** The family whose price includes park entry ('expo', 'student'), or null. */
+  /** The family whose price includes park entry ('expo', 'student', 'senior') for some of the party, or null. */
   entryIncludedBy: string | null;
+  /** How many adults / children that family's lines cover (they pay no entry). */
+  entryCovered: { a: number; k: number };
 }
 
 export interface BookingRequest {
@@ -204,7 +206,11 @@ export interface BookingRequest {
   slot: 'morning' | 'afternoon';
   adults: number;
   kids: number;
+  /** Children under 6: free entry, counted for capacity and waivers. */
+  infants?: number;
   rate: RateKey;
+  /** The page's language: ticket links in the confirmation keep it. */
+  lang?: string;
   items: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[];
   /** The hold taken while filling in the form; its places become this booking. */
   holdId?: string;
@@ -238,6 +244,8 @@ export interface BookingResponse {
   paymentId?: string;
   /** Groups: rupees asked up front. */
   depositAmount?: number;
+  /** Groups: how to pay the deposit (settings group_bank_details); '' when the team sends them. */
+  bankDetails?: string;
 }
 
 export interface QuoteRequest {
@@ -273,6 +281,7 @@ export interface BookingRow {
   slot: SlotKey;
   adults: number;
   kids: number;
+  infants?: number;
   rate: RateKey;
   guestName: string;
   email: string | null;

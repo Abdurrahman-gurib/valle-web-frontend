@@ -13,7 +13,9 @@ export function MobileBar({ mobileNavOpen }: { mobileNavOpen: boolean }) {
   const { pathname } = useLocation();
   // A guest on their ticket or waiver has already booked; the bar would only cover the form.
   const guestDoc = /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname);
-  if (!isMobile || mobileNavOpen || app.dayOpen || guestDoc) return null;
+  // The booking and group pages carry their own sticky Confirm bar: this one would cover it.
+  const ownActionBar = /^(\/(fr|de|it|ar|ru|es|hi))?\/(booking|groups)\/?$/.test(pathname);
+  if (!isMobile || mobileNavOpen || app.dayOpen || guestDoc || ownActionBar) return null;
 
   return (
     <div style={{

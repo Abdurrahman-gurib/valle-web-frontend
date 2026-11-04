@@ -234,7 +234,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
               <div className="font-mono text-[13px] font-bold text-valle-red">{view.refCode}</div>
               <div className="font-display italic font-black uppercase text-[26px] leading-none">{view.guestName}</div>
               <div className="text-[13px] mt-[4px] text-[rgba(52,0,87,.7)]">
-                {shortDate(view.visitDate)} · {view.slot} · {partyText(view.adults, view.kids)} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
+                {shortDate(view.visitDate)} · {view.slot} · {partyText(view.adults, view.kids, view.infants ?? 0)} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
               </div>
               {!view.isToday && <div className="font-mono text-[11px] font-bold text-[#D91E44] mt-[6px]">NOT TODAY'S BOOKING</div>}
               <div data-testid="gate-balance" className={cn('font-mono text-[12px] font-bold mt-[6px]', view.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
@@ -253,6 +253,12 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
           <div className="px-[18px] py-[14px] grid gap-[10px]">
             {view.lines.length > 0 && (
               <div className="text-[13px] text-[rgba(52,0,87,.75)]">{view.lines.map((l) => l.label).join(' · ')}</div>
+            )}
+            {(view.checkAtGate?.length ?? 0) > 0 && (
+              <div data-testid="gate-check-at-gate" className="rounded-[12px] border-[1.5px] border-[#E6E000] bg-[#FFFFE2] px-[12px] py-[10px] text-[13px]">
+                <div className="font-mono text-[10.5px] font-bold tracking-[.12em]">CHECK AT THE GATE · NOT EVERYONE IS BOOKED ON THESE</div>
+                <ul className="m-0 mt-[4px] ps-[18px]">{view.checkAtGate!.map((c, i) => <li key={i}>{c.message}</li>)}</ul>
+              </div>
             )}
             {view.required === 0 && <div className="font-semibold text-[#1E9E4A]">No waiver needed: nothing on this booking is a zipline, quad, buggy or luge.</div>}
             {view.required > 0 && view.waivers.length === 0 && <div className="font-semibold">No waiver signed yet. The guest can sign at the gate on their phone from the ticket link, or on paper.</div>}

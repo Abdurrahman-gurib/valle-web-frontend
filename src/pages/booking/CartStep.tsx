@@ -5,7 +5,7 @@ import type { SelLine } from '../../types';
 import { productAmount } from '../../types';
 import { useApp } from '../../store/AppStore';
 import { useCatalog } from '../../store/CatalogContext';
-import { entryPrices } from '../../store/booking';
+import { entryPrices, lineEligibility } from '../../store/booking';
 import { useGoto } from '../../lib/nav';
 import type { CardModel } from '../../lib/card';
 import { flatUnitName, money } from '../../lib/format';
@@ -50,8 +50,21 @@ function CartLine({ line }: { line: SelLine }) {
   const app = useApp();
   const goto = useGoto();
   const [hx, bindX] = useHover();
+  const catalog = useCatalog();
   const { act: a, qty: c, price, product: p } = line;
   const isFlat = a.mode === 'flat';
+  const el = lineEligibility(catalog, line.key);
+  const { minAge, maxAge, driveMinAge } = el.limits;
+  const ageText = minAge !== undefined && maxAge !== undefined ? minAge + '–' + maxAge : minAge !== undefined ? minAge + '+' : '';
+  const nobody = !isFlat && (c.a || 0) + (c.k || 0) === 0;
+  // Who of the party cannot be counted here, said plainly (a 12+ ride with a 6–11 child, a kids' ride with adults only).
+  const ageNote = isFlat || !ageText ? ''
+    : nobody ? t('Nobody in your party fits the age limit ({age}). Add someone who does, or remove it.', { age: ageText })
+    : !el.kids && app.kids > 0 ? t('Ages {age}: children 6–11 cannot ride.', { age: ageText })
+    : el.kidsRide && app.adults > 0 ? t("Ages {age}: a kids' ride, adults are not counted.", { age: ageText })
+    : minAge !== undefined && minAge > 6 && (c.k || 0) > 0 ? t('Children must be {age} or older.', { age: minAge })
+    : '';
+  const driveNote = !isFlat && driveMinAge ? t('Drivers {age}+; younger guests ride as passengers.', { age: driveMinAge }) : '';
   const amt = p
     ? productAmount(p, app.rate, c.a || 0, c.k || 0, c.u || 0)
     : isFlat ? price * (c.u || 0) : price * (c.a || 0) + Math.round(price * 0.5) * (c.k || 0);
@@ -66,6 +79,7 @@ function CartLine({ line }: { line: SelLine }) {
     ? money(price) + ' ' + tr(a.flatLabel || '').toUpperCase()
     : t('{adult} /ADULT · {child} /CHILD', { adult: money(price), child: money(Math.round(price * 0.5)) });
   const unitName = flatUnitName(a.flatLabel, t);
+  const childTag = el.infants ? t('CHILD UNDER 12') : t('CHILD 6–11');
   const stepper = (tag: string, k: 'a' | 'k' | 'u') => (
     <Stepper tag={tag} val={c[k] || 0} inc={() => app.bumpSel(line.key, k, 1)} dec={() => app.bumpSel(line.key, k, -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
   );
@@ -75,25 +89,29 @@ function CartLine({ line }: { line: SelLine }) {
         onClick={() => (p ? goto.packages() : goto.detail(a.id))}
         style={{ width: '52px', height: '52px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', background: '#EBE2FF' }}
       >
-        <img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ flex: 1, minWidth: '130px' }}>
         <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{a.name}</div>
         {line.variant && <div style={{ fontSize: '11.5px', color: '#7333FF', fontWeight: 600, marginTop: '2px' }}>{t(line.variant)}</div>}
         <div style={noteStyle}>{each}</div>
+        {(ageNote || driveNote) && <div data-testid={`age-note-${a.id}`} style={{ fontSize: '12px', fontWeight: 600, color: nobody ? '#B8163A' : '#7333FF', marginTop: '4px', lineHeight: 1.4 }}>{[ageNote, driveNote].filter(Boolean).join(' ')}</div>}
       </div>
-      {isFlat ? stepper(unitName, 'u') : <>{stepper(t('ADULTS'), 'a')}{stepper(t('CHILD 6–11'), 'k')}</>}
+      {isFlat ? stepper(unitName, 'u') : <>{(el.adults || (c.a || 0) > 0) && stepper(t('ADULTS'), 'a')}{(el.kids || el.infants || (c.k || 0) > 0) && stepper(childTag, 'k')}</>}
       <div style={amountStyle}>{money(amt)}</div>
       <button
+        type="button"
         onClick={() => app.toggleSel(a.id, line.variant)}
-        title={t('Remove')}
+        title={t('Remove {name}', { name: a.name })}
+        aria-label={t('Remove {name}', { name: a.name })}
         {...bindX}
+        className="size-10 sm:size-7"
         style={{
           border: '1.5px solid ' + (hx ? '#340057' : '#EBE2FF'), background: hx ? '#F4EEFF' : 'transparent',
-          color: hx ? '#340057' : 'rgba(52,0,87,.7)', width: '28px', height: '28px', borderRadius: '999px',
+          color: hx ? '#340057' : 'rgba(52,0,87,.7)', borderRadius: '999px',
           cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: 0,
         }}
-      >×</button>
+      ><span aria-hidden>×</span></button>
     </div>
   );
 }
@@ -136,14 +154,17 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
 }) {
   const t = useT();
   const catalog = useCatalog();
-  const { rate, adults, kids, setAdults, setKids, booking } = useApp();
+  const { rate, adults, kids, infants, setAdults, setKids, setInfants, booking } = useApp();
   const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
     ? t('PARK ENTRY')
     : (cartActs.length > 1 ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length }) : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length }));
   const ep = entryPrices(catalog, rate);
   const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD (6 TO 11) · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
-  const entryIncludedNote = booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') : booking.entryIncludedBy ? t('INCLUDED WITH THE STUDENT RATE') : '';
+  const coveredN = booking.entryCovered.a + booking.entryCovered.k;
+  const allCovered = coveredN > 0 && coveredN === adults + kids;
+  const includedWith = booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') : booking.entryIncludedBy === 'senior' ? t('INCLUDED WITH THE SENIOR PACKAGE') : booking.entryIncludedBy ? t('INCLUDED WITH THE STUDENT RATE') : '';
+  const entryIncludedNote = !includedWith ? '' : allCovered ? includedWith : t('{n} OF {total}', { n: coveredN, total: adults + kids }) + ' ' + includedWith;
   return (
     <div style={{ marginTop: '34px' }}>
       <StepLabel>{t('2 · YOUR DAY')} · {cartCountLabel}</StepLabel>
@@ -155,6 +176,7 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
           </div>
           <Stepper tag={t('ADULTS')} val={adults} inc={() => setAdults(adults + 1)} dec={() => setAdults(adults - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
           <Stepper tag={t('CHILD 6–11')} val={kids} inc={() => setKids(kids + 1)} dec={() => setKids(kids - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
+          <Stepper tag={t('UNDER 6 (FREE)')} val={infants} inc={() => setInfants(infants + 1)} dec={() => setInfants(infants - 1)} boxBg="#FFFFFF" btnBg="#F7F3FF" />
           <div style={amountStyle}>{money(booking.entry)}</div>
         </div>
         {cartActs.map((l) => (

@@ -40,7 +40,7 @@ export interface AvailabilityDay {
 }
 
 /** POST /api/bookings/hold: keeps the party's places for a few minutes while the form is filled in. */
-export interface HoldRequest { visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number; items: { id: string; adults?: number; kids?: number; units?: number; time?: string }[]; holdId?: string }
+export interface HoldRequest { visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number; infants?: number; items: { id: string; adults?: number; kids?: number; units?: number; time?: string }[]; holdId?: string }
 export function createHold(body: HoldRequest): Promise<{ holdId: string; expiresAt: string }> {
   return request<{ holdId: string; expiresAt: string }>('/bookings/hold', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -56,19 +56,21 @@ export function fetchAvailability(from: string, days: number): Promise<Availabil
 /** GET /api/tickets/:ref?t= : the guest's ticket, from the QR / e-mail link. */
 export interface TicketView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon'; adults: number; kids: number;
+  /** Children under 6 (free); older API versions may not send it. */
+  infants?: number; lang?: string;
   rate: string; payMode: string; status: string; total: number; ticketUrl: string; qrUrl: string;
   lines: { label: string; amount: number; experienceId?: string | null; productKey?: string | null; variant?: string; adults?: number; kids?: number; units?: number; time?: string | null }[];
   /** Older API versions may not send these. */
   waiverUrl?: string; waiversSigned?: number; waiversRequired?: number;
   paidAmount?: number; balance?: number; adjustmentAmount?: number; adjustmentNote?: string; couponCode?: string; receiptUrl?: string; postponedFrom?: string | null;
   /** School / company / club booking. */
-  group?: { kind: string; organisation: string; leaderName: string; participants: { name: string; age?: number | null }[]; depositAmount: number };
+  group?: { kind: string; organisation: string; leaderName: string; participants: { name: string; age?: number | null }[]; depositAmount: number; bankDetails?: string };
 }
 export function fetchTicket(refCode: string, token: string): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}?t=${encodeURIComponent(token)}`);
 }
 /** PATCH /api/tickets/:ref/booking?t= : the guest changes date, slot, party or experiences. */
-export interface GuestChange { visitDate?: string; slot?: 'morning' | 'afternoon'; adults?: number; kids?: number; items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[] }
+export interface GuestChange { visitDate?: string; slot?: 'morning' | 'afternoon'; adults?: number; kids?: number; infants?: number; items?: { id: string; variant?: string; adults?: number; kids?: number; units?: number; time?: string }[] }
 export function changeBooking(refCode: string, token: string, body: GuestChange): Promise<TicketView> {
   return request<TicketView>(`/tickets/${encodeURIComponent(refCode)}/booking?t=${encodeURIComponent(token)}`, { method: 'PATCH', body: JSON.stringify(body) });
 }
@@ -83,7 +85,11 @@ export function checkCoupon(code: string): Promise<CouponOffer> {
 }
 
 /** GET/POST /api/tickets/:ref/waivers?t= : the party's digital waivers. */
-export interface WaiverActivity { name: string; minAge?: number; maxAge?: number; driveMinAge?: number; minWeightKg?: number; maxWeightKg?: number; minHeightCm?: number; maxHeightCm?: number }
+export interface WaiverActivity {
+  name: string; minAge?: number; maxAge?: number; driveMinAge?: number; minWeightKg?: number; maxWeightKg?: number; minHeightCm?: number; maxHeightCm?: number;
+  /** Who of the party the booking puts on it, per age band (older APIs omit it: everyone). */
+  bands?: { adults: 'all' | 'some' | 'none'; kids: 'all' | 'some' | 'none'; infants: 'some' | 'none' };
+}
 export interface WaiverView {
   refCode: string; guestName: string; visitDate: string; slot: 'morning' | 'afternoon';
   required: number; signed: { id: string; participantName: string; isMinor: boolean; signedAt: string }[];
@@ -127,7 +133,7 @@ export function reserveTable(restaurantId: string, body: TableRequest): Promise<
 }
 
 // ---- saved booking drafts ----
-export interface BookingDraftPayload { sel: Record<string, { a?: number; k?: number; u?: number }>; adults: number; kids: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }
+export interface BookingDraftPayload { sel: Record<string, { a?: number; k?: number; u?: number }>; adults: number; kids: number; infants?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }
 export function saveDraft(email: string, payload: BookingDraftPayload): Promise<{ id: string; sent: boolean }> {
   return request<{ id: string; sent: boolean }>('/bookings/draft', { method: 'POST', body: JSON.stringify({ email, payload }) });
 }

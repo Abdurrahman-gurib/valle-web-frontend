@@ -42,13 +42,14 @@ export function lineChanges(before: CountedLine[], after: CountedLine[]): LineCh
 }
 
 /**
- * "2 adults · 1 child", "1 child", "3 adults": zero parts hidden, plurals right.
+ * "2 adults · 1 child · 1 under 6", "1 child", "3 adults": zero parts hidden, plurals right.
  * Staff screens are English only, so this does not go through t().
  */
-export function partyText(adults: number, kids: number): string {
+export function partyText(adults: number, kids: number, infants = 0): string {
   const parts = [
     adults > 0 ? `${adults} adult${adults === 1 ? '' : 's'}` : '',
     kids > 0 ? `${kids} child${kids === 1 ? '' : 'ren'}` : '',
+    infants > 0 ? `${infants} under 6` : '',
   ].filter(Boolean);
   return parts.join(' · ') || 'nobody';
 }
