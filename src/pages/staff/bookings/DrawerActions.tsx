@@ -18,12 +18,18 @@ export type RunAction = (
   busyAs: BookingStatus, call: () => Promise<BookingUpdated>, done: string, fail: string, onDone: () => void,
 ) => Promise<void>;
 
+/** "Mark arrived" refused by the gate's waiver rule (409 WAIVERS_MISSING). */
+export interface ArrivalBlock { missing: number; required: number; stops: number; message: string }
+
+/** A postponement needs a reason the trail and the guest can read. */
+export const POSTPONE_MIN = 3;
+
 /**
  * The drawer footer. Editing: Cancel / Save. Reading: Edit, take a payment,
  * refund, postpone for the weather, mark arrived and cancel (asked once). It
  * stays mounted across Edit so a half-filled payment form survives it.
  */
-export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdit, onSave, onStatus, onError, run }: {
+export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdit, onSave, onStatus, onError, run, arrivalBlock, onDismissArrivalBlock }: {
   data: BookingDetailFull;
   busy: BookingStatus | null;
   editing: boolean;
@@ -31,9 +37,11 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
   onEdit: () => void;
   onCancelEdit: () => void;
   onSave: () => void;
-  onStatus: (status: BookingStatus) => Promise<void>;
+  onStatus: (status: BookingStatus, extra?: { override?: boolean; reason?: string }) => Promise<void>;
   onError: (msg: string) => void;
   run: RunAction;
+  arrivalBlock?: ArrivalBlock | null;
+  onDismissArrivalBlock?: () => void;
 }) {
   const refCode = data.refCode;
   // 'Cancel booking' asks once before releasing the reservation
@@ -47,6 +55,7 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
   const [payReceipt, setPayReceipt] = useState('');
   const [postponeOpen, setPostponeOpen] = useState(false);
   const [postponeReason, setPostponeReason] = useState('');
+  const [overrideReason, setOverrideReason] = useState('');
   const balance = data.balance ?? data.total;
   const paid = data.paidAmount ?? 0;
   const locked = busy !== null;
@@ -66,6 +75,7 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
       () => { setRefundOpen(false); setRefundAmount(''); setRefundReason(''); });
   };
   const postpone = () => {
+    if (postponeReason.trim().length < POSTPONE_MIN) { onError('Give a reason for the postponement (at least 3 characters).'); return; }
     void run('postponed', () => postponeBooking(refCode, postponeReason.trim()),
       'Postponed. The payment stays on the booking; pick the new date with Edit when the guest calls.', 'Could not postpone.',
       () => { setPostponeOpen(false); setPostponeReason(''); });
@@ -90,7 +100,7 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
           <Field id="pay-how" tag="HOW">
             {/* the options are exactly the PaymentMethod values */}
             <select id="pay-how" value={payMethod} onChange={(e) => setPayMethod(e.target.value as PaymentMethod)} className={cn(inputCls, 'w-[130px] cursor-pointer appearance-auto')}>
-              <option value="cash">Cash</option><option value="card">Card</option><option value="juice">Juice</option><option value="online">Online</option><option value="other">Other</option>
+              <option value="cash">Cash</option><option value="card">Card</option><option value="juice">Juice</option><option value="transfer">Bank transfer</option><option value="online">Online</option><option value="other">Other</option>
             </select>
           </Field>
           <Field id="pay-rc" tag="TILL RECEIPT NO."><input id="pay-rc" value={payReceipt} onChange={(e) => setPayReceipt(e.target.value)} placeholder="optional" className={cn(inputCls, 'w-[140px]')} /></Field>
@@ -101,8 +111,8 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
       {postponeOpen && (
         <div data-testid="postpone-form" className="flex basis-full flex-wrap items-center gap-2 rounded-[14px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2.5">
           <span className="flex-[1_1_100%] text-[13px] font-semibold">Weather day: the visit is postponed, nothing is refunded, the guest picks a new date later (Edit → date + status Confirmed).</span>
-          <input value={postponeReason} onChange={(e) => setPostponeReason(e.target.value)} placeholder="Reason, e.g. heavy rain, park closed 11:00" style={inputStyle} className="flex-[1_1_220px]" data-testid="postpone-reason" />
-          <Btn variant="dark" onClick={postpone} disabled={locked} data-testid="postpone-confirm">Postpone</Btn>
+          <input value={postponeReason} onChange={(e) => setPostponeReason(e.target.value)} placeholder="Reason (required), e.g. heavy rain, park closed 11:00" aria-label="Postponement reason (required)" aria-required="true" style={inputStyle} className="flex-[1_1_220px]" data-testid="postpone-reason" />
+          <Btn variant="dark" onClick={postpone} disabled={locked || postponeReason.trim().length < POSTPONE_MIN} data-testid="postpone-confirm">Postpone</Btn>
           <Btn variant="ghost" onClick={() => setPostponeOpen(false)}>Close</Btn>
         </div>
       )}
@@ -125,18 +135,35 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
       {data.status !== 'cancelled' && data.status !== 'postponed' && (
         <Btn variant="ghost" onClick={() => setPostponeOpen((v) => !v)} disabled={locked} style={{ flex: 1 }} data-testid="postpone-open">Postpone (weather)</Btn>
       )}
-      <Btn
-        onClick={() => { void onStatus('arrived'); }}
-        disabled={locked || data.status === 'arrived'}
-        style={{ flex: 1 }}
-      >
-        {busy === 'arrived' ? <Spinner /> : 'Mark arrived'}
-      </Btn>
+      {arrivalBlock ? (
+        <div data-testid="arrival-blocked" role="alert" className="flex basis-full flex-wrap items-center gap-2 rounded-[14px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2.5">
+          <span className="flex-[1_1_100%] text-[13.5px] font-bold">
+            {arrivalBlock.missing > 0
+              ? `Waivers ${arrivalBlock.required - arrivalBlock.missing}/${arrivalBlock.required}: ${arrivalBlock.missing} still to sign.`
+              : `${arrivalBlock.stops} signed waiver${arrivalBlock.stops === 1 ? '' : 's'} over an activity limit.`}
+            {' '}Send the waiver link, use the Gate tab, or check in anyway with a reason (kept in the trail).
+          </span>
+          <input value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} placeholder="Reason, e.g. paper waivers signed at the desk" aria-label="Reason for checking in without all waivers" style={inputStyle} className="flex-[1_1_220px]" data-testid="arrival-override-reason" />
+          <Btn variant="danger" disabled={locked || overrideReason.trim().length < 3} onClick={() => { void onStatus('arrived', { override: true, reason: overrideReason.trim() }); }} data-testid="arrival-override">
+            {busy === 'arrived' ? <Spinner color="#A3122F" /> : 'Mark arrived anyway'}
+          </Btn>
+          <Btn variant="ghost" onClick={() => { setOverrideReason(''); onDismissArrivalBlock?.(); }}>Close</Btn>
+        </div>
+      ) : (
+        <Btn
+          onClick={() => { void onStatus('arrived'); }}
+          disabled={locked || data.status === 'arrived' || data.status === 'cancelled'}
+          style={{ flex: 1 }}
+          data-testid="mark-arrived"
+        >
+          {busy === 'arrived' ? <Spinner /> : 'Mark arrived'}
+        </Btn>
+      )}
       {confirmCancel ? (
         <div data-testid="cancel-confirm" className="flex basis-full flex-wrap items-center gap-2.5 rounded-[14px] border-[1.5px] border-solid border-valle-red bg-[#FFF1F3] px-3.5 py-2.5">
           <span className="flex-[1_1_200px] text-[13.5px] font-bold">Cancel booking {data.refCode}? The guest keeps their e-mail but the reservation is released.</span>
           <Btn variant="danger" onClick={() => { setConfirmCancel(false); void onStatus('cancelled'); }} disabled={locked}>
-            {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Yes, cancel booking'}
+            {busy === 'cancelled' ? <Spinner color="#A3122F" /> : 'Yes, cancel booking'}
           </Btn>
           <Btn variant="ghost" onClick={() => setConfirmCancel(false)}>Keep it</Btn>
         </div>
@@ -147,7 +174,7 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
           disabled={locked || data.status === 'cancelled'}
           style={{ flex: 1 }}
         >
-          {busy === 'cancelled' ? <Spinner color="#D91E44" /> : 'Cancel booking'}
+          {busy === 'cancelled' ? <Spinner color="#A3122F" /> : 'Cancel booking'}
         </Btn>
       )}
     </>

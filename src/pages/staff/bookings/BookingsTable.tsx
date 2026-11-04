@@ -1,5 +1,6 @@
 import type { BookingRow } from '../../../types';
-import { mur as money, partyLabel } from '../../../lib/format';
+import { mur as money } from '../../../lib/format';
+import { partyText } from './partyLines';
 import { cn } from '../../../lib/utils';
 import { RatePill, StatusChip, clockTimeSec, shortDate } from '../ui';
 import { payLabel, slotLabel } from './shared';
@@ -22,7 +23,7 @@ function TableRow({ row, onOpen }: { row: BookingRow; onOpen: (ref: string) => v
       <td className={td}>{shortDate(row.visitDate)}</td>
       <td className={td}>{slotLabel(row.slot)}</td>
       <td className={cn(td, 'font-semibold')}>{row.guestName}</td>
-      <td className={td}>{partyLabel(row.adults, row.kids)}</td>
+      <td className={td}>{partyText(row.adults, row.kids)}</td>
       <td className={td}><RatePill rate={row.rate} size="sm" /></td>
       <td className={td}>{payLabel(row.payMode)}</td>
       <td className={cn(td, 'font-display text-[17px] font-black uppercase italic tracking-[-0.01em]')}>{money(row.total)}</td>

@@ -22,7 +22,11 @@ export function setUnauthorizedHandler(fn: () => void): void {
   onUnauthorized = fn;
 }
 
-export interface HttpError extends Error { status: number }
+export interface HttpError extends Error {
+  status: number;
+  /** The JSON error body, when the server sent one (e.g. `{ code: 'WAIVERS_MISSING', missing: 4 }`). */
+  body?: Record<string, unknown>;
+}
 
 /** True when the failure came from the server rather than from a dead network. */
 export function isHttpError(e: unknown): e is HttpError {
@@ -43,11 +47,12 @@ async function request<T>(path: string, init?: RequestInit, opts?: Opts): Promis
   if (!res.ok) {
     if (res.status === 401 && !opts?.allow401) onUnauthorized();
     let msg = res.statusText;
+    let body: Record<string, unknown> | undefined;
     try {
-      const body = await res.json();
-      if (body && body.message) msg = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+      body = await res.json();
+      if (body && body.message) msg = Array.isArray(body.message) ? body.message.join(', ') : String(body.message);
     } catch { /* keep statusText */ }
-    throw Object.assign(new Error(msg || 'Request failed'), { status: res.status });
+    throw Object.assign(new Error(msg || 'Request failed'), { status: res.status, body });
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
@@ -130,9 +135,15 @@ export function staffLogout(): Promise<{ ok: boolean }> {
   return request<{ ok: boolean }>('/staff/auth/logout', { method: 'POST' }, { allow401: true });
 }
 
-/** Resolves with the signed-in staff user, or rejects with a 401 HttpError. */
-export function staffMe(): Promise<StaffUser> {
-  return request<StaffUser>('/staff/auth/me', undefined, { allow401: true });
+/**
+ * Resolves with the signed-in staff user, or rejects with a 401 HttpError.
+ * Asks `/staff/auth/session`, which answers "not signed in" with a quiet 200
+ * `{ user: null }`, so a page load before login logs no failed request.
+ */
+export async function staffMe(): Promise<StaffUser> {
+  const { user } = await request<{ user: StaffUser | null }>('/staff/auth/session', undefined, { allow401: true });
+  if (!user) throw Object.assign(new Error('Not signed in'), { status: 401 });
+  return user;
 }
 
 // ---- bookings ----
@@ -170,6 +181,9 @@ export interface StaffBookingInput {
   payMode: PayMode;
   channel: BookingChannel;
   note?: string;
+  couponCode?: string;
+  /** Money taken at the desk in the same step; no amount = the total the server prices. */
+  payment?: { method: PaymentMethod; amount?: number; receiptNo?: string };
 }
 
 export function createStaffBooking(body: StaffBookingInput): Promise<BookingDetailFull> {
@@ -185,21 +199,34 @@ export interface SalesSummary {
   totals: {
     bookings: number; cancelled: number; guests: number; adults: number; kids: number; revenue: number;
     entryRevenue: number; experienceRevenue: number; discounts: number; avgTicket: number; onlineRevenue: number; gateRevenue: number;
+    /** packages, photos and other product lines; anything else in the subtotal */
+    productRevenue?: number; otherRevenue?: number;
+    /** Explorer Pass, and coupons / FOC / manual discounts (together = discounts) */
+    passDiscounts?: number; offerDiscounts?: number;
+    refundsDue?: number;
   };
   byStatus: Breakdown[]; byPayMode: Breakdown[]; byRate: Breakdown[]; bySlot: Breakdown[]; daily: DailyPoint[];
 }
 export interface NationalityRow { nationality: string; bookings: number; guests: number; revenue: number; share: number }
-export interface ExperienceRow { experienceId: string; label: string; bookings: number; adults: number; kids: number; units: number; revenue: number }
+export interface ExperienceRow { experienceId: string; name?: string; label: string; bookings: number; adults: number; kids: number; units: number; revenue: number }
 export interface ReconciliationRow {
   refCode: string; guestName: string; slot: string; payMode: string; status: string; adults: number; kids: number; total: number;
   nationality: string; phone: string; email: string;
+  paid?: number; refundDue?: number;
+  /** payments recorded for this booking on the day, per method */
+  paidToday?: { method: string; amount: number }[];
 }
+export type LedgerMethod = 'cash' | 'card' | 'juice' | 'transfer' | 'online' | 'other';
+export interface LedgerEntry { at: string; refCode: string; guestName: string; method: LedgerMethod; amount: number; receiptNo: string; by: string }
 export interface Reconciliation {
   date: string; rows: ReconciliationRow[];
   totals: {
     bookings: number; guestsExpected: number; guestsArrived: number; gateExpected: number; gateCollected: number; gateOutstanding: number;
     onlinePaid: number; cancelled: number; cancelledAmount: number; noShows: number; noShowAmount: number;
   };
+  /** money recorded that day per method (refunds negative) and its total: what the till balances against */
+  collected?: Record<LedgerMethod, number> & { total: number };
+  payments?: LedgerEntry[];
 }
 export interface ForecastDay {
   date: string; dow: string; bookings: number; morningGuests: number; afternoonGuests: number; guests: number; revenue: number;
@@ -287,6 +314,8 @@ export interface BookingAuditEntry {
  * shipped them yet.
  */
 export interface BookingDetailFull extends BookingDetail {
+  /** paid more than the total (a code applied after payment): owed back */
+  refundDue?: number;
   staffNote?: string | null;
   updatedAt?: string | null;
   updatedBy?: string | null;
@@ -317,10 +346,17 @@ export interface BookingPatch {
   adjustmentValue?: number;
   adjustmentNote?: string;
   couponCode?: string;
+  /** the `updatedAt` this screen was showing: a stale save comes back 409 */
+  expectedUpdatedAt?: string;
+  /** mark arrived although waivers are missing (needs `reason`) */
+  override?: boolean;
+  /** why: the waiver override, a cancellation; written to the trail */
+  reason?: string;
 }
 
 /** The updated row plus its re-priced lines (and the fresh audit when sent). */
 export interface BookingUpdated extends BookingRow {
+  refundDue?: number;
   lines?: BookingDetailLine[];
   staffNote?: string | null;
   updatedAt?: string | null;
@@ -341,7 +377,7 @@ export function updateBooking(refCode: string, patch: BookingPatch): Promise<Boo
 }
 
 /** Re-send the guest's ticket by e-mail and WhatsApp. */
-export type PaymentMethod = 'cash' | 'card' | 'juice' | 'online' | 'other';
+export type PaymentMethod = 'cash' | 'card' | 'juice' | 'online' | 'transfer' | 'other';
 export function recordPayment(refCode: string, body: { amount: number; method: PaymentMethod; receiptNo?: string }): Promise<BookingDetailFull> {
   return request<BookingDetailFull>('/staff/bookings/' + encodeURIComponent(refCode) + '/payment', { method: 'POST', body: JSON.stringify(body) });
 }

@@ -1,5 +1,7 @@
 import { receiptPdfUrl, type BookingDetailFull } from '../../../lib/staffApi';
-import { mur as money, partyLabel } from '../../../lib/format';
+import { mur as money } from '../../../lib/format';
+import { methodText } from '../reportUi';
+import { partyText } from './partyLines';
 import { cn } from '../../../lib/utils';
 import { RatePill, SectionLabel, TotalTag, shortDate } from '../ui';
 import { adjustmentLabel } from './draft';
@@ -19,7 +21,7 @@ export function BookingFacts({ data }: { data: BookingDetailFull }) {
   return (
     <div className={cn(cardCls, 'grid grid-cols-[1fr_1fr] gap-3.5 bg-[#F7F3FF] p-4')}>
       <DetailLine tag="GUEST" value={data.guestName} />
-      <DetailLine tag="PARTY" value={partyLabel(data.adults, data.kids)} />
+      <DetailLine tag="PARTY" value={partyText(data.adults, data.kids)} />
       <DetailLine tag="EMAIL" value={data.email || ''} />
       <DetailLine tag="PHONE" value={data.phone || ''} />
       <DetailLine tag="NATIONALITY" value={data.nationality || ''} />
@@ -44,6 +46,8 @@ export function BookingMoney({ data }: { data: BookingDetailFull }) {
   // Defensive: an API that has not shipped the richer payload could omit these.
   const lines = data.lines ?? [];
   const balance = data.balance ?? data.total;
+  // a code / FOC applied after payment: the guest paid more than the new total
+  const refundDue = data.refundDue ?? Math.max(0, (data.paidAmount ?? 0) - data.total);
   const participants = data.participants ?? [];
   return (
     <>
@@ -86,16 +90,24 @@ export function BookingMoney({ data }: { data: BookingDetailFull }) {
           <TotalTag amount={money(data.total)} size={28} />
         </div>
         <div data-testid="money-paid" className="mt-2.5 flex justify-between gap-3 pt-2.5 text-[13.5px]" style={{ borderTop: '1px dashed #D9CCF2' }}>
-          <span className="text-valle-purple/70">Paid{data.paymentMethod ? ' · ' + data.paymentMethod : ''}{data.receiptNo ? ' · receipt ' + data.receiptNo : ''}</span>
+          <span className="text-valle-purple/70">Paid{data.paymentMethod ? ' · ' + methodText(data.paymentMethod) : ''}{data.receiptNo ? ' · receipt ' + data.receiptNo : ''}</span>
           <span className="font-semibold">{money(data.paidAmount ?? 0)}</span>
         </div>
-        <div className="mt-1.5 flex items-center justify-between gap-3 text-[14px]">
-          <span className="font-extrabold" style={{ color: balance > 0 ? '#D91E44' : '#1E9E4A' }}>{balance > 0 ? 'Balance to collect' : 'Fully paid'}</span>
+        <div className="mt-1.5 flex items-center justify-between gap-3 text-[14px]" data-testid="money-balance">
+          <span className="font-extrabold" style={{ color: refundDue > 0 ? '#8A6A00' : balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+            {refundDue > 0 ? 'Refund due to the guest' : balance > 0 ? 'Balance to collect' : 'Fully paid'}
+          </span>
           <span className="inline-flex items-center gap-2.5">
-            <span className="font-mono font-extrabold">{money(balance)}</span>
+            <span className="font-mono font-extrabold">{money(refundDue > 0 ? refundDue : balance)}</span>
             <a href={receiptPdfUrl(data.refCode)} target="_blank" rel="noopener noreferrer" className="rounded-full border-[1.5px] border-solid border-valle-purple px-2.5 py-[5px] text-[11.5px] font-bold" style={{ color: '#340057', textDecoration: 'none' }}>Receipt PDF</a>
           </span>
         </div>
+        {refundDue > 0 && (
+          <div data-testid="refund-due" role="status" className="mt-2.5 rounded-[10px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2 text-[13px]">
+            Paid {money(data.paidAmount ?? 0)}, the total is now {money(data.total)}: <strong>refund due {money(refundDue)}</strong>.
+            {data.paymentMethod === 'online' ? ' Use "Refund online payment" below.' : ' Give it back at the desk and note it in the internal note.'}
+          </div>
+        )}
         {data.groupKind && (
           <div data-testid="group-block" className="mt-2.5 rounded-[10px] border-[1.5px] border-solid border-[#D9C9F0] bg-[#F0E8FF] px-3 py-2 text-[13px]">
             <strong>Group · {data.groupKind}</strong> · {data.organisation} · leader {data.leaderName} · {data.adults + data.kids} people · {participants.length} names listed{(data.depositAmount ?? 0) > 0 ? ` · deposit ${money(data.depositAmount ?? 0)}${(data.paidAmount ?? 0) >= (data.depositAmount ?? 0) ? ' received' : ' due'}` : ''}

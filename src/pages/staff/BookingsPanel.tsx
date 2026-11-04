@@ -6,20 +6,27 @@ import { cn } from '../../lib/utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import NewBookingDrawer from './NewBookingDrawer';
 import { Btn, EmptyState, Spinner } from './ui';
-import { onLive } from './liveEvents';
+import { isOwnBooking, onLive } from './liveEvents';
+import { useUrlState } from './urlState';
 import { BookingDrawer } from './bookings/BookingDrawer';
-import { BookingFilters, NO_FILTERS, isFiltered, type BookingFilterValues } from './bookings/BookingFilters';
+import { BookingFilters, NO_FILTERS, filtersFromParams, filtersToParams, isFiltered, normaliseSearch, type BookingFilterValues } from './bookings/BookingFilters';
 import { BookingsTable } from './bookings/BookingsTable';
 import { cardCls, tagCls } from './bookings/shared';
 
 const PAGE_SIZE = 20;
 
-/** The Bookings tab: filters, the paged list, and the drawer of the booking opened. */
-export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }: { onChanged: (force?: boolean) => void; openRef?: string | null; onOpened?: () => void }) {
+/**
+ * The Bookings tab: filters, the paged list, and the drawer of the booking
+ * opened. Search, filters and the open booking live in the URL
+ * (`?q=ana&status=postponed&open=VAL-2857-26`), so a refresh keeps them.
+ */
+export default function BookingsPanel({ onChanged }: { onChanged: (force?: boolean) => void }) {
   const isMobile = useIsMobile(900);
-  const [q, setQ] = useState('');
-  const [dq, setDq] = useState('');
-  const [f, setF] = useState<BookingFilterValues>({ ...NO_FILTERS, sort: 'newest' });
+  const [params, setParams] = useUrlState();
+  const [q, setQ] = useState(() => params.get('q') ?? '');
+  const dq = normaliseSearch(params.get('q') ?? '');
+  const f = useMemo(() => filtersFromParams(params), [params]);
+  const setF = (patch: Partial<BookingFilterValues>) => setParams(filtersToParams(patch));
   const { status, from, to, slot, payMode, rate, nationality, sort } = f;
   const [creating, setCreating] = useState(false);
   const [page, setPage] = useState(1);
@@ -27,15 +34,15 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
-  const [openRef, setOpenRef] = useState<string | null>(null);
-  // the gate tab asked for a booking: open it here
-  useEffect(() => { if (jumpRef) { setOpenRef(jumpRef); onOpened?.(); } }, [jumpRef, onOpened]);
+  // the open booking (also how the gate tab hands one over)
+  const openRef = params.get('open');
+  const setOpenRef = useCallback((ref: string | null) => setParams({ open: ref }), [setParams]);
 
-  // Debounce the search box so every keystroke is not a query.
+  // Debounce the search box so every keystroke is not a query; spaces collapsed.
   useEffect(() => {
-    const t = setTimeout(() => setDq(q.trim()), 320);
+    const t = setTimeout(() => { if (normaliseSearch(q) !== dq) setParams({ q: normaliseSearch(q) }); }, 320);
     return () => clearTimeout(t);
-  }, [q]);
+  }, [q, dq, setParams]);
 
   // Any filter change restarts at page 1.
   useEffect(() => { setPage(1); }, [dq, status, from, to, slot, payMode, rate, nationality, sort]);
@@ -87,8 +94,9 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
   useEffect(() => {
     return onLive('valle:booking-new', (b) => {
       if (!b?.refCode) return;
-      setFresh(b);
       if (page === 1 && !filtered) prepend(b);
+      // the operator's own booking opens in the drawer already: no "just came in" banner
+      if (!isOwnBooking(b)) setFresh(b);
     });
   }, [page, filtered]);
 
@@ -115,9 +123,9 @@ export default function BookingsPanel({ onChanged, openRef: jumpRef, onOpened }:
         q={q}
         onQ={setQ}
         f={f}
-        onChange={(patch) => setF((prev) => ({ ...prev, ...patch }))}
+        onChange={setF}
         filtered={filtered}
-        onClear={() => { setQ(''); setF((prev) => ({ ...prev, ...NO_FILTERS })); }}
+        onClear={() => { setQ(''); setParams({ q: null, ...filtersToParams(NO_FILTERS) }); }}
         onCreate={() => setCreating(true)}
         isMobile={isMobile}
       />

@@ -115,7 +115,7 @@ export default function TicketPage() {
                   {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div className="mt-1 font-bold text-[#D91E44]">{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
                 </div>
             )}
-            {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && (
+            {tk.waiversRequired !== undefined && tk.waiversRequired > 0 && tk.status !== 'cancelled' && tk.status !== 'arrived' && (
               <WaiverBlock group={!!tk.group} signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div className="my-[18px] h-px bg-valle-lilac" />

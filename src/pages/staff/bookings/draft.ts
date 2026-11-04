@@ -54,8 +54,8 @@ export function validate(f: Draft): Record<string, string> {
   if (!isDate(f.visitDate)) e.visitDate = 'Pick a valid date';
   const a = Number(f.adults);
   const k = Number(f.kids);
-  if (!Number.isInteger(a) || a < 1 || a > 12) e.adults = '1 to 12';
-  if (!Number.isInteger(k) || k < 0 || k > 12) e.kids = '0 to 12';
+  if (!Number.isInteger(a) || a < 1 || a > 12) e.adults = '1 to 12 (a bigger party is a group booking)';
+  if (!Number.isInteger(k) || k < 0 || k > 12) e.kids = '0 to 12 (a bigger party is a group booking)';
   const name = f.guestName.trim();
   if (name.length < 2 || name.length > 120) e.guestName = '2 to 120 characters';
   if (f.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) e.email = 'Not a valid email';

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { mur } from '../../lib/format';
+import { revenueParts } from './reportMath';
 import {
   exportUrl, getExperienceSales, getNationalities, getSalesSummary,
   type ExperienceRow, type NationalityRow, type SalesSummary,
@@ -31,10 +32,12 @@ function presetRange(p: Preset, today: string): [string, string] {
   }
 }
 
+/** Every preset is a range of VISIT dates (the header's "Booked this month" counts by booking date). */
 const PRESETS: { key: Preset; label: string }[] = [
-  { key: 'today', label: 'Today' }, { key: 'week', label: '7 days' }, { key: 'month', label: 'This month' },
+  { key: 'today', label: 'Visits today' }, { key: 'week', label: 'Last 7 days' }, { key: 'month', label: 'Visits this month' },
   { key: 'last-month', label: 'Last month' }, { key: 'quarter', label: '90 days' }, { key: 'custom', label: 'Custom' },
 ];
+const BASIS_TIP = 'Figures are by visit date (when guests come), cancellations excluded. The header\'s "Booked this month" counts bookings by the date they were made.';
 
 /**
  * Sales: what was sold for visits in a period, how it was paid, who came and
@@ -73,7 +76,7 @@ export default function ReportsPanel() {
       {/* ---- period ---- */}
       <div className={cn(CARD, 'p-[12px] mb-[14px] flex flex-wrap gap-[8px] items-center')}>
         {PRESETS.map((p) => (
-          <Btn key={p.key} variant={preset === p.key ? 'solid' : 'ghost'} onClick={() => setPreset(p.key)}>{p.label}</Btn>
+          <Btn key={p.key} variant={preset === p.key ? 'solid' : 'ghost'} onClick={() => setPreset(p.key)} title={BASIS_TIP} aria-pressed={preset === p.key}>{p.label}</Btn>
         ))}
         {preset === 'custom' && (
           <div className={cn('flex gap-[8px] items-center', isMobile ? 'flex-[1_1_100%]' : 'flex-none')}>
@@ -82,7 +85,7 @@ export default function ReportsPanel() {
             <input type="date" value={custom[1]} min={custom[0]} onChange={(e) => setCustom([custom[0], e.target.value])} aria-label="To date" className={DATE_INPUT} />
           </div>
         )}
-        <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] ml-auto">VISITS {from} → {to}</span>
+        <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] ml-auto" title={BASIS_TIP}>VISITS {from} → {to} · BY VISIT DATE ⓘ</span>
       </div>
 
       {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
@@ -91,12 +94,16 @@ export default function ReportsPanel() {
       {t && (
         <>
           <div className={cn('grid gap-[12px] mb-[14px] grid-cols-[repeat(auto-fit,minmax(150px,1fr))]', loading ? 'opacity-[.6]' : 'opacity-100')}>
-            <Kpi tag="REVENUE" value={mur(t.revenue)} sub={`${mur(t.entryRevenue)} entry · ${mur(t.experienceRevenue)} experiences`} accent="#7333FF" />
+            <Kpi tag="REVENUE" value={mur(t.revenue)} sub={`${mur(t.entryRevenue)} entry · ${mur(t.experienceRevenue)} experiences · ${mur(t.productRevenue ?? 0)} packages & products`} accent="#7333FF" title={BASIS_TIP} />
             <Kpi tag="BOOKINGS" value={String(t.bookings)} sub={`${t.cancelled} cancelled`} />
             <Kpi tag="GUESTS" value={String(t.guests)} sub={`${t.adults} adults · ${t.kids} children`} />
             <Kpi tag="AVERAGE TICKET" value={mur(t.avgTicket)} sub="per booking" />
             <Kpi tag="PAID ONLINE" value={mur(t.onlineRevenue)} sub={`${mur(t.gateRevenue)} at the gate`} accent="#33FF74" />
-            <Kpi tag="DISCOUNTS" value={mur(t.discounts)} sub="Explorer Pass and offers" accent="#FFFC33" />
+            <Kpi testId="kpi-discounts" tag="DISCOUNTS" value={mur(t.discounts)} sub={`${mur(t.passDiscounts ?? t.discounts)} Explorer Pass · ${mur(t.offerDiscounts ?? 0)} codes, FOC & manual`} accent="#FFFC33" />
+            {(t.refundsDue ?? 0) > 0 && <Kpi testId="kpi-refunds" tag="REFUNDS DUE" value={mur(t.refundsDue ?? 0)} sub="paid more than the new total" accent="#8A6A00" />}
+          </div>
+          <div data-testid="revenue-adds-up" className="mb-[14px] -mt-[4px] font-mono text-[11px] leading-[1.6] tracking-[.04em] text-[rgba(52,0,87,.75)]">
+            HOW THIS ADDS UP: {revenueParts(t).map((p, i) => <span key={p.label}>{i > 0 ? (p.sign < 0 ? ' − ' : ' + ') : ''}{p.label} {mur(p.amount)}</span>)} = REVENUE {mur(t.revenue)}
           </div>
 
           <Panel title="REVENUE BY DAY" action={<ExportLink href={exportUrl('daily', from, to)} label="Daily CSV" />}>
@@ -138,7 +145,7 @@ export default function ReportsPanel() {
                 <tbody>
                   {exps.map((r, i) => (
                     <tr key={i}>
-                      <td className={cn(TD, 'font-semibold')}>{r.experienceId}</td>
+                      <td className={cn(TD, 'font-semibold')} title={r.experienceId}>{r.name || r.experienceId}</td>
                       <td className={cn(TD, 'whitespace-normal')}>{r.label}</td>
                       <td className={TDNUM}>{r.bookings}</td>
                       <td className={TDNUM}>{r.adults}</td>

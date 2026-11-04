@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { getGateView, resendTicket, resendWaiver, type BookingDetailFull } from '../../../lib/staffApi';
-import { mur as money, partyLabel } from '../../../lib/format';
+import { mur as money } from '../../../lib/format';
+import { partyText } from './partyLines';
 import { cn } from '../../../lib/utils';
 import { dateTimeSec, shortDate } from '../ui';
 import { rateLabel, slotLabel } from './shared';
@@ -13,7 +14,7 @@ function confirmationText(d: BookingDetailFull): string {
   const lines = (d.lines || []).map((l) => `• ${l.label}: ${money(l.amount)}`).join('\n');
   return [
     `VALLÉ Advenature™ Park · booking ${d.refCode}`,
-    `Guest: ${d.guestName} · ${partyLabel(d.adults, d.kids)} · ${rateLabel(d.rate)}`,
+    `Guest: ${d.guestName} · ${partyText(d.adults, d.kids)} · ${rateLabel(d.rate)}`,
     `Visit: ${shortDate(d.visitDate)}, ${slotLabel(d.slot).toLowerCase()} arrival (${d.slot === 'morning' ? '09:00–12:00' : '12:00–15:30'})`,
     lines,
     `Total: ${money(d.total)} · ${(d.balance ?? d.total) > 0 ? `${money(d.balance ?? d.total)} to pay on arrival` : 'paid'}`,
