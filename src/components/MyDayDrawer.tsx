@@ -1,6 +1,7 @@
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../store/AppStore';
+import { ExplorerPassNote } from './ExplorerPassNote';
 import { useGoto } from '../lib/nav';
 import { flatUnitName, money } from '../lib/format';
 import { Img } from './Img';
@@ -113,7 +114,7 @@ export function MyDayDrawer() {
           <div className="flex flex-wrap items-center gap-2 py-3" style={{ borderBottom: '1px dashed #EBE2FF' }}>
             <div className="min-w-[110px] flex-1">
               <div className="text-[13.5px] font-bold">{t('Park entry')}</div>
-              <div className="mt-0.5 font-mono text-[10px] text-valle-purple/60">{app.booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') + ' · ' : ''}{t('TRAILS INCLUDED')}</div>
+              <div className="mt-0.5 font-mono text-[10px] text-valle-purple/75">{app.booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') + ' · ' : ''}{t('TRAILS INCLUDED')}</div>
             </div>
             <Qty tag={t('AD')} what={t('Park entry') + ' · ' + t('Adults')} val={app.adults} dec={() => app.setAdults(app.adults - 1)} inc={() => app.setAdults(app.adults + 1)} />
             <Qty tag={t('CH')} what={t('Park entry') + ' · ' + t('Children')} val={app.kids} dec={() => app.setKids(app.kids - 1)} inc={() => app.setKids(app.kids + 1)} />
@@ -123,18 +124,19 @@ export function MyDayDrawer() {
           {cartActs.length === 0 && (
             <div className="px-2.5 py-7 text-center">
               <div className="font-display text-[19px] font-extrabold uppercase italic">{t('Nothing here yet')}</div>
-              <div className="mt-1.5 text-[13px] leading-[1.5] text-valle-purple/60">{t('Tap + on any experience card to build your day.')}</div>
+              <div className="mt-1.5 text-[13px] leading-[1.5] text-valle-purple/60">{t('Tap + on any activity card to build your day.')}</div>
               <button
                 onClick={() => { app.closeDay(); goto.explore('all'); }}
                 type="button"
                 className="vbtn vbtn-secondary vbtn-sm mt-[14px]"
               >
-                {t('Explore experiences')} <Fwd />
+                {t('Explore activities')} <Fwd />
               </button>
             </div>
           )}
         </div>
         <div className="shrink-0 border-t-[1.5px] border-valle-lilac bg-white px-[18px] pt-[14px] pb-4">
+          <div className="mb-3 empty:hidden"><ExplorerPassNote compact /></div>
           <div className="flex items-baseline justify-between">
             <span className="text-[14px] font-bold">{t('Total')}</span>
             <span aria-live="polite" aria-atomic="true" className="font-display text-[26px] font-black italic">{money(app.booking.total)}</span>

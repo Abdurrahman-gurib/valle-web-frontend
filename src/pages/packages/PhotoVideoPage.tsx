@@ -98,7 +98,7 @@ export default function PhotoVideoPage() {
         <SupportPanel id="cine-title" testId="cine-panel" photo={{ src: '/images/shoot/cine-07.webp', alt: t('A guest smiling by the river, filmed during a cinematic shoot'), width: 1600, height: 899, position: '45% 35%' }}>
           <Eyebrow>{t('02 · SAME PRICE FOR EVERYONE')}</Eyebrow>
           <h2 id="cine-title" style={H2}>{t('Cinematic experience')}</h2>
-          <p className="sr-lunch-intro">{t('A dedicated shooter follows your day: the koi pond, the swing over the valley, the ziplines. You get an edited cinematic reel and the stills, ready to post before you leave the park.')}</p>
+          <p className="sr-lunch-intro">{t('A dedicated shooter follows your day: the koi pond, the swing over the valley, the ziplines. You get an edited cinematic reel and the stills, delivered on your ticket page.')}</p>
           <ul className="pk-rows" style={{ width: '100%', marginTop: 20 }}>
             {cine.map((c) => <CineRow key={c.key ?? c.n} item={c} />)}
           </ul>

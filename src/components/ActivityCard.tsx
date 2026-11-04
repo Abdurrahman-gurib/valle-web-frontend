@@ -2,7 +2,6 @@ import { motion } from 'motion/react';
 import { Img } from './Img';
 import { paths } from '../lib/nav';
 import type { CardModel } from '../lib/card';
-import { showsDuration } from '../types';
 import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
 import { KP, KP_CONFETTI, KP_FONT } from './KidsPark';
@@ -46,7 +45,7 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
         </h3>
         <p className="mt-2 mb-0 text-[14px] leading-[1.5] text-valle-purple/75">{a.blurb}</p>
         <div className="mt-auto pt-4">
-          <div className="pt-3 font-mono text-[11px] text-valle-purple/75" style={{ borderTop: '1.5px dashed #D9C9F0' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
+          <div className="pt-3 font-mono text-[11px] text-valle-purple/75" style={{ borderTop: '1.5px dashed #D9C9F0' }}>{a.meta}</div>
           {a.hasAdd ? (
             <motion.button
               type="button"
@@ -97,7 +96,7 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
           <div title={t('Pulse level')} className="text-[10.5px] font-bold tracking-[.13em] whitespace-nowrap" style={{ color: KP.yellow }}>{a.pulseStr}</div>
         </div>
         <div className="mt-1.5 flex-1 text-[13.5px] leading-normal text-white/85">{a.blurb}</div>
-        <div className="mt-3 pt-[11px] font-mono text-[11px] text-white/80" style={{ borderTop: `2px dotted ${KP.lime}` }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
+        <div className="mt-3 pt-[11px] font-mono text-[11px] text-white/80" style={{ borderTop: `2px dotted ${KP.lime}` }}>{a.meta}</div>
         {a.hasAdd && (
           <motion.button
             type="button"

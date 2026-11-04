@@ -96,7 +96,7 @@ export default function ExplorePage() {
         <KidsParkEntrance as="h1" priority>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
             <a href="#kids-prices" style={kpButton('purple')}>{t('Kids Park prices →')}</a>
-            <span style={{ alignSelf: 'center', fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', color: '#3A0A46' }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
+            <span style={{ alignSelf: 'center', fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', color: '#3A0A46' }}>{t('{count} ACTIVITIES · ONE PARK', { count: catalog.ACTS.length })}</span>
           </div>
         </KidsParkEntrance>
         <KidsParkSection />
@@ -109,7 +109,7 @@ export default function ExplorePage() {
         <span style={{
           fontFamily: MONO, fontSize: 12, fontWeight: 600,
           letterSpacing: '.16em', color: 'rgba(52,0,87,.75)',
-        }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
+        }}>{t('{count} ACTIVITIES · ONE PARK', { count: catalog.ACTS.length })}</span>
       </div>
       )}
 
@@ -124,7 +124,7 @@ export default function ExplorePage() {
           <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in entrance admission fees')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
             {cards.map((a) => (
               <div key={a.id} className="min-w-0 shrink-0 grow-0 basis-[min(300px,82vw)] py-2">
-                <ActivityCard a={a} rateTag={app.rateTag} eager />
+                <ActivityCard a={a} rateTag={app.rateBadge} eager />
               </div>
             ))}
           </CarouselTrack>
@@ -135,7 +135,7 @@ export default function ExplorePage() {
           display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 20, marginTop: 24, scrollMarginTop: 96,
         }}>
           {cards.map((a) => (
-            <ActivityCard key={a.id} a={a} rateTag={app.rateTag} kids={cat === 'kids'} />
+            <ActivityCard key={a.id} a={a} rateTag={app.rateBadge} kids={cat === 'kids'} />
           ))}
         </div>
       )}

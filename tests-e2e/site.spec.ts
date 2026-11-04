@@ -240,7 +240,7 @@ test.describe('experience detail', () => {
     await page.goto('/experience/does-not-exist');
     await expect(page).toHaveURL(/\/activities\/does-not-exist$/);
     await expect(page.getByRole('heading', { name: /Off the/i })).toBeVisible();
-    await page.getByRole('main').getByRole('link', { name: /All \d+ experiences/i }).click();
+    await page.getByRole('main').getByRole('link', { name: /All \d+ activities/i }).click();
     await expect(page).toHaveURL(/\/explore$/);
   });
 
@@ -343,7 +343,7 @@ test.describe('regressions', () => {
     await expect(pirate).toBeVisible();
     await pirate.getByRole('link', { name: 'Pirate Ship' }).click();
     await expect(page).toHaveURL(/\/activities\/pirate/);
-    await page.getByText(/All experiences/i).first().click();
+    await page.getByText(/All activities/i).first().click();
     await expect(page).toHaveURL(/cat=kids/);
     await expect(page.getByText('Zipline Adventures')).toBeHidden();
   });
@@ -1081,7 +1081,7 @@ test.describe('special deals (expo)', () => {
     await expect(page).toHaveURL(/\/booking$/);
     await expect(page.getByText('GO-PACKAGE').first()).toBeVisible();
     await expect(page.getByTestId('entry-note')).toContainText('INCLUDED WITH THE EXPO DEAL');
-    await expect(page.getByText(/1 experience \+ entry · Rs 3,950/).first()).toBeVisible();
+    await expect(page.getByText(/1 activity \+ entry · Rs 3,950/).first()).toBeVisible();
 
     // the server agrees: deal price × party, entry 0; refused for visitors and outside the dates
     const day = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
@@ -1111,6 +1111,15 @@ test.describe('special deals (expo)', () => {
     test.skip(info.project.name !== 'desktop', 'class strip checked once');
     await page.goto('/packages');
     await expect(page.getByTestId('package-classes').locator('a').first()).toHaveAttribute('data-testid', 'class-deals');
+    await expect(page.getByTestId('class-deals')).toContainText(/From Rs [\d,]+ · Resident rate/);
+  });
+
+  test('visitors see the classes sold at the visitor rate first', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'class strip checked once');
+    await page.addInitScript(() => localStorage.setItem('valle_rate', 'nr'));
+    await page.goto('/packages');
+    await expect(page.getByTestId('package-classes').locator('a').first()).toHaveAttribute('data-testid', 'class-exclusive');
+    await expect(page.getByTestId('class-exclusive')).toContainText(/From Rs [\d,]+ · Visitor rate/);
   });
 });
 

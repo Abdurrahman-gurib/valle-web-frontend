@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
+import { useApp } from '../../store/AppStore';
+import { useRawCatalog } from '../../store/CatalogContext';
+import { entryPrices } from '../../store/booking';
+import { mur } from '../../lib/format';
 import { Accordion } from '@/components/ui/accordion';
 
 /** One tile of the visit facts: lilac tint with a 3px brand rule on top (one accent per tile). */
@@ -17,6 +21,9 @@ function InfoTile({ rule, tag, head, children, caps = true }: { rule: string; ta
 /** "Plan your visit": hours, tickets, getting here, contact, plus the awards strip. */
 export function PlanSection() {
   const t = useT();
+  const app = useApp();
+  const raw = useRawCatalog();
+  const child = entryPrices(raw, app.rate === 'nr' ? 'nr' : 'rr').child;
   return (
     <section id="plan" data-screen-label="Plan your visit" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
@@ -37,8 +44,9 @@ export function PlanSection() {
       <div className="mt-12" data-testid="faq">
         <div className="mb-3 font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/70 uppercase">{t('Questions before you come')}</div>
         <Accordion defaultOpen={['pay']} items={[
-          { id: 'pay', title: t('Do I pay when I book?'), content: t('Book free online, no cancellation fee. Nature trails included with park entry.') },
-          { id: 'kids', title: t('How much do children pay?'), content: t('Children aged 6 to 11 pay the child rate; under 6 enter free. The Explorer Pass discount applies automatically when three or more different adventure experiences are booked for the same day. Promo and partner codes are applied as shown on the booking page and cannot be combined with another code.') },
+          { id: 'pay', title: t('Do I pay when I book?'), content: t('No. Booking is free. Pay at the gate or online. No cancellation fee on regular bookings; Expo deals are non refundable.') },
+          { id: 'kids', title: t('How much do children pay?'), content: t('Ages 6–11: {child} park entry ({rate}). Under 6: free.', { child: mur(child), rate: app.rate === 'nr' ? t('visitor rate') : t('resident rate') }) },
+          { id: 'pass', title: t('What is the Explorer Pass?'), content: t('Book three or more different adventure activities for the same day and the Explorer Pass takes 15% off them automatically. Promo and partner codes are applied as shown on the booking page and cannot be combined with another code.') },
           { id: 'bring', title: t('What should I bring?'), content: t('Closed shoes, sunscreen, water and a change of clothes for the waterfalls. Ziplines, quad and buggy have age, height and weight limits, shown on each activity page.') },
           { id: 'waiver', title: t('Do I need to sign a waiver?'), content: t('Before ziplines, quad, buggy, luge and similar activities every participant, or a parent or guardian for a minor, signs the park’s safety waiver, online from the booking confirmation or at the gate. No signed waiver, no activity.') },
           { id: 'rain', title: t('What happens if it rains?'), content: t('Most activities run rain or shine. Ziplines pause in strong wind or storms; if the weather stops your day, we postpone it to another date, never lose it.') },

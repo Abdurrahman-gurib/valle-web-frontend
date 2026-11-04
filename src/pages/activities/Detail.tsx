@@ -13,7 +13,7 @@ import { useParkStatus } from '../../components/WeatherCard';
 import { QuadMap, ZiplineMap } from '../home/ActivityMaps';
 import { KP, KP_PATTERN, KidsParkLogo, KidsProfile } from '../../components/KidsPark';
 import { DetailGallery } from './DetailGallery';
-import { DetailAside, DetailPricelist, RelatedCard, SeeAlso, ZiplineReviews } from './DetailParts';
+import { ComboSuggest, DetailAside, DetailPricelist, RelatedCard, SeeAlso, ZiplineReviews } from './DetailParts';
 import { BARLOW, MONO, sectionLabel } from './shared';
 import { chipInk } from '@/styles/theme';
 
@@ -58,6 +58,7 @@ export default function DetailPage() {
   const kids = act.cat === 'kids';
   /** "Minimum height 1.2 m" and the like, read from the English facts and shown in the page's language. */
   const rawGtk = raw.ACTS.find((a) => a.id === act.id)?.gtk ?? [];
+  const rawName = raw.ACTS.find((a) => a.id === act.id)?.name ?? act.name;
   const heightRules = rawGtk.map((g, i) => (/^minimum height/i.test(g.t) ? act.gtk[i]?.t : undefined)).filter((x): x is string => !!x);
 
   /** Always goes to the explore page (never history.back), but restores its last filters. */
@@ -83,7 +84,7 @@ export default function DetailPage() {
         onClick={backExplore}
         className="vbtn-link"
         style={{ padding: '8px 0' }}
-      >{t('← All experiences')}</button>
+      >{t('← All activities')}</button>
 
       <div style={{ position: 'relative', borderRadius: kids ? 30 : 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12, ...(kids ? { boxShadow: `0 0 0 5px ${KP.lime}, 0 0 0 9px ${KP.purple}`, margin: '17px 9px 0' } : null) }}>
         {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
@@ -151,9 +152,10 @@ export default function DetailPage() {
 
       <div style={{ marginTop: 'clamp(44px,6vw,72px)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', borderBottom: '2px solid #340057', paddingBottom: 14, marginBottom: 18 }}>
-          <h2 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(30px,4.4vw,58px)', letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{t('Pairs well with')}</h2>
+          <h2 className="v-h2">{t('Pairs well with')}</h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))', gap: 14 }}>
+          <ComboSuggest actId={act.id} actName={rawName} />
           {related.map((a) => <RelatedCard key={a.id} a={a} />)}
         </div>
       </div>

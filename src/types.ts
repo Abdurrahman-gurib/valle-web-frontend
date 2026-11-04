@@ -193,6 +193,8 @@ export interface BookingSummary {
   discount: number;
   total: number;
   advCount: number;
+  /** Adventure activities subtotal, the base of the Explorer Pass 15%. */
+  advSubtotal: number;
   /** Park entry charged (0 when a product in the cart includes it). */
   entry: number;
   /** The family whose price includes park entry ('expo', 'student', 'senior') for some of the party, or null. */

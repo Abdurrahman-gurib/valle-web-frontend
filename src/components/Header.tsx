@@ -199,15 +199,16 @@ export function Header() {
                 <button
                   onClick={app.openRateGate}
                   title={t('Change your rate')}
-                  aria-label={app.rateTag + ' · ' + t('Change your rate')}
-                  className={cn("border-[1.5px] border-solid bg-transparent cursor-pointer font-mono text-[11px]", headerFg === "#FFFFFF" ? "border-white/55" : "border-[rgba(115,51,255,.5)]", " font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-purple hover:bg-valle-purple hover:text-white")}
+                  aria-label={t('{rate} prices', { rate: app.rateWord }) + ' · ' + t('Change your rate')}
+                  data-testid="rate-toggle"
+                  className={cn("border-[1.5px] border-solid bg-transparent cursor-pointer font-sans text-[13px]", headerFg === "#FFFFFF" ? "border-white/55" : "border-[rgba(115,51,255,.5)]", " font-bold text-[var(--fg)] py-[9px] px-[13px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-purple hover:bg-valle-purple hover:text-white")}
                 >
-                  {app.rateTag} ⇄
+                  {t('{rate} prices', { rate: app.rateWord })} ⇄
                 </button>
                 <LanguagePicker fg={headerFg} />
                 <button
                   onClick={() => { setMega(null); app.openDay(); }}
-                  title={t('Your selected experiences')}
+                  title={t('Your selected activities')}
                   className="border-[1.5px] border-solid border-[var(--fg)] opacity-[.92] hover:opacity-100 bg-transparent cursor-pointer [font-family:inherit] text-[13.5px] font-bold text-[var(--fg)] py-[9px] px-[15px] rounded-[999px] flex items-center gap-[8px] whitespace-nowrap hover:[transform:translateY(-1px)]"
                 >
                   {t('My Day')}

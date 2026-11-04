@@ -1,4 +1,5 @@
 import type { Activity, Category } from '../types';
+import { showsDuration } from '../types';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { useGoto } from './nav';
@@ -17,6 +18,8 @@ export interface CardModel extends Activity {
   hasAdd: boolean;
   selOn: boolean;
   addLabel: string;
+  /** One meta line for every card: "Ages 8+ · 1–2 H" (parts the catalog lacks are left out). */
+  meta: string;
   open: () => void;
   add: (e?: { stopPropagation?: () => void }) => void;
 }
@@ -54,6 +57,7 @@ export function useCardModel(): (a: Activity) => CardModel {
       priceLabel,
       hasAdd,
       selOn: sel,
+      meta: [/^\d+(\+|[–-]\d+)$/.test(a.age.trim()) ? tr('Ages {age}', { age: a.age.trim() }) : a.age, showsDuration(a.id) ? a.dur : ''].filter(Boolean).join(' · '),
       addLabel: sel ? (options > 1 ? tr('✓ In My Day · change options') : tr('✓ Added to My Day')) : (options > 1 ? tr('+ Choose an option') : tr('+ Add to My Day')),
       open: () => goto.detail(a.id),
       // Several priced options (zipline tours, quad tracks, buggies, luge rides): let the visitor

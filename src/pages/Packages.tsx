@@ -1,8 +1,11 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { paths } from '../lib/nav';
 import NotFoundPage from './NotFound';
-import { PACKAGE_GROUPS, packageGroupOf } from '../lib/packageGroups';
+import { PACKAGE_GROUPS, classFrom, packageGroupOf } from '../lib/packageGroups';
+import { useApp } from '../store/AppStore';
+import { money } from '../lib/format';
 import { breadcrumbs, useSeo } from '../lib/seo';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCatalog } from '../store/CatalogContext';
 import { useReveal } from '../hooks/useReveal';
 import { liveDeals } from '../lib/deals';
@@ -42,15 +45,32 @@ export default function PackagesPage() {
   const [pk, setPk] = useState<PackModalData | null>(null);
 
   const quoteEl = useRef<HTMLDivElement>(null);
+  // The full quote form stays on the index, Corporate and Student pages; the other class pages
+  // carry one line ("Group of 10+? Book as a group · Request a quote") and open the form on demand.
+  const fullQuote = !group || group.slug === 'corporate' || group.slug === 'student';
+  const [quoteOpen, setQuoteOpen] = useState(false);
+  useEffect(() => { setQuoteOpen(false); }, [groupSlug]);
   const quoteGo = () => {
-    if (quoteEl.current) window.scrollTo({ top: quoteEl.current.offsetTop - 84, behavior: 'smooth' });
+    setQuoteOpen(true);
+    requestAnimationFrame(() => {
+      if (quoteEl.current) window.scrollTo({ top: quoteEl.current.getBoundingClientRect().top + window.scrollY - 96, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    });
   };
 
   /** A section shows on its own class page only; the index shows the classes. */
   const show = (key: string) => !!group && group.keys.includes(key);
   /** The expo deals on sale today; outside their window the class is hidden and its page says so. */
   const deals = liveDeals(catalog);
-  const classes = PACKAGE_GROUPS.filter((g) => g.slug !== 'deals' || deals.length > 0 || group?.slug === 'deals');
+  const app = useApp();
+  const rate = app.rate === 'nr' ? 'nr' : 'rr';
+  const fromOf = (slug: string) => classFrom(slug, catalog, rate);
+  const live = PACKAGE_GROUPS.filter((g) => g.slug !== 'deals' || deals.length > 0 || group?.slug === 'deals');
+  // visitors see the classes sold at their rate first; residents keep the special deals first
+  const classes = group || rate === 'rr' ? live : [...live].sort((a, b) => Number(fromOf(a.slug)?.rate !== 'nr') - Number(fromOf(b.slug)?.rate !== 'nr'));
+  const meta = (g: { slug: string }) => {
+    const f = fromOf(g.slug);
+    return f ? t('From {price} · {rate}', { price: money(f.price), rate: f.rate === 'nr' ? t('Visitor rate') : t('Resident rate') }) : null;
+  };
   const ownHero = !!group && group.slug !== 'deals';
 
   if (groupSlug && !group) return <NotFoundPage />;
@@ -64,11 +84,11 @@ export default function PackagesPage() {
           <h1 style={{ ...BARLOW, fontSize: group ? 'clamp(34px,5vw,72px)' : 'clamp(42px,6.4vw,90px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase', transform: 'rotate(-4deg)', transformOrigin: 'left bottom' }}>{group ? t(group.title) : t('Packages')}</h1>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.16em', color: 'rgba(52,0,87,.7)' }}>{t('ALL PRICES VAT INCLUSIVE')}<CurrencyPicker fg="#340057" /></span>
         </div>
-        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{group ? t(group.intro) : t('Curated adventure days, from a relaxed first taste of the valley to the full VIP escape. Enquire to book a package; the team confirms availability within one working day.')}</p>
+        <p style={{ fontSize: 16, lineHeight: 1.6, color: 'rgba(52,0,87,.75)', maxWidth: '62ch', margin: '18px 0 0' }}>{group ? t(group.intro) : t('Ready-made adventure days at one price. Book online, pay on arrival. Groups and companies can ask for a quote.')}</p>
         </>)}
 
         {/* the six classes, each on its own page; on a class page the strip doubles as the way to the others */}
-        <ClassNav classes={classes} current={group} marginTop={ownHero ? 0 : group ? 22 : 30} />
+        <ClassNav classes={classes} current={group} marginTop={ownHero ? 0 : group ? 22 : 30} meta={group ? undefined : meta} />
 
         {/* SPECIAL DEALS (the expo flyer) */}
         {show('deals') && <DealsSection deals={deals} />}
@@ -80,7 +100,18 @@ export default function PackagesPage() {
         {group?.slug === 'corporate' && <CorporatePage onQuote={quoteGo} />}
         {group?.slug === 'photo-video' && <PhotoVideoPage />}
 
-        <QuoteForm anchorRef={quoteEl} corporate={group?.slug === 'corporate'} />
+        {!fullQuote && (
+          <div data-testid="group-line" style={{ marginTop: 'clamp(48px,6vw,72px)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 16px', borderRadius: 20, background: '#F7F3FF', padding: '18px 24px', fontSize: 16, fontWeight: 600, color: '#340057' }}>
+            <span>{t('Group of 10+?')}</span>
+            <Link to={paths.groups()} style={{ color: '#5B21B6', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 4 }}>{t('Book as a group')}</Link>
+            <span aria-hidden style={{ color: 'rgba(52,0,87,.5)' }}>·</span>
+            <button type="button" onClick={quoteGo} aria-expanded={quoteOpen} aria-controls="quote-wrap" className="vbtn-link" style={{ fontSize: 16, textDecoration: 'underline', textUnderlineOffset: 4 }}>{t('Request a quote')}</button>
+          </div>
+        )}
+        {/* stays mounted (hidden) so a card's "Request a quote" can still prefill it */}
+        <div id="quote-wrap" hidden={!fullQuote && !quoteOpen}>
+          <QuoteForm anchorRef={quoteEl} corporate={group?.slug === 'corporate'} />
+        </div>
 
         <HostContacts />
       </main>

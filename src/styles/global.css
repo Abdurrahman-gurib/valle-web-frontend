@@ -491,3 +491,17 @@ html[dir="rtl"] .rail-fade { -webkit-mask-image: linear-gradient(to left, #000 c
   html[dir="rtl"] .explore-cats { padding: 2px 2px 2px 32px; -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
   .explore-cats::-webkit-scrollbar { display: none; }
 }
+
+/* booking page: the one-line suggestions (packages, photographer, lunch) */
+.booking-upsell { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 16px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 0 0 1.5px #EBE2FF; font-size: 14.5px; font-weight: 600; text-decoration: none; transition: background-color var(--t-fast); }
+.booking-upsell:hover { background: var(--c-hover-tint); }
+.booking-upsell:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 2px; }
+.booking-upsell-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 999px; background: #F7F3FF; color: #5B21B6; flex-shrink: 0; }
+
+/* home: the visit facts under the marquee */
+.home-info { max-width: 1320px; margin: 8px auto 0; padding: 0 clamp(16px, 3.5vw, 40px); }
+.home-info ul { list-style: none; margin: 0; padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; border-radius: 999px; background: #F7F3FF; box-shadow: inset 0 0 0 1.5px #EBE2FF; }
+.home-info li { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; color: #340057; }
+.home-info li svg { width: 17px; height: 17px; color: #5B21B6; flex-shrink: 0; }
+.home-info a { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 720px) { .home-info ul { border-radius: 20px; justify-content: flex-start; flex-direction: column; gap: 10px; padding: 16px 18px; } }

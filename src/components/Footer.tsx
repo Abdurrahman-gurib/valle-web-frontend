@@ -78,7 +78,7 @@ export function Footer() {
           <div>
             <h2 className={colHead}>{t('EXPLORE')}</h2>
             <div className="mt-2.5">
-              <FootLink label={t('All {n} experiences', { n: catalog.ACTS.length })} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
+              <FootLink label={t('All {n} activities', { n: catalog.ACTS.length })} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
               <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FFFC33" />
               <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#FFFC33" />
               <FootLink label={t('Kids Park')} href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />

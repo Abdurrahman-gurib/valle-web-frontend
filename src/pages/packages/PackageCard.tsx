@@ -172,7 +172,7 @@ export function ProductCard({ productKey, name, fallbackSingle, fallbackDbl, onD
       dataKey={productKey}
       single={b.single ?? fallbackSingle}
       dbl={b.product ? b.dbl : fallbackDbl || undefined}
-      rateChip={rateOnly === 'rr' ? t('RESIDENT RATE · ID REQUIRED') : rateOnly === 'nr' ? t('VISITOR RATE · NR') : undefined}
+      rateChip={rateOnly === 'rr' ? t('RESIDENT RATE · ID REQUIRED') : rateOnly === 'nr' ? t('Visitor rate') : undefined}
       actions={<BookActions productKey={productKey} name={name} onDetails={onDetails} bookTestId={bookTestId} blockedText={blockedText} bookLabel={bookLabel} />}
     />
   );

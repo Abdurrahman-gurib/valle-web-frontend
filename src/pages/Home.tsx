@@ -2,6 +2,7 @@ import { abs, useSeo } from '../lib/seo';
 import { useReveal } from '../hooks/useReveal';
 import { Hero } from './home/Hero';
 import { SlopeMarquee } from './home/SlopeMarquee';
+import { InfoStrip } from './home/InfoStrip';
 import { QuickPlan } from './home/QuickPlan';
 import { ParkMap } from './home/ParkMap';
 import { ClassicsRail } from './home/ClassicsRail';
@@ -21,6 +22,7 @@ export default function HomePage() {
     <main ref={ref}>
       <Hero />
       <SlopeMarquee />
+      <InfoStrip />
       <QuickPlan />
       <ParkMap />
       <ClassicsRail />

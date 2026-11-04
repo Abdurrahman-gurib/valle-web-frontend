@@ -204,5 +204,5 @@ export function computeBooking(
   const hasDiscount = advCount >= 3;
   const discount = hasDiscount ? Math.round(advSubtotal * 0.15) : 0;
   total -= discount;
-  return { selActs, selLines, lines, hasDiscount, discount, total, advCount, entry, entryIncludedBy, entryCovered: { a: coveredA, k: coveredK } };
+  return { selActs, selLines, lines, hasDiscount, discount, total, advCount, advSubtotal, entry, entryIncludedBy, entryCovered: { a: coveredA, k: coveredK } };
 }

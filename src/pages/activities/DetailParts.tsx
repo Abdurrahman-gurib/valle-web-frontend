@@ -6,6 +6,7 @@ import { BtnLabel, ValleButton, ValleCard } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { paths } from '../../lib/nav';
+import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import type { CardModel } from '../../lib/card';
 import { money } from '../../lib/format';
@@ -41,7 +42,7 @@ export function DetailPricelist({ act, d, kids, catalog }: { act: Activity; d: C
       <div style={{ padding: '18px 22px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <span style={{ fontFamily: BARLOW, fontStyle: kids ? 'normal' : 'italic', fontWeight: 900, fontSize: 22, lineHeight: 1, textTransform: 'uppercase', color: kids ? KP.yellow : '#340057' }}>{t('Pricelist')}</span>
-          <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: kids ? '#FFFC33' : '#340057', color: kids ? '#340057' : '#FFFC33', borderRadius: 999, padding: '7px 12px' }}>{app.rateTag} ⇄</button>
+          <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: kids ? '#FFFC33' : '#340057', color: kids ? '#340057' : '#FFFC33', borderRadius: 999, padding: '7px 12px' }} aria-label={t('{rate} prices', { rate: app.rateWord }) + ' · ' + t('Change your rate')}>{t('{rate} prices', { rate: app.rateWord })} ⇄</button>
         </div>
         <div style={{ marginTop: 10 }}>
           {prices.map((pr) => {
@@ -98,13 +99,22 @@ export function DetailAside({ act, d, kids, paused, onBook }: { act: Activity; d
           <Fact label={t('PRICE')}><div style={factValue}>{d.priceLabel}</div></Fact>
         </div>
         <div style={{ height: 1, background: 'rgba(255,255,255,.2)', margin: '20px 0' }} />
+        {/* one primary action and one link: add first; once it is in My Day, booking becomes the primary */}
+        {d.hasAdd && !d.selOn && (kids
+          ? <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => d.add()} data-testid="detail-add" className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ ...kpButton('yellow'), width: '100%' }}>{d.addLabel}</motion.button>
+          : <ValleButton variant="onDark" onClick={() => d.add()} data-testid="detail-add">{d.addLabel}</ValleButton>)}
+        {!d.hasAdd && <div data-testid="detail-included" style={{ textAlign: 'center', fontWeight: 700, fontSize: 14.5, marginBottom: 12 }}>{act.mode === 'kiosk' ? t('Pay at the kiosk on the day') : t('Included with park entry')}</div>}
+        {(!d.hasAdd || d.selOn) && (kids
+          ? <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBook} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ ...kpButton('yellow'), width: '100%' }}>{d.hasAdd ? t('Book now →') : t('Book your visit →')}</motion.button>
+          : <ValleButton variant="onDark" onClick={onBook}><BtnLabel>{d.hasAdd ? t('Book now →') : t('Book your visit →')}</BtnLabel></ValleButton>)}
         {d.hasAdd && (
-          <ValleButton onClick={() => d.add()} variant="ghost" className={cn(d.selOn && 'bg-valle-green/25 hover:bg-valle-green/35')}>{d.addLabel}</ValleButton>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 12 }}>
+            {d.selOn
+              ? <button type="button" onClick={() => d.add()} className="vbtn-link" style={{ color: '#FFFFFF', textDecoration: 'underline', textUnderlineOffset: 4 }}>{d.addLabel}</button>
+              : <button type="button" onClick={onBook} className="vbtn-link" style={{ color: '#FFFFFF', textDecoration: 'underline', textUnderlineOffset: 4 }}><BtnLabel>{t('Book now →')}</BtnLabel></button>}
+          </div>
         )}
-        {kids
-          ? <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onBook} className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ ...kpButton('yellow'), width: '100%', marginTop: 12 }}>{t('Book this now →')}</motion.button>
-          : <ValleButton variant="onDark" onClick={onBook} className="mt-2.5"><BtnLabel>{t('Book this now →')}</BtnLabel></ValleButton>}
-        <div style={{ fontFamily: MONO, fontSize: 10.5, opacity: 0.65, textAlign: 'center', marginTop: 12 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, color: 'rgba(255,255,255,.8)', textAlign: 'center', marginTop: 14 }}>{t('PAY ON ARRIVAL · NO CANCELLATION FEE')}</div>
       </div>
     </div>
   );
@@ -163,7 +173,8 @@ export function RelatedCard({ a }: { a: CardModel }) {
             type="button"
             onClick={a.add}
             title={a.addLabel}
-            aria-label={a.addLabel}
+            aria-label={a.addLabel.replace(/^[+✓]\s*/, '') + ' · ' + a.name}
+            aria-pressed={a.selOn}
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             className={cn('absolute top-2.5 right-2.5 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-white p-0 shadow-[0_4px_10px_rgba(0,0,0,.3)]', a.selOn ? 'bg-valle-green text-valle-purple' : 'bg-valle-purple/50 text-white')}
@@ -178,5 +189,39 @@ export function RelatedCard({ a }: { a: CardModel }) {
         </div>
       </div>
     </ValleCard>
+  );
+}
+
+/** Which combo lines mention an activity (the zipline tours are named by their lines). */
+const COMBO_MATCH: Record<string, RegExp> = { quad: /quad/i, zipline: /\blines?\b|tour/i, buggy: /buggy/i };
+
+/**
+ * "Pairs well with" also suggests the catalog packages (the quad + zipline combos) that
+ * contain this activity, priced from the catalog at the guest's rate.
+ */
+export function ComboSuggest({ actId, actName }: { actId: string; actName: string }) {
+  const t = useT();
+  const app = useApp();
+  const catalog = useCatalog();
+  const raw = useRawCatalog();
+  const re = COMBO_MATCH[actId] ?? new RegExp(actName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const rk = app.rate === 'nr' ? 'nr' : 'rr';
+  const combos = catalog.COMBO.filter((c, i) => (raw.COMBO[i]?.items ?? c.items).some((it) => re.test(it.t)));
+  return (
+    <>
+      {combos.map((c) => (
+        <Link key={c.key ?? c.name} to={paths.packages('combo')} data-testid="pairs-package" className="v-card" style={{ color: '#340057', textDecoration: 'none', background: '#340057' }}>
+          <span className="v-card-body" style={{ color: '#FFFFFF', gap: 6 }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.12em', color: '#33FF74' }}>{t('PACKAGE · ONE PRICE')}</span>
+            <span className="v-h3" style={{ color: '#FFFFFF' }}>{c.name}</span>
+            <span style={{ fontSize: 14, lineHeight: 1.5, color: 'rgba(255,255,255,.85)' }}>{c.items.map((it) => it.t).join(' + ')}</span>
+            <span style={{ marginTop: 'auto', paddingTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontSize: 12, fontWeight: 700, borderRadius: 8, padding: '5px 9px' }}>{t('From {price} · {rate}', { price: money(c[rk][0]), rate: rk === 'nr' ? t('Visitor rate') : t('Resident rate') })}</span>
+              <span aria-hidden style={{ color: '#FFFC33', display: 'inline-flex' }}><Fwd /></span>
+            </span>
+          </span>
+        </Link>
+      ))}
+    </>
   );
 }

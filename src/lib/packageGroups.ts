@@ -19,3 +19,39 @@ export const PACKAGE_GROUPS: PackageGroup[] = [
 export const packageGroupOf = (slug?: string) => (slug ? PACKAGE_GROUPS.find((g) => g.slug === slug) : undefined);
 /** The class page a price-list section lives on ('' for the quote form, which is on every page). */
 export const groupOfSection = (key: string) => PACKAGE_GROUPS.find((g) => g.keys.includes(key))?.slug ?? '';
+
+/** The product families each class sells (catalog PRODUCTS[].family). */
+const CLASS_FAMILIES: Record<string, string[]> = {
+  deals: ['expo'],
+  exclusive: ['ls', 'ex', 'vip', 'diamond', 'combo'],
+  resident: ['resident'],
+  senior: ['senior'],
+  photo: ['photo', 'cine'],
+};
+
+interface PricedProduct { family: string; rr: number; nr: number; rateOnly: 'rr' | 'nr' | null }
+
+/**
+ * The lowest per-person price of a class, from the catalog, at the guest's rate when the class
+ * sells at it, else at the rate it is sold at. Null when the catalog has no price for it
+ * (corporate programmes are quoted).
+ */
+export function classFrom(
+  slug: string,
+  catalog: { PRODUCTS?: PricedProduct[]; PL: Record<string, { n: string; rr: number; nr: number }[]> },
+  rate: 'rr' | 'nr',
+): { price: number; rate: 'rr' | 'nr' } | null {
+  if (slug === 'student') {
+    const entry = (catalog.PL.student || []).find((r) => /^entrance/i.test(r.n));
+    return entry ? { price: entry[rate], rate } : null;
+  }
+  const fams = CLASS_FAMILIES[slug === 'photo-video' ? 'photo' : slug];
+  if (!fams) return null;
+  const items = (catalog.PRODUCTS || []).filter((p) => fams.includes(p.family));
+  const at = (r: 'rr' | 'nr') => items.filter((p) => !p.rateOnly || p.rateOnly === r).map((p) => p[r]).filter((n) => n > 0);
+  const mine = at(rate);
+  if (mine.length) return { price: Math.min(...mine), rate };
+  const other: 'rr' | 'nr' = rate === 'nr' ? 'rr' : 'nr';
+  const theirs = at(other);
+  return theirs.length ? { price: Math.min(...theirs), rate: other } : null;
+}

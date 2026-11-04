@@ -1,3 +1,4 @@
+import { Map as MapIcon } from 'lucide-react';
 import { breadcrumbs, useSeo } from '../../lib/seo';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
@@ -19,6 +20,8 @@ import { useReveal } from '../../hooks/useReveal';
 import { useLang, useT } from '../../i18n';
 import { BARLOW, ErrorNote, Field, inputStyle, MONO, NATIONALITIES, PayCard, StepLabel } from './bookingUi';
 import { BookCard, CartStep } from './CartStep';
+import { DayExtras, PackagesLine } from './Upsells';
+import { ExplorerPassNote } from '../../components/ExplorerPassNote';
 import { isOut, WhenStep } from './WhenStep';
 import { forgetReceipt, readReceipt, Receipt, saveReceipt, type ConfirmedBooking, type ReceiptSnapshot } from './Receipt';
 import { useAvailability, useCoupon, useHold, useOnlinePayment, useSavedDraft, useSlotFallback } from './bookingHooks';
@@ -89,7 +92,7 @@ export default function BookingPage() {
   // the promo code the guest checked comes off the total shown, as the server will take it off
   const couponCut = coupon.cut(booking.total, booking.entry);
   const payable = booking.total - couponCut;
-  const sumLine = (cartActs.length === 0 ? t('Park entry only') : (cartActs.length > 1 ? t('{n} experiences + entry', { n: cartActs.length }) : t('{n} experience + entry', { n: cartActs.length })))
+  const sumLine = (cartActs.length === 0 ? t('Park entry only') : (cartActs.length > 1 ? t('{n} activities + entry', { n: cartActs.length }) : t('{n} activity + entry', { n: cartActs.length })))
     + ' · ' + mur(payable) + (app.currency !== 'MUR' ? ' (' + money(payable) + ')' : '');
   const payModeNote = payMode === 'online' ? t('E-RECEIPT BY EMAIL & SMS, INSTANTLY') : t('FREE · NO CANCELLATION FEE');
   // Without a gateway the only honest option is the gate; the whole step is hidden.
@@ -173,6 +176,28 @@ export default function BookingPage() {
     }
     return '';
   };
+
+  /**
+   * The sticky bar's button follows the booking: a date problem first ("Next: pick a date"),
+   * then missing contact details ("Next: your details"), then the confirmation itself.
+   * A tap on a "Next" label scrolls to that step instead of sending.
+   */
+  const dateBlocked = !!dealDateMsg || selectedSlotFull || activityFull.length > 0 || needsTime.length > 0;
+  const detailsMissing = name.trim().length < 2 || (!email.trim() && !phoneValue);
+  const nextStep: 'when' | 'details' | 'confirm' = dateBlocked ? 'when' : detailsMissing ? 'details' : 'confirm';
+  const goStep = (id: string, focus?: HTMLElement | null) => {
+    const el = document.getElementById(id);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    if (focus) setTimeout(() => focus.focus({ preventScroll: true }), reduce ? 0 : 400);
+    else (el?.querySelector<HTMLElement>('button[aria-pressed="false"], button, input'))?.focus({ preventScroll: true });
+  };
+  const onSticky = () => {
+    if (nextStep === 'when') { goStep('step-when'); return; }
+    if (nextStep === 'details') { goStep('step-details', name.trim().length < 2 ? nameRef.current : email.trim() ? phoneRef.current : emailRef.current); return; }
+    void confirmNow();
+  };
+  const stickyLabel = nextStep === 'when' ? t('Next: pick a date ↓') : nextStep === 'details' ? t('Next: your details ↓') : confirmLabel;
 
   const confirmNow = async () => {
     if (submitting) return;
@@ -299,11 +324,12 @@ export default function BookingPage() {
             <div>
               {/* 1 · PICK EXPERIENCES */}
               <div style={{ marginTop: '30px' }}>
-                <StepLabel>{t('1 · TAP TO ADD EXPERIENCES')}</StepLabel>
-                <div style={{ background: booking.hasDiscount ? '#E2FFEB' : '#FFFFE2', borderRadius: '14px', padding: '13px 18px', fontSize: '13.5px', color: '#340057', fontWeight: 600, marginTop: '12px' }}>{passHint}</div>
+                <StepLabel>{t('1 · TAP TO ADD ACTIVITIES')}</StepLabel>
+                <div style={{ marginTop: '12px' }}>{booking.hasDiscount || booking.advCount === 2 ? <ExplorerPassNote /> : <div style={{ background: '#FFFFE2', borderRadius: '14px', padding: '13px 18px', fontSize: '13.5px', color: '#340057', fontWeight: 600 }}>{passHint}</div>}</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(146px,1fr))', gap: '10px', marginTop: '14px' }}>
                   {bookCards.map((m) => <BookCard key={m.id} m={m} />)}
                 </div>
+                <div style={{ marginTop: 12 }}><PackagesLine /></div>
               </div>
 
               {/* 2 · YOUR DAY (cart) */}
@@ -313,6 +339,7 @@ export default function BookingPage() {
                 hasSessions={(id) => !!sessionsOf(id)}
                 timesFor={timesFor}
               />
+              <DayExtras />
 
               {/* the route maps of what is in the cart, so the day can be pictured while booking */}
               {(() => {
@@ -323,16 +350,19 @@ export default function BookingPage() {
                   {quad && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><QuadMap /></div>}
                   {zip && <div data-testid="booking-route-map" style={{ marginTop: '24px' }}><ZiplineMap /></div>}
                 </>;
-                // On a phone the maps and their photos would push step 3 far down: they open on demand.
-                return isMobile
-                  ? <details data-testid="route-disclosure" style={{ marginTop: '18px', background: '#F7F3FF', borderRadius: '14px', padding: '12px 16px' }}>
-                      <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '14.5px', minHeight: '24px' }}>{t('See the route')}</summary>
-                      {maps}
-                    </details>
-                  : maps;
+                // The maps and their photos would push step 3 far down: they open on demand, on every screen.
+                return (
+                  <details data-testid="route-disclosure" className="route-disclosure" style={{ marginTop: '18px', background: '#F7F3FF', borderRadius: '14px', padding: '12px 16px' }}>
+                    <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: '15px', minHeight: '28px', display: 'flex', alignItems: 'center', gap: 8, color: '#340057' }}>
+                      <MapIcon aria-hidden size={18} strokeWidth={2.2} />{t('See the route map')}
+                    </summary>
+                    {maps}
+                  </details>
+                );
               })()}
 
               {/* 3 · WHEN */}
+              <div id="step-when" style={{ scrollMarginTop: 96 }}>
               <WhenStep
                 dOpts={dOpts}
                 todayIso={tIso}
@@ -342,11 +372,12 @@ export default function BookingPage() {
                 activityFullMsg={activityFullMsg}
                 holdUntil={hold && !selectedSlotFull && activityFull.length === 0 ? hold.until : undefined}
               />
+              </div>
             </div>
 
             <div>
               {/* 4 · DETAILS */}
-              <div style={{ marginTop: '34px' }}>
+              <div id="step-details" style={{ marginTop: '34px', scrollMarginTop: 96 }}>
                 <StepLabel>{t('4 · YOUR DETAILS · FOR YOUR CONFIRMATION & E-RECEIPT')}</StepLabel>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: '10px', marginTop: '12px' }}>
                   <Field ref={nameRef} id="bk-name" autoComplete="name" value={name} onChange={editContact(setName, 'name')} placeholder={t('Full name')} error={fieldErr.name} />
@@ -449,7 +480,7 @@ export default function BookingPage() {
               </div>
               {redirecting
                 ? <div data-testid="checkout-redirect" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '14.5px', padding: '14px 4px' }}>{t('Taking you to the secure payment page…')}</div>
-                : <ValleButton variant="onDark" size={isMobile ? 'md' : 'lg'} onClick={confirmNow} aria-busy={submitting}><BtnLabel>{confirmLabel}</BtnLabel></ValleButton>}
+                : <ValleButton variant="onDark" size={isMobile ? 'md' : 'lg'} onClick={onSticky} aria-busy={submitting} data-testid="sticky-action" data-step={nextStep}>{nextStep === 'confirm' ? <BtnLabel>{stickyLabel}</BtnLabel> : stickyLabel}</ValleButton>}
             </div>
           </div>
         </>

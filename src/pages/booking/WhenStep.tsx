@@ -143,7 +143,7 @@ export function WhenStep({ dOpts, todayIso, avail, selectedLoad, dealDateMsg, ac
   const { dateIdx, setDateIdx, customDate, setCustomDate, slot, setSlot } = useApp();
   return (
     <div style={{ marginTop: '34px' }}>
-      <StepLabel>{t('3 · WHEN ARE YOU COMING?')}</StepLabel>
+      <StepLabel>{t('3 · DATE AND ARRIVAL TIME')}</StepLabel>
       {dealDateMsg && <div role="alert" data-testid="deal-date-warning" style={{ marginTop: '12px', background: '#FFE2E7', borderRadius: '12px', padding: '11px 14px', fontSize: '13.5px', fontWeight: 600, color: '#B8163A' }}>{dealDateMsg}</div>}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(86px,1fr))', gap: '8px', marginTop: '12px' }}>
         {dOpts.map((o) => (

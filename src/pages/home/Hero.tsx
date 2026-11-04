@@ -3,11 +3,13 @@ import { useCatalog } from '../../store/CatalogContext';
 import { Img } from '../../components/Img';
 import { Pause, Play } from 'lucide-react';
 import { useT } from '../../i18n';
+import { paths, useGoto } from '../../lib/nav';
 import { setHomeMotionPaused, useHomeMotionPaused } from './motionPause';
 
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
   const t = useT();
+  const goto = useGoto();
   const { HERO } = useCatalog();
   const [heroIdx, setHeroIdxRaw] = useState(0);
   // the outgoing slide stays fully visible underneath while the next one fades in over it
@@ -95,6 +97,10 @@ export function Hero() {
         <p data-hero-copy className="mx-0 mt-[22px] mb-0 max-w-[52ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-white [text-shadow:0_1px_12px_rgba(31,0,51,.6)]">
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
+        <div data-hero-copy className="mt-7 flex flex-wrap gap-3">
+          <a href={paths.booking()} onClick={(e) => { e.preventDefault(); goto.booking(); }} data-testid="hero-book" className="vbtn vbtn-on-dark" style={{ color: '#340057' }}>{t('Book your day')}</a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); goto.packages(); }} data-testid="hero-packages" className="vbtn vbtn-ghost" style={{ color: '#FFFFFF' }}>{t('See packages')}</a>
+        </div>
       </div>
       <div className="absolute z-[4] right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col items-center gap-2">
         <button

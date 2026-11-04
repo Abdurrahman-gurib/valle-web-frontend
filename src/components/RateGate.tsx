@@ -95,9 +95,14 @@ export function RateGate() {
             <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 10, letterSpacing: '.08em', color: 'rgba(52,0,87,.7)' }}>
               {t('YOU CAN SWITCH ANY TIME FROM THE MENU')}
             </span>
-            {app.rateGateDismissable && (
+            {app.rateGateDismissable ? (
               <button type="button" onClick={app.closeRateGate} className="vbtn vbtn-secondary vbtn-sm">
                 {t('Keep {rate}', { rate: t(app.rateWord) })}
+              </button>
+            ) : (
+              // a first visit can skip the question: visitor prices are the default
+              <button type="button" onClick={() => app.setRate('nr')} data-testid="rate-browse" className="vbtn-link" style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>
+                {t('Just browsing: show visitor prices')}
               </button>
             )}
           </div>

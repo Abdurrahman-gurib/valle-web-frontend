@@ -125,7 +125,7 @@ export default function ExclusivePage({ onDetails }: { onDetails: (p: PackModalD
       <section id="diamond" aria-labelledby="diamond-feature-0" className="sr-section">
         {diamond.map((pk, i) => (
           <FeaturePackage
-            eyebrow={t('04 · THE ULTIMATE DAY · NR')}
+            eyebrow={t('04 · THE ULTIMATE DAY · VISITOR RATE')}
             key={pk.key ?? pk.name}
             testId="diamond-feature"
             productKey={pk.key}

@@ -15,7 +15,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
   const catalog = useCatalog();
   useSeo({ title: t('Page not found · VALLÉ Advenature™ Park'), description: t('That page is not in the valley. Find the ziplines, quad trails, packages and restaurants from here.'), noindex: true });
   const links: [string, string][] = [
-    [t('All {n} experiences', { n: catalog.ACTS.length }), paths.explore()],
+    [t('All {n} activities', { n: catalog.ACTS.length }), paths.explore()],
     [t('Ziplines'), paths.detail('zipline')],
     [t('Quad & buggy'), paths.detail('quad')],
     [t('Packages & prices'), paths.packages()],

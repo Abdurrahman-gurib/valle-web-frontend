@@ -1,4 +1,3 @@
-import { showsDuration } from '../../types';
 import { motion } from 'motion/react';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
 import { useCatalog } from '../../store/CatalogContext';
@@ -61,7 +60,7 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
         <h3 className="v-h3" style={{ marginTop: 8 }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></h3>
         <div style={{ fontSize: 14, color: 'rgba(52,0,87,.75)', lineHeight: 1.5, marginTop: 8, marginBottom: 16 }}>{a.blurb}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1.5px dashed #D9C9F0', paddingTop: 12 }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.75)' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</span>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.75)' }}>{a.meta}</span>
           <span style={{ fontSize: 14, fontWeight: 700, color: '#5B21B6' }}>{t('Details →')}</span>
         </div>
       </div>
@@ -74,7 +73,7 @@ export function ClassicsRail() {
   const t = useT();
   const lang = useLang();
   const { ACTS } = useCatalog();
-  const { rateTag } = useApp();
+  const { rateBadge: rateTag } = useApp();
   const card = useCardModel();
   const c = useCarousel({ autoplayMs: 3500, loop: true });
 

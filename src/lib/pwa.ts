@@ -82,26 +82,33 @@ export function useInstall(): InstallState {
 let reachable = true;
 let probing = false;
 let retry: number | undefined;
+/** Failed probes in a row: one slow answer (a busy page, a cold API) is not "offline". */
+let misses = 0;
 const onlineListeners = new Set<() => void>();
 
 async function probe(): Promise<void> {
   if (probing) return;
   probing = true;
   let ok = false;
-  if (navigator.onLine) {
+  const browserOffline = !navigator.onLine;
+  if (!browserOffline) {
     const ctrl = new AbortController();
-    const timer = window.setTimeout(() => ctrl.abort(), 5000);
+    const timer = window.setTimeout(() => ctrl.abort(), 8000);
     try {
       // /api/health is never cached by the service worker, so this is the real network
       const res = await fetch((import.meta.env.VITE_API_URL || '/api') + '/health', { cache: 'no-store', signal: ctrl.signal });
-      ok = res.ok || res.status < 500;
+      // any answer from the server, even an error status, proves the network works
+      ok = res.status > 0;
     } catch { ok = false; }
     window.clearTimeout(timer);
   }
   probing = false;
   window.clearTimeout(retry);
-  if (!ok) retry = window.setTimeout(() => { void probe(); }, 30000);
-  if (ok !== reachable) { reachable = ok; onlineListeners.forEach((l) => l()); }
+  misses = ok ? 0 : misses + 1;
+  // the browser's own "offline" is trusted at once; a failed request only after a second one fails too
+  const now = ok || (!browserOffline && misses < 2);
+  if (!ok) retry = window.setTimeout(() => { void probe(); }, misses < 2 ? 4000 : 30000);
+  if (now !== reachable) { reachable = now; onlineListeners.forEach((l) => l()); }
 }
 
 function subscribeOnline(l: () => void) {

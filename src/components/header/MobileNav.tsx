@@ -86,7 +86,7 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
         ))}
       </div>
       <NavRow href={paths.home()} onClick={go(goto.home)} delay="[animation-delay:.1s]">{t('Home')}</NavRow>
-      <NavRow href={paths.explore('all')} onClick={go(() => goto.explore('all'))} delay="[animation-delay:.14s]" arrow="text-valle-yellow">{t('All {n} experiences', { n: catalog.ACTS.length })}</NavRow>
+      <NavRow href={paths.explore('all')} onClick={go(() => goto.explore('all'))} delay="[animation-delay:.14s]" arrow="text-valle-yellow">{t('All {n} activities', { n: catalog.ACTS.length })}</NavRow>
       <NavRow href={paths.packages()} onClick={go(() => goto.packages())} delay="[animation-delay:.16s]">{t('Packages')}</NavRow>
       {/* the packages menu's groups, folded so the overlay stays short */}
       <details data-testid="mobile-packages-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.17s]">

@@ -71,7 +71,7 @@ export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
             <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="group block rounded-[20px] overflow-hidden bg-white shadow-s2 [transition:transform_var(--t-ui)] hover:[transform:translateY(-4px)]" color="#340057">
               {src
                 ? <span className="block relative aspect-[16/9] bg-valle-lilac"><Img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /></span>
-                : <span className="flex aspect-[16/9] items-center justify-center bg-valle-tint font-display italic font-black text-[28px] uppercase text-valle-purple">{t('Kids menu')}</span>}
+                : <span aria-hidden className="flex aspect-[16/9] items-center justify-center bg-valle-tint font-display italic font-black text-[28px] uppercase text-valle-purple">{t('Kids menu')}</span>}
               <span className="flex items-center justify-between gap-2 px-[18px] py-[14px] font-display italic font-black text-[19px] uppercase">
                 {name}<span className="text-valle-link"><Fwd /></span>
               </span>

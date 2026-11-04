@@ -43,7 +43,7 @@ export function FeaturePackage({ eyebrow, testId, productKey, name, title, title
           <div className="pk-price-band">
             <PriceFigure label={dbl ? t('SINGLE') : t('PER PERSON')} value={single} testId={testId + '-single'} size={FEATURE_PRICE} color="#FFFC33" labelColor="rgba(255,255,255,.75)" />
             {dbl && <PriceFigure label={t('DOUBLE · 2 PEOPLE')} value={dbl} testId={testId + '-double'} size={FEATURE_PRICE} color="#FFFFFF" labelColor="rgba(255,255,255,.75)" />}
-            <div className="sr-from-note">{t('VAT inclusive')}{b.product?.rateOnly === 'nr' && <> · {t('VISITOR RATE · NR')}</>}</div>
+            <div className="sr-from-note">{t('VAT inclusive')}{b.product?.rateOnly === 'nr' && <> · {t('Visitor rate')}</>}</div>
           </div>
         )}
         {note && <p className="pk-sub" style={{ color: 'rgba(255,255,255,.8)', fontFamily: MONO, fontSize: 11.5, letterSpacing: '.06em', marginTop: 14 }}>{note}</p>}

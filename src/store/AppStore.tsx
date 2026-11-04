@@ -16,6 +16,8 @@ interface AppState {
   rate: RateKey | null;
   rateTag: string;              // 'RR' | 'NR'
   rateWord: string;             // 'Resident' | 'Visitor'
+  /** The badge beside a price: 'VISITOR PRICE' | 'RESIDENT PRICE'. */
+  rateBadge: string;
   rateGateOpen: boolean;
   rateGateDismissable: boolean;
   setRate: (r: RateKey) => void;
@@ -290,6 +292,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     rate,
     rateTag: rate === 'nr' ? 'NR' : 'RR',
     rateWord: rate === 'nr' ? tr('Visitor') : tr('Resident'),
+    rateBadge: rate === 'nr' ? tr('VISITOR PRICE') : tr('RESIDENT PRICE'),
     rateGateOpen: !rate || rateGate,
     rateGateDismissable: !!rate,
     setRate,
