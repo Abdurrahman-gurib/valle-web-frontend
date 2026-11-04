@@ -24,9 +24,13 @@ import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
 import TeamPanel from './TeamPanel';
 import SecurityPanel from './SecurityPanel';
-import { onLive } from './liveEvents';
+import { isOwnBooking, onLive } from './liveEvents';
+import { useUrlState } from './urlState';
 
 type Tab = 'bookings' | 'gate' | 'offers' | 'reports' | 'reconciliation' | 'forecast' | 'quotes' | 'chat' | 'calendar' | 'team' | 'security';
+const TABS: Tab[] = ['bookings', 'gate', 'offers', 'reports', 'reconciliation', 'forecast', 'quotes', 'chat', 'calendar', 'team', 'security'];
+/** Minimum gap between two refreshes of the stats strip; a burst still ends in one trailing refresh. */
+const STATS_GAP_MS = 10_000;
 
 /** Segmented pill, the same shape as the public site's rate switch. */
 function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
@@ -44,13 +48,17 @@ function TabBtn({ on, onClick, children }: { on: boolean; onClick: () => void; c
   );
 }
 
-function StatCard({ tag, value }: { tag: string; value: string }) {
+/** One figure of the strip. Values wrap rather than truncate (a tablet is ~820 px wide). */
+function StatCard({ tag, value, title, testId }: { tag: string; value: string; title?: string; testId?: string }) {
   return (
-    <div className={cn(cardCls, 'min-w-0 px-[16px] py-[13px]')}>
-      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>{tag}</div>
-      <div className={cn(displayCls, 'mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap text-[length:clamp(22px,3vw,28px)] leading-[1.1]')}>
+    <div className={cn(cardCls, 'min-w-0 px-[16px] py-[13px]')} title={title} data-testid={testId}>
+      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>
+        {tag}{title ? <span aria-hidden="true" className="ms-[5px] opacity-60">ⓘ</span> : null}
+      </div>
+      <div className={cn(displayCls, 'mt-[4px] text-[length:clamp(20px,2.6vw,27px)] leading-[1.1] [overflow-wrap:anywhere]')}>
         {value}
       </div>
+      {title && <span className="sr-only">{title}</span>}
     </div>
   );
 }
@@ -75,9 +83,11 @@ export default function StaffDashboard() {
   const auth = useStaffAuth();
   const navigate = useNavigate();
   const narrow = useIsMobile(700);
-  const [tab, setTab] = useState<Tab>('bookings');
-  // a reference the gate asked to open in the bookings tab
-  const [jumpRef, setJumpRef] = useState<string | null>(null);
+  // the tab lives in the URL (?tab=gate), so a refresh mid-edit stays where it was
+  const [params, setParams] = useUrlState();
+  const urlTab = params.get('tab') as Tab | null;
+  const tab: Tab = urlTab && TABS.includes(urlTab) ? urlTab : 'bookings';
+  const setTab = useCallback((t: Tab) => setParams({ tab: t === 'bookings' ? null : t }), [setParams]);
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -87,14 +97,21 @@ export default function StaffDashboard() {
   }, [auth.loading, auth.user, navigate]);
 
   // Chat fires `conversation:updated` on every message, so the strip is throttled
-  // rather than refetched per event.
+  // rather than refetched per event. A throttled call is not dropped: it runs once
+  // the gap is over, so a visitor's first message always reaches "Chats to answer".
   const lastStats = useRef(0);
+  const trailing = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reloadStats = useCallback((force = false) => {
-    const now = Date.now();
-    if (!force && now - lastStats.current < 10_000) return;
-    lastStats.current = now;
-    getStats().then(setStats).catch(() => { /* the strip just keeps its last figures */ });
+    const fetchNow = () => {
+      if (trailing.current) { clearTimeout(trailing.current); trailing.current = null; }
+      lastStats.current = Date.now();
+      getStats().then(setStats).catch(() => { /* the strip just keeps its last figures */ });
+    };
+    const wait = STATS_GAP_MS - (Date.now() - lastStats.current);
+    if (force || wait <= 0) { fetchNow(); return; }
+    if (!trailing.current) trailing.current = setTimeout(fetchNow, wait);
   }, []);
+  useEffect(() => () => { if (trailing.current) clearTimeout(trailing.current); }, []);
 
   useEffect(() => {
     if (auth.user) reloadStats(true);
@@ -107,6 +124,8 @@ export default function StaffDashboard() {
     const offBooking = onLive('valle:booking-new', (b) => {
       if (!b?.refCode) return;
       reloadStats(true);
+      // the operator's own booking from the New-booking drawer is not news to them
+      if (isOwnBooking(b)) return;
       setToast(`New booking ${b.refCode} · ${b.guestName} · ${b.visitDate} ${b.slot}`);
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => setToast(''), 9000);
@@ -195,7 +214,7 @@ export default function StaffDashboard() {
             <div className="mt-[20px] flex flex-wrap gap-[10px]">
               <Link
                 to="/hr"
-                className="press inline-flex items-center rounded-[999px] bg-valle-red px-[20px] py-[11px] text-[13.5px] font-bold"
+                className="press inline-flex items-center rounded-[999px] bg-valle-purple px-[20px] py-[11px] text-[13.5px] font-bold"
                 style={{ color: '#FFFFFF', textDecoration: 'none' }}
               >
                 Go to careers →
@@ -219,12 +238,12 @@ export default function StaffDashboard() {
       ) : (
       <div className="mx-auto my-0 max-w-[1440px] px-[clamp(14px,3vw,28px)] pt-[clamp(16px,3vw,26px)] pb-[40px]">
         {/* ---- stat strip ---- */}
-        <div data-print-hide="" className="mb-[18px] grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[12px]">
-          <StatCard tag="BOOKINGS TODAY" value={stats ? String(stats.bookingsToday) : '…'} />
-          <StatCard tag="ARRIVALS TODAY" value={stats ? `${stats.arrivalsToday} · ${stats.guestsToday ?? 0} guests` : '…'} />
-          <StatCard tag="REVENUE TODAY" value={stats ? money(stats.revenueToday ?? 0) : '…'} />
-          <StatCard tag="CHATS TO ANSWER" value={stats ? `${stats.unansweredChats ?? 0} of ${stats.openChats} open` : '…'} />
-          <StatCard tag="REVENUE THIS MONTH" value={stats ? money(stats.revenueMonth) : '…'} />
+        <div data-print-hide="" className="mb-[18px] grid grid-cols-[repeat(auto-fit,minmax(165px,1fr))] gap-[12px]">
+          <StatCard tag="BOOKINGS TODAY" value={stats ? String(stats.bookingsToday) : '…'} title="Bookings made today (any visit date)" />
+          <StatCard tag="ARRIVALS TODAY" value={stats ? `${stats.arrivalsToday} · ${stats.guestsToday ?? 0} guests` : '…'} title="Bookings and guests due on site today, cancellations excluded" />
+          <StatCard tag="REVENUE TODAY" value={stats ? money(stats.revenueToday ?? 0) : '…'} title="Value of today's visits (by visit date), cancellations excluded" />
+          <StatCard testId="stat-chats" tag="CHATS TO ANSWER" value={stats ? `${stats.unansweredChats ?? 0} of ${stats.openChats} open` : '…'} title="Open visitor chats waiting for a reply, of the open chats a visitor has written in" />
+          <StatCard testId="stat-booked-month" tag="BOOKED THIS MONTH" value={stats ? money(stats.revenueMonth) : '…'} title="Value of bookings made this calendar month, whatever the visit date, cancellations excluded. Sales & reports count by visit date (Visits this month)." />
         </div>
 
         {/* ---- tabs ---- */}
@@ -243,18 +262,27 @@ export default function StaffDashboard() {
         </div>
 
         {toast && (
-          <div role="status" data-testid="booking-toast" className="fixed right-[16px] bottom-[16px] z-90 max-w-[min(420px,calc(100vw_-_32px))] rounded-[14px] bg-valle-purple px-[16px] py-[12px] text-[14px] font-bold text-white shadow-[0_18px_40px_-12px_rgba(38,0,64,.6)]">
+          // top right, under the bar and below every drawer (z 80+): never over a drawer's footer buttons
+          <div role="status" data-testid="booking-toast" className="fixed top-[76px] right-[16px] z-[70] max-w-[min(420px,calc(100vw_-_32px))] rounded-[14px] bg-valle-purple px-[16px] py-[12px] text-[14px] font-bold text-white shadow-[0_18px_40px_-12px_rgba(38,0,64,.6)]">
             <span className="mr-[8px] text-valle-green">●</span>{toast}
           </div>
         )}
 
         {/* Both panels stay mounted so the chat socket survives a tab switch. */}
         <div className={tab === 'bookings' ? 'block' : 'hidden'}>
-          <BookingsPanel onChanged={reloadStats} openRef={jumpRef} onOpened={() => setJumpRef(null)} />
+          <BookingsPanel onChanged={reloadStats} />
         </div>
-        {tab === 'gate' && <ParkStatusPanel />}
-        {tab === 'gate' && <LiveOpsPanel />}
-        {tab === 'gate' && <GatePanel onChanged={reloadStats} onOpenBooking={(ref) => { setJumpRef(ref); setTab('bookings'); }} />}
+        {/* the gate's job comes first (scan / look up); the park-status and live-board editors fold away */}
+        {tab === 'gate' && <GatePanel onChanged={reloadStats} onOpenBooking={(ref) => setParams({ tab: null, open: ref })} />}
+        {tab === 'gate' && (
+          <details data-testid="gate-editors" className={cn(cardCls, 'mt-[14px] px-[16px] py-[12px]')}>
+            <summary className={cn(monoCls, 'cursor-pointer text-[10.5px] font-bold tracking-[.14em] text-valle-purple')}>PARK STATUS &amp; LIVE BOARD (EDIT)</summary>
+            <div className="mt-[12px] grid gap-[14px]">
+              <ParkStatusPanel />
+              <LiveOpsPanel />
+            </div>
+          </details>
+        )}
         {tab === 'offers' && <CouponsPanel />}
         {tab === 'reports' && <ReportsPanel />}
         {/* managers only; the API enforces it (the StaffRole type predates the manager role) */}

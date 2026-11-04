@@ -87,15 +87,20 @@ export function Lockup({ color = '#FFFFFF', size = 27, sub = 'ADVENATURE™ PARK
   );
 }
 
+/*
+ * The site's button system (.vbtn in src/styles/global.css): primary = solid
+ * purple, secondary = purple outline. Red is never a button colour; a
+ * destructive action is a dark-red outline that only tints on hover.
+ */
 const BTN_SKIN: Record<string, string> = {
-  solid: 'border-0 bg-valle-red text-white enabled:hover:bg-[#D91E44]',
-  danger: 'border-[1.5px] border-[#D91E44] bg-transparent text-[#D91E44] enabled:hover:bg-[#D91E44] enabled:hover:text-white',
-  dark: 'border-0 bg-valle-purple text-white enabled:hover:bg-valle-deep',
-  ghost: 'border-[1.5px] border-valle-lilac bg-transparent text-valle-purple enabled:hover:bg-[#F7F3FF]',
+  solid: 'border-[1.5px] border-transparent bg-valle-purple text-white shadow-[0_1px_2px_rgba(23,0,40,.12)] enabled:hover:bg-[#4A0F75] enabled:active:bg-[#260040]',
+  danger: 'border-[1.5px] border-[#A3122F] bg-white text-[#A3122F] enabled:hover:bg-[#FFF1F3]',
+  dark: 'border-[1.5px] border-transparent bg-valle-purple text-white enabled:hover:bg-[#4A0F75] enabled:active:bg-[#260040]',
+  ghost: 'border-[1.5px] border-valle-purple bg-white text-valle-purple enabled:hover:bg-[#F4EEFF] enabled:active:bg-[#EBE2FF]',
 };
 
 /** Filled / outlined pill button with the site's hover lift. */
-export function Btn({ children, onClick, variant = 'solid', disabled, type = 'button', style, className }: {
+export function Btn({ children, onClick, variant = 'solid', disabled, type = 'button', style, className, title, ...data }: {
   children: ReactNode;
   onClick?: () => void;
   variant?: 'solid' | 'ghost' | 'dark' | 'danger';
@@ -103,12 +108,17 @@ export function Btn({ children, onClick, variant = 'solid', disabled, type = 'bu
   type?: 'button' | 'submit';
   style?: CSSProperties;
   className?: string;
+  title?: string;
+  'data-testid'?: string;
+  'aria-pressed'?: boolean;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
+      title={title}
+      {...data}
       className={cn(
         'press inline-flex cursor-pointer items-center justify-center gap-[8px] whitespace-nowrap rounded-[999px] px-[18px] py-[10px] [font-family:inherit] text-[13.5px] font-bold',
         '[transition:transform_.15s_ease,background_.15s_ease] disabled:cursor-default disabled:opacity-55 enabled:hover:[transform:translateY(-1px)]',
@@ -121,6 +131,11 @@ export function Btn({ children, onClick, variant = 'solid', disabled, type = 'bu
     </button>
   );
 }
+
+/** How a status reads on screen ("Checked in", not the API's "arrived"). */
+export const STATUS_TEXT: Record<string, string> = {
+  confirmed: 'Confirmed', arrived: 'Arrived', cancelled: 'Cancelled', postponed: 'Postponed',
+};
 
 /** Booking status chip, colour-coded the way the park floor reads them. */
 export function StatusChip({ status }: { status: BookingStatus | string }) {
@@ -136,7 +151,7 @@ export function StatusChip({ status }: { status: BookingStatus | string }) {
       className={cn(monoCls, 'whitespace-nowrap rounded-[999px] px-[9px] py-[4px] text-[10px] font-bold uppercase tracking-[.1em]')}
       style={{ background: bg, color: fg }}
     >
-      {status}
+      {STATUS_TEXT[status] ?? status}
     </span>
   );
 }

@@ -21,3 +21,31 @@ export function onLive<K extends keyof LiveEvents>(name: K, fn: (detail: LiveEve
   window.addEventListener(name, h);
   return () => window.removeEventListener(name, h);
 }
+
+// ------------------------------------------------- the operator's own bookings
+
+/**
+ * A booking this operator just took in the New-booking drawer comes back on the
+ * socket like any website booking. It is not news to them, so the toast and the
+ * "just came in" banner skip it. The socket can announce it before the POST
+ * answers, so the drawer registers what it is about to create (guest + date)
+ * and then the reference it got.
+ */
+const ownRefs = new Set<string>();
+let pending: { guestName: string; visitDate: string; until: number }[] = [];
+const PENDING_MS = 30_000;
+
+export function expectOwnBooking(guestName: string, visitDate: string, now = Date.now()): void {
+  pending = pending.filter((p) => p.until > now);
+  pending.push({ guestName: guestName.trim().toLowerCase(), visitDate, until: now + PENDING_MS });
+}
+
+export function markOwnBooking(refCode: string): void {
+  ownRefs.add(refCode);
+}
+
+export function isOwnBooking(b: Pick<BookingRow, 'refCode' | 'guestName' | 'visitDate'>, now = Date.now()): boolean {
+  if (ownRefs.has(b.refCode)) return true;
+  const name = (b.guestName || '').trim().toLowerCase();
+  return pending.some((p) => p.until > now && p.guestName === name && p.visitDate === b.visitDate);
+}

@@ -2,8 +2,16 @@ import type { BookingDetailFull } from '../../../lib/staffApi';
 import { cn } from '../../../lib/utils';
 import { LineEditor, type EditableLine } from '../LineEditor';
 import { Field, SectionLabel, inputStyle, textareaStyle } from '../ui';
-import { linesToEditable, type Draft } from './draft';
+import type { Draft } from './draft';
+import { MAX_ADULTS, MAX_KIDS, type LineChange } from './partyLines';
 import { Select, inputCls } from './shared';
+
+/** The limit of one booking, said out loud rather than silently clamped. */
+export function partyLimitHint(value: string, max: number, who: string): string | undefined {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= max) return undefined;
+  return `At most ${max} ${who} per booking. For ${n}, make a group booking (Quotes / group form) or split it.`;
+}
 
 const grid = 'grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3';
 
@@ -11,14 +19,16 @@ const grid = 'grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3';
 export type SetDraft = <K extends keyof Draft>(k: K) => (v: Draft[K]) => void;
 
 /** The drawer's Edit mode: every field the PATCH accepts, plus the experience lines. */
-export function BookingEditForm({ data, form, set, fieldErr, editLines, onLinesChange }: {
+export function BookingEditForm({ form, set, fieldErr, lines, onLinesChange, lineDiff }: {
   data: BookingDetailFull;
   form: Draft;
   set: SetDraft;
   fieldErr: Record<string, string>;
-  /** null = the lines are untouched */
-  editLines: EditableLine[] | null;
+  /** the lines a save would send, already fitted to the party on screen */
+  lines: EditableLine[];
   onLinesChange: (lines: EditableLine[]) => void;
+  /** what the party change does to the lines, shown before saving */
+  lineDiff: LineChange[];
 }) {
   return (
     <div className="grid gap-3.5">
@@ -39,16 +49,16 @@ export function BookingEditForm({ data, form, set, fieldErr, editLines, onLinesC
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(118px,1fr))] gap-3">
-        <Field id="bk-adults" tag="ADULTS" hint={fieldErr.adults}>
+        <Field id="bk-adults" tag={`ADULTS (MAX ${MAX_ADULTS})`} hint={partyLimitHint(form.adults, MAX_ADULTS, 'adults') ?? fieldErr.adults}>
           <input
-            id="bk-adults" type="number" min={1} max={12} value={form.adults}
+            id="bk-adults" type="number" min={1} max={MAX_ADULTS} value={form.adults}
             onChange={(e) => set('adults')(e.target.value)}
             style={inputStyle}
           />
         </Field>
-        <Field id="bk-kids" tag="CHILDREN" hint={fieldErr.kids}>
+        <Field id="bk-kids" tag={`CHILDREN (MAX ${MAX_KIDS})`} hint={partyLimitHint(form.kids, MAX_KIDS, 'children') ?? fieldErr.kids}>
           <input
-            id="bk-kids" type="number" min={0} max={12} value={form.kids}
+            id="bk-kids" type="number" min={0} max={MAX_KIDS} value={form.kids}
             onChange={(e) => set('kids')(e.target.value)}
             style={inputStyle}
           />
@@ -64,6 +74,17 @@ export function BookingEditForm({ data, form, set, fieldErr, editLines, onLinesC
       <div className="rounded-[12px] border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] px-3 py-[9px] font-mono text-[10px] leading-[1.5] tracking-[.06em] text-valle-purple/60">
         CHANGING THE PARTY OR THE RATE RE-PRICES THE BOOKING ON THE SERVER.
       </div>
+      {lineDiff.length > 0 && (
+        <div data-testid="party-line-changes" role="status" className="rounded-[12px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2.5 text-[13px] leading-[1.5]">
+          <strong>The new party changes these activities when you save:</strong>
+          <ul className="m-0 mt-1 ps-5">
+            {lineDiff.map((c) => (
+              <li key={c.id + (c.variant ?? '')}>{c.id}{c.variant ? ` (${c.variant})` : ''}: {c.before} → {c.after ?? 'removed'}</li>
+            ))}
+          </ul>
+          <span className="text-valle-purple/70">Adjust them below if that is not right.</span>
+        </div>
+      )}
 
       <Field id="bk-name" tag="GUEST NAME" hint={fieldErr.guestName}>
         <input id="bk-name" value={form.guestName} onChange={(e) => set('guestName')(e.target.value)} style={inputStyle} />
@@ -100,7 +121,7 @@ export function BookingEditForm({ data, form, set, fieldErr, editLines, onLinesC
 
       <SectionLabel>EXPERIENCES · ADD A TOP-UP OR REMOVE</SectionLabel>
       <LineEditor
-        lines={editLines ?? linesToEditable(data)}
+        lines={lines}
         onChange={onLinesChange}
         adults={Number(form.adults) || 1}
         kids={Number(form.kids) || 0}

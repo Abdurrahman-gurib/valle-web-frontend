@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { BookingRow } from '../../types';
 import { cn } from '../../lib/utils';
 import { Btn, StatusChip, clockTime, shortDate } from './ui';
-import { gateCheckIn, gateWaiverPdfUrl, getGateDay, getGateView, isHttpError, type GateDayRow, type GateView } from '../../lib/staffApi';
+import { gateCheckIn, gateWaiverPdfUrl, getGateDay, getGateView, isHttpError, listBookings, type GateDayRow, type GateView } from '../../lib/staffApi';
 import { errorMessage } from '../../lib/errors';
+import { normaliseSearch } from './bookings/BookingFilters';
+import { partyText } from './bookings/partyLines';
 
 const money = (n: number) => 'Rs ' + n.toLocaleString('en-US');
 
@@ -17,7 +20,20 @@ export function refFromScan(text: string): string | null {
   const inUrl = s.match(/\/(?:ticket|waiver)\/([A-Za-z]{3}-\d{3,6}-\d{2})/);
   if (inUrl) return inUrl[1].toUpperCase();
   const bare = s.match(/^([A-Za-z]{3}-\d{3,6}-\d{2})$/);
-  return bare ? bare[1].toUpperCase() : null;
+  if (bare) return bare[1].toUpperCase();
+  // typed loosely: "val 2857 26", "VAL2857-26", "val-2857 26"
+  const loose = s.match(/^([A-Za-z]{3})[\s-]*(\d{3,6})[\s-]*(\d{2})$/);
+  return loose ? `${loose[1]}-${loose[2]}-${loose[3]}`.toUpperCase() : null;
+}
+
+/** Arrivals whose reference or guest name contains every typed word. */
+export function filterArrivals(rows: GateDayRow[], q: string): GateDayRow[] {
+  const words = normaliseSearch(q).toLowerCase().split(' ').filter(Boolean);
+  if (words.length === 0) return rows;
+  return rows.filter((r) => {
+    const hay = (r.refCode + ' ' + r.guestName).toLowerCase();
+    return words.every((w) => hay.includes(w));
+  });
 }
 
 type Detector = { detect: (src: CanvasImageSource) => Promise<{ rawValue: string }[]> };
@@ -112,12 +128,16 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
   const [override, setOverride] = useState(false);
   const [reason, setReason] = useState('');
   const [openSig, setOpenSig] = useState<string | null>(null);
+  // several bookings matched what was typed: pick one
+  const [matches, setMatches] = useState<BookingRow[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [dayQ, setDayQ] = useState('');
 
   const loadDay = useCallback(() => { getGateDay().then(setDay).catch(() => setDay([])); }, []);
   useEffect(loadDay, [loadDay]);
 
   const open = useCallback(async (ref: string) => {
-    setScan(false); setErr(''); setOverride(false); setReason(''); setOpenSig(null);
+    setScan(false); setErr(''); setOverride(false); setReason(''); setOpenSig(null); setMatches(null);
     try {
       setView(await getGateView(ref));
     } catch (e) {
@@ -126,9 +146,28 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
     }
   }, []);
 
-  const lookup = () => {
-    const ref = refFromScan(typed) ?? typed.trim().toUpperCase();
-    if (ref) open(ref);
+  /**
+   * A full reference (any case, spaces or dashes) opens straight away; anything
+   * else ("2857", a name, a phone, an e-mail) goes through the same search as
+   * the bookings table: one match opens, several give a list to pick from.
+   */
+  const lookup = async () => {
+    const text = typed.trim();
+    if (!text) return;
+    const ref = refFromScan(text);
+    if (ref) { void open(ref); return; }
+    setSearching(true); setErr(''); setMatches(null); setView(null);
+    try {
+      const res = await listBookings({ q: normaliseSearch(text), pageSize: 10, sort: 'visit_desc' });
+      const items = res.items ?? [];
+      if (items.length === 1) void open(items[0].refCode);
+      else if (items.length === 0) setErr(`No booking matches "${text}". Try the reference, the guest's name, phone or e-mail.`);
+      else setMatches(items);
+    } catch (e) {
+      setErr(errorMessage(e, 'Could not search the bookings.'));
+    } finally {
+      setSearching(false);
+    }
   };
 
   const checkIn = async (withOverride: boolean) => {
@@ -147,6 +186,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
   const blocked = !!view && (view.missing > 0 || view.stops > 0);
   const signedToday = day?.reduce((n, r) => n + Math.min(r.signed, r.party), 0) ?? 0;
   const partyToday = day?.reduce((n, r) => n + r.party, 0) ?? 0;
+  const shownDay = useMemo(() => (day ? filterArrivals(day, dayQ) : null), [day, dayQ]);
 
   return (
     <div className="grid gap-[14px]">
@@ -156,15 +196,34 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
         <input
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') lookup(); }}
-          placeholder="or type VAL-1234-26"
+          onKeyDown={(e) => { if (e.key === 'Enter') void lookup(); }}
+          placeholder="or type 2857, VAL-2857-26, a name, phone or e-mail"
+          aria-label="Booking reference, guest name, phone or e-mail"
           data-testid="gate-ref"
-          className={INPUT_CORE.replace('[font-family:inherit]', 'font-mono') + ' px-[14px] py-[11px] w-[220px] flex-[1_1_180px] uppercase'}
+          className={INPUT_CORE + ' px-[14px] py-[11px] w-[220px] flex-[1_1_220px]'}
         />
-        <Btn variant="ghost" onClick={lookup}>Look up</Btn>
+        <Btn variant="ghost" onClick={() => { void lookup(); }} disabled={searching}>{searching ? 'Searching…' : 'Look up'}</Btn>
       </div>
 
       {scan && <Scanner onRef={open} onClose={() => setScan(false)} />}
+      {matches && (
+        <div data-testid="gate-matches" className={cn(CARD, 'p-[12px]')}>
+          <div className={cn(LABEL, 'mb-[8px]')}>{matches.length} BOOKINGS MATCH · PICK ONE</div>
+          <ul className="m-0 grid list-none gap-[6px] p-0">
+            {matches.map((m) => (
+              <li key={m.refCode}>
+                <button type="button" onClick={() => { void open(m.refCode); }} className="flex w-full cursor-pointer flex-wrap items-center gap-[10px] rounded-[12px] border-[1.5px] border-valle-lilac bg-white px-[12px] py-[9px] text-left [font-family:inherit] text-[13.5px] text-valle-purple hover:bg-[#F7F3FF]">
+                  <span className="font-mono text-[12px] font-bold">{m.refCode}</span>
+                  <span className="font-semibold">{m.guestName}</span>
+                  <span>{shortDate(m.visitDate)} · {m.slot}</span>
+                  <span className="text-[rgba(52,0,87,.7)]">{partyText(m.adults, m.kids)}</span>
+                  <span className="ms-auto"><StatusChip status={m.status} /></span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {err && <div role="alert" className="bg-[#FFE2E7] border-[1.5px] border-valle-red rounded-[18px] px-[16px] py-[12px] font-semibold">{err}</div>}
 
       {/* ---- the scanned booking ---- */}
@@ -175,7 +234,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
               <div className="font-mono text-[13px] font-bold text-valle-red">{view.refCode}</div>
               <div className="font-display italic font-black uppercase text-[26px] leading-none">{view.guestName}</div>
               <div className="text-[13px] mt-[4px] text-[rgba(52,0,87,.7)]">
-                {shortDate(view.visitDate)} · {view.slot} · {view.adults} adult{view.adults === 1 ? '' : 's'}{view.kids ? ` · ${view.kids} child${view.kids === 1 ? '' : 'ren'}` : ''} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
+                {shortDate(view.visitDate)} · {view.slot} · {partyText(view.adults, view.kids)} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
               </div>
               {!view.isToday && <div className="font-mono text-[11px] font-bold text-[#D91E44] mt-[6px]">NOT TODAY'S BOOKING</div>}
               <div data-testid="gate-balance" className={cn('font-mono text-[12px] font-bold mt-[6px]', view.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
@@ -259,7 +318,10 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
                 )}
               </div>
             ) : (
-              <Btn onClick={() => checkIn(false)} disabled={busy} style={{ justifySelf: 'start', padding: '12px 26px', fontSize: 15 }}>Check in {view.required} guest{view.required === 1 ? '' : 's'}</Btn>
+              // the whole party walks in, whether or not their activities need a waiver
+              <Btn onClick={() => checkIn(false)} disabled={busy} style={{ justifySelf: 'start', padding: '12px 26px', fontSize: 15 }} data-testid="gate-check-in">
+                Check in {view.adults + view.kids} guest{view.adults + view.kids === 1 ? '' : 's'}
+              </Btn>
             )}
           </div>
         </div>
@@ -271,13 +333,25 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
           <div className={LABEL}>TODAY&apos;S ARRIVALS</div>
           <div className="font-mono text-[12px]">{signedToday}/{partyToday} waivers signed</div>
         </div>
+        {day && day.length > 0 && (
+          <input
+            type="search"
+            value={dayQ}
+            onChange={(e) => setDayQ(e.target.value)}
+            placeholder="Find in today's arrivals: name or reference"
+            aria-label="Search today's arrivals"
+            data-testid="gate-day-search"
+            className={INPUT + ' mb-[10px]'}
+          />
+        )}
         {day === null && <div className="text-[13px]">Loading…</div>}
         {day && day.length === 0 && <div className="text-[13px]">No bookings for today.</div>}
-        {day && day.length > 0 && (
+        {shownDay && day && day.length > 0 && shownDay.length === 0 && <div className="text-[13px]">No arrival matches &ldquo;{dayQ}&rdquo;.</div>}
+        {shownDay && shownDay.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-[13.5px]">
               <tbody>
-                {day.map((r) => (
+                {shownDay.map((r) => (
                   <tr key={r.refCode} onClick={() => open(r.refCode)} className="cursor-pointer border-t border-[#F1EAFF]">
                     <td className="px-[6px] py-[8px] font-mono text-[12px]">{r.refCode}</td>
                     <td className="px-[6px] py-[8px] font-semibold">{r.guestName}</td>

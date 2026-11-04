@@ -33,7 +33,8 @@ export function Select<T extends string>({ value, onChange, children, width, id,
       // the options are the caller's own T values
       onChange={(e) => onChange(e.target.value as T)}
       className="cursor-pointer appearance-auto"
-      style={{ ...inputStyle, width: width ?? 'auto' }}
+      // a number is a floor, not a fixed width: the option text always fits ("Any payment", "Any nationality")
+      style={{ ...inputStyle, ...(typeof width === 'number' ? { width: 'auto', minWidth: width } : { width: width ?? 'auto' }) }}
     >
       {children}
     </select>

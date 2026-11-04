@@ -35,11 +35,12 @@ export const prevMonth = (iso: string) => {
   return d.toISOString().slice(0, 10);
 };
 
-export function Kpi({ tag, value, sub, accent }: { tag: string; value: string; sub?: string; accent?: string }) {
+export function Kpi({ tag, value, sub, accent, title, testId }: { tag: string; value: string; sub?: string; accent?: string; title?: string; testId?: string }) {
   return (
-    <div className={cn(cardCls, 'px-[16px] py-[14px]')} style={{ borderLeft: accent ? '4px solid ' + accent : undefined }}>
-      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>{tag}</div>
-      <div className={cn(displayCls, 'mt-[4px] text-[26px] tracking-[-0.01em]')}>{value}</div>
+    <div className={cn(cardCls, 'min-w-0 px-[16px] py-[14px]')} style={{ borderLeft: accent ? '4px solid ' + accent : undefined }} title={title} data-testid={testId}>
+      <div className={cn(monoCls, 'text-[9.5px] font-bold tracking-[.14em] text-valle-violet')}>{tag}{title ? <span aria-hidden="true" className="ms-[5px] opacity-60">ⓘ</span> : null}</div>
+      <div className={cn(displayCls, 'mt-[4px] text-[26px] tracking-[-0.01em] [overflow-wrap:anywhere]')}>{value}</div>
+      {title && <span className="sr-only">{title}</span>}
       {sub && <div className="mt-[2px] text-[12px] text-[rgba(52,0,87,.6)]">{sub}</div>}
     </div>
   );
@@ -126,7 +127,11 @@ export function BreakdownTable({ rows, label, total }: { rows: { key: string; bo
   );
 }
 
-export const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmed', arrived: 'Arrived', cancelled: 'Cancelled' };
+export const STATUS_LABEL: Record<string, string> = { confirmed: 'Confirmed', arrived: 'Arrived', cancelled: 'Cancelled', postponed: 'Postponed (weather)' };
 export const PAY_LABEL: Record<string, string> = { gate: 'Pay at gate', online: 'Paid online' };
+/** How money was taken, as the till names it. */
+export const METHOD_LABEL: Record<string, string> = { cash: 'Cash', card: 'Card', juice: 'Juice', transfer: 'Bank transfer', online: 'Online', other: 'Other' };
+/** "cash+card" (the booking's summary of its payments) → "Cash + Card". */
+export const methodText = (m: string): string => (m ? m.split('+').map((x) => METHOD_LABEL[x] ?? x).join(' + ') : '');
 export const RATE_LABEL: Record<string, string> = { rr: 'Resident (RR)', nr: 'Visitor (NR)' };
 export const SLOT_LABEL: Record<string, string> = { morning: 'Morning', afternoon: 'Afternoon' };

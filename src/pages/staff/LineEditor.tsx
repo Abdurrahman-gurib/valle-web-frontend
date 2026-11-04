@@ -35,8 +35,10 @@ export function LineEditor({ lines, onChange, adults, kids, rate }: {
     onChange([...lines, act.mode === 'flat' ? { id: act.id, variant, adults: 0, kids: 0, units: 1 } : { id: act.id, variant, adults, kids, units: 0 }]);
     setPickVar('');
   };
+  // never more on a line than in the party
+  const cap = (f: 'adults' | 'kids' | 'units') => (f === 'adults' ? adults : f === 'kids' ? kids : 12);
   const bump = (i: number, f: 'adults' | 'kids' | 'units', d: number) =>
-    onChange(lines.map((l, j) => (j === i ? { ...l, [f]: Math.max(0, Math.min(12, l[f] + d)) } : l)).filter((l) => l.adults + l.kids + l.units > 0));
+    onChange(lines.map((l, j) => (j === i ? { ...l, [f]: Math.max(0, Math.min(cap(f), l[f] + d)) } : l)).filter((l) => l.adults + l.kids + l.units > 0));
 
   return (
     <div className="grid gap-2" data-testid="line-editor">

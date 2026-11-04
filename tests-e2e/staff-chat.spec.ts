@@ -311,6 +311,8 @@ test.describe('staff dashboard', () => {
     const drawer = page.getByTestId('new-booking');
     await expect(drawer).toBeVisible();
     const tag = Math.random().toString(36).slice(2, 8);
+    // the drawer opens on the channel this device used last (a desk walk-in by default)
+    await drawer.getByTestId('nb-channel-phone').click();
     await drawer.getByLabel('FULL NAME').fill(`Phone Guest ${tag}`);
     await drawer.getByLabel('PHONE').fill('+230 5000 0000');
     await drawer.getByLabel('NATIONALITY').selectOption('Mauritius');

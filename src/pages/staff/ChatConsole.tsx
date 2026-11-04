@@ -81,6 +81,8 @@ export default function ChatConsole({ active, onChanged }: {
       chat.on('message', ({ conversationId, message }) => {
         const isOpen = activeIdRef.current === conversationId;
         if (isOpen) setMsgs((prev) => reconcile(prev, message));
+        // a visitor wrote: "Chats to answer" in the header follows (throttled, never dropped)
+        if (message.sender === 'visitor') onChangedRef.current();
 
         setConvos((prev) => {
           const i = prev.findIndex((c) => c.id === conversationId);
