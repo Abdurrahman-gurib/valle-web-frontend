@@ -1,4 +1,4 @@
-import { useEscape } from '../hooks/useEscape';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
@@ -38,15 +38,21 @@ export function RateGate() {
   const nr = entryPrices(catalog, 'nr');
   const t = useT();
   const { pathname } = useLocation();
-  // Escape closes the rate question once a rate is already chosen (the first visit has to pick one)
-  useEscape(app.rateGateOpen && app.rateGateDismissable, app.closeRateGate);
-  if (!app.rateGateOpen) return null;
   // A guest opening their ticket or waiver from the e-mail has already booked:
   // the first-visit rate question would only stand between them and the form.
-  if (!app.rateGateDismissable && /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname)) return null;
+  const skip = !app.rateGateDismissable && /^(\/(fr|de|it|ar|ru|es|hi))?\/(ticket|waiver)\//.test(pathname);
+  const shown = app.rateGateOpen && !skip;
+  // Modal: the page behind is inert. Escape closes it once a rate is already chosen (the
+  // first visit has to pick one). Focus returns to the control that opened it, or, after
+  // the first-visit choice, to the start of the page content.
+  const trap = useFocusTrap(shown, {
+    onEscape: app.rateGateDismissable ? app.closeRateGate : undefined,
+    fallbackFocus: () => document.getElementById('main'),
+  });
+  if (!shown) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('Choose your rate')} style={{
+    <div ref={trap} role="dialog" aria-modal="true" aria-labelledby="rate-gate-title" aria-describedby="rate-gate-desc" style={{
       position: 'fixed', inset: 0, zIndex: 130, background: 'rgba(38,0,64,.62)',
       backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -62,11 +68,11 @@ export function RateGate() {
             {t('WELCOME TO VALLÉ ADVENATURE™ PARK')}
           </span>
           <div style={{ transform: 'rotate(-3deg)', transformOrigin: 'left bottom', marginTop: 12 }}>
-            <h2 style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,4.2vw,46px)', lineHeight: 0.86, margin: 0, textTransform: 'uppercase' }}>
+            <h2 id="rate-gate-title" tabIndex={-1} data-autofocus="" style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(28px,4.2vw,46px)', lineHeight: 0.86, margin: 0, textTransform: 'uppercase' }}>
               {t('Which rate')}<br />{t('applies to you?')}
             </h2>
           </div>
-          <p style={{ fontSize: 15, lineHeight: 1.55, color: 'rgba(52,0,87,.72)', margin: '14px 0 0' }}>
+          <p id="rate-gate-desc" style={{ fontSize: 15, lineHeight: 1.55, color: 'rgba(52,0,87,.72)', margin: '14px 0 0' }}>
             {t('Mauritian residents pay a local rate. Pick yours and every price on the site updates instantly.')}
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 12, marginTop: 20 }}>

@@ -1335,7 +1335,7 @@
   "The colours": "Цвета",
   "THE COLOURS": "ЦВЕТА",
   "The colours today, trails and viewpoints around them": "Цвета сегодня, вокруг них тропы и смотровые площадки",
-  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "РОЗА ВЕТРОВ УКАЗЫВАЕТ НА СЕВЕР. LA ROSE DES VENTS INDIQUE LE NORD.",
+  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "РОЗА ВЕТРОВ УКАЗЫВАЕТ НА СЕВЕР.",
   "The complete flight: every cable in the network. It opens with The Signature 1.5 km across the valley, climbs the northern ridge over the Coloured Earth and both waterfalls, then finishes with the western chain up the Kazmaël slopes and back into the hub. Around 3 hours of air time.": "Полный полёт: все тросы сети. Начинается с The Signature, 1,5 км через долину, поднимается по северному хребту над Цветной землёй и обоими водопадами, затем завершается западной цепью вверх по склонам Kazmaël и обратно в центр. Около 3 часов в воздухе.",
   "The convoy pauses above the Chamouzé falls, right beside the restaurant terrace.": "Колонна останавливается над водопадом Chamouzé, прямо у террасы ресторана.",
   "THE CROSSING": "ПЕРЕХОД",
@@ -2549,5 +2549,18 @@
   "REPLY WITHIN 1 WORKING DAY": "ОТВЕТ В ТЕЧЕНИЕ 1 РАБОЧЕГО ДНЯ",
   "Request a quote for {name}": "Запросить расчёт: {name}",
   "Riders must meet both the age and the height rule.": "Нужно соответствовать и возрасту, и росту.",
-  "The Nepalese Bridge stretching across the forested valley": "Непальский мост над лесистой долиной"
+  "The Nepalese Bridge stretching across the forested valley": "Непальский мост над лесистой долиной",
+  "Adults": "Взрослые",
+  "Dismiss": "Закрыть",
+  "Draw instead": "Нарисовать подпись",
+  "Fewer: {what}": "Меньше: {what}",
+  "More: {what}": "Больше: {what}",
+  "Gate pass": "Пропуск на вход",
+  "Language": "Язык",
+  "Search experiences": "Поиск развлечений",
+  "Sign with your finger, mouse or type your name": "Распишитесь пальцем, мышью или введите своё имя",
+  "Skip to main content": "Перейти к основному содержанию",
+  "Type my name instead": "Ввести имя вместо подписи",
+  "Type your full name as your signature": "Введите полное имя в качестве подписи",
+  "Your day and booking summary": "Ваш день и сводка бронирования"
 }

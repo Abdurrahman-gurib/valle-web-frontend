@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { MapLine, MapPin, MapRoute } from '../../../data/maps';
 import type { TrailArrow, TrailEdge } from '../../../data/quadTrails';
 import { useT } from '../../../i18n';
+import { usePrefersReducedMotion } from '../../../hooks/usePrefersReducedMotion';
 import { MONO } from './glass';
 
 /** A stretch of a zipline route between two stations: a cable flown, or a walk between platforms. */
@@ -18,7 +19,7 @@ function LineLabel({ from, to, lift, fill, size, halo, children }: { from: [numb
 }
 
 /** Quad: the chosen loop(s) traced over the artwork, one continuous ride from the base (see quadTrails.ts). */
-function TrailLoops({ trails, arrows, route, routes, isMobile }: { trails: Record<string, TrailEdge[]>; arrows?: Record<string, TrailArrow[]>; route: MapRoute; routes: MapRoute[]; isMobile: boolean }) {
+function TrailLoops({ trails, arrows, route, routes, isMobile, still }: { trails: Record<string, TrailEdge[]>; arrows?: Record<string, TrailArrow[]>; route: MapRoute; routes: MapRoute[]; isMobile: boolean; still: boolean }) {
   // A route without its own trail (the 2 h Advenature Tour) traces every loop.
   const trailSets = trails[route.id] ? [route.id] : Object.keys(trails);
   // Each loop is one continuous ride; several loops ride one after the other.
@@ -32,7 +33,7 @@ function TrailLoops({ trails, arrows, route, routes, isMobile }: { trails: Recor
   return (
     <>
       {trailSets.map((id) => {
-        const anim = (e: TrailEdge, w: number): CSSProperties => ({
+        const anim = (e: TrailEdge, w: number): CSSProperties => (still ? { strokeWidth: w } : {
           strokeDasharray: 1, strokeDashoffset: 1, strokeWidth: w,
           animation: `vtrace ${Math.max(0.05, e.len / trailSpeed)}s linear ${(e.d0 + loopOffset[id]) / trailSpeed}s forwards`,
         });
@@ -46,7 +47,8 @@ function TrailLoops({ trails, arrows, route, routes, isMobile }: { trails: Recor
                 trace reaches it (time = when the pen passes the nearest trail point), in the loop's colour. */}
             {arrows?.[id]?.map((a, i) => {
               let best = Infinity, at = 0;
-              for (const e of trails[id]) {
+              // reduced motion: every chevron is simply there (no search for its moment)
+              if (!still) for (const e of trails[id]) {
                 const n = e.pts.length;
                 for (let k = 0; k < n; k++) {
                   const d = (e.pts[k][0] - a.x) ** 2 + (e.pts[k][1] - a.y) ** 2;
@@ -58,7 +60,7 @@ function TrailLoops({ trails, arrows, route, routes, isMobile }: { trails: Recor
               return (
                 <g key={'a' + i} transform={`translate(${a.x} ${a.y}) rotate(${a.a})`}>
                   {/* the CSS scale lives on an inner group so it never overrides the placement transform above */}
-                  <g style={{ opacity: 0, animation: `vpop .35s cubic-bezier(.2,1.4,.5,1) ${delay}s forwards` }}>
+                  <g style={still ? undefined : { opacity: 0, animation: `vpop .35s cubic-bezier(.2,1.4,.5,1) ${delay}s forwards` }}>
                     <path d={d} fill="none" stroke="#260040" strokeWidth={isMobile ? 1.3 : 1.0} strokeLinecap="round" strokeLinejoin="round" />
                     <path d={d} fill="none" stroke={trailColor(id)} strokeWidth={isMobile ? 0.7 : 0.5} strokeLinecap="round" strokeLinejoin="round" />
                   </g>
@@ -86,11 +88,15 @@ export function MapLayers({ img, alt, route, routes, extraLines, trails, arrows,
   isMobile: boolean;
 }) {
   const t = useT();
+  // Under reduced motion the map is drawn in its final state: no traces, pops or sparks
+  // (the global CSS only shortens animations; their delays would still hold lines back).
+  const still = usePrefersReducedMotion();
   const seg = (s: Segment) => ({ x1: s.a.px, y1: s.a.py, x2: s.b.px, y2: s.b.py });
   // Cables only, each traced after the previous one (dash animation, see global.css).
-  const traceStyle = (i: number, extra: CSSProperties = {}): CSSProperties => ({
+  const traceStyle = (i: number, extra: CSSProperties = {}): CSSProperties => (still ? extra : {
     strokeDasharray: 1, strokeDashoffset: 1, animation: `vtrace ${TRACE}s ease-out ${i * TRACE}s forwards`, ...extra,
   });
+  const extraTrace: CSSProperties = still ? {} : { strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' };
   const [sigA, sigB] = signature ?? [];
   return (
     <svg key={route.id} viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={alt} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', display: 'block' }}>
@@ -107,11 +113,11 @@ export function MapLayers({ img, alt, route, routes, extraLines, trails, arrows,
           <LineLabel from={l.from} to={l.to} lift={1.6} fill={l.color} size={isMobile ? 2.4 : 1.7} halo={0.6}>{t(l.label)}</LineLabel>
         </g>
       ))}
-      {trails && <TrailLoops trails={trails} arrows={arrows} route={route} routes={routes} isMobile={isMobile} />}
+      {trails && <TrailLoops trails={trails} arrows={arrows} route={route} routes={routes} isMobile={isMobile} still={still} />}
       {extraLines?.filter((l) => l.label === route.extra).map((l) => (
         <g key={'trace' + l.label}>
-          <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={{ strokeWidth: isMobile ? 2.4 : 1.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
-          <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeLinecap="round" style={{ strokeWidth: isMobile ? 0.7 : 0.4, strokeDasharray: 1, strokeDashoffset: 1, animation: 'vtrace 1.2s ease-out forwards' }} />
+          <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeOpacity={0.5} filter="url(#amglow)" strokeLinecap="round" style={{ strokeWidth: isMobile ? 2.4 : 1.4, ...extraTrace }} />
+          <line x1={l.from[0]} y1={l.from[1]} x2={l.to[0]} y2={l.to[1]} pathLength={1} stroke={l.color} strokeLinecap="round" style={{ strokeWidth: isMobile ? 0.7 : 0.4, ...extraTrace }} />
           <LineLabel from={l.from} to={l.to} lift={1.8} fill="#FFFFFF" size={isMobile ? 2.6 : 1.9} halo={0.7}>{t(l.label)}</LineLabel>
         </g>
       ))}
@@ -122,7 +128,7 @@ export function MapLayers({ img, alt, route, routes, extraLines, trails, arrows,
       {cables.map((s, i) => (
         <line key={'c' + i} {...seg(s)} pathLength={1} stroke={route.color} strokeLinecap="round" style={traceStyle(i, { strokeWidth: isMobile ? 0.6 : 0.34 })} />
       ))}
-      {cables.map((s, i) => (
+      {!still && cables.map((s, i) => (
         <circle key={'s' + i} cx={s.b.px} cy={s.b.py} r={0.9} fill="#FFFFFF" style={{ opacity: 0, animation: `vspark .6s ease-out ${(i + 1) * TRACE - 0.1}s forwards` }} />
       ))}
       {sigA && sigB && (

@@ -3,7 +3,7 @@ import { MotionConfig } from 'motion/react';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import NotFoundPage from './pages/NotFound';
 import { CatalogProvider } from './store/CatalogContext';
-import { LANGS, LangProvider } from './i18n';
+import { LANGS, LangProvider, useT } from './i18n';
 import { paths } from './lib/nav';
 import { AppStoreProvider } from './store/AppStore';
 import { StaffAuthProvider } from './store/StaffAuth';
@@ -79,6 +79,29 @@ function ScrollManager() {
 }
 
 /**
+ * "Skip to main content": the first stop for keyboard users, hidden until focused
+ * (see .skip-link in global.css). Each page renders its own <main>, so the target
+ * is the wrapper around the routed page.
+ */
+function SkipLink() {
+  const t = useT();
+  return (
+    <a
+      href="#main"
+      className="skip-link"
+      onClick={(e) => {
+        e.preventDefault();
+        const el = document.getElementById('main');
+        el?.focus({ preventScroll: true });
+        el?.scrollIntoView({ block: 'start' });
+      }}
+    >
+      {t('Skip to main content')}
+    </a>
+  );
+}
+
+/**
  * Public site chrome: header (which owns the mobile action bar), footer, the two
  * global overlays, and the visitor chat launcher. The staff branch renders none
  * of this: the back office is a separate product surface on the same bundle.
@@ -90,10 +113,14 @@ function PublicShell() {
       minHeight: '100vh', background: '#FFFFFF', color: '#340057',
       fontFamily: "'Work Sans',sans-serif", paddingBottom: isMobile ? 84 : 0,
     }}>
+      <SkipLink />
       <Header />
       <ParkStatusBanner />
-      {/* a page not fetched yet (rare: the rest preload when the browser is idle) */}
-      <Suspense fallback={<div style={{ minHeight: '100vh' }} />}><Outlet /></Suspense>
+      {/* the skip link's target; the page inside renders its own <main> landmark */}
+      <div id="main" tabIndex={-1} className="outline-none">
+        {/* a page not fetched yet (rare: the rest preload when the browser is idle) */}
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}><Outlet /></Suspense>
+      </div>
       <Footer />
       <MyDayDrawer />
       <RateGate />

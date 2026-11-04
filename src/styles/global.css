@@ -385,3 +385,32 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .pk-tag { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #FFFC33; color: #340057; border-radius: 14px; padding: 18px 30px 14px; transform: rotate(-3deg); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6); min-width: 220px; }
 .pk-tag:nth-child(2) { transform: rotate(2deg); }
 .pk-tag > span { font-size: clamp(44px, 4.6vw, 60px); line-height: 1; }
+
+/* ============ ACCESSIBILITY ============ */
+/* "Skip to main content": off-screen until a keyboard user tabs onto it. */
+.skip-link {
+  position: fixed; top: 10px; left: 10px; z-index: 200;
+  transform: translateY(-160%);
+  background: #340057; color: #FFFFFF !important; border-radius: 999px; padding: 12px 20px;
+  font-family: 'Work Sans', sans-serif; font-size: 15px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 10px 30px -10px rgba(31, 0, 51, .6);
+}
+html[dir="rtl"] .skip-link { left: auto; right: 10px; }
+.skip-link:focus { transform: none; outline: 2px solid #FFFC33; outline-offset: 2px; }
+/* Containers and headings that only receive focus from script (skip target, dialog titles) draw no ring. */
+[tabindex="-1"]:focus { outline: none; }
+
+/* Arabic (Cairo) and Devanagari glyphs are taller than Barlow's Latin caps: the tight
+   display leading (0.85-1) of the brand headings makes their lines collide. */
+html:is([lang="ar"], [lang="hi"]) :is(h1, h2, h3, .font-display, [style*="Barlow"]) { line-height: 1.3 !important; }
+
+/* Small dots and links keep their look but get a 24px hit area. */
+[data-hero-dot] { position: relative; }
+[data-hero-dot]::before { content: ''; position: absolute; inset: -7.5px; border-radius: 999px; }
+:has(> [data-hero-dot]) { gap: 15px !important; }
+footer a[hreflang] { display: inline-block; min-width: 24px; padding: 6px 2px; text-align: center; }
+
+/* Short viewports (phones in landscape): a slimmer header and no language offer, so the page keeps its room. */
+@media (max-height: 480px) {
+  [data-testid="language-suggest"] { display: none !important; }
+}

@@ -89,11 +89,14 @@ export default function TicketPage() {
       {tk && (
         <article data-testid="ticket" className="overflow-hidden rounded-[22px] bg-white shadow-[0_30px_70px_-30px_rgba(31,0,51,.5),0_0_0_1.5px_#EBE2FF]">
           <div className="bg-valle-purple px-6 py-5 text-white">
-            <div className="font-mono text-[10px] tracking-[.16em] opacity-70">{t('VALLÉ ADVENATURE™ PARK · YOUR TICKET')}</div>
-            <div className="mt-1 font-display text-[30px] font-black uppercase italic">{tk.guestName}</div>
+            <h1 className="m-0">
+              <span className="block font-mono text-[10px] font-normal not-italic tracking-[.16em] opacity-70">{t('VALLÉ ADVENATURE™ PARK · YOUR TICKET')}</span>
+              <span className="mt-1 block font-display text-[30px] font-black uppercase italic">{tk.guestName}</span>
+            </h1>
           </div>
           <Stripes />
           <div className="p-6 text-center">
+            <h2 className="sr-only">{t('Gate pass')}</h2>
             <img src={tk.qrUrl} alt={t('Ticket QR code {ref}', { ref: tk.refCode })} width={240} height={240} data-testid="ticket-qr" className="inline-block h-[240px] w-[240px] rounded-[14px] border-[1.5px] border-valle-lilac bg-white p-2" />
             <div className="mt-3 font-mono text-[28px] font-bold tracking-[.06em] text-valle-red">{tk.refCode}</div>
             {tk.status === 'cancelled' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#D91E44]">{t('THIS BOOKING WAS CANCELLED')}</div>}
@@ -109,7 +112,7 @@ export default function TicketPage() {
             {tk.status === 'postponed' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#8A6A00]">{t('POSTPONED · CALL US TO PICK YOUR NEW DATE')}</div>}
             {tk.group && (
                 <div data-testid="ticket-group" className="mt-4 rounded-[14px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-4 py-3 text-start text-[13.5px] leading-[1.55]">
-                  <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</div>
+                  <h2 className="m-0 font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet">{t('GROUP BOOKING · {kind}', { kind: tk.group.kind.toUpperCase() })}</h2>
                   <div className="mt-1 text-[15px] font-extrabold">{tk.group.organisation}</div>
                   <div>{t('Leader: {name} · {n} people · {listed} names listed', { name: tk.group.leaderName, n: tk.adults + tk.kids, listed: tk.group.participants.length })}</div>
                   {tk.group.depositAmount > (tk.paidAmount ?? 0) && <div className="mt-1 font-bold text-[#D91E44]">{t('Deposit to confirm: {amount} (bank transfer or at the desk, within 7 days)', { amount: mur(tk.group.depositAmount - (tk.paidAmount ?? 0)) })}</div>}
@@ -119,11 +122,12 @@ export default function TicketPage() {
               <WaiverBlock group={!!tk.group} signed={tk.waiversSigned ?? 0} required={tk.waiversRequired} href={localizePath(`/waiver/${encodeURIComponent(tk.refCode)}?t=${encodeURIComponent(token)}`, lang)} />
             )}
             <div className="my-[18px] h-px bg-valle-lilac" />
+            <h2 className="sr-only">{t('Your day and booking summary')}</h2>
             {tk.status !== 'cancelled' && <TicketDay tk={tk} />}
             {tk.status !== 'cancelled' && <TicketPhotos tk={tk} token={token} onChanged={(v) => setT(v)} />}
             {tk.lines.some((l) => l.time) && (
               <div data-testid="itinerary" className="mx-0 mt-[14px] mb-2.5 rounded-[14px] border-[1.5px] border-[#FFE94D] bg-[#FFFDE0] px-4 py-3 text-start">
-                <div className="font-mono text-[10px] font-bold tracking-[.14em] text-[#8A6A00]">{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</div>
+                <h3 className="m-0 font-mono text-[10px] font-bold tracking-[.14em] text-[#8A6A00]">{t('YOUR DAY · BE AT EACH START 15 MINUTES EARLY')}</h3>
                 {tk.lines.filter((l) => l.time).sort((a, b) => (a.time as string).localeCompare(b.time as string)).map((l, i) => (
                   <div key={i} className="mt-1.5 flex items-baseline gap-3 text-[14px]">
                     <span className="min-w-12 font-mono font-extrabold text-valle-purple">{l.time}</span>
@@ -199,7 +203,7 @@ function WaiverBlock({ signed, required, href, group }: { signed: number; requir
   return (
     <div data-testid="ticket-waivers" data-print-hide="" className={cn('mt-5 rounded-[14px] border-[1.5px] px-4 py-[14px] text-start', all ? 'border-valle-green bg-[#E6FFEE]' : 'border-[#FFE94D] bg-[#FFFDE0]')}>
       <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="text-[15px] font-extrabold">{all ? t('Waivers signed') : group ? t('Leader: sign the waiver pack for the group') : t('Skip the queue: sign your waivers')}</div>
+        <h2 className="m-0 text-[15px] font-extrabold">{all ? t('Waivers signed') : group ? t('Leader: sign the waiver pack for the group') : t('Skip the queue: sign your waivers')}</h2>
         <div className="font-mono text-[13px] font-bold">{t('{n} of {total} signed', { n: Math.min(signed, required), total: required })}</div>
       </div>
       {!all && <p className="mx-0 mt-1.5 mb-2.5 text-[13.5px] leading-[1.5]">{group ? t('One waiver pack for the whole group: the teacher or leader signs it once, with the participant list, and the gate is done with paperwork.') : t('Ziplines, quads and buggies need a signed safety waiver for every participant. Sign on your phone now and walk past the paperwork at the gate.')}</p>}

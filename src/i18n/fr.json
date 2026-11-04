@@ -2549,5 +2549,18 @@
   "REPLY WITHIN 1 WORKING DAY": "RÉPONSE SOUS 1 JOUR OUVRÉ",
   "Request a quote for {name}": "Demander un devis pour {name}",
   "Riders must meet both the age and the height rule.": "Les participants doivent respecter à la fois la règle d'âge et celle de taille.",
-  "The Nepalese Bridge stretching across the forested valley": "Le pont népalais tendu au-dessus de la vallée boisée"
+  "The Nepalese Bridge stretching across the forested valley": "Le pont népalais tendu au-dessus de la vallée boisée",
+  "Adults": "Adultes",
+  "Dismiss": "Fermer",
+  "Draw instead": "Signer à la main",
+  "Fewer: {what}": "Moins : {what}",
+  "More: {what}": "Plus : {what}",
+  "Gate pass": "Passe d’entrée",
+  "Language": "Langue",
+  "Search experiences": "Rechercher des expériences",
+  "Sign with your finger, mouse or type your name": "Signez avec le doigt, la souris ou tapez votre nom",
+  "Skip to main content": "Aller au contenu principal",
+  "Type my name instead": "Taper mon nom à la place",
+  "Type your full name as your signature": "Tapez vos nom et prénom comme signature",
+  "Your day and booking summary": "Votre journée et le récapitulatif"
 }

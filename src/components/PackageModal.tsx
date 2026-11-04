@@ -1,6 +1,7 @@
 import { Fwd } from '@/components/ui/arrows';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Img } from './Img';
 import { useT } from '../i18n';
 import { useApp } from '../store/AppStore';
@@ -30,8 +31,10 @@ function CloseBtn({ onClose }: { onClose: () => void }) {
   return (
     <button
       {...bind}
+      type="button"
       onClick={onClose}
       title={t('Close')}
+      aria-label={t('Close')}
       style={{
         border: 0, background: h ? '#340057' : '#F7F3FF', cursor: 'pointer', fontFamily: 'inherit',
         fontSize: 19, fontWeight: 700, color: h ? '#FFFFFF' : '#340057',
@@ -94,6 +97,7 @@ function PillLink({ href, title, label, blank }: { href: string; title: string; 
 
 export function PackageModal({ pack, onClose }: { pack: PackModalData | null; onClose: () => void }) {
   const t = useT();
+  const trap = useFocusTrap(!!pack, { onEscape: onClose });
   if (!pack) return null;
 
   const whatsapp = 'https://api.whatsapp.com/send/?phone=23052928841&text='
@@ -105,6 +109,7 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
 
   return (
     <div
+      ref={trap}
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(38,0,64,.55)',
@@ -114,6 +119,9 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="package-modal-title"
         onClick={(e: MouseEvent) => e.stopPropagation()}
         style={{
           background: '#FFFFFF', borderRadius: 22, overflow: 'hidden', width: 'min(1000px,100%)',
@@ -123,18 +131,19 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
       >
         <div style={{ flex: 1.1, minWidth: 'min(100%,320px)', position: 'relative', minHeight: 280, background: '#EBE2FF' }}>
           <Img src={pack.img} alt={t('{name} package', { name: pack.name })} priority style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <span style={{
-            position: 'absolute', top: 14, left: 14, background: pack.color, color: pack.fg || '#FFFFFF',
+          {!!pack.badge && <span style={{
+            // small text on the brand red uses its darker ink shade (contrast)
+            position: 'absolute', top: 14, left: 14, background: pack.color.toUpperCase() === '#FF3358' ? '#D6173F' : pack.color, color: pack.fg || '#FFFFFF',
             fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
             borderRadius: 999, padding: '7px 12px', transform: 'rotate(-4deg)',
           }}
           >
-            {pack.badge || ''}
-          </span>
+            {pack.badge}
+          </span>}
         </div>
         <div style={{ flex: 1.25, minWidth: 'min(100%,300px)', padding: 'clamp(20px,3vw,32px)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-            <div style={{ ...BARLOW, fontSize: 'clamp(28px,3.6vw,42px)', lineHeight: 0.9, textTransform: 'uppercase' }}>{pack.name}</div>
+            <h2 id="package-modal-title" tabIndex={-1} data-autofocus="" style={{ ...BARLOW, fontSize: 'clamp(28px,3.6vw,42px)', lineHeight: 0.9, textTransform: 'uppercase', margin: 0 }}>{pack.name}</h2>
             <CloseBtn onClose={onClose} />
           </div>
           {!!pack.hero && (
@@ -158,10 +167,13 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
               <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('SINGLE')}</div>
               <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.single}</div>
             </div>
-            <div>
-              <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('DOUBLE')}</div>
-              <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.dbl}</div>
-            </div>
+            {/* only packages sold per couple have a double price */}
+            {!!pack.dbl && (
+              <div>
+                <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)' }}>{t('DOUBLE')}</div>
+                <div style={{ ...BARLOW, fontSize: 26, marginTop: 2 }}>{pack.dbl}</div>
+              </div>
+            )}
           </div>
           {pack.productKey ? <AddToDay productKey={pack.productKey} onClose={onClose} /> : <ReserveLink href={whatsapp} />}
           <div style={{ display: 'flex', gap: 8, marginTop: 9 }}>

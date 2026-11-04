@@ -1,6 +1,8 @@
 import { Fwd } from '@/components/ui/arrows';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Stripes } from './Stripes';
 import { ComposerTools } from './chatParts';
 import { Bubble, Launcher, Lockup, TypingDots, displayText, fadeIn, fieldLabel, inputCls, riseIn } from './chat/parts';
@@ -24,9 +26,43 @@ import { cn } from '@/lib/utils';
 /** Panel geometry, kept in one place because the launcher shares the offsets. */
 const PANEL_W = 360;
 
+/** Pages whose forms fill a phone screen down to the bottom edge: no launcher there on phones. */
+const FORM_PAGE = /^(\/(fr|de|it|ar|ru|es|hi))?\/(booking|waiver)(\/|$)/;
+/** Form controls the launcher must never sit on while the guest is using them. */
+const FIELD = 'input, textarea, select, canvas, [contenteditable="true"]';
+
+/**
+ * True while a form control outside the chat has focus (or, for a canvas, is
+ * being drawn on): the phone keyboard or the guest's finger is there, so the
+ * floating launcher steps aside.
+ */
+function useFieldActive(): boolean {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const isField = (t: EventTarget | null) => t instanceof Element && t.matches(FIELD) && !t.closest('[data-chat-panel]');
+    const onIn = (e: FocusEvent) => setActive(isField(e.target));
+    const onOut = (e: FocusEvent) => { if (!isField(e.relatedTarget)) setActive(false); };
+    const onDown = (e: PointerEvent) => { if (e.target instanceof HTMLCanvasElement) setActive(true); };
+    const onUp = (e: PointerEvent) => { if (e.target instanceof HTMLCanvasElement && !isField(document.activeElement)) setTimeout(() => setActive(false), 1200); };
+    document.addEventListener('focusin', onIn);
+    document.addEventListener('focusout', onOut);
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('pointerup', onUp);
+    return () => {
+      document.removeEventListener('focusin', onIn);
+      document.removeEventListener('focusout', onOut);
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('pointerup', onUp);
+    };
+  }, []);
+  return active;
+}
+
 export function ChatWidget() {
   const isMobile = useIsMobile();
   const reduced = usePrefersReducedMotion();
+  const { pathname } = useLocation();
+  const fieldActive = useFieldActive();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [intro, setIntro] = useState(() => !introDone());
@@ -75,8 +111,20 @@ export function ChatWidget() {
     chat.begin(name, email);
   };
 
+  // Escape closes; focus goes to the message box (or the first field of the intro) and back to
+  // the launcher on close. On a phone the panel covers the page, so it is modal there.
+  const trap = useFocusTrap(open, {
+    onEscape: closePanel,
+    modal: isMobile,
+    initialFocus: (): HTMLElement | null => document.querySelector<HTMLElement>('[data-chat-panel] [data-chat-input], [data-chat-panel] #vw-name'),
+    fallbackFocus: () => document.querySelector<HTMLElement>('[data-chat-launcher]'),
+  });
+
+  // On phones the mobile action bar is fixed at bottom:12 (about 66px tall), so the launcher sits
+  // above it; an open cookie notice publishes its height and the launcher rises above that too.
   const bottom = isMobile ? 92 : 24;
   const right = isMobile ? 12 : 24;
+  const launcherBottom = `max(${bottom}px, calc(var(--valle-cookie-h, 0px) + 8px))`;
   const connected = status === 'connected';
   // "Reconnecting" is only honest once a connection has existed. On the intro
   // step a first-time visitor has not opened a socket yet, so the first state
@@ -88,7 +136,9 @@ export function ChatWidget() {
       : t('RECONNECTING…');
 
   if (!open) {
-    return <Launcher onClick={openPanel} unread={chat.unread} bottom={bottom} right={right} reduced={reduced} />;
+    // never over a form: not on the booking and waiver pages on phones, and nowhere while a field is in use
+    if ((isMobile && FORM_PAGE.test(pathname)) || fieldActive) return null;
+    return <Launcher onClick={openPanel} unread={chat.unread} bottom={launcherBottom} right={right} reduced={reduced} />;
   }
 
   const panelAnim = reduced
@@ -99,7 +149,10 @@ export function ChatWidget() {
 
   return (
     <div
+      ref={trap}
+      data-chat-panel=""
       role="dialog"
+      aria-modal={isMobile ? 'true' : undefined}
       aria-label={t('Chat with VALLÉ')}
       className={cn(
         'fixed z-[86] bg-[#F7F3FF] rounded-[20px] overflow-hidden flex flex-col shadow-[0_40px_90px_-20px_rgba(0,0,0,.6)] origin-bottom-right font-sans text-valle-purple',
@@ -133,7 +186,7 @@ export function ChatWidget() {
         <button
           onClick={closePanel}
           aria-label={t('Close chat')}
-          className="press relative border-[1.5px] border-solid border-[rgba(255,255,255,.32)] bg-[rgba(255,255,255,.06)] text-white w-[31px] h-[31px] rounded-[999px] cursor-pointer text-[16px] leading-none shrink-0 flex items-center justify-center [transition:background_.18s_cubic-bezier(.2,.7,.2,1)]"
+          className="press relative border-[1.5px] border-solid border-[rgba(255,255,255,.32)] bg-[rgba(255,255,255,.06)] text-white w-[40px] h-[40px] rounded-[999px] cursor-pointer text-[16px] leading-none shrink-0 flex items-center justify-center [transition:background_.18s_cubic-bezier(.2,.7,.2,1)]"
         >
           ×
         </button>
@@ -231,6 +284,7 @@ export function ChatWidget() {
               maxLength={2000}
               placeholder={t('Type a message…')}
               aria-label={t('Message')}
+              data-chat-input=""
               className={cn(inputCls, 'flex-1 min-w-0')}
             />
             <button

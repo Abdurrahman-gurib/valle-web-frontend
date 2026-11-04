@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 import { cn } from '@/lib/utils';
 import { Img } from '../Img';
 
@@ -9,7 +9,7 @@ import { Img } from '../Img';
 /** Inline styles that also set CSS custom properties (--fg, --hc). */
 export type CSSVars = CSSProperties & Record<`--${string}`, string>;
 
-export const mobileNavRow = 'cursor-pointer text-[16.5px] font-semibold text-white py-[12px] border-b border-solid border-[rgba(255,255,255,.16)] flex justify-between items-center animate-[vfadeup_.3s_ease_both]';
+export const mobileNavRow = 'w-full text-start [font-family:inherit] cursor-pointer text-[16.5px] font-semibold text-white py-[12px] border-b border-solid border-[rgba(255,255,255,.16)] flex justify-between items-center animate-[vfadeup_.3s_ease_both]';
 export const monoLink = 'block no-underline cursor-pointer font-mono text-[12px] font-semibold tracking-[.12em]';
 export const megaPanel = 'absolute top-[70px] left-0 right-0 bg-white border-b border-solid border-valle-lilac shadow-[0_32px_60px_-20px_rgba(52,0,87,.35)]';
 export const hamburgerBar = 'block w-[16px] h-[2px] bg-current rounded-[2px]';
@@ -18,15 +18,20 @@ export const hamburgerBar = 'block w-[16px] h-[2px] bg-current rounded-[2px]';
  * A crawlable link that navigates in the app. The global a / a:hover colours
  * are unlayered and beat Tailwind, so a link's colour is passed inline.
  */
-export function SpaLink({ href, onClick, className, color, style, children }: { href: string; onClick: () => void; className?: string; color?: string; style?: CSSVars; children: ReactNode }) {
+export function SpaLink({ href, onClick, className, color, style, children }: { href: string; onClick: (e: MouseEvent) => void; className?: string; color?: string; style?: CSSVars; children: ReactNode }) {
   return (
-    <a href={href} onClick={(e) => { e.preventDefault(); onClick(); }} className={className} style={{ ...(color ? { color } : null), textDecoration: 'none', ...style }}>
+    <a href={href} onClick={(e) => { e.preventDefault(); onClick(e); }} className={className} style={{ ...(color ? { color } : null), textDecoration: 'none', ...style }}>
       {children}
     </a>
   );
 }
 
-export function NavBtn({ label, onClick, color, chev, href, snug }: { label: string; onClick: () => void; color: string; chev?: string; href?: string; snug?: boolean }) {
+export function NavBtn({ label, onClick, color, chev, href, snug, btnRef, controls, onKeyDown, onPointerEnter, onPointerLeave }: {
+  label: string; onClick: (e: MouseEvent) => void; color: string; chev?: string; href?: string; snug?: boolean;
+  /** Menu toggles: the button, the id of the panel it opens, and its keyboard / hover handlers. */
+  btnRef?: Ref<HTMLButtonElement>; controls?: string; onKeyDown?: (e: KeyboardEvent) => void;
+  onPointerEnter?: (e: PointerEvent) => void; onPointerLeave?: (e: PointerEvent) => void;
+}) {
   const cls = cn(
     'flex items-center gap-[6px] whitespace-nowrap rounded-[999px] border-0 bg-transparent cursor-pointer no-underline [font-family:inherit] font-semibold py-[10px] hover:bg-[rgba(255,51,88,.14)]',
     // longer (non-English) labels stop growing at the size that fits the 1320px row
@@ -34,15 +39,19 @@ export function NavBtn({ label, onClick, color, chev, href, snug }: { label: str
   );
   // Real links get a real href (crawlable); menu toggles stay buttons.
   if (href) return <SpaLink href={href} onClick={onClick} className={cls} color={color}>{label}</SpaLink>;
+  const open = chev === '▲';
   return (
-    <button onClick={onClick} aria-expanded={chev === '▲'} className={cls} style={{ color }}>
+    <button
+      ref={btnRef} onClick={onClick} onKeyDown={onKeyDown} onPointerEnter={onPointerEnter} onPointerLeave={onPointerLeave}
+      aria-expanded={open} aria-controls={open ? controls : undefined} className={cls} style={{ color }}
+    >
       {label}
       {chev && <motion.span aria-hidden animate={{ rotate: chev === '▲' ? 180 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} className="inline-flex opacity-75"><ChevronDown size={14} strokeWidth={2.5} /></motion.span>}
     </button>
   );
 }
 
-export function MegaLink({ name, onClick, hoverColor = '#FF3358', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
+export function MegaLink({ name, onClick, hoverColor = '#D6173F', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
   return (
     <SpaLink
       href={href}

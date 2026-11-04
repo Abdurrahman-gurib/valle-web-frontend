@@ -50,7 +50,7 @@ export function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left:
           aria-label={t('Close')}
           style={{
             position: 'absolute', top: 8, right: 8, border: '1px solid rgba(255,255,255,.3)', background: hX ? 'rgba(255,255,255,.26)' : 'rgba(255,255,255,.12)',
-            color: '#FFFFFF', width: 24, height: 24, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
+            color: '#FFFFFF', width: 28, height: 28, borderRadius: 999, cursor: 'pointer', fontSize: 12, lineHeight: 1, padding: 0,
           }}
         >
           ×
@@ -83,7 +83,7 @@ export function RouteCard({ route, options, overlay }: { route: MapRoute; option
       <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
         <Img src={route.img} alt={t(route.name)} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
-        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
+        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color === '#FF3358' ? '#D6173F' : route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
         <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>
       </div>
       <div style={{ padding: '12px 15px 15px' }}>
@@ -124,12 +124,15 @@ export function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick
   return (
     <button
       {...bind}
+      type="button"
       onClick={onClick}
+      aria-pressed={on}
       style={{
         flexShrink: 0, cursor: 'pointer', borderRadius: 999, padding: '9px 16px 9px 11px', display: 'flex', alignItems: 'center', gap: 9,
         fontFamily: 'inherit', textAlign: 'left', transition: 'all .2s ease',
         border: '1px solid ' + (on ? r.color : (h ? 'rgba(255,255,255,.45)' : 'rgba(255,255,255,.22)')),
-        background: on ? r.color : (h ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.07)'),
+        // small white text on the brand red uses its darker ink shade (contrast)
+        background: on ? (r.color === '#FF3358' ? '#D6173F' : r.color) : (h ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.07)'),
         backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
         color: on ? r.fg : '#FFFFFF',
         boxShadow: on ? `0 10px 26px -10px ${r.color}` : 'inset 0 1px 0 rgba(255,255,255,.12)',

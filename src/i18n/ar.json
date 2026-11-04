@@ -2549,5 +2549,18 @@
   "REPLY WITHIN 1 WORKING DAY": "الرد خلال يوم عمل واحد",
   "Request a quote for {name}": "اطلب عرض سعر لـ {name}",
   "Riders must meet both the age and the height rule.": "يجب أن يستوفي الراكب شرطي العمر والطول معًا.",
-  "The Nepalese Bridge stretching across the forested valley": "الجسر النيبالي ممتد فوق الوادي المشجر"
+  "The Nepalese Bridge stretching across the forested valley": "الجسر النيبالي ممتد فوق الوادي المشجر",
+  "Adults": "البالغون",
+  "Dismiss": "إغلاق",
+  "Draw instead": "الرسم بدلاً من ذلك",
+  "Fewer: {what}": "أقل: {what}",
+  "More: {what}": "أكثر: {what}",
+  "Gate pass": "تصريح الدخول",
+  "Language": "اللغة",
+  "Search experiences": "ابحث عن التجارب",
+  "Sign with your finger, mouse or type your name": "وقّع بإصبعك أو بالفأرة أو اكتب اسمك",
+  "Skip to main content": "انتقل إلى المحتوى الرئيسي",
+  "Type my name instead": "اكتب اسمي بدلاً من ذلك",
+  "Type your full name as your signature": "اكتب اسمك الكامل كتوقيع",
+  "Your day and booking summary": "يومك وملخص الحجز"
 }

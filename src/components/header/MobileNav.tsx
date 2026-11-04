@@ -8,12 +8,13 @@ import { paths, useGoto } from '../../lib/nav';
 import { useT, _t } from '../../i18n';
 import { Stripes } from '../Stripes';
 import { KidsParkLogo, SpaLink, mobileNavRow } from './parts';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { MenuGroup } from './packageGroups';
 
 type Go = (fn: () => void) => () => void;
 
 const CATEGORY_TILES: [label: string, cat: string, bg: string, fg: string, rot: number][] = [
-  [_t('Adventure'), 'adventure', '#FF3358', '#FFFFFF', -1],
+  [_t('Adventure'), 'adventure', '#D6173F', '#FFFFFF', -1],
   [_t('Nature'), 'nature', '#33FF74', '#340057', 1],
   [_t('Kids Park'), 'kids', '#FFFC33', '#340057', 1],
   [_t('Tours & Groups'), 'tours', '#7333FF', '#FFFFFF', -1],
@@ -29,16 +30,26 @@ function NavRow({ href, onClick, delay, arrow = 'text-[rgba(255,252,51,.7)]', ch
 }
 
 /** The compact layout's full-screen menu under the header bar. */
-export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, gotoVacancies }: {
+export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, gotoVacancies, header }: {
   groups: MenuGroup[]; go: Go; searchQ: string; setSearchQ: (q: string) => void; onSearch: () => void; close: () => void; gotoVacancies: () => void;
+  /** The header bar stays usable (and in the Tab cycle) while the menu covers the page. */
+  header: () => HTMLElement | null;
 }) {
   const t = useT();
   const app = useApp();
   const catalog = useCatalog();
   const goto = useGoto();
   const navigate = useNavigate();
+  // the page behind goes inert; focus starts on the menu itself, so no phone keyboard pops up
+  const trap = useFocusTrap<HTMLElement>(true, { onEscape: close, also: () => [header()], initialFocus: (): HTMLElement | null => document.getElementById('mobile-nav') });
   return (
-    <div className="fixed top-[70px] right-0 bottom-0 left-0 z-[89] bg-valle-deep overflow-y-auto pt-[16px] px-[20px] pb-[28px] flex flex-col">
+    <nav
+      ref={trap}
+      id="mobile-nav"
+      aria-label={t('Menu')}
+      tabIndex={-1}
+      className="fixed top-[70px] short:top-[54px] right-0 bottom-0 left-0 z-[89] bg-valle-deep overflow-y-auto pt-[16px] px-[20px] pb-[28px] flex flex-col"
+    >
       <div className="flex gap-[8px] animate-[vfadeup_.3s_ease_both]">
         <input
           className="vbar-input flex-1 min-w-0 border-[1.5px] border-solid border-[rgba(255,255,255,.3)] bg-[rgba(255,255,255,.12)] rounded-[999px] py-[12px] px-[18px] [font-family:inherit] text-[14px] text-white outline-none"
@@ -46,6 +57,9 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
           onChange={(e) => setSearchQ(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSearch(); }}
           placeholder={t('Search ziplines, tortoises, waterfalls…')}
+          aria-label={t('Search experiences')}
+          type="search"
+          enterKeyHint="search"
         />
         <button
           onClick={onSearch}
@@ -89,25 +103,25 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
           ))}
         </div>
       </details>
-      <div onClick={() => { close(); app.openRateGate(); }} className={cn(mobileNavRow, '[animation-delay:.18s]')}>
+      <button type="button" onClick={() => { close(); app.openRateGate(); }} className={cn(mobileNavRow, 'border-x-0 border-t-0 bg-transparent px-0 [animation-delay:.18s]')}>
         <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
         <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>
-      </div>
+      </button>
       <NavRow href={paths.plan()} onClick={go(goto.plan)} delay="[animation-delay:.18s]">{t('Plan your visit')}</NavRow>
       <NavRow href={paths.dine()} onClick={go(goto.dine)} delay="[animation-delay:.22s]">{t('Dine')}</NavRow>
       <NavRow href={paths.story()} onClick={go(goto.story)} delay="[animation-delay:.26s]">{t('Our story')}</NavRow>
       <NavRow href={paths.vacancies()} onClick={go(gotoVacancies)} delay="[animation-delay:.28s]">{t('Vacancies')}</NavRow>
-      <div onClick={() => { close(); app.openDay(); }} className={cn(mobileNavRow, '[animation-delay:.3s]')}>
+      <button type="button" onClick={() => { close(); app.openDay(); }} className={cn(mobileNavRow, 'border-x-0 border-t-0 bg-transparent px-0 [animation-delay:.3s]')}>
         <span className="flex gap-[10px] items-center">
           {t('My Day')}
           {app.hasSel && (
-            <span className="bg-valle-red text-white rounded-[999px] min-w-[22px] h-[22px] inline-flex items-center justify-center text-[12px] px-[6px]">
+            <span className="bg-valle-red-ink text-white rounded-[999px] min-w-[22px] h-[22px] inline-flex items-center justify-center text-[12px] px-[6px]">
               {app.selCount}
             </span>
           )}
         </span>
         <span className="text-[rgba(255,252,51,.7)]"><Fwd /></span>
-      </div>
+      </button>
       <button
         onClick={go(goto.booking)}
         className="vbtn vbtn-on-dark vbtn-block mt-[14px] text-[16px] animate-[vfadeup_.3s_ease_both] [animation-delay:.34s]"
@@ -120,6 +134,6 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
           {t('OPEN DAILY · 09:00–17:30 · CHAMOUNY, MAURITIUS')}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }
