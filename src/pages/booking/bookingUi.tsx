@@ -50,7 +50,7 @@ export function Stepper({ tag, val, inc, dec, boxBg, btnBg }: {
 }) {
   return (
     <div className="flex items-center gap-[5px] rounded-[10px] px-[7px] py-1" style={{ background: boxBg }}>
-      <span style={{ fontFamily: MONO, fontSize: '8.5px', letterSpacing: '.05em', color: 'rgba(52,0,87,.7)' }}>{tag}</span>
+      <span style={{ fontFamily: MONO, fontSize: '10px', letterSpacing: '.05em', color: 'rgba(52,0,87,.7)' }}>{tag}</span>
       <StepBtn onClick={dec} bg={btnBg} label={'− ' + tag}><Minus size={14} strokeWidth={3} aria-hidden /></StepBtn>
       <span className="min-w-4 text-center text-sm font-bold" aria-live="polite">{val}</span>
       <StepBtn onClick={inc} bg={btnBg} label={'+ ' + tag}><Plus size={14} strokeWidth={3} aria-hidden /></StepBtn>

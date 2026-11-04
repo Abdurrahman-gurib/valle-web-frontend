@@ -55,7 +55,7 @@ function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: 
       data-full={full || undefined}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.96 }}
-      className={cn('cursor-pointer rounded-[14px] border-[1.5px] px-1.5 py-3 text-center font-sans', chipFocus, on ? chipOn : chipOff, full && 'opacity-45')}
+      className={cn('cursor-pointer rounded-[14px] border-[1.5px] px-1.5 py-3 text-center font-sans', chipFocus, on ? chipOn : chipOff, full && 'opacity-60')}
     >
       <div className={cn('font-mono text-[10px] font-semibold tracking-[.08em]', !on && 'opacity-75')}>{o.dow}</div>
       <div className="mt-0.5 font-display text-[22px] font-black italic">{o.dd}</div>
@@ -175,7 +175,7 @@ export function WhenStep({ dOpts, todayIso, avail, selectedLoad, dealDateMsg, ac
         </div>
       )}
       {Object.keys(avail).length > 0 && (
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px', fontFamily: MONO, fontSize: '10px', letterSpacing: '.06em', color: 'rgba(52,0,87,.6)' }}>
           <span>{t('DOTS = MORNING · AFTERNOON, FROM BOOKINGS SO FAR:')}</span>
           {LEVELS.map((l) => (
             <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>

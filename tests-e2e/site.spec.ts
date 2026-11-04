@@ -89,7 +89,7 @@ test.describe('currency', () => {
     // the picker lives on the price pages (packages, booking), not in the header
     await page.goto('/packages/exclusive');
     await page.getByTestId('currency-picker').first().click();
-    await page.getByRole('option', { name: /EUR/ }).click();
+    await page.getByRole('button', { name: /EUR/ }).click();
     await expect(page.getByTestId('currency-picker').first()).toHaveText(/EUR/);
     await page.goto('/explore');
     await expect(page.getByText(/^FROM ≈ € /).first()).toBeVisible();
@@ -102,7 +102,7 @@ test.describe('currency', () => {
 
     // and back
     await page.getByTestId('currency-picker').first().click();
-    await page.getByRole('option', { name: /MUR/ }).click();
+    await page.getByRole('button', { name: /MUR/ }).click();
     await expect(page.getByText(/· Rs [\d,]+$/).first()).toBeVisible();
   });
 
@@ -110,7 +110,7 @@ test.describe('currency', () => {
     await page.goto('/booking');
     await page.getByTestId('currency-picker').first().click();
     for (const name of ['UAE dirham', 'Saudi riyal', 'Indian rupee', 'US dollar', 'Euro', 'British pound', 'South African rand']) {
-      await expect(page.getByRole('option', { name })).toBeVisible();
+      await expect(page.getByRole('button', { name })).toBeVisible();
     }
     await expect(page.getByText(/BANK OF MAURITIUS/)).toBeVisible();
   });

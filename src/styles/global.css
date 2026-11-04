@@ -82,14 +82,20 @@ html[dir="rtl"] { --tilt-origin: right bottom; }
 
 /* ============ BASE ============ */
 html, body { margin: 0; padding: 0; background: #FFFFFF; }
+/* focus never lands under the fixed header, the cookie notice or the phone action bar (WCAG 2.4.11) */
+html { scroll-padding-top: 88px; scroll-padding-bottom: 24px; }
+@media (max-width: 1079px) { html { scroll-padding-bottom: 104px; } }
+
+/* links inside running text are underlined, so they do not rely on colour alone */
+:where(p, li, dd, figcaption) a:not(.vbtn):not(.vbtn-link):not(.sr-link) { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 /* Decorative rotations (marquee slope, reveal animations) may poke past the
    viewport; clip does not create a scroll container, so position:sticky keeps working. */
 html, body { overflow-x: clip; }
 body { font-family: 'Work Sans', sans-serif; color: #340057; -webkit-font-smoothing: antialiased; }
 * { box-sizing: border-box; }
 ::selection { background: #FF3358; color: #FFFFFF; }
-input::placeholder, textarea::placeholder { color: rgba(52, 0, 87, .4); }
-.vbar-input::placeholder { color: rgba(255, 255, 255, .6); }
+input::placeholder, textarea::placeholder { color: rgba(52, 0, 87, .7); }
+.vbar-input::placeholder { color: rgba(255, 255, 255, .75); }
 img { max-width: 100%; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
@@ -474,3 +480,6 @@ a.v-card:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 3px;
 /* home rail: the last visible card fades out over 48px, so the row reads as scrollable */
 .rail-fade { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
 html[dir="rtl"] .rail-fade { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent); }
+
+/* the home marquee stops on hover/focus and with the hero's pause button */
+.vmarquee[data-paused], *:hover > .vmarquee, *:focus-within > .vmarquee { animation-play-state: paused !important; }

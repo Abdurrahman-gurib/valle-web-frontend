@@ -121,7 +121,7 @@ function SessionPicker({ line, options, picked, onPick }: { line: SelLine; optio
   const t = useT();
   return (
     <div data-testid={`session-picker-${line.act.id}`} style={{ padding: '0 18px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-      <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: picked ? 'rgba(52,0,87,.6)' : '#D6173F' }}>{t('START TIME')}</span>
+      <span style={{ fontFamily: MONO, fontSize: '10px', fontWeight: 700, letterSpacing: '.1em', color: picked ? 'rgba(52,0,87,.6)' : '#D6173F' }}>{t('START TIME')}</span>
       {options.map(([tm, lv]) => {
         const on = picked === tm;
         const full = lv === 'full';

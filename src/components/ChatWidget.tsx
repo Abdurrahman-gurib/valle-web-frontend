@@ -237,10 +237,13 @@ export function ChatWidget() {
           {/* -------------------------------------------------------- messages -- */}
           <div
             ref={scrollRef}
+            role="log"
+            aria-live="polite"
+            aria-label={t('Chat messages')}
             className="no-scrollbar flex-1 overflow-y-auto p-[14px] min-h-0 bg-white"
           >
             {msgs.length === 0 && (
-              <div className={cn('font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.45)] text-center pt-[18px]', reduced ? fadeIn : riseIn)}>
+              <div className={cn('font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.7)] text-center pt-[18px]', reduced ? fadeIn : riseIn)}>
                 {t('SAY HELLO · WE ARE LISTENING')}
               </div>
             )}
@@ -269,7 +272,7 @@ export function ChatWidget() {
 
           {/* -------------------------------------------------------- composer -- */}
           {fileErr && (
-            <div role="alert" className="font-mono text-[10px] tracking-[.08em] text-[#D6173F] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
+            <div role="alert" className="font-mono text-[10px] tracking-[.08em] text-[#B8163A] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
               {fileErr.toUpperCase()}
             </div>
           )}

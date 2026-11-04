@@ -28,7 +28,9 @@ import { localTicketHref } from './booking/Receipt';
  */
 
 const input = 'border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[14px] py-3 [font-family:inherit] text-[15px] text-valle-purple outline-none w-full box-border';
-const label = 'grid gap-[5px] font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.6)]';
+const label = 'grid gap-[5px] font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.75)]';
+/** The red star after a required field's label (the field itself carries `required`). */
+const Req = () => <span aria-hidden className="text-valle-red-ink"> *</span>;
 const stepLabel = 'font-mono text-[12px] font-semibold tracking-[.16em] text-valle-violet mt-[34px]';
 
 type Kind = 'school' | 'company' | 'club' | 'other';
@@ -114,6 +116,7 @@ export default function GroupsPage() {
   const [list, setList] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [tried, setTried] = useState(false);
   const [done, setDone] = useState<(BookingResponse & { total: number }) | null>(null);
   const [avail, setAvail] = useState<AvailabilityDay | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -182,6 +185,7 @@ export default function GroupsPage() {
 
   const submit = async () => {
     setErr('');
+    setTried(true);
     if (!org.trim() || !leader.trim()) { setErr(t('Add the organisation and the leader’s name.')); return; }
     if (!email.trim() && !phone.trim()) { setErr(t('Add an e-mail or a phone number for the confirmation.')); return; }
     if (!date) { setErr(t('Pick the date of the visit.')); return; }
@@ -221,10 +225,11 @@ export default function GroupsPage() {
           </h1>
           <p className="text-[16px] leading-[1.6] text-[rgba(52,0,87,.75)] max-w-[60ch] mt-[22px] mb-0 mx-0">
             {t('Ten people or more book here: per-head prices, your participant list, a {pct}% deposit, and one safety waiver pack the leader signs for everyone. Team-building programmes with facilitators still start with a quote.', { pct: depositPct })}
-            {' '}<Link to={paths.team()} className="font-semibold" style={{ color: '#7333FF' }}>{t('Team building →')}</Link>
+            {' '}<Link to={paths.team()} className="font-semibold" style={{ color: '#5B21B6' }}>{t('Team building →')}</Link>
           </p>
 
           <div className={stepLabel}>{t('1 · WHO IS COMING')}</div>
+          <p className="mt-2 mb-0 text-[13px] text-[rgba(52,0,87,.75)]">{t('Fields marked * are required.')}</p>
           <div className="grid [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))] gap-3 mt-3">
             <label className={label}>{t('TYPE OF GROUP')}
               <select value={kind} onChange={(e) => setKind(e.target.value as Kind)} className={input} data-testid="group-kind">
@@ -234,15 +239,15 @@ export default function GroupsPage() {
                 <option value="other">{t('Other')}</option>
               </select>
             </label>
-            <label className={label}>{t('ORGANISATION')}<input value={org} onChange={(e) => setOrg(e.target.value)} placeholder={t('School, company or club name')} autoComplete="organization" className={input} data-testid="group-org" /></label>
-            <label className={label}>{t('LEADER / TEACHER IN CHARGE')}<input value={leader} onChange={(e) => setLeader(e.target.value)} placeholder={t('Full name')} autoComplete="name" className={input} data-testid="group-leader" /></label>
-            <label className={label}>{t('E-MAIL')}<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" inputMode="email" autoComplete="email" dir="ltr" className={input} data-testid="group-email" /></label>
-            <label className={label}>{t('PHONE (SMS / WHATSAPP)')}<input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" dir="ltr" className={input} /></label>
+            <label className={label}><span>{t('ORGANISATION')}<Req /></span><input required aria-invalid={tried && !org.trim() ? true : undefined} value={org} onChange={(e) => setOrg(e.target.value)} placeholder={t('School, company or club name')} autoComplete="organization" className={input} data-testid="group-org" /></label>
+            <label className={label}><span>{t('LEADER / TEACHER IN CHARGE')}<Req /></span><input required aria-invalid={tried && !leader.trim() ? true : undefined} value={leader} onChange={(e) => setLeader(e.target.value)} placeholder={t('Full name')} autoComplete="name" className={input} data-testid="group-leader" /></label>
+            <label className={label}>{t('E-MAIL')}<input aria-invalid={tried && !email.trim() && !phone.trim() ? true : undefined} value={email} onChange={(e) => setEmail(e.target.value)} type="email" inputMode="email" autoComplete="email" dir="ltr" className={input} data-testid="group-email" /></label>
+            <label className={label}>{t('PHONE (SMS / WHATSAPP)')}<input aria-invalid={tried && !email.trim() && !phone.trim() ? true : undefined} value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" dir="ltr" className={input} /></label>
           </div>
 
           <div className={stepLabel}>{t('2 · WHEN AND HOW MANY')}</div>
           <div className="grid [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] gap-3 mt-3">
-            <label className={label}>{t('DATE')}<input type="date" value={date} min={todayIso()} onChange={(e) => setDate(e.target.value)} className={input} data-testid="group-date" /></label>
+            <label className={label}><span>{t('DATE')}<Req /></span><input required aria-invalid={tried && !date ? true : undefined} type="date" value={date} min={todayIso()} onChange={(e) => setDate(e.target.value)} className={input} data-testid="group-date" /></label>
             <label className={label}>{t('ARRIVAL')}
               <select value={slot} onChange={(e) => setSlot(e.target.value as 'morning' | 'afternoon')} className={input}>
                 <option value="morning">{t('Morning · 09:00–12:00')}</option>

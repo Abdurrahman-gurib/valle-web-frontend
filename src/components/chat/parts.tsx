@@ -55,6 +55,8 @@ export function Launcher({ onClick, unread, bottom, right, reduced }: {
     <button
       onClick={onClick}
       data-chat-launcher=""
+      aria-expanded={false}
+      aria-haspopup="dialog"
       aria-label={unread > 0 ? (unread === 1 ? t('Open chat, {n} new message', { n: unread }) : t('Open chat, {n} new messages', { n: unread })) : t('Open chat')}
       className={cn(
         'press group fixed z-[85] w-[58px] h-[58px] p-0 border-0 bg-transparent text-white cursor-pointer',

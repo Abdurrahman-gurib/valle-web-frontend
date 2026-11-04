@@ -137,7 +137,7 @@ export function MyDayDrawer() {
         <div className="shrink-0 border-t-[1.5px] border-valle-lilac bg-white px-[18px] pt-[14px] pb-4">
           <div className="flex items-baseline justify-between">
             <span className="text-[14px] font-bold">{t('Total')}</span>
-            <span className="font-display text-[26px] font-black italic">{money(app.booking.total)}</span>
+            <span aria-live="polite" aria-atomic="true" className="font-display text-[26px] font-black italic">{money(app.booking.total)}</span>
           </div>
           <button
             type="button"

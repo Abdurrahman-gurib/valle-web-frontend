@@ -2600,5 +2600,13 @@
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "छात्र प्रवेश शुल्क ({price} प्रति छात्र) 6 वर्ष और अधिक के हर छात्र के लिए एक बार जोड़ा जाता है; प्री-प्राइमरी छात्रों का प्रवेश निःशुल्क है। शिक्षक और साथ आने वाले वयस्क सामान्य वयस्क प्रवेश ({adult}) देते हैं। चुनें कि छात्र क्या करेंगे और हर गतिविधि के लिए संख्या बताएँ।",
   "UNDER 6 (FREE)": "6 से कम (निःशुल्क)",
   "Pay at the kiosk on the day": "उसी दिन कियोस्क पर भुगतान करें",
-  "See the prices": "कीमतें देखें"
+  "See the prices": "कीमतें देखें",
+  "{n} items": "{n} आइटम",
+  "1 item": "1 आइटम",
+  "Added {name} to My Day · {count}": "{name} मेरा दिन में जोड़ा गया · {count}",
+  "Removed {name} from My Day · {count}": "{name} मेरा दिन से हटाया गया · {count}",
+  "Chat messages": "चैट संदेश",
+  "Pause the slideshow and the moving banner": "स्लाइडशो और चलती पट्टी रोकें",
+  "Play the slideshow and the moving banner": "स्लाइडशो और चलती पट्टी चलाएँ",
+  "Safety waiver": "सुरक्षा छूट-पत्र"
 }

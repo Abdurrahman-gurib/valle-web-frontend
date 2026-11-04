@@ -54,6 +54,8 @@ export function DetailPricelist({ act, d, kids, catalog }: { act: Activity; d: C
                   <button
                     onClick={() => app.toggleSel(act.id, pr.n)}
                     title={on ? t('Remove from My Day') : t('Add this option to My Day')}
+                    aria-pressed={on}
+                    aria-label={(on ? t('Added') : t('Add')) + ': ' + t(pr.n)}
                     style={kids
                       ? { border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, padding: '0 12px', minHeight: 32, borderRadius: 999, whiteSpace: 'nowrap', minWidth: 72 }
                       : { border: '1.5px solid #340057', background: on ? '#340057' : '#FFFFFF', color: on ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, padding: '0 12px', minHeight: 32, borderRadius: 999, whiteSpace: 'nowrap', minWidth: 72 }}

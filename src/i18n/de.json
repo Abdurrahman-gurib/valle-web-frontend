@@ -2600,5 +2600,13 @@
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "Der Schüler-Eintritt ({price} pro Schüler) wird einmal für jeden Schüler ab 6 Jahren berechnet; Vorschulkinder haben freien Eintritt. Lehrkräfte und Begleitpersonen zahlen den normalen Erwachseneneintritt ({adult}). Kreuzen Sie an, was die Schüler machen, und geben Sie jeweils die Anzahl an.",
   "UNDER 6 (FREE)": "UNTER 6 (FREI)",
   "Pay at the kiosk on the day": "Bezahlung am Kiosk vor Ort",
-  "See the prices": "Preise ansehen"
+  "See the prices": "Preise ansehen",
+  "{n} items": "{n} Einträge",
+  "1 item": "1 Eintrag",
+  "Added {name} to My Day · {count}": "{name} zu Mein Tag hinzugefügt · {count}",
+  "Removed {name} from My Day · {count}": "{name} aus Mein Tag entfernt · {count}",
+  "Chat messages": "Chat-Nachrichten",
+  "Pause the slideshow and the moving banner": "Diashow und Laufband anhalten",
+  "Play the slideshow and the moving banner": "Diashow und Laufband abspielen",
+  "Safety waiver": "Sicherheitsverzicht"
 }

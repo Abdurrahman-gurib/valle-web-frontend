@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCatalog } from '../../store/CatalogContext';
 import { Img } from '../../components/Img';
+import { Pause, Play } from 'lucide-react';
 import { useT } from '../../i18n';
+import { setHomeMotionPaused, useHomeMotionPaused } from './motionPause';
 
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
@@ -37,16 +39,27 @@ export function Hero() {
     return () => { cancelled = true; revert?.(); };
   }, []);
 
+  // the slideshow stops with the pause button, and while the pointer or keyboard focus is in the hero
+  const paused = useHomeMotionPaused();
+  const [held, setHeld] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => { setReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches); }, []);
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reduced || paused || held) return;
     const t = setInterval(() => {
       setHeroIdx((i) => (i + 1) % HERO.length);
     }, 5200);
     return () => clearInterval(t);
-  }, [HERO.length]);
+  }, [HERO.length, reduced, paused, held]);
 
   return (
-    <section className="relative h-[min(96vh,880px)] min-h-[580px] overflow-hidden bg-valle-deep">
+    <section
+      className="relative h-[min(96vh,880px)] min-h-[580px] overflow-hidden bg-valle-deep"
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHeld(true); }}
+      onPointerLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false); }}
+    >
       <Img
         src="/images/valle-zipline-adventure-mauritius.avif"
         alt={t('Zipline flight over the Vallé Advenature™ Park valley')}
@@ -66,22 +79,34 @@ export function Hero() {
             position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
             opacity: i === heroIdx || i === prevIdx ? 1 : 0, zIndex: i === heroIdx ? 2 : i === prevIdx ? 1 : 0,
             transition: i === heroIdx ? 'opacity .8s cubic-bezier(.2,.8,.2,1)' : 'none',
-            animation: i === heroIdx || i === prevIdx ? 'vken 16s ease-out infinite alternate' : 'none',
+            animation: i === heroIdx || i === prevIdx ? 'vken 16s ease-out infinite alternate' : 'none', animationPlayState: paused || held ? 'paused' : 'running',
           }}
         />
       ))}
-      <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.88)_0%,rgba(52,0,87,.2)_48%,rgba(31,0,51,.4)_100%)]" />
+      {/* scrim: dark at the bottom and behind the headline and copy (top start), so white text keeps 4.5:1 on every slide */}
+      <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.88)_0%,rgba(52,0,87,.25)_48%,rgba(31,0,51,.55)_100%)]" />
+      <div className="absolute inset-0 z-[3] bg-[linear-gradient(100deg,rgba(31,0,51,.62)_0%,rgba(31,0,51,.35)_38%,rgba(31,0,51,0)_62%)] rtl:bg-[linear-gradient(-100deg,rgba(31,0,51,.62)_0%,rgba(31,0,51,.35)_38%,rgba(31,0,51,0)_62%)]" />
       <div ref={copyRef} className="relative z-[4] mx-auto flex h-full flex-col justify-start px-[clamp(16px,2.5vw,40px)] pt-[clamp(96px,12vh,130px)] pb-0">
         <div className="origin-bottom-left -rotate-4">
           <h1 className="m-0 font-display text-[clamp(48px,8.4vw,132px)] leading-[0.82] font-black tracking-[-0.01em] text-white uppercase italic">
             <span data-hero-line className="inline-block">{t('Feel the')}</span><br /><span data-hero-line className="inline-block text-valle-yellow">{t('colours.')}</span>
           </h1>
         </div>
-        <p data-hero-copy className="mx-0 mt-[22px] mb-0 max-w-[52ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-white/88">
+        <p data-hero-copy className="mx-0 mt-[22px] mb-0 max-w-[52ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-white [text-shadow:0_1px_12px_rgba(31,0,51,.6)]">
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
       </div>
-      <div className="absolute z-[4] right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col gap-2">
+      <div className="absolute z-[4] right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col items-center gap-2">
+        <button
+          type="button"
+          data-testid="hero-pause"
+          onClick={() => setHomeMotionPaused(!paused)}
+          aria-pressed={paused}
+          aria-label={paused ? t('Play the slideshow and the moving banner') : t('Pause the slideshow and the moving banner')}
+          className="mb-2 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-[1.5px] border-solid border-white/70 bg-[rgba(31,0,51,.45)] text-white hover:bg-[rgba(31,0,51,.7)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-yellow"
+        >
+          {paused ? <Play size={16} strokeWidth={2.5} aria-hidden /> : <Pause size={16} strokeWidth={2.5} aria-hidden />}
+        </button>
         {HERO.map((src, i) => (
           <button
             key={src}

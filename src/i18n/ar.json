@@ -2600,5 +2600,13 @@
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "تُضاف رسوم دخول الطلاب ({price} لكل طالب) مرة واحدة لكل طالب بعمر 6 سنوات فأكثر؛ ويدخل طلاب ما قبل الابتدائي مجانًا. يدفع المعلمون والبالغون المرافقون رسوم دخول البالغين العادية ({adult}). اختر ما سيقوم به الطلاب وحدد عدد المشاركين في كل نشاط.",
   "UNDER 6 (FREE)": "دون 6 سنوات (مجانًا)",
   "Pay at the kiosk on the day": "الدفع عند الكشك في يوم الزيارة",
-  "See the prices": "عرض الأسعار"
+  "See the prices": "عرض الأسعار",
+  "{n} items": "{n} عناصر",
+  "1 item": "عنصر واحد",
+  "Added {name} to My Day · {count}": "تمت إضافة {name} إلى يومي · {count}",
+  "Removed {name} from My Day · {count}": "تمت إزالة {name} من يومي · {count}",
+  "Chat messages": "رسائل المحادثة",
+  "Pause the slideshow and the moving banner": "إيقاف عرض الصور والشريط المتحرك مؤقتًا",
+  "Play the slideshow and the moving banner": "تشغيل عرض الصور والشريط المتحرك",
+  "Safety waiver": "إقرار السلامة"
 }

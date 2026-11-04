@@ -437,7 +437,7 @@ export default function BookingPage() {
             }}>
               <div style={{ flex: 1, minWidth: '170px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <div data-testid="sticky-total" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
+                  <div data-testid="sticky-total" aria-live="polite" aria-atomic="true" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '15.5px' }}>{sumLine}</div>
                   <CurrencyPicker fg="#FFFFFF" compact />
                 </div>
                 {couponCut > 0 && coupon.offer && (
@@ -445,7 +445,7 @@ export default function BookingPage() {
                     {t('Code {code}', { code: coupon.offer.code })} · − {mur(couponCut)}
                   </div>
                 )}
-                <div style={{ fontFamily: MONO, fontSize: '9.5px', letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: '3px' }}>{payModeNote}</div>
+                <div style={{ fontFamily: MONO, fontSize: '10px', letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: '3px' }}>{payModeNote}</div>
               </div>
               {redirecting
                 ? <div data-testid="checkout-redirect" style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '14.5px', padding: '14px 4px' }}>{t('Taking you to the secure payment page…')}</div>

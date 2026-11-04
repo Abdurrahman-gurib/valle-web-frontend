@@ -38,13 +38,13 @@ export function LanguagePicker({ fg, compact }: { fg: string; compact?: boolean 
         onClick={() => setOpen((o) => !o)}
         onMouseEnter={() => setH(true)}
         onMouseLeave={() => setH(false)}
-        aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={tr('Language: {name}. Change language', { name: LANG_META[lang].name })}
+        aria-controls="language-menu"
+        aria-label={LANG_META[lang].short + ' · ' + tr('Language: {name}. Change language', { name: LANG_META[lang].name })}
         data-testid="language-picker"
         style={{
-          border: `1.5px solid ${h || open ? '#7333FF' : (fg === '#FFFFFF' ? 'rgba(255,255,255,.55)' : 'rgba(115,51,255,.5)')}`,
-          background: h || open ? '#7333FF' : 'transparent', cursor: 'pointer',
+          border: `1.5px solid ${h || open ? '#340057' : (fg === '#FFFFFF' ? 'rgba(255,255,255,.55)' : 'rgba(115,51,255,.5)')}`,
+          background: h || open ? '#340057' : 'transparent', cursor: 'pointer',
           fontFamily: MONO, fontSize: compact ? 10 : 11, fontWeight: 700, letterSpacing: compact ? '.06em' : '.1em',
           color: h || open ? '#FFFFFF' : fg, padding: compact ? '0 8px' : '9px 12px', borderRadius: 999,
           whiteSpace: 'nowrap', lineHeight: 1, ...(compact ? { minHeight: 40, minWidth: 40 } : null),
@@ -53,7 +53,7 @@ export function LanguagePicker({ fg, compact }: { fg: string; compact?: boolean 
         {LANG_META[lang].short} ▾
       </button>
       {open && (
-        <div role="listbox" aria-label={tr('Language')} style={{
+        <ul id="language-menu" aria-label={tr('Language')} style={{ listStyle: 'none', margin: 0,
           position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 190, background: '#FFFFFF', color: '#340057',
           borderRadius: 16, boxShadow: '0 24px 60px -18px rgba(31,0,51,.55), 0 0 0 1.5px #EBE2FF', padding: 8, animation: 'vfadeup .2s ease both',
           fontFamily: "'Work Sans',sans-serif",
@@ -61,25 +61,23 @@ export function LanguagePicker({ fg, compact }: { fg: string; compact?: boolean 
           {LANGS.map((l) => {
             const on = l === lang;
             return (
-              <a
-                key={l}
-                role="option"
-                aria-selected={on}
+              <li key={l}><a
+                aria-current={on ? 'true' : undefined}
                 lang={l}
                 hrefLang={l}
                 href={localizePath(stripLang(typeof window !== 'undefined' ? window.location.pathname : '/'), l)}
                 onClick={(e) => { e.preventDefault(); setOpen(false); switchTo(l); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: '#340057',
-                  background: on ? '#F1EBFF' : 'transparent', borderRadius: 10, padding: '9px 10px',
+                  background: on ? '#F4EEFF' : 'transparent', borderRadius: 10, padding: '9px 10px', fontWeight: on ? 700 : 400,
                 }}
               >
                 <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.08em', width: 26 }}>{LANG_META[l].short}</span>
                 <span style={{ fontSize: 14 }}>{LANG_META[l].name}</span>
-              </a>
+              </a></li>
             );
           })}
-        </div>
+        </ul>
       )}
     </div>
   );

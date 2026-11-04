@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cloneElement, isValidElement, useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useSeo } from '../../lib/seo';
 import { paths } from '../../lib/nav';
@@ -141,10 +141,12 @@ export default function WaiverPage() {
   const nothingToSign = !!view && view.required === 0;
   const showForm = !!view && view.open && !nothingToSign && (!allSigned || correcting);
 
+  const [tried, setTried] = useState(false);
   const submit = async () => {
     if (!view) return;
     setErr('');
     const h = Number(height), w = Number(weight);
+    setTried(true);
     const problems: string[] = [];
     if (!name.trim()) problems.push(t('the participant’s full name'));
     if (age === null || age < 0 || age > 110) problems.push(t('a valid date of birth'));
@@ -190,12 +192,13 @@ export default function WaiverPage() {
 
   return (
     <main className="mx-auto max-w-[620px] px-[clamp(16px,3.5vw,40px)] pt-[110px] pb-[60px] font-sans text-valle-purple">
-      {loadErr && (
-        <div className="rounded-[16px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-5 py-4 font-semibold">
-          {loadErr} <Link to={paths.booking()} style={{ color: '#7333FF' }}>{t('Book a day')}</Link>
+      {loadErr && (<>
+        <h1 className="v-h1 mb-6" style={{ fontSize: 'clamp(34px,7vw,52px)' }}>{t('Safety waiver')}</h1>
+        <div role="alert" className="rounded-[16px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-5 py-4 font-semibold">
+          {loadErr} <Link to={paths.booking()} style={{ color: '#5B21B6', textDecoration: 'underline', textUnderlineOffset: 3 }}>{t('Book a day')}</Link>
         </div>
-      )}
-      {!view && !loadErr && <div className="font-mono text-[11px] tracking-[.12em] text-valle-purple/60">{t('LOADING…')}</div>}
+      </>)}
+      {!view && !loadErr && <div role="status" className="font-mono text-[11px] tracking-[.12em] text-valle-purple/75">{t('LOADING…')}</div>}
 
       {view && (
         <>
@@ -285,14 +288,15 @@ export default function WaiverPage() {
                   <label className="col-span-full grid gap-1.5">
                     <span className="text-[14px] font-bold">{t('Participants covered by this signature (one per line)')}</span>
                     <textarea value={groupNames} onChange={(e) => setGroupNames(e.target.value)} rows={6} data-testid="group-names" className="rounded-[12px] border-[1.5px] border-valle-lilac bg-[#F7F3FF] px-[14px] py-2.5 font-mono text-[13px] text-valle-purple" />
-                    <span className="text-[12.5px] text-valle-purple/60">{t('{n} names · add or remove before signing', { n: groupNames.split(/\r?\n/).filter((x) => x.trim()).length })}</span>
+                    <span className="text-[12.5px] text-valle-purple/75">{t('{n} names · add or remove before signing', { n: groupNames.split(/\r?\n/).filter((x) => x.trim()).length })}</span>
                   </label>
                 )}
-                <Field label={t('First and last name')}><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={input} data-testid="w-name" /></Field>
+                <p className="m-0 col-span-full text-[13px] text-valle-purple/75">{t('Fields marked * are required.')}</p>
+                <Field req invalid={tried && !name.trim()} label={t('First and last name')}><input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={input} data-testid="w-name" /></Field>
                 <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
-                  <Field label={t('Date of birth')}><input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} max={view.visitDate} className={input} data-testid="w-birth" /></Field>
-                  <Field label={t('Height (cm)')}><input inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9]/g, ''))} placeholder="170" className={input} data-testid="w-height" /></Field>
-                  <Field label={t('Weight (kg)')}><input inputMode="numeric" value={weight} onChange={(e) => setWeight(e.target.value.replace(/[^0-9]/g, ''))} placeholder="70" className={input} data-testid="w-weight" /></Field>
+                  <Field req invalid={tried && !birth} label={t('Date of birth')}><input type="date" value={birth} onChange={(e) => setBirth(e.target.value)} max={view.visitDate} className={input} data-testid="w-birth" /></Field>
+                  <Field req invalid={tried && !height} label={t('Height (cm)')}><input inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9]/g, ''))} placeholder="170" className={input} data-testid="w-height" /></Field>
+                  <Field req invalid={tried && !weight} label={t('Weight (kg)')}><input inputMode="numeric" value={weight} onChange={(e) => setWeight(e.target.value.replace(/[^0-9]/g, ''))} placeholder="70" className={input} data-testid="w-weight" /></Field>
                 </div>
                 {age !== null && age >= 0 && <div className="-mt-1 text-[13px] text-valle-purple/70">{t('Age on the day of the visit: {n}', { n: age })}</div>}
                 {warnings.length > 0 && (
@@ -303,13 +307,13 @@ export default function WaiverPage() {
                   </div>
                 )}
                 {minor && (
-                  <Field label={t('Legal Guardian signing for this minor Participant (first and last name)')}><input value={guardian} onChange={(e) => setGuardian(e.target.value)} className={input} data-testid="w-guardian" /></Field>
+                  <Field req invalid={tried && !guardian.trim()} label={t('Legal Guardian signing for this minor Participant (first and last name)')}><input value={guardian} onChange={(e) => setGuardian(e.target.value)} className={input} data-testid="w-guardian" /></Field>
                 )}
                 <Field label={t('Address / Hotel')}><input value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" className={input} data-testid="w-address" /></Field>
                 <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
                   <Field label={t('E-mail')}><input type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={input} data-testid="w-email" /></Field>
-                  <Field label={t('Phone number')}><input type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" placeholder="+230 5xxx xxxx" className={input} data-testid="w-phone" /></Field>
-                  <Field label={t('Nationality')}><input value={nationality} onChange={(e) => setNationality(e.target.value)} autoComplete="country-name" className={input} data-testid="w-nationality" /></Field>
+                  <Field req invalid={tried && !phone.trim()} label={t('Phone number')}><input type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" placeholder="+230 5xxx xxxx" className={input} data-testid="w-phone" /></Field>
+                  <Field req invalid={tried && !nationality.trim()} label={t('Nationality')}><input value={nationality} onChange={(e) => setNationality(e.target.value)} autoComplete="country-name" className={input} data-testid="w-nationality" /></Field>
                   <Field label={t('National Identity Card / Passport number (optional)')}><input dir="ltr" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} className={input} data-testid="w-id" /></Field>
                 </div>
                 <Field label={t('Medical conditions, allergies or injuries the guides should know about (optional)')}>
@@ -319,8 +323,8 @@ export default function WaiverPage() {
 
               <Section n="3" title={t('Emergency contact')}>
                 <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))]">
-                  <Field label={t('Name of contact person in case of emergency')}><input value={emName} onChange={(e) => setEmName(e.target.value)} className={input} data-testid="w-em-name" /></Field>
-                  <Field label={t('Phone number of the person to contact in case of emergency')}><input type="tel" dir="ltr" value={emPhone} onChange={(e) => setEmPhone(e.target.value)} placeholder="+230 5xxx xxxx" className={input} data-testid="w-em-phone" /></Field>
+                  <Field req invalid={tried && !emName.trim()} label={t('Name of contact person in case of emergency')}><input value={emName} onChange={(e) => setEmName(e.target.value)} className={input} data-testid="w-em-name" /></Field>
+                  <Field req invalid={tried && !emPhone.trim()} label={t('Phone number of the person to contact in case of emergency')}><input type="tel" dir="ltr" value={emPhone} onChange={(e) => setEmPhone(e.target.value)} placeholder="+230 5xxx xxxx" className={input} data-testid="w-em-phone" /></Field>
                 </div>
               </Section>
 
@@ -361,11 +365,15 @@ function Section({ n, title, children }: { n: string; title: string; children: R
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+/** A labelled field; `req` marks it required (star + `required`), `invalid` flags it after a failed submit. */
+function Field({ label, children, req, invalid }: { label: string; children: ReactNode; req?: boolean; invalid?: boolean }) {
+  const field = isValidElement(children) && req
+    ? cloneElement(children as ReactElement<Record<string, unknown>>, { required: true, 'aria-invalid': invalid || undefined })
+    : children;
   return (
     <label className="grid gap-1.5 text-[13px] font-semibold">
-      <span>{label}</span>
-      {children}
+      <span>{label}{req && <span aria-hidden className="text-valle-red-ink"> *</span>}</span>
+      {field}
     </label>
   );
 }

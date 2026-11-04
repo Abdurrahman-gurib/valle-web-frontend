@@ -39,6 +39,8 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
             {...bindTick}
             onClick={(e) => a.add(e)}
             title={a.addLabel}
+            aria-label={a.addLabel.replace(/^[+✓]\s*/, '') + ' · ' + a.name}
+            aria-pressed={a.selOn}
             style={{
               position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: 999, border: '2px solid #FFFFFF',
               background: a.selOn ? '#33FF74' : 'rgba(52,0,87,.5)', color: a.selOn ? '#340057' : '#FFFFFF',

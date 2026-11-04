@@ -10,6 +10,7 @@ import { StaffAuthProvider } from './store/StaffAuth';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { MyDayDrawer } from './components/MyDayDrawer';
+import { MyDayAnnouncer } from './components/MyDayAnnouncer';
 import { RateGate } from './components/RateGate';
 import { ChatWidget } from './components/ChatWidget';
 import { OptionPicker } from './components/OptionPicker';
@@ -123,6 +124,7 @@ function PublicShell() {
       </div>
       <Footer />
       <MyDayDrawer />
+      <MyDayAnnouncer />
       <RateGate />
       <OptionPicker />
       <ChatWidget />

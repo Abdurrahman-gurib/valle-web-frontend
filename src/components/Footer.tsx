@@ -45,7 +45,7 @@ export function Footer() {
       <Stripes />
       <div className="bg-valle-deep px-0 pt-[clamp(44px,6vw,72px)] pb-[34px] text-white">
         <div className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] py-0">
-          <div className="origin-left -rotate-4 overflow-hidden font-display text-[clamp(52px,9vw,140px)] leading-[0.82] font-black tracking-[-0.01em] whitespace-nowrap text-white/8 uppercase italic">
+          <div aria-hidden className="origin-left -rotate-4 overflow-hidden font-display text-[clamp(52px,9vw,140px)] leading-[0.82] font-black tracking-[-0.01em] whitespace-nowrap text-white/8 uppercase italic">
             {t('LIVE THE PULSE')}
           </div>
         </div>

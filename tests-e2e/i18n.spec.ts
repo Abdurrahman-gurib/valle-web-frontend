@@ -53,17 +53,17 @@ test.describe('language switch', () => {
     await preset(page);
     await page.goto('/explore?cat=kids');
     await page.getByTestId('language-picker').first().click();
-    await page.getByRole('option', { name: /Français/ }).click();
+    await page.locator('#language-menu').getByRole('link', { name: /Français/ }).click();
     await expect(page).toHaveURL(/\/fr\/explore\?cat=kids$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
     // an activity link from a French page stays French
     const link = page.locator('a[href^="/fr/activities/"]').first();
     await expect(link).toBeVisible();
     await page.getByTestId('language-picker').first().click();
-    await page.getByRole('option', { name: /Deutsch/ }).click();
+    await page.locator('#language-menu').getByRole('link', { name: /Deutsch/ }).click();
     await expect(page).toHaveURL(/\/de\/explore\?cat=kids$/);
     await page.getByTestId('language-picker').first().click();
-    await page.getByRole('option', { name: /English/ }).click();
+    await page.locator('#language-menu').getByRole('link', { name: /English/ }).click();
     await expect(page).toHaveURL(/\/explore\?cat=kids$/);
   });
 

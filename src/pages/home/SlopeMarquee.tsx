@@ -1,10 +1,11 @@
 import { Stripes } from '../../components/Stripes';
 import { useT } from '../../i18n';
+import { useHomeMotionPaused } from './motionPause';
 
-function MarqueeLine() {
+function MarqueeLine({ copy }: { copy?: boolean }) {
   const t = useT();
   return (
-    <span style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(15px,1.7vw,20px)', letterSpacing: '.1em', color: '#FFFFFF' }}>
+    <span aria-hidden={copy || undefined} style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(15px,1.7vw,20px)', letterSpacing: '.1em', color: '#FFFFFF' }}>
       {t('ZIPLINES')} <span style={{ color: '#FF3358' }}>●</span> {t('QUAD & BUGGY')} <span style={{ color: '#33FF74' }}>●</span> {t('WATERFALLS')}{' '}
       <span style={{ color: '#FFFC33' }}>●</span> {t('23 COLOURED EARTH')} <span style={{ color: '#FF3358' }}>●</span> {t('NEPALESE BRIDGE')}{' '}
       <span style={{ color: '#33FF74' }}>●</span> {t('KIDS PARK')} <span style={{ color: '#FFFC33' }}>●</span> {t('GIANT TORTOISES')}{' '}
@@ -16,15 +17,17 @@ function MarqueeLine() {
 
 /** The 4° tilted caution-stripe slope + dark scrolling marquee band under the hero. */
 export function SlopeMarquee() {
+  const paused = useHomeMotionPaused();
   return (
     <div style={{ position: 'relative', zIndex: 4, marginTop: -96, overflow: 'hidden' }}>
       {/* one band on the original 4° slope, with the caution stripe above it and its mirror below */}
       <div style={{ margin: '3.6vw -3vw', transform: 'rotate(-4deg)' }}>
         <Stripes height={12} />
         <div style={{ background: '#340057', padding: '14px 0', overflow: 'hidden', whiteSpace: 'nowrap', boxShadow: '0 16px 36px -14px rgba(38,0,64,.5)' }}>
-          <div style={{ display: 'inline-flex', animation: 'vmarq 42s linear infinite', willChange: 'transform' }}>
+          {/* stops with the hero's pause button, and while the pointer or focus is on it */}
+          <div className="vmarquee" data-paused={paused || undefined} style={{ display: 'inline-flex', animation: 'vmarq 42s linear infinite', willChange: 'transform' }}>
             <MarqueeLine />
-            <MarqueeLine />
+            <MarqueeLine copy />
           </div>
         </div>
         <div data-testid="slope-stripe-2" style={{ transform: 'scaleX(-1)' }}><Stripes height={12} /></div>

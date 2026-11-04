@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useApp } from '../store/AppStore';
 import { CURRENCY_ORDER } from '../lib/fx';
 import { useT, _t } from '../i18n';
@@ -20,6 +20,7 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
   const [open, setOpen] = useState(false);
   const [h, setH] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -39,13 +40,13 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
         onClick={() => setOpen((o) => !o)}
         onMouseEnter={() => setH(true)}
         onMouseLeave={() => setH(false)}
-        aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={t('Prices shown in {name}. Change currency', { name: rates[app.currency]?.name ? t(rates[app.currency].name) : app.currency })}
+        aria-controls={menuId}
+        aria-label={app.currency + ' · ' + t('Prices shown in {name}. Change currency', { name: rates[app.currency]?.name ? t(rates[app.currency].name) : app.currency })}
         data-testid="currency-picker"
         style={{
-          border: `1.5px solid ${h || open ? '#7333FF' : 'rgba(115,51,255,.5)'}`,
-          background: h || open ? '#7333FF' : 'transparent', cursor: 'pointer',
+          border: `1.5px solid ${h || open ? '#340057' : (fg === '#FFFFFF' ? 'rgba(255,255,255,.55)' : 'rgba(115,51,255,.5)')}`,
+          background: h || open ? '#340057' : 'transparent', cursor: 'pointer',
           fontFamily: MONO, fontSize: compact ? 10 : 11, fontWeight: 700, letterSpacing: compact ? '.06em' : '.1em',
           color: h || open ? '#FFFFFF' : fg, padding: compact ? '8px 9px' : '9px 12px', borderRadius: 999,
           whiteSpace: 'nowrap', lineHeight: 1,
@@ -55,7 +56,8 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
       </button>
       {open && (
         <div
-          role="listbox"
+          id={menuId}
+          role="group"
           aria-label={t('Currency')}
           style={{
             position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 250, maxHeight: '70vh', overflowY: 'auto',
@@ -68,12 +70,12 @@ export function CurrencyPicker({ fg, compact }: { fg: string; compact?: boolean 
             return (
               <button
                 key={c}
-                role="option"
-                aria-selected={on}
+                type="button"
+                aria-pressed={on}
                 onClick={() => { app.setCurrency(c); setOpen(false); }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', border: 0, cursor: 'pointer',
-                  background: on ? '#F1EBFF' : 'transparent', color: '#340057', borderRadius: 10, padding: '9px 10px', fontFamily: 'inherit',
+                  background: on ? '#F4EEFF' : 'transparent', color: '#340057', borderRadius: 10, fontWeight: on ? 700 : 400, padding: '9px 10px', fontFamily: 'inherit',
                 }}
                 onMouseEnter={(e) => { if (!on) e.currentTarget.style.background = '#F7F3FF'; }}
                 onMouseLeave={(e) => { if (!on) e.currentTarget.style.background = 'transparent'; }}

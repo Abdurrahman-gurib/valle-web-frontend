@@ -32,7 +32,7 @@ export function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left:
           <Img src={p.img} alt={p.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, padding: '12px 14px 13px' }}>
-          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
+          <span style={{ background: p.badgeColor === '#FF3358' ? '#D6173F' : p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
           <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', marginTop: 7, lineHeight: 1 }}>{p.name}</div>
           <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.78)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.sub}</div>
           {p.facts.length > 0 && (
@@ -87,7 +87,7 @@ export function RouteCard({ route, options, overlay }: { route: MapRoute; option
         <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>
       </div>
       <div style={{ padding: '12px 15px 15px' }}>
-        <p style={{ fontSize: 12.5, lineHeight: 1.5, color: 'rgba(255,255,255,.8)', margin: 0, display: '-webkit-box', WebkitLineClamp: overlay ? 3 : 6, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t(route.blurb)}</p>
+        <p style={{ fontSize: 13, lineHeight: 1.5, color: 'rgba(255,255,255,.88)', margin: 0 }}>{t(route.blurb)}</p>
         <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,.25)', paddingTop: 9, display: 'grid', gap: 4, fontFamily: MONO, fontSize: 10.5 }}>
           {options.map((o) => (
             <div key={o.variant} style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><span style={{ opacity: 0.65 }}>{options.length > 1 ? t(o.label) : t('FROM')}</span><b style={{ color: '#FFFC33' }}>{o.price}</b></div>

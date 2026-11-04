@@ -13,6 +13,9 @@ import { KP, KP_CONFETTI, KP_FONT } from './KidsPark';
  * and the add-to-day button. Tailwind with the VALLÉ tokens; Motion lifts it
  * on hover (reduced motion follows the app-wide MotionConfig).
  */
+/** The add button's accessible name: its visible words plus the activity ("Add to My Day · Buggy"). */
+const addName = (a: CardModel) => a.addLabel.replace(/^[+✓]\s*/, '') + ' · ' + a.name;
+
 export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTag: string; eager?: boolean; kids?: boolean }) {
   const t = useT();
   if (kids) return <KidsActivityCard a={a} rateTag={rateTag} eager={eager} />;
@@ -48,6 +51,8 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
             <motion.button
               type="button"
               onClick={a.add}
+              aria-label={addName(a)}
+              aria-pressed={a.selOn}
               whileTap={{ scale: 0.98 }}
               className={cn('vbtn vbtn-sm vbtn-block mt-3', a.selOn ? 'vbtn-primary' : 'vbtn-secondary')}
             >
@@ -97,6 +102,8 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
           <motion.button
             type="button"
             onClick={a.add}
+              aria-label={addName(a)}
+              aria-pressed={a.selOn}
             whileTap={{ scale: 0.97 }}
             className="mt-3 w-full cursor-pointer rounded-full border-0 py-[12px] text-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             style={{ ...KP_FONT, background: a.selOn ? KP.lime : KP.yellow, color: '#3A0A46', boxShadow: `0 4px 0 ${a.selOn ? '#6E8F1A' : '#B07C00'}` }}

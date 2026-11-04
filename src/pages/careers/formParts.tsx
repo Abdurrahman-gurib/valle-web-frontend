@@ -48,7 +48,7 @@ export function TextField(p: FieldProps) {
     <div>
       <label htmlFor={p.id} className={labelCls}>
         {p.label.toUpperCase()}
-        {!p.required && <span className="opacity-55"> · {t('OPTIONAL')}</span>}
+        {!p.required && <span className="opacity-80"> · {t('OPTIONAL')}</span>}
       </label>
       <input
         id={p.id}
@@ -82,7 +82,7 @@ export function TextArea(p: BoundField & { max: number }) {
   return (
     <div>
       <label htmlFor={p.id} className={labelCls}>
-        {p.label.toUpperCase()}<span className="opacity-55"> · {t('OPTIONAL')}</span>
+        {p.label.toUpperCase()}<span className="opacity-80"> · {t('OPTIONAL')}</span>
       </label>
       <textarea
         id={p.id}

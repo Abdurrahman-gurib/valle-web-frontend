@@ -195,7 +195,8 @@ export function Header() {
                 <button
                   onClick={app.openRateGate}
                   title={t('Change your rate')}
-                  className={cn("border-[1.5px] border-solid bg-transparent cursor-pointer font-mono text-[11px]", headerFg === "#FFFFFF" ? "border-white/55" : "border-[rgba(115,51,255,.5)]", " font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-violet hover:bg-valle-violet hover:text-white")}
+                  aria-label={app.rateTag + ' · ' + t('Change your rate')}
+                  className={cn("border-[1.5px] border-solid bg-transparent cursor-pointer font-mono text-[11px]", headerFg === "#FFFFFF" ? "border-white/55" : "border-[rgba(115,51,255,.5)]", " font-bold tracking-[.1em] text-[var(--fg)] py-[9px] px-[12px] rounded-[999px] whitespace-nowrap leading-none hover:border-valle-purple hover:bg-valle-purple hover:text-white")}
                 >
                   {app.rateTag} ⇄
                 </button>
@@ -229,6 +230,7 @@ export function Header() {
               <button
                 onClick={app.openRateGate}
                 title={t('Change your rate')}
+                aria-label={app.rateTag + ' · ' + t('Change your rate')}
                 className="border-[1.5px] border-solid border-[rgba(115,51,255,.55)] bg-transparent cursor-pointer font-mono text-[10px] font-bold tracking-[.06em] text-[var(--fg)] min-h-[40px] min-w-[40px] px-[8px] rounded-[999px] whitespace-nowrap leading-none shrink-0"
               >
                 {app.rateTag}

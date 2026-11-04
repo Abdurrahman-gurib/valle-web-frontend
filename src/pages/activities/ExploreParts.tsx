@@ -20,7 +20,9 @@ function Chip({ label, onClick, on }: { label: string; onClick: () => void; on: 
   return (
     <button
       {...bind}
+      type="button"
       onClick={onClick}
+      aria-pressed={on}
       style={{
         border: `1.5px solid ${on ? '#340057' : '#EBE2FF'}`,
         background: on ? '#340057' : '#FFFFFF',
@@ -83,10 +85,10 @@ export function PulseFilter({ value, onChange, resultCount }: { value: string; o
   const t = useT();
   return (
     <div style={{ margin: '22px 0 0', padding: '14px 0', borderBottom: '1px solid #EBE2FF' }}>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
-        <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.7)', marginRight: 4 }}>{t('PULSE LEVEL')}</span>
+      <div role="group" aria-labelledby="pulse-label" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
+        <span id="pulse-label" style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.75)', marginInlineEnd: 4 }}>{t('PULSE LEVEL')}</span>
         {PULSE_CHIPS.map((c) => <Chip key={c.key} label={t(c.label)} onClick={() => onChange(c.key)} on={value === c.key} />)}
-        <span style={{ marginLeft: 'auto', fontFamily: MONO, fontSize: 12, color: 'rgba(52,0,87,.7)' }}>{resultCount}</span>
+        <span role="status" aria-live="polite" data-testid="explore-count" style={{ marginInlineStart: 'auto', fontFamily: MONO, fontSize: 12, color: 'rgba(52,0,87,.75)' }}>{resultCount}</span>
       </div>
     </div>
   );

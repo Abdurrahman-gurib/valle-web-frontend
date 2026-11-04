@@ -2600,5 +2600,13 @@
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "Входной билет для учеников ({price} за ученика) добавляется один раз за каждого ученика от 6 лет; дошкольники проходят бесплатно. Учителя и сопровождающие платят обычный взрослый вход ({adult}). Отметьте, что будут делать ученики, и укажите, сколько человек на каждой позиции.",
   "UNDER 6 (FREE)": "ДО 6 ЛЕТ (БЕСПЛАТНО)",
   "Pay at the kiosk on the day": "Оплата в киоске в день визита",
-  "See the prices": "Смотреть цены"
+  "See the prices": "Смотреть цены",
+  "{n} items": "Позиций: {n}",
+  "1 item": "1 позиция",
+  "Added {name} to My Day · {count}": "{name} добавлено в «Мой день» · {count}",
+  "Removed {name} from My Day · {count}": "{name} удалено из «Мой день» · {count}",
+  "Chat messages": "Сообщения чата",
+  "Pause the slideshow and the moving banner": "Приостановить слайд-шоу и бегущую строку",
+  "Play the slideshow and the moving banner": "Возобновить слайд-шоу и бегущую строку",
+  "Safety waiver": "Отказ от претензий по безопасности"
 }
