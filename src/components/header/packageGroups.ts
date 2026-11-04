@@ -6,32 +6,19 @@ type Translate = (s: string, vars?: Record<string, string | number>) => string;
 
 export interface MenuGroup { title: string; kids?: boolean; links: [name: string, href: string][] }
 
-/**
- * The packages menu (desktop mega menu and mobile overlay), in two groups: the
- * ready-made day packages, then the packages by who is coming. Restaurant menus
- * live under Dine, the Kids Park under Explore.
- */
+/** The packages menu, classified the way the park sells them (desktop mega menu and mobile overlay). */
 export function packageGroups(t: Translate, catalog: Catalog): MenuGroup[] {
-  const cls = (name: string, slug: string): [string, string] => [name, paths.packageGroup(slug)];
+  const pk = (name: string, key: string): [string, string] => [name, paths.packages(key)];
   return [
-    {
-      title: t('DAY PACKAGES'),
-      links: [
-        ...(liveDeals(catalog).length ? [cls(t('Special deals'), 'deals')] : []),
-        cls(t('Exclusive package'), 'exclusive'),
-        cls(t('Photo & video package'), 'photo-video'),
-      ],
-    },
-    {
-      title: t('BY GROUP'),
-      links: [
-        cls(t('Residents'), 'resident'),
-        cls(t('Seniors 55+'), 'senior'),
-        cls(t('Schools'), 'student'),
-        cls(t('Companies'), 'corporate'),
-        [t('Groups of 10+'), paths.groups()],
-      ],
-    },
+    ...(liveDeals(catalog).length ? [{ title: t('SPECIAL DEALS'), links: [pk(t('Expo deals'), 'deals')] }] : []),
+    { title: t('EXCLUSIVE PACKAGE'), links: [pk(t('Light & Standard'), 'ls'), pk(t('Exclusive tiers'), 'ex'), pk(t('VIP Ultimate'), 'vip'), pk(t('Diamond'), 'diamond'), pk(t('Combo packages'), 'combo')] },
+    { title: t('RESIDENT PACKAGE'), links: [pk(t('Resident packages'), 'resident')] },
+    { title: t('KIDS PARK'), kids: true, links: [[t('Vallé Kids Park pricelist'), paths.explore('kids') + '#kids-prices'], [t('Kids Park activities'), paths.explore('kids')]] },
+    { title: t('SENIOR CITIZEN'), links: [pk(t('Senior citizens 55+'), 'senior')] },
+    { title: t('STUDENT PACKAGE'), links: [pk(t('Student package'), 'student')] },
+    { title: t('CORPORATE PACKAGE'), links: [pk(t('Team building'), 'team')] },
+    { title: t('PHOTO & VIDEO PACKAGE'), links: [pk(t('Photo pricelist'), 'photo'), pk(t('Cinematic experience'), 'cine')] },
+    { title: t('RESTAURANTS & MENUS'), links: [[t('Le Chamouzé menu'), paths.resto('chamouze') + '#menu'], [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'], [t('La Citronelle menu'), paths.resto('citronelle') + '#menu']] },
   ];
 }
 

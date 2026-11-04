@@ -6,7 +6,7 @@ import { paths, useGoto } from '../../lib/nav';
 import { useT } from '../../i18n';
 import { StripesSm } from '../Stripes';
 import { Img } from '../Img';
-import { MegaLink, SpaLink, megaPanel, monoLink } from './parts';
+import { KidsParkLogo, MegaLink, SpaLink, megaPanel, monoLink } from './parts';
 
 /** Link/selected text colour of the design system. */
 const LINK = '#5B21B6';
@@ -15,7 +15,7 @@ import type { MenuGroup } from './packageGroups';
 /** `go` closes the menus and then runs the navigation. */
 type Go = (fn: () => void) => () => void;
 
-/** Desktop packages mega menu: day packages and packages by group, plus the VIP teaser. */
+/** Desktop packages mega menu: the package groups in CSS columns, plus the VIP teaser. */
 export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
   const t = useT();
   const goto = useGoto();
@@ -25,13 +25,17 @@ export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
       <StripesSm />
       <div className="max-w-[1320px] mx-auto pt-[28px] px-[clamp(16px,3.5vw,40px)] pb-[32px] flex gap-[clamp(20px,3vw,44px)] flex-wrap items-start">
         <div className="flex-1 min-w-[220px]">
-          <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mb-[20px]')} color={LINK}>
+          <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
             {t('ALL PACKAGES')} <Fwd />
           </SpaLink>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-[32px] gap-y-[16px]" data-testid="packages-menu">
+          {/* CSS columns pack the groups top to bottom, so a short group never leaves a gap under it */}
+          <div className="[column-width:170px] [column-gap:24px]" data-testid="packages-menu">
             {groups.map((g) => (
-              <div key={g.title}>
-                <div className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/75 mb-[6px] pb-[6px] border-b border-solid border-valle-lilac">{g.title}</div>
+              <div key={g.title} className="break-inside-avoid mb-[16px]">
+                <div className="font-mono text-[12.5px] font-bold tracking-[.14em] text-valle-violet mb-[6px] flex items-center gap-2">
+                  {g.title}
+                  {g.kids && <KidsParkLogo width={40} />}
+                </div>
                 {g.links.map(([name, href]) => (
                   <MegaLink key={href} name={name} href={href} onClick={go(() => navigate(href))} />
                 ))}
