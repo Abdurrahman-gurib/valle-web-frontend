@@ -220,12 +220,13 @@ export default function GroupsPage() {
       {!done && (
         <>
           <div className="font-mono text-[12px] font-semibold tracking-[.16em] text-valle-violet">{t('SCHOOLS · COMPANIES · CLUBS')}</div>
-          <h1 className="v-h1 mt-[14px]">
+          {/* the -4° tilt lifts the right end of a wide heading by ~7% of its width: room so it never touches the label (inline, as .v-h1 resets margin outside the Tailwind layers) */}
+          <h1 className="v-h1" style={{ marginTop: 'clamp(44px, 7vw, 96px)' }}>
             {t('Bring the')}<br /><span className="text-valle-violet">{t('whole group.')}</span>
           </h1>
           <p className="text-[16px] leading-[1.6] text-[rgba(52,0,87,.75)] max-w-[60ch] mt-[22px] mb-0 mx-0">
             {t('Ten people or more book here: per-head prices, your participant list, a {pct}% deposit, and one safety waiver pack the leader signs for everyone. Team-building programmes with facilitators still start with a quote.', { pct: depositPct })}
-            {' '}<Link to={paths.team()} className="font-semibold" style={{ color: '#5B21B6' }}>{t('Team building →')}</Link>
+            {' '}<Link to={paths.team()} className="font-semibold whitespace-nowrap" style={{ color: '#5B21B6' }}>{t('Team building →')}</Link>
           </p>
 
           <div className={stepLabel}>{t('1 · WHO IS COMING')}</div>
