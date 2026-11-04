@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,7 @@ export const MONO = "'Chivo Mono',monospace";
 export const BARLOW = "'Barlow',sans-serif";
 
 /** Nationality values (NATC keys) are stored and sent in English; translated only for display. */
-export const NATIONALITIES = [_t('Mauritius'), _t('Réunion / France'), _t('United Kingdom'), _t('Germany'), _t('Italy'), _t('India'), _t('China'), _t('South Africa'), _t('UAE'), _t('Australia'), _t('USA'), _t('Other')];
+export const NATIONALITIES = [_t('Mauritius'), _t('France'), _t('Réunion'), _t('United Kingdom'), _t('Germany'), _t('Italy'), _t('India'), _t('China'), _t('South Africa'), _t('UAE'), _t('Australia'), _t('USA'), _t('Other')];
 
 export const inputStyle: CSSProperties = {
   width: '100%', border: '1.5px solid #EBE2FF', background: '#F7F3FF', borderRadius: '12px',
@@ -22,20 +22,22 @@ export function StepLabel({ children }: { children: ReactNode }) {
   return <div style={{ fontFamily: MONO, fontSize: '11.5px', fontWeight: 600, letterSpacing: '.14em', color: 'rgba(52,0,87,.7)' }}>{children}</div>;
 }
 
-/** The red-bordered notice under the form (missing details, a refused booking). */
-export function ErrorNote({ children }: { children: ReactNode }) {
-  return (
-    <div style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600 }}>
-      {children}
-    </div>
-  );
-}
+/** The red-bordered notice next to the Confirm bar (missing details, a refused booking): announced, and focusable. */
+export const ErrorNote = forwardRef<HTMLDivElement, { children: ReactNode; style?: CSSProperties } & Pick<HTMLAttributes<HTMLDivElement>, 'id'>>(
+  function ErrorNote({ children, style, id }, ref) {
+    return (
+      <div ref={ref} id={id} role="alert" tabIndex={-1} data-testid="booking-error" style={{ marginTop: '18px', background: '#FFE2E7', border: '1.5px solid #FF3358', borderRadius: '14px', padding: '13px 18px', fontSize: '14px', color: '#340057', fontWeight: 600, outlineColor: '#7333FF', ...style }}>
+        {children}
+      </div>
+    );
+  },
+);
 
 /* Stepper +/− button with hover background (style-hover="background:#EBE2FF") */
 function StepBtn({ onClick, bg, label, children }: { onClick: () => void; bg: string; label: string; children: ReactNode }) {
   return (
     <motion.button type="button" onClick={onClick} aria-label={label} whileTap={{ scale: 0.88 }}
-      className="inline-flex size-[26px] cursor-pointer items-center justify-center rounded-[7px] border-0 text-valle-purple transition-colors hover:!bg-valle-lilac focus-visible:outline-2 focus-visible:outline-valle-violet"
+      className="inline-flex size-10 sm:size-[26px] cursor-pointer items-center justify-center rounded-[7px] border-0 text-valle-purple transition-colors hover:!bg-valle-lilac focus-visible:outline-2 focus-visible:outline-valle-violet"
       style={{ background: bg }}>
       {children}
     </motion.button>
@@ -56,19 +58,35 @@ export function Stepper({ tag, val, inc, dec, boxBg, btnBg }: {
   );
 }
 
-/* 4 · DETAILS: text input with focus border (style-focus="border-color:#7333FF") */
-export function Field({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+/* 4 · DETAILS: text input with focus border (style-focus="border-color:#7333FF") and its own error line */
+export const Field = forwardRef<HTMLInputElement, {
+  value: string; onChange: (v: string) => void; placeholder: string; id: string;
+  type?: 'text' | 'email' | 'tel'; inputMode?: 'text' | 'email' | 'tel'; autoComplete?: string; error?: string;
+}>(function Field({ value, onChange, placeholder, id, type = 'text', inputMode, autoComplete, error }, ref) {
+  const errId = id + '-error';
   return (
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      aria-label={placeholder}
-      className="transition-colors focus:!border-valle-violet focus:outline-none"
-      style={inputStyle}
-    />
+    <div>
+      <input
+        ref={ref}
+        id={id}
+        name={id}
+        type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errId : undefined}
+        dir={type === 'text' ? undefined : 'ltr'}
+        className="transition-colors focus:!border-valle-violet focus:outline-none"
+        style={{ ...inputStyle, ...(error ? { borderColor: '#D91E44' } : null) }}
+      />
+      {error && <div id={errId} role="alert" style={{ fontSize: '12.5px', fontWeight: 600, color: '#B8163A', marginTop: '5px' }}>{error}</div>}
+    </div>
   );
-}
+});
 
 /* 5 · PAYMENT: pay mode card */
 export function PayCard({ on, bgOn, title, note, onClick }: { on: boolean; bgOn: string; title: string; note: string; onClick: () => void }) {

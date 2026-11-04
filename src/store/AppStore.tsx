@@ -3,7 +3,8 @@ import {
 } from 'react';
 import type { BookingSummary, RateKey, Sel, SelEntry } from '../types';
 import { useCatalog } from './CatalogContext';
-import { computeBooking, priceFor, variantPrice } from './booking';
+import { computeBooking, fitSelToParty, lineEligibility, newLineCounts, priceFor, variantPrice, type Party } from './booking';
+import { lineCaps } from '../lib/ages';
 import { parseSelKey, selKey } from '../lib/sel';
 import { CURRENCY_STORAGE_KEY, FX_FALLBACK, isCurrency, readStoredCurrency, type FxTable } from '../lib/fx';
 import { fetchFx } from '../lib/api';
@@ -36,8 +37,11 @@ interface AppState {
   // party & visit
   adults: number;
   kids: number;
+  /** Children under 6: free entry, still counted for capacity and waivers. */
+  infants: number;
   setAdults: (n: number) => void;
   setKids: (n: number) => void;
+  setInfants: (n: number) => void;
   dateIdx: number;
   setDateIdx: (i: number) => void;
   customDate: string;
@@ -57,7 +61,10 @@ interface AppState {
   payMode: 'gate' | 'online';
   setPayMode: (m: 'gate' | 'online') => void;
   /** Restore a saved booking draft (cart, party, date, slot, details). */
-  loadDraft: (d: { sel?: Sel; adults?: number; kids?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => void;
+  loadDraft: (d: { sel?: Sel; adults?: number; kids?: number; infants?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => void;
+
+  /** After a booking: the cart, the party, the date and the details start afresh. */
+  clearDraft: () => void;
 
   // My Day drawer
   dayOpen: boolean;
@@ -91,7 +98,7 @@ function readRate(): RateKey | null {
 
 /** The guest's details and visit choice, kept for a day so a reload or a closed tab loses nothing. */
 const DRAFT_KEY = 'valle_draft';
-interface DraftFields { adults: number; kids: number; dateIdx: number; customDate: string; slot: number; name: string; phone: string; email: string; nat: string; at: number }
+interface DraftFields { adults: number; kids: number; infants: number; dateIdx: number; customDate: string; slot: number; name: string; phone: string; email: string; nat: string; at: number }
 function readDraft(): Partial<DraftFields> {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -115,15 +122,15 @@ function readSel(): Sel {
       if (!val || typeof val !== 'object' || Array.isArray(val)) continue;
       const src = val as Record<string, unknown>;
       const entry: SelEntry = {};
-      let qty = 0;
+      let fields = 0;
       for (const k of ['a', 'k', 'u'] as const) {
         const n = src[k];
         if (typeof n !== 'number' || !Number.isFinite(n)) continue;
-        const q = Math.max(0, Math.min(12, Math.floor(n)));
-        entry[k] = q;
-        qty += q;
+        entry[k] = Math.max(0, Math.min(24, Math.floor(n)));
+        fields++;
       }
-      if (qty > 0) out[id] = entry;
+      // a line nobody in the party fits yet (0 people) stays, with its note in the cart
+      if (fields > 0) out[id] = entry;
     }
     return out;
   } catch { /* corrupted or private mode */ }
@@ -138,6 +145,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const draft0 = readDraft();
   const [adults, setAdults] = useState(draft0.adults ?? 2);
   const [kids, setKids] = useState(draft0.kids ?? 0);
+  const [infants, setInfants] = useState(draft0.infants ?? 0);
   const [dateIdx, setDateIdx] = useState(draft0.dateIdx ?? 1);
   const [customDate, setCustomDate] = useState(draft0.customDate ?? '');
   const [slot, setSlot] = useState(draft0.slot ?? 0);
@@ -176,14 +184,15 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem('valle_sel', JSON.stringify(sel)); } catch { /* ignore */ }
   }, [sel]);
   useEffect(() => {
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ adults, kids, dateIdx, customDate, slot, name, phone, email, nat, at: Date.now() })); } catch { /* ignore */ }
-  }, [adults, kids, dateIdx, customDate, slot, name, phone, email, nat]);
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ adults, kids, infants, dateIdx, customDate, slot, name, phone, email, nat, at: Date.now() })); } catch { /* ignore */ }
+  }, [adults, kids, infants, dateIdx, customDate, slot, name, phone, email, nat]);
 
   /** A draft the guest saved by e-mail: the whole page state comes back. */
-  const loadDraft = useCallback((d: { sel?: Sel; adults?: number; kids?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => {
+  const loadDraft = useCallback((d: { sel?: Sel; adults?: number; kids?: number; infants?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }) => {
     if (d.sel && typeof d.sel === 'object') setSel(d.sel);
     if (typeof d.adults === 'number') setAdults(Math.max(0, Math.min(400, d.adults)));
     if (typeof d.kids === 'number') setKids(Math.max(0, Math.min(400, d.kids)));
+    if (typeof d.infants === 'number') setInfants(Math.max(0, Math.min(400, d.infants)));
     if (typeof d.customDate === 'string') setCustomDate(d.customDate);
     if (typeof d.dateIdx === 'number') setDateIdx(d.dateIdx);
     if (typeof d.slot === 'number') setSlot(d.slot);
@@ -228,32 +237,53 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       } else {
         const act = catalog.ACTS.find((x) => x.id === id);
         const product = id.startsWith('product:') ? (catalog.PRODUCTS ?? []).find((p) => 'product:' + p.key === id) : undefined;
-        next[key] = (act && act.mode === 'flat') || product?.mode === 'flat' ? { u: 1 } : { a: Math.max(1, adults), k: kids };
+        next[key] = (act && act.mode === 'flat') || product?.mode === 'flat' ? { u: 1 } : newLineCounts(catalog, key, { adults, kids, infants });
       }
       return next;
     });
-  }, [catalog, adults, kids]);
+  }, [catalog, adults, kids, infants]);
 
   const bumpSel = useCallback((key: string, field: 'a' | 'k' | 'u', d: number) => {
     setSel((s) => {
       const cur = s[key];
       if (!cur) return s;
-      const entry = { ...cur, [field]: Math.max(0, Math.min(12, (cur[field] || 0) + d)) };
+      // per-person counts never go past the people of the party who fit the line
+      const caps = lineCaps(lineEligibility(catalog, key), { adults, kids, infants });
+      const max = field === 'a' ? caps.a : field === 'k' ? caps.k : 12;
+      const entry = { ...cur, [field]: Math.max(0, Math.min(max, (cur[field] || 0) + d)) };
       const next = { ...s };
-      if ((entry.a || 0) + (entry.k || 0) + (entry.u || 0) <= 0) delete next[key];
+      if ((entry.a || 0) + (entry.k || 0) + (entry.u || 0) <= 0 && d < 0) delete next[key];
       else next[key] = entry;
       return next;
     });
+  }, [catalog, adults, kids, infants]);
+
+  /** The party changes: lines already in the cart follow it (see fitSelToParty). */
+  const changeParty = useCallback((next: Party) => {
+    const prev = { adults, kids, infants };
+    setAdults(next.adults);
+    setKids(next.kids);
+    setInfants(next.infants);
+    setSel((s) => fitSelToParty(catalog, s, prev, next));
+  }, [catalog, adults, kids, infants]);
+
+  const clearDraft = useCallback(() => {
+    setSel({});
+    setAdults(2); setKids(0); setInfants(0);
+    setDateIdx(1); setCustomDate(''); setSlot(0);
+    setName(''); setPhone(''); setEmail(''); setNat('');
+    setPayMode('gate');
+    try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
   }, []);
 
   const clearSel = useCallback(() => setSel({}), []);
 
   const lang = useLang();
   const booking = useMemo(
-    () => computeBooking(catalog, sel, adults, kids, rate),
+    () => computeBooking(catalog, sel, adults, kids, rate, infants),
     // currency and fx: the summary lines carry formatted amounts
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [catalog, sel, adults, kids, rate, currency, fx, lang],
+    [catalog, sel, adults, kids, infants, rate, currency, fx, lang],
   );
 
   const value = useMemo<AppState>(() => ({
@@ -273,12 +303,15 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     bumpSel,
     loadDraft,
     clearSel,
+    clearDraft,
     isSelected: (id: string, variant?: string) => (variant ? !!sel[selKey(id, variant)] : Object.keys(sel).some((k) => parseSelKey(k).id === id)),
 
     adults,
     kids,
-    setAdults: (n: number) => setAdults(Math.max(1, Math.min(12, n))),
-    setKids: (n: number) => setKids(Math.max(0, Math.min(12, n))),
+    infants,
+    setAdults: (n: number) => changeParty({ adults: Math.max(1, Math.min(12, n)), kids, infants }),
+    setKids: (n: number) => changeParty({ adults, kids: Math.max(0, Math.min(12, n)), infants }),
+    setInfants: (n: number) => changeParty({ adults, kids, infants: Math.max(0, Math.min(12, n)) }),
     dateIdx,
     setDateIdx,
     customDate,
@@ -316,7 +349,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     currency: isCurrency(currency, fx) ? currency : 'MUR',
     fx,
     setCurrency,
-  }), [rate, rateGate, sel, adults, kids, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang, loadDraft]);
+  }), [rate, rateGate, sel, adults, kids, infants, changeParty, clearDraft, dateIdx, customDate, slot, dayOpen, optionsFor, name, phone, email, nat, payMode, booking, catalog, setRate, toggleSel, bumpSel, clearSel, currency, fx, setCurrency, lang, loadDraft]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -20,11 +20,13 @@ export function mur(n: number): string {
   return 'Rs ' + n.toLocaleString('en-US');
 }
 
-/** "2 adults · 1 child" party label, in the page's language. */
-export function partyLabel(adults: number, kids: number): string {
-  const a = adults === 1 ? tr('1 adult') : tr('{n} adults', { n: adults });
-  const k = kids > 0 ? ' · ' + (kids === 1 ? tr('1 child') : tr('{n} children', { n: kids })) : '';
-  return a + k;
+/** "2 adults · 1 child · 1 under 6" party label, in the page's language; zero parts are left out. */
+export function partyLabel(adults: number, kids: number, infants = 0): string {
+  const parts: string[] = [];
+  if (adults > 0) parts.push(adults === 1 ? tr('1 adult') : tr('{n} adults', { n: adults }));
+  if (kids > 0) parts.push(kids === 1 ? tr('1 child') : tr('{n} children', { n: kids }));
+  if (infants > 0) parts.push(infants === 1 ? tr('1 under 6') : tr('{n} under 6', { n: infants }));
+  return parts.length ? parts.join(' · ') : tr('{n} adults', { n: 0 });
 }
 
 const intl = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(LANG_META[currentLang()].locale, opts);
@@ -101,6 +103,9 @@ export function shortDateFromIso(iso: string): string {
 
 export const NATC: Record<string, string> = {
   'Mauritius': '+230',
+  'France': '+33',
+  'Réunion': '+262',
+  // older saved drafts
   'Réunion / France': '+262',
   'United Kingdom': '+44',
   'Germany': '+49',

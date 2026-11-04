@@ -3,21 +3,28 @@ import { Link } from 'react-router-dom';
 import { Stripes } from '../components/Stripes';
 import { cn } from '../lib/utils';
 import { BtnLabel } from '@/components/ui/valle';
-import { isRtl, useT } from '../i18n';
+import { isRtl, useLang, useT } from '../i18n';
 import { createBooking, fetchAvailability, newAttemptKey, type AvailabilityDay } from '../lib/api';
-import { money, mur, todayIso } from '../lib/format';
+import { fullDateFromIso, money, mur, partyLabel, todayIso } from '../lib/format';
 import { paths } from '../lib/nav';
 import { breadcrumbs, useSeo } from '../lib/seo';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
-import { productAmount, type BookingRequest, type BookingResponse } from '../types';
+import { entryPrices } from '../store/booking';
+import { productAmount, type BookingRequest, type BookingResponse, type Product } from '../types';
 import { errorMessage, httpStatus } from '../lib/errors';
+import { localTicketHref } from './booking/Receipt';
 
 /**
  * /groups: schools, companies and clubs book online with per-head pricing,
  * a participant list (typed or pasted from a spreadsheet), a deposit, and
  * one waiver pack the teacher / leader signs for everyone. Replaces the
  * quote-only form for anything that is really a booking.
+ *
+ * Schools count their pupils by age (under 6, 6–11, 12+) and their teachers.
+ * Every student row has its own quantity (pupils doing it); the student
+ * entrance fee is added once per pupil aged 6 and over; teachers pay the
+ * normal adult entry. The server prices exactly these lines.
  */
 
 const input = 'border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] px-[14px] py-3 [font-family:inherit] text-[15px] text-valle-purple outline-none w-full box-border';
@@ -44,8 +51,37 @@ export function parseParticipants(text: string): Participant[] {
   return out;
 }
 
+/** Pupils of a school party, by age band. */
+export interface Pupils { under6: number; kids: number; teens: number }
+
+/** The student price list's entrance row ("Entrance fee · visit of the park"). */
+export const isEntranceRow = (p: Pick<Product, 'name'>) => /^entrance fee/i.test(p.name);
+/** Rows made for the under-12s: the 4–11 lunch and the Kids Park rides. */
+const forUnder12 = (p: Pick<Product, 'name'>) => /4 to 11|kids park/i.test(p.name);
+/** The 12+ lunch. */
+const forTeens = (p: Pick<Product, 'name'>) => /12 yrs and over|12 years and over/i.test(p.name);
+
+/** How many pupils a student row starts with: lunch 4–11 and Kids Park the under-12s, the 12+ lunch the teens, anything else every pupil aged 6+. */
+export function defaultRowQty(p: Pick<Product, 'name'>, pupils: Pupils): number {
+  if (forUnder12(p)) return pupils.under6 + pupils.kids;
+  if (forTeens(p)) return pupils.teens;
+  return pupils.kids + pupils.teens;
+}
+
+/**
+ * A row's pupils as the booking's adults / children: the under-12 rows fill
+ * the children first, the others the 12+ pupils first (who book as adults).
+ */
+export function splitRowQty(p: Pick<Product, 'name'>, qty: number, pupils: Pupils): { adults: number; kids: number } {
+  const young = pupils.under6 + pupils.kids;
+  if (forUnder12(p)) { const kids = Math.min(qty, young); return { adults: Math.max(0, qty - kids), kids }; }
+  const adults = Math.min(qty, pupils.teens);
+  return { adults, kids: Math.max(0, qty - adults) };
+}
+
 export default function GroupsPage() {
   const t = useT();
+  const lang = useLang();
   const app = useApp();
   const catalog = useCatalog();
   useSeo({
@@ -62,9 +98,17 @@ export default function GroupsPage() {
   const [phone, setPhone] = useState('');
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState<'morning' | 'afternoon'>('morning');
+  /** teachers / accompanying adults (school) or adults (other groups) */
   const [adults, setAdults] = useState(2);
+  /** children 6–11 / pupils 6–11 */
   const [kids, setKids] = useState(30);
+  /** pupils 12+ (schools only; they book as adults at the student rate) */
+  const [teens, setTeens] = useState(0);
+  /** under 6 / pre-primary pupils: free entry */
+  const [under6, setUnder6] = useState(0);
   const [picked, setPicked] = useState<Record<string, boolean>>({});
+  /** per student row: how many pupils do it (unset = the row's default) */
+  const [qty, setQty] = useState<Record<string, number>>({});
   const [list, setList] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -74,10 +118,16 @@ export default function GroupsPage() {
   const attemptKey = useRef(newAttemptKey());
 
   const rate = app.rate ?? 'rr';
-  const students = useMemo(() => (catalog.PRODUCTS ?? []).filter((p) => p.family === 'student'), [catalog]);
-  const activities = useMemo(() => catalog.ACTS.filter((a) => a.mode === 'pp' && (a.cat === 'adventure' || a.cat === 'nature')), [catalog]);
   const school = kind === 'school';
-  const headcount = adults + kids;
+  const allStudents = useMemo(() => (catalog.PRODUCTS ?? []).filter((p) => p.family === 'student'), [catalog]);
+  const entranceRow = allStudents.find(isEntranceRow);
+  const students = allStudents.filter((p) => !isEntranceRow(p));
+  const activities = useMemo(() => catalog.ACTS.filter((a) => a.mode === 'pp' && (a.cat === 'adventure' || a.cat === 'nature')), [catalog]);
+  const pupils: Pupils = { under6: school ? under6 : 0, kids: school ? kids : 0, teens: school ? teens : 0 };
+  const pupilCount = pupils.under6 + pupils.kids + pupils.teens;
+  // the party the server sees: 12+ pupils book as adults, under-6s as infants (free)
+  const partyAdults = adults + (school ? teens : 0);
+  const headcount = partyAdults + kids + under6;
   const participants = useMemo(() => parseParticipants(list), [list]);
 
   useEffect(() => {
@@ -87,29 +137,36 @@ export default function GroupsPage() {
     return () => { dead = true; };
   }, [date]);
 
-  // what the party pays, per head and in all
-  const lines = useMemo(() => {
-    const out: { id: string; name: string; perHead: string; amount: number }[] = [];
-    for (const [id, on] of Object.entries(picked)) {
-      if (!on) continue;
-      if (id.startsWith('product:')) {
-        const p = students.find((x) => 'product:' + x.key === id);
-        if (!p) continue;
-        out.push({ id, name: p.name, perHead: mur(rate === 'nr' ? p.nr : p.rr), amount: productAmount(p, rate, adults, kids, 0) });
-      } else {
-        const a = activities.find((x) => x.id === id);
-        if (!a) continue;
-        const rp = catalog.RATEP[a.id];
-        const price = rp ? (rate === 'nr' ? rp[1] : rp[0]) : a.price;
-        out.push({ id, name: a.name, perHead: mur(price), amount: price * adults + Math.round(price * 0.5) * kids });
-      }
+  const ep = entryPrices(catalog, rate);
+  const rowQty = (p: Product) => Math.max(0, Math.min(pupilCount, qty['product:' + p.key] ?? defaultRowQty(p, pupils)));
+
+  // what the party pays: every line the server will price, with its own quantity
+  type QuoteLine = { id: string; name: string; perHead: string; qty: number; amount: number; adults: number; kids: number };
+  const lines: QuoteLine[] = [];
+  if (school) {
+    const entranceQty = pupils.kids + pupils.teens;
+    if (entranceRow && entranceQty > 0) {
+      lines.push({ id: 'product:' + entranceRow.key, name: entranceRow.name, perHead: mur(rate === 'nr' ? entranceRow.nr : entranceRow.rr), qty: entranceQty, amount: productAmount(entranceRow, rate, pupils.teens, pupils.kids, 0), adults: pupils.teens, kids: pupils.kids });
     }
-    return out;
-  }, [picked, students, activities, catalog, rate, adults, kids]);
-  const entryA = (catalog.PL.admission?.[0] ? (rate === 'nr' ? catalog.PL.admission[0].nr : catalog.PL.admission[0].rr) : 550);
-  const entryK = (catalog.PL.admission?.[1] ? (rate === 'nr' ? catalog.PL.admission[1].nr : catalog.PL.admission[1].rr) : 325);
-  // the student rows include the entrance fee; experiences do not
-  const entry = school && lines.some((l) => l.id.startsWith('product:')) ? 0 : entryA * adults + entryK * kids;
+    for (const p of students) {
+      const id = 'product:' + p.key;
+      if (!picked[id]) continue;
+      const q = rowQty(p);
+      if (q <= 0) continue;
+      const split = splitRowQty(p, q, pupils);
+      lines.push({ id, name: p.name, perHead: mur(rate === 'nr' ? p.nr : p.rr), qty: q, amount: productAmount(p, rate, split.adults, split.kids, 0), ...split });
+    }
+  } else {
+    for (const a of activities) {
+      if (!picked[a.id]) continue;
+      const rp = catalog.RATEP[a.id];
+      const price = rp ? (rate === 'nr' ? rp[1] : rp[0]) : a.price;
+      lines.push({ id: a.id, name: a.name, perHead: mur(price), qty: adults + kids, amount: price * adults + Math.round(price * 0.5) * kids, adults, kids });
+    }
+  }
+  // Park entry: teachers and accompanying adults (school), everyone 6+ (other groups); under-6s are free.
+  // (without the student entrance row in the catalog, pupils pay the ordinary entry, as the server charges it)
+  const entry = school && entranceRow ? ep.adult * adults : ep.adult * partyAdults + ep.child * kids;
   const total = entry + lines.reduce((s, l) => s + l.amount, 0);
   const depositPct = 30;
   const deposit = Math.round(total * depositPct / 100);
@@ -126,12 +183,13 @@ export default function GroupsPage() {
     if (!org.trim() || !leader.trim()) { setErr(t('Add the organisation and the leader’s name.')); return; }
     if (!email.trim() && !phone.trim()) { setErr(t('Add an e-mail or a phone number for the confirmation.')); return; }
     if (!date) { setErr(t('Pick the date of the visit.')); return; }
+    if (school && adults < 1) { setErr(t('Add at least one teacher or accompanying adult.')); return; }
     if (headcount < 10) { setErr(t('A group booking is for 10 people or more. For fewer, book a day the usual way.')); return; }
     if (participants.length > headcount) { setErr(t('The list has more names than the headcount ({n}). Adjust one or the other.', { n: headcount })); return; }
     setBusy(true);
     const req: BookingRequest = {
-      visitDate: date, slot, adults, kids, rate,
-      items: lines.map((l) => ({ id: l.id, adults, kids })),
+      visitDate: date, slot, adults: Math.max(1, partyAdults), kids, infants: under6, rate, lang,
+      items: lines.map((l) => ({ id: l.id, adults: l.adults, kids: l.kids })),
       name: leader.trim(), email: email.trim() || undefined, phone: phone.trim() || undefined,
       payMode: 'gate',
       idempotencyKey: attemptKey.current,
@@ -148,6 +206,8 @@ export default function GroupsPage() {
   };
 
   const slotLevel = avail ? (slot === 'morning' ? avail.morning.level : avail.afternoon.level) : undefined;
+  const num = (v: string) => Math.max(0, Math.min(400, Math.floor(Number(v) || 0)));
+  const ticketHref = done?.ticketUrl ? localTicketHref(done.ticketUrl) : '';
 
   return (
     <main className="max-w-[1180px] mx-auto pt-[104px] px-[clamp(16px,3.5vw,40px)] pb-[60px]">
@@ -172,10 +232,10 @@ export default function GroupsPage() {
                 <option value="other">{t('Other')}</option>
               </select>
             </label>
-            <label className={label}>{t('ORGANISATION')}<input value={org} onChange={(e) => setOrg(e.target.value)} placeholder={t('School, company or club name')} className={input} data-testid="group-org" /></label>
-            <label className={label}>{t('LEADER / TEACHER IN CHARGE')}<input value={leader} onChange={(e) => setLeader(e.target.value)} placeholder={t('Full name')} className={input} data-testid="group-leader" /></label>
-            <label className={label}>{t('E-MAIL')}<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" className={input} data-testid="group-email" /></label>
-            <label className={label}>{t('PHONE (SMS / WHATSAPP)')}<input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" autoComplete="tel" className={input} /></label>
+            <label className={label}>{t('ORGANISATION')}<input value={org} onChange={(e) => setOrg(e.target.value)} placeholder={t('School, company or club name')} autoComplete="organization" className={input} data-testid="group-org" /></label>
+            <label className={label}>{t('LEADER / TEACHER IN CHARGE')}<input value={leader} onChange={(e) => setLeader(e.target.value)} placeholder={t('Full name')} autoComplete="name" className={input} data-testid="group-leader" /></label>
+            <label className={label}>{t('E-MAIL')}<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" inputMode="email" autoComplete="email" dir="ltr" className={input} data-testid="group-email" /></label>
+            <label className={label}>{t('PHONE (SMS / WHATSAPP)')}<input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" dir="ltr" className={input} /></label>
           </div>
 
           <div className={stepLabel}>{t('2 · WHEN AND HOW MANY')}</div>
@@ -187,24 +247,42 @@ export default function GroupsPage() {
                 <option value="afternoon">{t('Afternoon · 12:00–15:30')}</option>
               </select>
             </label>
-            <label className={label}>{school ? t('ADULTS (TEACHERS, PARENTS)') : t('ADULTS')}<input type="number" min={0} max={400} value={adults} onChange={(e) => setAdults(Math.max(0, Math.min(400, Math.floor(Number(e.target.value) || 0))))} className={input} data-testid="group-adults" /></label>
-            <label className={label}>{school ? t('STUDENTS / CHILDREN 6–11') : t('CHILDREN 6–11')}<input type="number" min={0} max={400} value={kids} onChange={(e) => setKids(Math.max(0, Math.min(400, Math.floor(Number(e.target.value) || 0))))} className={input} data-testid="group-kids" /></label>
+          </div>
+          <div className="grid [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))] gap-3 mt-3">
+            {school && <label className={label}>{t('PUPILS UNDER 6 (PRE-PRIMARY)')}<input type="number" min={0} max={400} value={under6} onChange={(e) => setUnder6(num(e.target.value))} className={input} data-testid="group-under6" /></label>}
+            <label className={label}>{school ? t('PUPILS 6–11') : t('CHILDREN 6–11')}<input type="number" min={0} max={400} value={kids} onChange={(e) => setKids(num(e.target.value))} className={input} data-testid="group-kids" /></label>
+            {school && <label className={label}>{t('PUPILS 12 AND OVER')}<input type="number" min={0} max={400} value={teens} onChange={(e) => setTeens(num(e.target.value))} className={input} data-testid="group-teens" /></label>}
+            <label className={label}>{school ? t('TEACHERS AND ACCOMPANYING ADULTS') : t('ADULTS')}<input type="number" min={school ? 1 : 0} max={400} value={adults} onChange={(e) => setAdults(num(e.target.value))} className={input} data-testid="group-adults" /></label>
+            {!school && <label className={label}>{t('UNDER 6 (FREE)')}<input type="number" min={0} max={400} value={under6} onChange={(e) => setUnder6(num(e.target.value))} className={input} data-testid="group-under6" /></label>}
           </div>
           {slotLevel && (slotLevel === 'full' || slotLevel === 'closed') && (
             <div role="alert" className="mt-[10px] bg-[#FFE2E7] border-[1.5px] border-solid border-valle-red rounded-[12px] py-[10px] px-[14px] text-[13.5px] font-semibold">
               {slotLevel === 'closed' ? t('The park is closed for that arrival slot. Pick another day.') : t('That arrival slot is fully booked on this date. Pick the other slot or another day.')}
             </div>
           )}
-          <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)] mt-2">{t('HEADCOUNT {n} · GROUPS ARE 10 OR MORE · SECONDARY STUDENTS OVER 11 COUNT AS ADULTS AT THE STUDENT RATE', { n: headcount })}</div>
+          <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)] mt-2">{t('HEADCOUNT {n} · GROUPS ARE 10 OR MORE', { n: headcount })}</div>
 
-          <div className={stepLabel}>{school ? t('3 · STUDENT PRICELIST · PER STUDENT, ENTRANCE INCLUDED') : t('3 · EXPERIENCES · PER PERSON')}</div>
-          <div className="grid [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))] gap-[10px] mt-3" data-testid="group-items">
-            {(school ? students.map((p) => ({ id: 'product:' + p.key, name: p.name, price: rate === 'nr' ? p.nr : p.rr })) : activities.map((a) => ({ id: a.id, name: a.name, price: catalog.RATEP[a.id] ? (rate === 'nr' ? catalog.RATEP[a.id][1] : catalog.RATEP[a.id][0]) : a.price }))).map((it) => (
-              <label key={it.id} className={cn('flex gap-[10px] items-center border-[1.5px] border-solid rounded-[14px] py-3 px-[14px] cursor-pointer', picked[it.id] ? 'bg-[#F0E8FF] border-valle-violet' : 'bg-white border-valle-lilac')}>
-                <input type="checkbox" checked={!!picked[it.id]} onChange={(e) => setPicked((p) => ({ ...p, [it.id]: e.target.checked }))} />
-                <span className="flex-1 font-semibold text-[14px]">{it.name}</span>
-                <span className="font-mono font-bold text-[12.5px]">{mur(it.price)} {t('/ HEAD')}</span>
-              </label>
+          <div className={stepLabel}>{school ? t('3 · STUDENT PRICELIST · PER PUPIL') : t('3 · EXPERIENCES · PER PERSON')}</div>
+          {school && (
+            <p className="text-[13.5px] leading-[1.55] text-[rgba(52,0,87,.75)] mt-2 mb-0 mx-0 max-w-[70ch]" data-testid="group-entry-note">
+              {t('The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.', { price: mur(entranceRow ? (rate === 'nr' ? entranceRow.nr : entranceRow.rr) : 0), adult: mur(ep.adult) })}
+            </p>
+          )}
+          <div className="grid [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))] gap-[10px] mt-3" data-testid="group-items">
+            {(school ? students.map((p) => ({ id: 'product:' + p.key, name: p.name, price: rate === 'nr' ? p.nr : p.rr, p })) : activities.map((a) => ({ id: a.id, name: a.name, price: catalog.RATEP[a.id] ? (rate === 'nr' ? catalog.RATEP[a.id][1] : catalog.RATEP[a.id][0]) : a.price, p: undefined as Product | undefined }))).map((it) => (
+              <div key={it.id} className={cn('flex flex-wrap gap-x-[10px] gap-y-2 items-center border-[1.5px] border-solid rounded-[14px] py-3 px-[14px]', picked[it.id] ? 'bg-[#F0E8FF] border-valle-violet' : 'bg-white border-valle-lilac')}>
+                <label className="flex flex-1 basis-[180px] items-center gap-[10px] cursor-pointer">
+                  <input type="checkbox" checked={!!picked[it.id]} onChange={(e) => setPicked((p) => ({ ...p, [it.id]: e.target.checked }))} />
+                  <span className="flex-1 font-semibold text-[14px]">{it.name}</span>
+                  <span className="font-mono font-bold text-[12.5px] whitespace-nowrap">{mur(it.price)} {t('/ HEAD')}</span>
+                </label>
+                {school && it.p && picked[it.id] && (
+                  <label className="flex items-center gap-2 font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.65)]">
+                    {t('PUPILS')}
+                    <input type="number" min={0} max={pupilCount} value={rowQty(it.p)} onChange={(e) => setQty((q) => ({ ...q, [it.id]: num(e.target.value) }))} className={cn(input, 'w-[88px] py-2')} data-testid={`group-qty-${it.id}`} aria-label={t('Pupils doing {name}', { name: it.name })} />
+                  </label>
+                )}
+              </div>
             ))}
             {school && students.length === 0 && <div className="text-[13.5px] text-[rgba(52,0,87,.6)]">{t('The student pricelist is loading…')}</div>}
           </div>
@@ -219,13 +297,14 @@ export default function GroupsPage() {
 
           <div className={stepLabel}>{t('5 · YOUR QUOTE')}</div>
           <div className="bg-white rounded-[18px] shadow-[0_0_0_1.5px_#EBE2FF] mt-3 py-4 px-5" data-testid="group-summary">
-            {entry > 0 && <Row label={t('Park entry · {party}', { party: `${adults} + ${kids}` })} amount={mur(entry)} />}
-            {lines.map((l) => <Row key={l.id} label={`${l.name} · ${l.perHead} ${t('/ HEAD')} × ${headcount}`} amount={mur(l.amount)} />)}
+            {entry > 0 && <Row label={t('Park entry · {party}', { party: school && entranceRow ? partyLabel(adults, 0) : partyLabel(partyAdults, kids) })} amount={mur(entry)} />}
+            {under6 > 0 && <Row label={t('Park entry · {party}', { party: partyLabel(0, 0, under6) }) + ' · ' + t('free')} amount={mur(0)} />}
+            {lines.map((l) => <Row key={l.id} label={`${l.name} · ${l.perHead} ${t('/ HEAD')} × ${l.qty}`} amount={mur(l.amount)} />)}
             {lines.length === 0 && <div className="text-[13.5px] text-[rgba(52,0,87,.6)]">{school ? t('Tick the student rows your visit includes.') : t('Tick the experiences the group will do; park entry is included for everyone.')}</div>}
             <div className="flex justify-between pt-[10px] mt-2 font-extrabold text-[18px]" style={{ borderTop: '1px dashed #D9C9F0' }}>
               <span>{t('Total')}</span><span className="font-mono" data-testid="group-total">{mur(total)}{app.currency !== 'MUR' ? ' (' + money(total) + ')' : ''}</span>
             </div>
-            <div className="flex justify-between text-[14px] font-bold text-[#D91E44] mt-[6px]">
+            <div className="flex justify-between text-[14px] font-bold text-valle-purple mt-[6px]">
               <span>{t('Deposit to confirm ({pct}%)', { pct: depositPct })}</span><span className="font-mono" data-testid="group-deposit">{mur(deposit)}</span>
             </div>
             <div className="text-[12.5px] text-[rgba(52,0,87,.65)] mt-2 leading-[1.5]">{t('Pay the deposit by bank transfer or at the desk within 7 days (details in the confirmation); the balance is settled on the day. Changes to the headcount are free until the day before.')}</div>
@@ -244,14 +323,17 @@ export default function GroupsPage() {
       {done && (
         <div className="max-w-[640px] mx-auto text-center" data-testid="group-confirmed">
           <div className="font-mono text-[12px] tracking-[.16em] text-[#1E9E4A] font-bold">{t('GROUP BOOKED · BOOKING REFERENCE')}</div>
-          <div className="font-mono font-bold text-[34px] text-valle-red mt-2">{done.refCode}</div>
+          <div className="font-mono font-bold text-[34px] text-valle-purple mt-2 whitespace-nowrap" dir="ltr">{done.refCode}</div>
           <Stripes />
           <p className="text-[16px] leading-[1.6] text-[rgba(52,0,87,.8)] mt-[18px]">
-            {t('{org}: {n} people on {date}. Total {total}; deposit {deposit} to confirm, by transfer or at the desk within 7 days. The leader signs the waiver pack from the ticket link, which also carries the participant list.', { org: org, n: headcount, date, total: mur(done.total), deposit: mur(done.depositAmount ?? deposit) })}
+            {t('{org}: {n} people on {date}. Total {total}; deposit {deposit} to confirm, by transfer or at the desk within 7 days. The leader signs the waiver pack from the ticket link, which also carries the participant list.', { org: org, n: headcount, date: fullDateFromIso(date) || date, total: mur(done.total), deposit: mur(done.depositAmount ?? deposit) })}
+          </p>
+          <p data-testid="group-payment-details" className="whitespace-pre-line text-[14.5px] leading-[1.6] text-valle-purple mt-2">
+            {done.bankDetails?.trim() ? done.bankDetails : t('Our team sends you the payment details within one working day.')}
           </p>
           <div className="flex gap-[10px] justify-center flex-wrap mt-5">
-            {done.ticketUrl && <a href={done.ticketUrl} className="vbtn vbtn-primary" data-testid="group-ticket">{t('Open the ticket')}</a>}
-            {done.ticketUrl && <a href={done.ticketUrl.replace('/ticket/', '/waiver/')} className="vbtn vbtn-secondary">{t('Sign the waiver pack')}</a>}
+            {ticketHref && <a href={ticketHref} className="vbtn vbtn-primary" data-testid="group-ticket">{t('Open the ticket')}</a>}
+            {ticketHref && done.ticketUrl && <a href={localTicketHref(done.ticketUrl, 'waiver')} className="vbtn vbtn-secondary">{t('Sign the waiver pack')}</a>}
           </div>
         </div>
       )}

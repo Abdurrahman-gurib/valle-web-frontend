@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   checkCoupon, createHold, fetchAvailability, fetchPaymentConfig, readDraft, releaseHold, saveDraft,
@@ -48,12 +48,12 @@ export function useSavedDraft() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
   const saveForLater = async () => {
-    const { sel, adults, kids, customDate, dateIdx, slot, name, phone, email, nat } = app;
+    const { sel, adults, kids, infants, customDate, dateIdx, slot, name, phone, email, nat } = app;
     const to = (draftEmail || email).trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) { setDraftState('ask'); return; }
     setDraftState('busy');
     try {
-      await saveDraft(to, { sel, adults, kids, customDate, dateIdx, slot, name, phone, email: email || to, nat });
+      await saveDraft(to, { sel, adults, kids, infants, customDate, dateIdx, slot, name, phone, email: email || to, nat });
       setDraftState('sent');
     } catch { setDraftState('error'); }
   };
@@ -68,22 +68,39 @@ export function useCoupon() {
   const [coupon, setCoupon] = useState('');
   const [offer, setOffer] = useState<CouponOffer | null>(null);
   const [couponMsg, setCouponMsg] = useState('');
-  const clear = () => { setOffer(null); setCouponMsg(''); };
+  // Enter, the Apply button and leaving the box can all fire for one code: it is checked once.
+  const checked = useRef('');
+  const clear = () => { setOffer(null); setCouponMsg(''); checked.current = ''; };
   const tryCoupon = async () => {
     const code = coupon.trim();
     if (!code) { clear(); return; }
+    if (checked.current === code) return;
+    checked.current = code;
     try {
       const o = await checkCoupon(code);
       setOffer(o);
       setCouponMsg(o.kind === 'percent' ? t('Code applied: {n}% off', { n: o.value }) : o.kind === 'amount' ? t('Code applied: Rs {n} off', { n: o.value }) : o.kind === 'entry_free' ? t('Code applied: park entry free') : t('Code applied: free of charge'));
-    } catch {
+    } catch (e) {
+      // a refused code stays refused; a check that never reached the server may be tried again
+      if (!(e instanceof Error && 'status' in e)) checked.current = '';
       setOffer(null);
       setCouponMsg(t('This code is not valid or has expired.'));
     }
   };
+  /** Rupees the checked code takes off this total (the server's adjustmentAmount, mirrored). */
+  const cut = (total: number, entry: number): number => {
+    if (!offer) return 0;
+    switch (offer.kind) {
+      case 'foc': return total;
+      case 'percent': return Math.min(total, Math.round((total * Math.max(0, Math.min(100, offer.value))) / 100));
+      case 'amount': return Math.min(total, Math.max(0, Math.round(offer.value)));
+      case 'entry_free': return Math.min(total, entry);
+      default: return 0;
+    }
+  };
   /** Typing a new code drops the one checked before. */
   const edit = (v: string) => { setCoupon(v.toUpperCase()); clear(); };
-  return { coupon, edit, offer, couponMsg, tryCoupon, clear };
+  return { coupon, edit, offer, couponMsg, tryCoupon, clear, cut };
 }
 
 /** How busy each day already is, keyed by ISO date. Missing = unknown (API away): no dots. */

@@ -904,8 +904,10 @@ test.describe('groups and schools', () => {
   test('a school books 34 people per head with a list, gets a deposit, and the teacher signs one waiver pack', async ({ page, request }, info) => {
     test.skip(info.project.name !== 'desktop', 'same flow on every viewport');
     test.skip(!(await apiUp(page)), 'API not running');
-    const cat = await (await request.get('/api/catalog')).json() as { PRODUCTS?: { key: string; family: string; rr: number }[] };
-    const student = cat.PRODUCTS?.filter((p) => p.family === 'student') ?? [];
+    const cat = await (await request.get('/api/catalog')).json() as { PRODUCTS?: { key: string; family: string; name: string; rr: number }[]; PL: Record<string, { n: string; rr: number }[]> };
+    const student = cat.PRODUCTS?.filter((p) => p.family === 'student' && !/^entrance fee/i.test(p.name)) ?? [];
+    const entrance = cat.PRODUCTS?.find((p) => p.family === 'student' && /^entrance fee/i.test(p.name));
+    const adultEntry = cat.PL.admission?.find((r) => r.n.toLowerCase().includes('12 years'))?.rr ?? 0;
     test.skip(student.length === 0, 'no student products (migration 014 missing)');
 
     await page.goto('/groups');
@@ -919,10 +921,12 @@ test.describe('groups and schools', () => {
     await page.getByTestId('group-items').getByRole('checkbox').first().check();
     await page.getByTestId('group-list').fill('Ariane Léger, 11\nKabir Ramdhun, 10\nname,age\nSara Dupont');
     await expect(page.getByTestId('group-list-count')).toContainText('3 NAMES');
-    // per head × 34 (student rows: kids pay the full student price, no half rate)
+    // the row × the 30 pupils (full student price, no half rate), the student entrance fee once per pupil,
+    // and the 4 teachers at the ordinary adult entry
     const perHead = student[0].rr;
-    await expect(page.getByTestId('group-total')).toContainText('Rs ' + (perHead * 34).toLocaleString('en-US'));
-    await expect(page.getByTestId('group-deposit')).toContainText('Rs ' + Math.round(perHead * 34 * 0.3).toLocaleString('en-US'));
+    const expected = perHead * 30 + (entrance?.rr ?? 0) * 30 + adultEntry * 4;
+    await expect(page.getByTestId('group-total')).toContainText('Rs ' + expected.toLocaleString('en-US'));
+    await expect(page.getByTestId('group-deposit')).toContainText('Rs ' + Math.round(expected * 0.3).toLocaleString('en-US'));
     await page.getByTestId('group-submit').click();
     await expect(page.getByTestId('group-confirmed')).toBeVisible({ timeout: 15000 });
     await expect(page.getByTestId('group-confirmed')).toContainText('deposit Rs');

@@ -19,7 +19,7 @@ export function BookingFacts({ data }: { data: BookingDetailFull }) {
   return (
     <div className={cn(cardCls, 'grid grid-cols-[1fr_1fr] gap-3.5 bg-[#F7F3FF] p-4')}>
       <DetailLine tag="GUEST" value={data.guestName} />
-      <DetailLine tag="PARTY" value={partyLabel(data.adults, data.kids)} />
+      <DetailLine tag="PARTY" value={partyLabel(data.adults, data.kids, data.infants ?? 0)} />
       <DetailLine tag="EMAIL" value={data.email || ''} />
       <DetailLine tag="PHONE" value={data.phone || ''} />
       <DetailLine tag="NATIONALITY" value={data.nationality || ''} />
@@ -98,7 +98,7 @@ export function BookingMoney({ data }: { data: BookingDetailFull }) {
         </div>
         {data.groupKind && (
           <div data-testid="group-block" className="mt-2.5 rounded-[10px] border-[1.5px] border-solid border-[#D9C9F0] bg-[#F0E8FF] px-3 py-2 text-[13px]">
-            <strong>Group · {data.groupKind}</strong> · {data.organisation} · leader {data.leaderName} · {data.adults + data.kids} people · {participants.length} names listed{(data.depositAmount ?? 0) > 0 ? ` · deposit ${money(data.depositAmount ?? 0)}${(data.paidAmount ?? 0) >= (data.depositAmount ?? 0) ? ' received' : ' due'}` : ''}
+            <strong>Group · {data.groupKind}</strong> · {data.organisation} · leader {data.leaderName} · {data.adults + data.kids + (data.infants ?? 0)} people · {participants.length} names listed{(data.depositAmount ?? 0) > 0 ? ` · deposit ${money(data.depositAmount ?? 0)}${(data.paidAmount ?? 0) >= (data.depositAmount ?? 0) ? ' received' : ' due'}` : ''}
             {participants.length > 0 && <details className="mt-1"><summary className="cursor-pointer">Participant list</summary><div className="mt-1 font-mono text-[12px] whitespace-pre-wrap">{participants.map((p) => p.name + (p.age != null ? ` (${p.age})` : '')).join('\n')}</div></details>}
           </div>
         )}

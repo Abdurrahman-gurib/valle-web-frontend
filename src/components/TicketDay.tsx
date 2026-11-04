@@ -44,11 +44,12 @@ export function TicketDay({ tk }: { tk: TicketView }) {
     }).catch(() => { /* durations default to an hour */ });
   }, [tk.visitDate]);
 
-  const steps = useMemo<DayStep[]>(() => tk.lines.filter((l) => l.experienceId).map((l) => ({
-    experienceId: l.experienceId as string,
+  // experiences and packages (expo deals, senior and exclusive packages): every booked line is part of the day
+  const steps = useMemo<DayStep[]>(() => tk.lines.filter((l) => l.experienceId || l.productKey).map((l) => ({
+    experienceId: l.experienceId ?? 'product:' + l.productKey,
     label: l.label.replace(/ · \d{2}:\d{2}$/, ''),
     time: l.time ?? null,
-    endTime: l.time ? addMinutes(l.time, durations[l.experienceId as string] ?? 60) : null,
+    endTime: l.time ? addMinutes(l.time, durations[l.experienceId ?? ''] ?? 60) : null,
   })), [tk.lines, durations]);
   const { now, next, done } = dayPosition(steps, clock.time);
   const booked = new Set(steps.map((s) => s.experienceId));

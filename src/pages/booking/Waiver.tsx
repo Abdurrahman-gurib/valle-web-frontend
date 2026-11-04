@@ -53,18 +53,36 @@ const ageOn = (birth: string, on: string): number | null => {
   return a;
 };
 
-/** Plain-language warnings for the participant being entered (the gate checks the same limits). */
-function limitWarnings(acts: WaiverActivity[], age: number | null, heightCm: number, weightKg: number): string[] {
+/** Whether a participant of this age is on the activity: yes, perhaps (only some of their age band are), or no. */
+export function onActivity(a: WaiverActivity, age: number | null): 'yes' | 'maybe' | 'no' {
+  if (!a.bands || age === null) return 'yes';
+  const band = age >= 12 ? a.bands.adults : age >= 6 ? a.bands.kids : a.bands.infants;
+  return band === 'all' ? 'yes' : band === 'some' ? 'maybe' : 'no';
+}
+
+/**
+ * Plain-language warnings for the participant being entered (the gate checks the same limits),
+ * only for the rides their age band is booked on. A ride only some of the party do, whose limits
+ * this participant would not meet, is named once: the gate checks who rides it.
+ */
+export function limitWarnings(acts: WaiverActivity[], age: number | null, heightCm: number, weightKg: number): string[] {
   const out: string[] = [];
+  const atGate: string[] = [];
   for (const a of acts) {
+    const on = onActivity(a, age);
+    if (on === 'no') continue;
     const name = tr(a.name);
-    if (age !== null && a.minAge !== undefined && age < a.minAge) out.push(tr('{activity}: minimum age {n}.', { activity: name, n: a.minAge }));
-    if (age !== null && a.driveMinAge !== undefined && age < a.driveMinAge) out.push(tr('{activity}: drivers must be {n} or older; younger guests ride as passengers.', { activity: name, n: a.driveMinAge }));
-    if (weightKg && a.maxWeightKg !== undefined && weightKg > a.maxWeightKg) out.push(tr('{activity}: maximum weight {n} kg.', { activity: name, n: a.maxWeightKg }));
-    if (weightKg && a.minWeightKg !== undefined && weightKg < a.minWeightKg) out.push(tr('{activity}: minimum weight {n} kg.', { activity: name, n: a.minWeightKg }));
-    if (heightCm && a.minHeightCm !== undefined && heightCm < a.minHeightCm) out.push(tr('{activity}: minimum height {n} cm.', { activity: name, n: a.minHeightCm }));
-    if (heightCm && a.maxHeightCm !== undefined && heightCm > a.maxHeightCm) out.push(tr('{activity}: maximum height {n} cm.', { activity: name, n: a.maxHeightCm }));
+    const w: string[] = [];
+    if (age !== null && a.minAge !== undefined && age < a.minAge) w.push(tr('{activity}: minimum age {n}.', { activity: name, n: a.minAge }));
+    if (age !== null && a.driveMinAge !== undefined && age < a.driveMinAge) w.push(tr('{activity}: drivers must be {n} or older; younger guests ride as passengers.', { activity: name, n: a.driveMinAge }));
+    if (weightKg && a.maxWeightKg !== undefined && weightKg > a.maxWeightKg) w.push(tr('{activity}: maximum weight {n} kg.', { activity: name, n: a.maxWeightKg }));
+    if (weightKg && a.minWeightKg !== undefined && weightKg < a.minWeightKg) w.push(tr('{activity}: minimum weight {n} kg.', { activity: name, n: a.minWeightKg }));
+    if (heightCm && a.minHeightCm !== undefined && heightCm < a.minHeightCm) w.push(tr('{activity}: minimum height {n} cm.', { activity: name, n: a.minHeightCm }));
+    if (heightCm && a.maxHeightCm !== undefined && heightCm > a.maxHeightCm) w.push(tr('{activity}: maximum height {n} cm.', { activity: name, n: a.maxHeightCm }));
+    if (on === 'yes') out.push(...w);
+    else if (w.length > 0) atGate.push(name);
   }
+  if (atGate.length > 0) out.push(tr('Check at the gate: {names}. Not everyone in your party is booked on it, and this participant is outside its limits.', { names: atGate.join(', ') }));
   return out;
 }
 

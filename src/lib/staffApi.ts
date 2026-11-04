@@ -463,6 +463,10 @@ export interface GateWaiver {
 }
 export interface GateView {
   refCode: string; guestName: string; phone: string; visitDate: string; slot: SlotKey; adults: number; kids: number;
+  /** Children under 6 (older APIs omit it). */
+  infants?: number;
+  /** Partly booked lines: who of the party rides them is not known, so the limit is checked at the gate. */
+  checkAtGate?: { activity: string; message: string }[];
   status: BookingStatus; payMode: PayMode; total: number; paidAmount: number; balance: number; adjustmentAmount: number; adjustmentNote: string; isToday: boolean; lines: { label: string; amount: number }[];
   activities: { id: string; name: string; limits: Record<string, number> }[];
   required: number; signedCount: number; missing: number; stops: number; waivers: GateWaiver[]; waiverUrl: string;
