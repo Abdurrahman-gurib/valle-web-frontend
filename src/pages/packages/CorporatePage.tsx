@@ -6,7 +6,8 @@ import { ClassHero, CallButton } from './ClassHero';
 import { PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, QuoteLink, SectionHeader, cardItems, splitDuration } from './shared';
+import { requestQuoteFor } from './QuoteForm';
+import { Eyebrow, H2, MENU_DT, QuoteLink, SectionHeader, cardItems, splitDuration } from './shared';
 
 /**
  * The corporate class page (/packages/corporate), after the team-building
@@ -46,7 +47,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
         promise={t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}
         photo={{ src: '/images/team-building-goggles.webp', alt: t('Colleagues in goggles cheering during a team challenge at Vallé'), width: 781, height: 977, position: 'center 30%' }}
         actions={<>
-          <button type="button" data-testid="team-hero-quote" className="sr-btn sr-btn-primary sr-btn-lg" onClick={onQuote}>{t('Request a quote')} <Fwd /></button>
+          <button type="button" data-testid="team-hero-quote" className="sr-btn sr-btn-primary sr-btn-lg" onClick={() => { requestQuoteFor(t('Corporate package')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
           <CallButton testId="team-phone" />
         </>}
       />
@@ -73,7 +74,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
                 actions={(
                   <div className="sr-actions sr-actions-one" style={{ marginTop: 0 }}>
                     <p className="sr-price-note" style={{ alignItems: 'flex-start', textAlign: 'start', margin: '0 0 6px', paddingTop: 18, borderTop: '1.5px dashed #D9C9F0' }}>{t('Price per person on quote · HRDC refundable*')}</p>
-                    <button type="button" data-testid="team-card-quote" className="sr-btn sr-btn-primary" onClick={onQuote}>{t('Request a quote')} <Fwd /></button>
+                    <button type="button" data-testid="team-card-quote" className="sr-btn sr-btn-primary" aria-label={t('Request a quote for {name}', { name: t('Programme {n}', { n: i + 1 }) })} onClick={() => { requestQuoteFor([t('Programme {n}', { n: i + 1 }), ...highlights].join(' · ')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
                   </div>
                 )}
               />
@@ -88,7 +89,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
         <dl className="sr-menu">
           {why.map(([Icon, label]) => (
             <div key={label} className="sr-menu-row" style={{ gridTemplateColumns: 'minmax(0,1fr)' }}>
-              <dt><Icon aria-hidden strokeWidth={1.9} />{label}</dt>
+              <dt style={MENU_DT}><Icon aria-hidden strokeWidth={1.9} />{label}</dt>
             </div>
           ))}
         </dl>

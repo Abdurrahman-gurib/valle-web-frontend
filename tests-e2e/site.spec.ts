@@ -387,6 +387,19 @@ test.describe('packages', () => {
     expect(Object.keys(sel)).toContain('product:pkg:senior:0');
   });
 
+  test('/packages/senior: a visitor aged 55+ books at the same price, no resident-only switch', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('valle_rate', 'nr'));
+    await page.goto('/packages/senior');
+    const cards = page.getByTestId('senior-package');
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0).getByTestId('senior-price')).toHaveText('Rs 1,100');
+    await expect(cards.nth(1).getByTestId('senior-price')).toHaveText('Rs 1,500');
+    await expect(page.getByTestId('pkg-rate-note')).toHaveCount(0);
+    await expect(page.getByText('RESIDENT RATE · ID REQUIRED')).toHaveCount(0);
+    await expect(cards.nth(0).getByTestId('senior-book')).toBeVisible();
+    await expect(cards.nth(0).getByRole('button', { name: /View details/ })).toBeVisible();
+  });
+
   /** The catalog the pages read (live API, same shape as the bundled fallback). */
   async function catalogOf(page: Page) {
     const r = await page.request.get('/api/catalog');
@@ -446,7 +459,7 @@ test.describe('packages', () => {
     const cat = await catalogOf(page);
     const lunch = cat.PL.student.filter((r) => /^Lunch/.test(r.n));
     await page.goto('/packages/student');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Student special offer/i);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Student package/i);
     await expect(page.getByTestId('student-row')).toHaveCount(cat.PL.student.length - lunch.length);
     await expect(page.getByTestId('student-lunch-price')).toHaveText(lunch.map((r) => rs(r.rr)));
     await expect(page.getByTestId('student-group').filter({ hasText: 'Kids Park' })).toContainText(/Top-up card/);

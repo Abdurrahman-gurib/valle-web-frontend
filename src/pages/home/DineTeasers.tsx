@@ -44,7 +44,7 @@ export function DineTeasers() {
         <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('04 · DINE IN THE VALLEY')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
-        <RestoTeaser href={paths.resto('chamouze')} onGo={() => goto.resto('chamouze')} img={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} badge={t('WATERFALL DINING')} name="Le Chamouzé" blurb={t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · menus Rs 700 – 4,250.')} />
+        <RestoTeaser href={paths.resto('chamouze')} onGo={() => goto.resto('chamouze')} img={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} badge={t('WATERFALL DINING')} name="Le Chamouzé" blurb={t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · {price}.', { price: cham.price })} />
         <RestoTeaser href={paths.resto('citronelle')} onGo={() => goto.resto('citronelle')} img={cit.img} alt={t('La Citronelle riverside restaurant')} badge={t('RIVERSIDE · EVENTS TO 400')} name="La Citronelle" blurb={t('Refined Indian cuisine in a rustic lakeside setting. 11:30 – 16:30 · à la carte from Rs 600.')} />
       </div>
     </section>

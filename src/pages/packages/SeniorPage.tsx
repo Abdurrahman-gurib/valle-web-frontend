@@ -9,7 +9,8 @@ import { ClassHero } from './ClassHero';
 import { BookActions, PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, QuoteLink, SectionHeader, cardItems, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
+import { Eyebrow, H2, MENU_DT, QuoteLink, SectionHeader, cardItems, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
+import { requestQuoteFor } from './QuoteForm';
 
 /**
  * The senior citizen class page (/packages/senior), after the official
@@ -21,7 +22,7 @@ import { Eyebrow, H2, QuoteLink, SectionHeader, cardItems, rupees, scrollToId, u
 
 /** Photos that show what each package is; the catalog image stays the fallback. */
 const PHOTOS: Record<string, PagePhoto> = {
-  'pkg:senior:0': { src: '/images/valle-giant-tortoise-park-mauritius.avif', alt: _t('A senior couple walking past a giant tortoise in the park'), position: '30% 45%' },
+  'pkg:senior:0': { src: '/images/valle-waterfall-nature-trail-mauritius.avif', alt: _t('Adult guests on foot at the waterfall along the nature trail'), position: '60% 55%' },
   'pkg:senior:1': { src: '/images/expedition-convoy-meadow.webp', alt: _t('Guests seated in a VALLÉ jeep on a meadow track'), position: '55% 55%' },
 };
 /** Per-package accent, as on the sheet's price tags. */
@@ -81,8 +82,8 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
                 items={cardItems(pk.items, raw.PACKS.senior?.[i]?.items)}
                 single={pk.single}
                 priceTestId="senior-price"
-                rateChip={catalog.PRODUCTS?.find((p) => p.key === key)?.rateOnly === 'rr' ? t('RESIDENT RATE · ID REQUIRED') : undefined}
-                actions={<BookActions productKey={key} name={pk.name} bookTestId="senior-book" blockedText={t('The senior packages are sold at the resident rate. You are browsing at the visitor rate.')} onDetails={() => onDetails(photo ? { ...pk, img: photo.src } : pk)} />}
+                // one price for every guest aged 55 and above, resident or visiting (owner, Nov 2026)
+                actions={<BookActions productKey={key} name={pk.name} bookTestId="senior-book" onDetails={() => onDetails(photo ? { ...pk, img: photo.src } : pk)} />}
               />
             );
           })}
@@ -97,7 +98,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         <dl className="sr-menu">
           {MENU.map(({ course, icon: Icon, dishes }) => (
             <div key={course} className="sr-menu-row">
-              <dt><Icon aria-hidden strokeWidth={1.9} />{menuT[course]}</dt>
+              <dt style={MENU_DT}><Icon aria-hidden strokeWidth={1.9} />{menuT[course]}</dt>
               <dd>{dishes.map((d) => menuT[d]).join(' · ')}</dd>
             </div>
           ))}
@@ -111,7 +112,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         items={[
           { icon: UserCheck, title: t('Who it is for'), text: t('Guests aged 55 and above. Companions aged 12 and over pay the same package price.') },
           { icon: Footprints, title: t('What to bring'), text: t('Comfortable walking shoes and sun protection. The jeep visit is seated.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={onQuote} label={t('Request a group quote')} /> },
+          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={() => { requestQuoteFor(t('Senior citizen')); onQuote(); }} label={t('Request a group quote')} /> },
           validity,
         ]}
       />

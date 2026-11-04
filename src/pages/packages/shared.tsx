@@ -26,6 +26,8 @@ export const DISPLAY: CSSProperties = { ...BLACK_ITALIC, textTransform: 'upperca
 export const PRICE: CSSProperties = { ...DISPLAY, textTransform: 'none' };
 export const PHONE = '+230 660 4477';
 export const TEL = 'tel:+2306604477';
+/** The course / reason labels of the menu lists: 12.5px and a deep violet, so they stay readable (the sheet's 11px was too faint). */
+export const MENU_DT: CSSProperties = { fontSize: 12.5, color: '#5B21B6' };
 export const H2: CSSProperties = { ...DISPLAY, margin: '10px 0 0', fontSize: 'clamp(32px,4vw,52px)', lineHeight: 0.92, color: '#340057' };
 
 export const rupees = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
@@ -57,7 +59,7 @@ export function useValidityItem(): { icon: LucideIcon; title: string; text: stri
 }
 
 export function Eyebrow({ children, color = '#7333FF', className }: { children: ReactNode; color?: string; className?: string }) {
-  return <div className={className} style={{ fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.16em', color }}>{children}</div>;
+  return <div className={className} style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.16em', color }}>{children}</div>;
 }
 
 /** Splits "Visit by jeep (45 min)" into the inclusion and its hint ("45 min"). */
@@ -85,12 +87,16 @@ export function SectionHeader({ id, eyebrow, title, intro, onDark }: { id: strin
   );
 }
 
-/** The sheet's footer line: VAT, non refundable, terms. */
+/**
+ * The sheet's footer line: VAT and terms. Only the expo deals are sold non
+ * refundable (their own note says so); regular bookings keep free cancellation,
+ * so this line no longer claims "all activities sold are non refundable".
+ */
 export function FineLine({ text }: { text?: string }) {
   const t = useT();
   return (
     <div className="sr-fine">
-      <span>{text ?? t('ALL PRICES ARE VAT INCLUSIVE · ALL ACTIVITIES SOLD ARE NON REFUNDABLE · TERMS AND CONDITIONS APPLY')}</span>
+      <span style={{ fontSize: 12 }}>{text ?? t('ALL PRICES ARE VAT INCLUSIVE · TERMS AND CONDITIONS APPLY')}</span>
       <Link to={paths.terms()} style={{ color: '#340057', textDecoration: 'underline', textUnderlineOffset: 3 }}>{t('Read the terms')}</Link>
     </div>
   );

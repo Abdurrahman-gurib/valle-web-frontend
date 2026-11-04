@@ -11,7 +11,8 @@ import type { PriceRow } from '../../types';
 import { ClassHero, CallButton } from './ClassHero';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { DISPLAY, Eyebrow, H2, PRICE, SectionHeader, cover, useValidityItem } from './shared';
+import { DISPLAY, Eyebrow, H2, MENU_DT, PRICE, SectionHeader, cover, useValidityItem } from './shared';
+import { requestQuoteFor } from './QuoteForm';
 
 /**
  * The student class page (/packages/student), after the official 2026
@@ -26,7 +27,8 @@ const groupOf = (n: string): GroupKey =>
   /^Kids Park/i.test(n) ? 'kids' : /^Lunch/i.test(n) ? 'lunch' : /Luge/i.test(n) ? 'luge' : /Zipline|Plunge|Tour|Signature/i.test(n) ? 'zip' : 'visit';
 
 const GROUPS: { key: Exclude<GroupKey, 'lunch'>; title: string; color: string; photo: { src: string; alt: string; position: string } }[] = [
-  { key: 'visit', title: _t('Park visit & bridge'), color: '#33FF74', photo: { src: '/images/nepalesebridge.avif', alt: _t('A family crossing the Nepalese Bridge, a boy in front'), position: 'center 30%' } },
+  // the park has no school-group photo yet: the bridge itself, rather than a family day out
+  { key: 'visit', title: _t('Park visit & bridge'), color: '#33FF74', photo: { src: '/images/bridge-span.webp', alt: _t('The Nepalese Bridge stretching across the forested valley'), position: 'center 50%' } },
   { key: 'luge', title: _t('Mountain Luge Kart'), color: '#FFFC33', photo: { src: '/images/luge-new-3.webp', alt: _t('A child and an adult riding a luge kart down the track'), position: 'center 55%' } },
   { key: 'zip', title: _t('Ziplines'), color: '#FF3358', photo: { src: '/images/zipline-tandem.webp', alt: _t('A child and a guide flying a zipline together'), position: 'center 35%' } },
   { key: 'kids', title: _t('Kids Park'), color: '#A6CE39', photo: { src: '/images/miniquad.avif', alt: _t('A child driving a mini quad at Vallé Kids Park'), position: 'center 45%' } },
@@ -49,7 +51,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
     <div data-testid="student-page">
       <ClassHero
         id="student-title"
-        title={t('Student special offer')}
+        title={t('Student package')}
         chip={t('PRE-PRIMARY · PRIMARY · SECONDARY')}
         promise={t('Every great explorer starts small: school outings with the park visit, ziplines, the luge, the Kids Park and lunch, all at the student rate.')}
         from={entrance ? money(entrance.rr) : undefined}
@@ -84,7 +86,8 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
                     {list.map((r, i) => {
                       const [main, hint] = shown[i];
                       const label = upperFirst(common ? hint : main);
-                      const sub = common ? '' : hint;
+                      // the top-up card is bought once per card, not per student
+                      const sub = /top-up/i.test(r.n) ? t('PER CARD') : common ? '' : hint;
                       return (
                         <li key={r.n} data-testid="student-row">
                           <span>{label}{sub && <span className="pk-row-hint">{sub.toUpperCase()}</span>}</span>
@@ -110,7 +113,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
             {lunch.map((r) => (
               <div key={r.n} className="pk-tag">
                 <span data-testid="student-lunch-price" dir="ltr" style={{ ...PRICE, unicodeBidi: 'isolate' }}>{money(r.rr)}</span>
-                <Eyebrow color="#FFFFFF">{(parts(t(r.n))[1] || t(r.n)).toUpperCase()}</Eyebrow>
+                <Eyebrow color="#340057">{(parts(t(r.n))[1] || t(r.n)).toUpperCase()}</Eyebrow>
               </div>
             ))}
             <Eyebrow color="#33FF74">{t('PER STUDENT · VAT INCLUSIVE')}</Eyebrow>
@@ -121,11 +124,11 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
           <p className="sr-lunch-intro">{t('Two menus, each with a soft drink: one with chicken, one vegetarian.')}</p>
           <dl className="sr-menu">
             <div className="sr-menu-row">
-              <dt><UtensilsCrossed aria-hidden strokeWidth={1.9} />{t('NON-VEG')}</dt>
+              <dt style={MENU_DT}><UtensilsCrossed aria-hidden strokeWidth={1.9} />{t('NON-VEG')}</dt>
               <dd>{t('Chicken fried rice + soft drink, or crispy chicken, fries and cheese pizza + soft drink')}</dd>
             </div>
             <div className="sr-menu-row">
-              <dt><Leaf aria-hidden strokeWidth={1.9} />{t('VEG')}</dt>
+              <dt style={MENU_DT}><Leaf aria-hidden strokeWidth={1.9} />{t('VEG')}</dt>
               <dd>{t('Veg fried rice + soft drink, or fries and cheese pizza + soft drink')}</dd>
             </div>
           </dl>
@@ -153,7 +156,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
         </ol>
         <div className="sr-hero-actions" style={{ marginTop: 24 }}>
           <Link to={paths.groups()} data-testid="book-school" className="sr-btn sr-btn-primary sr-btn-lg"><BtnLabel>{t('Book a school visit online →')}</BtnLabel></Link>
-          <button type="button" className="sr-btn sr-btn-outline sr-btn-lg" onClick={onQuote}>{t('Request a quote')}</button>
+          <button type="button" className="sr-btn sr-btn-outline sr-btn-lg" onClick={() => { requestQuoteFor(t('Student package')); onQuote(); }}>{t('Request a quote')}</button>
         </div>
       </SupportPanel>
 

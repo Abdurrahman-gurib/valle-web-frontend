@@ -28,7 +28,11 @@ export function DetailPricelist({ act, d, kids, catalog }: { act: Activity; d: C
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
   const pl = catalog.PL[act.id] || [];
   if (pl.length === 0) return null;
-  const prices = pl.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
+  // cheapest first at the rate shown (the zipline tours rank differently for residents and visitors);
+  // lists of single/double pairs keep their sheet order so each pair stays together
+  const paired = pl.some((r) => /single|double/i.test(r.n));
+  const rows = paired ? pl : [...pl].sort((x, y) => x[rk] - y[rk]);
+  const prices = rows.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
   return (
     <div data-testid={kids ? 'kids-detail-pricelist' : undefined} style={{ marginTop: 26, background: kids ? KP.purple : '#7333FF', borderRadius: kids ? 24 : 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
       <PanelTop kids={kids} height={10} />

@@ -53,14 +53,14 @@ export function AdmissionBar() {
       <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
       <div style={{ padding: '14px 20px 16px', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color: '#FFFC33' }}>{t('ADMISSION FEE')} · {app.rateTag}</div>
+          <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FFFC33' }}>{t('ADMISSION FEE')} · {app.rateTag}</div>
           <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', color: '#FFFFFF', marginTop: 2 }}>{t('{rate} prices', { rate: app.rateWord })}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
           {rows.map((ar) => (
             <span key={ar.n} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', borderRadius: 10, padding: '8px 12px', fontSize: 13, color: 'rgba(255,255,255,.9)' }}>
               {t(ar.n)}
-              <span style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12, borderRadius: 5, padding: '3px 7px' }}>{ar.p}</span>
+              <span dir="ltr" style={{ background: '#FFFC33', color: '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12, borderRadius: 5, padding: '3px 7px', whiteSpace: 'nowrap', unicodeBidi: 'isolate' }}>{ar.p}</span>
             </span>
           ))}
         </div>

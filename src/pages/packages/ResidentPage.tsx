@@ -8,6 +8,7 @@ import { ProductCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { KidsParkSection } from './KidsParkSection';
 import { QuoteLink, SectionHeader, cardItems, fgOn, photoFor, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
+import { requestQuoteFor } from './QuoteForm';
 
 /**
  * The resident class page (/packages/resident), after the official 2026
@@ -67,7 +68,7 @@ export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => vo
         items={[
           { icon: IdCard, title: t('Who qualifies'), text: t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.') },
           { icon: Shuffle, title: t('Your choice on the day'), text: t('Where a package offers the Nepalese Bridge OR the Bicycle Zipline, pick the one you prefer at the park.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={onQuote} label={t('Request a group quote')} /> },
+          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={() => { requestQuoteFor(t('Resident package')); onQuote(); }} label={t('Request a group quote')} /> },
           validity,
         ]}
       />

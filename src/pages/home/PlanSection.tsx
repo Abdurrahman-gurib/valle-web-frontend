@@ -28,7 +28,7 @@ export function PlanSection() {
         <InfoTile bg="#FFFFE2" tag={t('GETTING HERE')} head={t('Chamouny, South')}>
           B102, Mare Anguilles, Chamouny. <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z" target="_blank" rel="noopener">{t('Open in Google Maps →')}</a>
         </InfoTile>
-        <InfoTile bg="#EBE2FF" tag={t('TALK TO US')} head="+230 660 44 77" caps={false}>
+        <InfoTile bg="#EBE2FF" tag={t('TALK TO US')} head="+230 660 4477" caps={false}>
           <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener">{t('WhatsApp us →')}</a> · sales@vallepark.com
         </InfoTile>
       </div>

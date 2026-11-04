@@ -2,7 +2,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import NotFoundPage from '../NotFound';
 import { abs, breadcrumbs, useSeo } from '../../lib/seo';
 import { paths, useGoto } from '../../lib/nav';
-import { useCatalog } from '../../store/CatalogContext';
+import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
+import { Ruler } from 'lucide-react';
 import { useApp } from '../../store/AppStore';
 import { useCardModel } from '../../lib/card';
 import { useReveal } from '../../hooks/useReveal';
@@ -19,6 +20,7 @@ export default function DetailPage() {
   const t = useT();
   const { id } = useParams();
   const catalog = useCatalog();
+  const raw = useRawCatalog();
   const app = useApp();
   const goto = useGoto();
   const navigate = useNavigate();
@@ -53,6 +55,9 @@ export default function DetailPage() {
   const showReviews = act.id === 'zipline';
   /** Kids Park activities wear the Kids Park identity (logo, lime squiggles, purple cards, sunflower prices). */
   const kids = act.cat === 'kids';
+  /** "Minimum height 1.2 m" and the like, read from the English facts and shown in the page's language. */
+  const rawGtk = raw.ACTS.find((a) => a.id === act.id)?.gtk ?? [];
+  const heightRules = rawGtk.map((g, i) => (/^minimum height/i.test(g.t) ? act.gtk[i]?.t : undefined)).filter((x): x is string => !!x);
 
   /** Always goes to the explore page (never history.back), but restores its last filters. */
   const backExplore = () => {
@@ -99,6 +104,17 @@ export default function DetailPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 'clamp(24px,4vw,48px)', marginTop: 'clamp(24px,4vw,40px)', alignItems: 'start' }}>
         <div>
           <p style={{ fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.6, color: 'rgba(52,0,87,.82)', margin: 0 }}>{d.blurb}</p>
+
+          {heightRules.length > 0 && (
+            <div data-testid="ride-height-rule" role="note" style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 14, background: '#FFFC33', color: '#340057', borderRadius: 18, padding: '14px 18px', boxShadow: `0 0 0 3px ${kids ? KP.purple : '#340057'}` }}>
+              <Ruler aria-hidden strokeWidth={2.2} style={{ width: 30, height: 30, flexShrink: 0 }} />
+              <div>
+                <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.12em' }}>{t('BEFORE YOU RIDE · AGE {age}', { age: act.age })}</div>
+                {heightRules.map((h) => <div key={h} style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(20px,2.2vw,26px)', textTransform: 'uppercase', lineHeight: 1.05, marginTop: 4 }}>{h}</div>)}
+                <div style={{ fontSize: 13.5, marginTop: 4 }}>{t('Riders must meet both the age and the height rule.')}</div>
+              </div>
+            </div>
+          )}
 
           <DetailPricelist act={act} d={d} kids={kids} catalog={catalog} />
 

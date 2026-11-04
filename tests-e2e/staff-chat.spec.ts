@@ -220,7 +220,7 @@ test.describe('staff dashboard', () => {
     await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
     await page.waitForTimeout(1500);
     const res = await page.request.post('/api/quotes', {
-      data: { name: `Quote Guest ${tag}`, company: `Acme ${tag}`, email: `quote-${tag}@example.mu`, phone: '+230 5111 2222', groupSize: '25', preferredDate: '2026-11-12', message: 'Team day with ziplines and lunch.' },
+      data: { name: `Quote Guest ${tag}`, company: `Acme ${tag}`, email: `quote-${tag}@example.mu`, phone: '+230 5111 2222', groupSize: '25', preferredDate: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10), message: 'Team day with ziplines and lunch.' },
     });
     // The quote form is rate-limited per IP; three viewport projects share one.
     test.skip(res.status() === 429, 'quote budget used by a parallel project');

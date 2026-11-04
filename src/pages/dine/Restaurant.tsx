@@ -38,6 +38,10 @@ function Allergens({ codes }: { codes?: string[] }) {
   );
 }
 
+/** Google Maps search for the park: both restaurants are inside it, past the main gate. */
+const DIRECTIONS_URL = 'https://www.google.com/maps/search/?api=1&query=Vall%C3%A9+Advenature+Park%2C+Chamouny%2C+Mauritius';
+const PHONE = '+230 660 4477';
+
 const HEAD = 'flex flex-wrap items-baseline justify-between gap-4 border-0 border-b-2 border-solid border-valle-purple pb-3.5';
 
 export default function RestaurantPage() {
@@ -58,7 +62,7 @@ export default function RestaurantPage() {
     image: r.img,
     jsonLd: [
       breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Dine', path: '/#dine' }, { name: r.name, path: paths.resto(id as string) }]),
-      { '@context': 'https://schema.org', '@type': 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: '+230 660 44 77', address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, hasMenu: abs(r.menuPdf), openingHours: r.hours },
+      { '@context': 'https://schema.org', '@type': 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: PHONE, address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, hasMenu: abs(r.menuPdf), openingHours: r.hours },
     ],
   } : { title: t('Restaurant not found · VALLÉ Advenature™ Park'), description: t('That restaurant is not in the valley.'), noindex: true });
   if (!r) return <NotFoundPage what={t('that restaurant')} />;
@@ -106,13 +110,18 @@ export default function RestaurantPage() {
               <Fact label={t('PRICES')} value={r.price} />
               <Fact label={t('SETTING')} value={r.setting} />
             </div>
+            <div data-testid="resto-address" className="mt-4 font-sans text-[14px] leading-[1.5]">
+              <div className="font-mono text-[12px] tracking-[.14em] opacity-80">{t('ADDRESS')}</div>
+              <div className="mt-1 font-semibold">{t('Inside VALLÉ Advenature™ Park')}<br />B102, Mare Anguilles, {t('Chamouny, Mauritius')}</div>
+              <a href={DIRECTIONS_URL} target="_blank" rel="noopener" data-testid="resto-directions" className="mt-1.5 inline-block font-bold underline underline-offset-[3px]" style={{ color: '#FFFC33' }}>{t('Directions (Google Maps) ↗')}</a>
+            </div>
             <div className="mx-0 my-5 h-px bg-white/20" />
             <TableReservation restaurantId={id as string} restaurantName={r.name} menuGroups={rMenuGroups} />
             <a
               href="tel:+2306604477"
               className="mt-2.5 block rounded-full border-[1.5px] border-solid border-white/50 px-0 py-[13px] text-center text-[14px] font-bold"
               style={{ color: '#FFFFFF' }}
-            >{t('Call')} +230 660 44 77</a>
+            >{t('Call')} <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{PHONE}</span></a>
             <div className="mt-3 text-center font-mono text-[10px] opacity-60">{t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
           </div>
         </div>

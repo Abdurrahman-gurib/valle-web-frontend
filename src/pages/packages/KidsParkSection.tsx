@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Img } from '../../components/Img';
 import { KP, KP_CONFETTI, KP_FONT, KidsParkEntrance, KidsProfile, kpButton } from '../../components/KidsPark';
-import { useCatalog } from '../../store/CatalogContext';
+import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { paths } from '../../lib/nav';
 import { money } from '../../lib/format';
@@ -12,8 +12,14 @@ import { MONO, cover } from './shared';
 export function KidsParkSection() {
   const t = useT();
   const catalog = useCatalog();
+  const raw = useRawCatalog();
   const { rate, rateTag } = useApp();
   const rk = rate ?? 'rr';
+  /** The Kids Park ride a price line is for ("Roller Coaster Zipline" is the Bonding Roller Coaster Zipline). */
+  const rideOf = (n: string) => {
+    const id = raw.ACTS.find((a) => a.cat === 'kids' && a.name.includes(n))?.id; // English names, as the price lines
+    return id ? catalog.ACTS.find((a) => a.id === id) : undefined;
+  };
   return (
     <div id="kids" className="sr-section">
       <KidsParkEntrance as="h2" />
@@ -23,21 +29,29 @@ export function KidsParkSection() {
           <div style={{ padding: '18px 22px 22px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 13, borderRadius: 12, padding: '8px 13px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{t('KIDS PARK PRICELIST · {rate}', { rate: rateTag })}</span>
-              <span style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', color: KP.lime }}>{t('PAY WITH POINTS · 10 POINTS = RS 100')}</span>
+              <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.1em', color: KP.lime }}>{t('PAY WITH POINTS · 10 POINTS = RS 100')}</span>
             </div>
             <div style={{ marginTop: 14 }}>
-              {(catalog.PL.kids || []).map((r) => (
-                <div key={r.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '9px 0', borderBottom: '2px dotted rgba(166,206,57,.55)' }}>
-                  <span style={{ fontSize: 15, fontWeight: 600 }}>{t(r.n)}</span>
-                  <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 15, borderRadius: 999, padding: '6px 12px', whiteSpace: 'nowrap' }}>{t('{price} · 20 pts', { price: money(r[rk]) })}</span>
-                </div>
-              ))}
+              {(catalog.PL.kids || []).map((r) => {
+                const ride = rideOf(r.n);
+                return (
+                  <div key={r.n} data-testid="kids-price-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, padding: '9px 0', borderBottom: '2px dotted rgba(166,206,57,.55)' }}>
+                    <span style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600 }}>
+                      {t(r.n)}
+                      {/* who may ride, from the catalog: the Pirate Ship is 12+, unlike the rest of the park */}
+                      {ride?.age && <span data-testid="kids-price-age" style={{ background: KP.lime, color: '#3A0A46', borderRadius: 999, padding: '3px 9px', fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.04em' }}>{t('AGE {age}', { age: ride.age })}</span>}
+                    </span>
+                    {/* 10 points = Rs 100, so the points follow the price shown at this rate */}
+                    <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 15, borderRadius: 999, padding: '6px 12px', whiteSpace: 'nowrap' }}>{t('{price} · {n} pts', { price: money(r[rk]), n: Math.round(r[rk] / 10) })}</span>
+                  </div>
+                );
+              })}
             </div>
             <div data-testid="kids-topup" style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12, background: KP.lime, color: '#3A0A46', borderRadius: 18, padding: '12px 16px', boxShadow: '0 4px 0 #6E8F1A' }}>
               <span aria-hidden style={{ ...KP_FONT, flexShrink: 0, width: 42, height: 42, borderRadius: 999, background: KP.purple, color: KP.yellow, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>+</span>
               <span style={{ ...KP_FONT, fontSize: 'clamp(16px,1.8vw,19px)', lineHeight: 1.1 }}>{t('Grab the top-up card for just Rs 50')}</span>
             </div>
-            <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.75)', marginTop: 12 }}>{t('OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE')}</div>
+            <div style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '.06em', color: 'rgba(255,255,255,.85)', marginTop: 12 }}>{t('OUTDOOR PLAYGROUND INCLUDED WITH THE PARK VISIT · STUDENT GROUPS RS 100 PER RIDE')}</div>
           </div>
         </div>
         <div style={{ flex: '1 1 280px', minHeight: 300, maxHeight: 480, borderRadius: 26, overflow: 'hidden', position: 'relative', background: KP.lime, boxShadow: `0 0 0 4px ${KP.lime}` }}>

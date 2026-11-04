@@ -117,7 +117,7 @@ export function DealsSection({ deals }: { deals: Product[] }) {
       </div>
       <div data-testid="deals-notes" style={{ marginTop: 14, background: '#F7F3FF', borderRadius: 16, padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ fontSize: 13.5, lineHeight: 1.55, color: '#340057' }}>{t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.')}</div>
-        <div style={{ fontFamily: MONO, fontSize: 10.5, fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.75)' }}>{t('ALL PRICES ARE VAT INCLUSIVE · ALL ACTIVITIES SOLD ARE NON REFUNDABLE · TERMS AND CONDITIONS APPLY')}</div>
+        <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, letterSpacing: '.08em', color: 'rgba(52,0,87,.8)' }}>{t('ALL PRICES ARE VAT INCLUSIVE · EXPO DEALS ARE NON REFUNDABLE · TERMS AND CONDITIONS APPLY')}</div>
       </div>
     </>) : (
       <div data-testid="deals-ended" style={{ marginTop: 26, background: '#F7F3FF', borderRadius: 16, padding: '22px 24px' }}>

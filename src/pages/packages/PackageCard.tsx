@@ -100,7 +100,7 @@ export function PackageCard({
               </div>
               <div className="sr-price-note">
                 {t('VAT inclusive')}
-                {rateChip && <span className="sr-rate">{rateChip}</span>}
+                {rateChip && <span className="sr-rate" style={{ fontSize: 12 }}>{rateChip}</span>}
               </div>
             </div>
           )}
@@ -133,6 +133,8 @@ export function BookActions({ productKey, name, onDetails, bookTestId = 'pkg-boo
       <div className="sr-visitor" data-testid="pkg-rate-note">
         <p style={{ margin: 0 }}>{blockedText ?? (blocked === 'rr' ? t('This package is sold at the resident rate. You are browsing at the visitor rate.') : t('This package is sold at the visitor rate. You are browsing at the resident rate.'))}</p>
         <button type="button" className="sr-btn sr-btn-outline" onClick={() => b.setRate(blocked)}>{blocked === 'rr' ? t('I am a resident: switch to the resident rate') : t('I am visiting: switch to the visitor rate')}</button>
+        {/* what is in the package stays readable at either rate */}
+        {onDetails && <button type="button" className="sr-btn sr-btn-outline" onClick={onDetails} aria-label={t('View details of {name}', { name })}>{t('View details')}</button>}
       </div>
     );
   }
