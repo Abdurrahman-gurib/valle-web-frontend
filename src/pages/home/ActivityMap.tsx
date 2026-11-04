@@ -171,16 +171,18 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                 <div>
                   <div style={{ display: 'inline-block', background: '#FFFC33', color: '#340057', padding: isMobile ? '10px 14px' : '16px 18px', transform: 'rotate(-2deg)', transformOrigin: 'left bottom', boxShadow: '0 8px 18px rgba(0,0,0,.25)' }}>
                     <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: isMobile ? 20 : 26, lineHeight: 0.9, textTransform: 'uppercase' }}>{sheet.title}</div>
-                    <div style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.14em', marginTop: 6 }}>{sheet.subtitle}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', marginTop: 6 }}>{sheet.subtitle}</div>
                   </div>
                   <div style={{ display: 'inline-block', background: '#340057', color: '#FFFC33', fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, padding: '6px 12px', marginTop: 10, textTransform: 'uppercase' }}>{t('Key / Légende')}</div>
                 </div>
-                <MapKey items={sheet.keyItems} compact={isMobile} />
+                {/* phones: the key sits under the title; on wider screens it runs under the map so the
+                    sheet is as tall as the map (no empty violet under it) */}
+                {isMobile && <MapKey items={sheet.keyItems} compact />}
                 {!isMobile && <RouteCard route={route} options={options} overlay={false} />}
                 {!isMobile && (
-                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <Compass size={74} />
-                    <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.06em', color: 'rgba(255,255,255,.7)', lineHeight: 1.5, maxWidth: 190 }}>{t('THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.')}</div>
+                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Compass size={56} />
+                    <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.06em', color: 'rgba(255,255,255,.75)', lineHeight: 1.5, maxWidth: 170 }}>{t('THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.')}</div>
                   </div>
                 )}
               </div>
@@ -215,11 +217,12 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
                     {mz.zoom > 1 && <span style={{ ...GLASS, borderRadius: 999, padding: '0 10px', fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', display: 'flex', alignItems: 'center' }}>{t('{z}× · DRAG TO PAN', { z: mz.zoom.toFixed(2).replace(/\.?0+$/, '') })}</span>}
                   </div>
                 </div>
+                {!isMobile && <div style={{ marginTop: 16 }}><MapKey items={sheet.keyItems} compact /></div>}
               </div>
               {/* Vallé band along the bottom of the sheet */}
               <div style={{ gridColumn: '1 / -1', background: '#FFFC33', color: '#340057', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '10px 22px', clipPath: 'polygon(0 22%, 100% 0, 100% 100%, 0 100%)', marginTop: -6 }}>
                 <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', marginTop: 6 }}>{sheet.foot}</span>
-                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 26, letterSpacing: '-0.02em', marginTop: 6 }}>VALLÉ<span style={{ fontSize: 9, fontFamily: MONO, fontStyle: 'normal', fontWeight: 700, letterSpacing: '.08em', marginLeft: 6, verticalAlign: 'middle' }}>ADVENATURE™ PARK</span></span>
+                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 26, letterSpacing: '-0.02em', marginTop: 6 }}>VALLÉ<span style={{ fontSize: 10, fontFamily: MONO, fontStyle: 'normal', fontWeight: 700, letterSpacing: '.08em', marginLeft: 6, verticalAlign: 'middle' }}>ADVENATURE™ PARK</span></span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>

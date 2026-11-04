@@ -54,7 +54,7 @@ function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; le
           <Img src={sel.img} alt={sel.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div className="min-w-0 flex-1 px-[13px] pt-[11px] pb-3">
-          <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[8.5px] font-bold tracking-[.08em]" style={{ background: chipInk(sel.catColor), color: sel.catFg }}>{sel.catBadge}</span>
+          <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[10px] font-bold tracking-[.08em]" style={{ background: chipInk(sel.catColor), color: sel.catFg }}>{sel.catBadge}</span>
           <div className="mt-1.5 font-display text-[14.5px] leading-none font-extrabold uppercase italic">{sel.name}</div>
           <div className="mt-[5px] line-clamp-2 text-[11.5px] leading-[1.45] text-valle-purple/70">{sel.sub}</div>
           <button

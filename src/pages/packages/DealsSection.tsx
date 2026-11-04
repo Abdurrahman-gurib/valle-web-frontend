@@ -36,8 +36,8 @@ function DealCard({ deal, accent, rate, inDay, onBook, onSwitchRate }: { deal: P
   const visitor = rate === 'nr';
   const accentFg = accent === '#7333FF' ? '#FFFFFF' : '#340057';
   const photo = DEAL_PHOTOS[deal.key];
-  const label = 'font-mono text-[9.5px] tracking-[.12em] text-valle-purple/70';
-  const tag = 'rounded-full px-2.5 py-[5px] font-mono text-[9.5px] font-bold tracking-[.08em]';
+  const label = 'font-mono text-[10px] tracking-[.12em] text-valle-purple/70';
+  const tag = 'rounded-full px-2.5 py-[5px] font-mono text-[10px] font-bold tracking-[.08em]';
   return (
     <ValleCard data-testid="deal-card" data-deal={deal.key}>
       <CardImage src={photo?.src ?? (deal.image || '/images/vip-ultimate-buggy-coloured-earth.avif')} position={photo?.position} alt={t('{name} package', { name: deal.name })} className="aspect-[16/9]">

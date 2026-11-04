@@ -76,7 +76,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', maxWidth: 260 }} title={a.name}>
         <img src={url} alt={a.name} loading="lazy" style={{ display: 'block', maxWidth: '100%', maxHeight: 260, borderRadius: 10, background: 'rgba(0,0,0,.06)' }} />
-        {a.kind === 'gif' && <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '.1em', opacity: 0.7 }}>GIF</span>}
+        {a.kind === 'gif' && <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', opacity: 0.7 }}>GIF</span>}
       </a>
     );
   }
@@ -84,7 +84,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
     return (
       <div style={{ display: 'grid', gap: 4 }}>
         <audio controls preload="metadata" src={url} style={{ width: 240, maxWidth: '100%', height: 36, filter: mine ? 'invert(1) hue-rotate(180deg)' : 'none' }} />
-        <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '.1em', opacity: 0.7 }}>{t('VOICE NOTE')} · {fmtSize(a.size)}</span>
+        <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', opacity: 0.7 }}>{t('VOICE NOTE')} · {fmtSize(a.size)}</span>
       </div>
     );
   }
@@ -103,7 +103,7 @@ export function AttachmentView({ a, url, mine }: { a: ChatAttachmentMeta; url: s
       <span style={{ fontSize: 22 }}>{FILE_ICON[ext] || '📎'}</span>
       <span style={{ minWidth: 0 }}>
         <span style={{ display: 'block', fontWeight: 700, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
-        <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', opacity: 0.75 }}>{ext.toUpperCase() || t('FILE')} · {fmtSize(a.size)} · {t('DOWNLOAD')}</span>
+        <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.08em', opacity: 0.75 }}>{ext.toUpperCase() || t('FILE')} · {fmtSize(a.size)} · {t('DOWNLOAD')}</span>
       </span>
     </a>
   );

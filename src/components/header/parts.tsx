@@ -33,7 +33,7 @@ export function NavBtn({ label, onClick, color, chev, href, snug, btnRef, contro
   onPointerEnter?: (e: PointerEvent) => void; onPointerLeave?: (e: PointerEvent) => void;
 }) {
   const cls = cn(
-    'flex items-center gap-[6px] whitespace-nowrap rounded-[999px] border-0 bg-transparent cursor-pointer no-underline [font-family:inherit] font-semibold py-[10px] hover:bg-[rgba(255,51,88,.14)]',
+    'flex items-center gap-[6px] whitespace-nowrap rounded-[999px] border-0 bg-transparent cursor-pointer no-underline [font-family:inherit] font-semibold py-[10px] [transition:background-color_var(--t-fast)] hover:bg-[var(--nav-hover,#F4EEFF)] aria-expanded:bg-[var(--nav-hover,#F4EEFF)]',
     // longer (non-English) labels stop growing at the size that fits the 1320px row
     snug ? 'text-[length:clamp(13px,1.05vw,14.3px)] px-[clamp(7px,0.95vw,13px)]' : 'text-[length:clamp(13px,1.05vw,15px)] px-[clamp(7px,0.95vw,14px)]',
   );
@@ -51,12 +51,12 @@ export function NavBtn({ label, onClick, color, chev, href, snug, btnRef, contro
   );
 }
 
-export function MegaLink({ name, onClick, hoverColor = '#D6173F', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
+export function MegaLink({ name, onClick, hoverColor = '#5B21B6', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
   return (
     <SpaLink
       href={href}
       onClick={onClick}
-      className="block cursor-pointer text-[15px] font-medium py-[5.5px] [--c:#340057] hover:[--c:var(--hc)] [transition:transform_.15s_ease] hover:[transform:translateX(3px)]"
+      className="block cursor-pointer text-[15px] font-medium py-[5.5px] [--c:#340057] hover:[--c:var(--hc)] [transition:transform_var(--t-fast),color_var(--t-fast)] hover:[transform:translateX(3px)] hover:underline underline-offset-4"
       // the colour reads a class-driven variable, so the hover colour still works inline
       color="var(--c)"
       style={{ '--hc': hoverColor }}

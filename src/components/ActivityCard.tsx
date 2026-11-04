@@ -6,7 +6,6 @@ import { showsDuration } from '../types';
 import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
 import { KP, KP_CONFETTI, KP_FONT } from './KidsPark';
-import { chipInk } from '@/styles/theme';
 
 /**
  * The activity card used across the site (Explore and its categories):
@@ -20,38 +19,46 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
   return (
     <motion.div
       onClick={a.open}
-      whileHover={{ y: -6}}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-white shadow-[0_0_0_1.5px_#EBE2FF] relative after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-300 after:content-[''] hover:after:opacity-100 after:shadow-[0_24px_46px_-18px_rgba(52,0,87,.4)]"
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[20px] bg-white shadow-s2 relative after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-300 after:content-[''] hover:after:opacity-100 after:shadow-[0_0_0_1.5px_#D9C9F0,0_24px_46px_-26px_rgba(52,0,87,.45)]"
       data-testid="activity-card"
     >
-      <div className="relative h-[195px] bg-valle-lilac">
-        <Img eager={eager} src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: chipInk(a.catColor), color: a.catFg }}>{a.catBadge}</span>
-        <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-valle-yellow px-2.5 py-1.5 font-mono text-[11px] font-bold text-valle-purple shadow-[0_6px_16px_-6px_rgba(0,0,0,.5)]">
+      <div className="relative aspect-[16/10] overflow-hidden bg-valle-lilac">
+        <div className="size-full transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+          <Img eager={eager} src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        <span className="absolute end-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-valle-yellow px-2.5 py-1.5 font-mono text-[11px] font-bold text-valle-purple shadow-s1">
           {a.priceLabel}
-          <span className="rounded bg-valle-purple px-[5px] py-0.5 text-[9px] tracking-[.06em] text-valle-yellow">{rateTag}</span>
+          <span className="rounded bg-valle-purple px-[5px] py-0.5 text-[10px] tracking-[.06em] text-valle-yellow">{rateTag}</span>
         </span>
       </div>
-      <div className="flex flex-1 flex-col px-[17px] pt-[15px] pb-[17px] text-valle-purple">
-        <div className="flex items-baseline justify-between gap-2.5">
-          <div className="font-display text-xl font-extrabold uppercase italic">
-            <a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a>
-          </div>
-          <div title={t('Pulse level')} className="text-[10.5px] font-bold tracking-[.13em] whitespace-nowrap" style={{ color: a.pulseColor }}>{a.pulseStr}</div>
+      <div className="flex flex-1 flex-col p-6 max-sm:p-5 text-valle-purple">
+        <div className="flex items-center justify-between gap-2.5">
+          <span className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-link">{a.catBadge}</span>
+          <span title={t('Pulse level')} className="text-[11px] font-bold tracking-[.13em] whitespace-nowrap text-valle-purple">{a.pulseStr}</span>
         </div>
-        <div className="mt-1.5 flex-1 text-[13.5px] leading-normal text-valle-purple/70">{a.blurb}</div>
-        <div className="mt-3 pt-[11px] font-mono text-[11px] text-valle-purple/60" style={{ borderTop: '1px dashed #D9C9F0' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
-        {a.hasAdd && (
-          <motion.button
-            type="button"
-            onClick={a.add}
-            whileTap={{ scale: 0.98 }}
-            className={cn('vbtn vbtn-sm vbtn-block mt-[11px]', a.selOn ? 'vbtn-primary' : 'vbtn-secondary')}
-          >
-            {a.addLabel}
-          </motion.button>
-        )}
+        <h3 className="v-h3 mt-2">
+          <a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a>
+        </h3>
+        <p className="mt-2 mb-0 text-[14px] leading-[1.5] text-valle-purple/75">{a.blurb}</p>
+        <div className="mt-auto pt-4">
+          <div className="pt-3 font-mono text-[11px] text-valle-purple/75" style={{ borderTop: '1.5px dashed #D9C9F0' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</div>
+          {a.hasAdd ? (
+            <motion.button
+              type="button"
+              onClick={a.add}
+              whileTap={{ scale: 0.98 }}
+              className={cn('vbtn vbtn-sm vbtn-block mt-3', a.selOn ? 'vbtn-primary' : 'vbtn-secondary')}
+            >
+              {a.addLabel}
+            </motion.button>
+          ) : (
+            <div className="mt-3 flex min-h-[40px] items-center justify-center rounded-full bg-valle-tint px-4 text-[13.5px] font-semibold text-valle-purple/80">
+              {a.mode === 'kiosk' ? t('Pay at the kiosk on the day') : t('Included with park entry')}
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -63,8 +70,8 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
   return (
     <motion.div
       onClick={a.open}
-      whileHover={{ y: -6, rotate: -0.6 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
       className="relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[26px] text-white"
       style={{ background: KP.purple, boxShadow: `0 0 0 4px ${KP.lime}, 0 18px 36px -20px rgba(58,10,70,.6)` }}
       data-testid="activity-card"
@@ -73,7 +80,7 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
         <Img eager={eager} src={a.img} alt={a.name} placeholder={KP.lime} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] shadow-[0_6px_16px_-6px_rgba(0,0,0,.5)]" style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46' }}>
           {a.priceLabel}
-          <span className="rounded-full px-[6px] py-0.5 font-mono text-[9px] tracking-[.06em]" style={{ background: KP.purple, color: KP.yellow }}>{rateTag}</span>
+          <span className="rounded-full px-[6px] py-0.5 font-mono text-[10px] tracking-[.06em]" style={{ background: KP.purple, color: KP.yellow }}>{rateTag}</span>
         </span>
       </div>
       <div aria-hidden className="h-[14px]" style={KP_CONFETTI} />

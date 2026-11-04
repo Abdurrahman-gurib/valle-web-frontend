@@ -9,13 +9,21 @@
  */
 
 export const color = {
-  /** Primary brand purple: body text and dark surfaces. */
+  /** Primary brand purple (ink): body text and dark surfaces. */
   purple: '#340057',
+  /** Hover state of purple fills. */
+  purpleHover: '#4A0F75',
+  /** Link and selected-state text on light surfaces. */
+  link: '#5B21B6',
+  /** Focus ring only. */
+  focus: '#7333FF',
+  /** Hover/active tint for menu items and light buttons. */
+  hoverTint: '#F4EEFF',
   /** Deepest purple: full-bleed dark sections and the mobile nav. */
   deep: '#260040',
   /** Brand red: accents and information (errors, sale strikes, badges). Never a button fill: CTAs use the .vbtn classes (purple). */
   pink: '#FF3358',
-  pinkDark: '#D91E44',
+  pinkDark: '#D6173F',
   /** valle-red-ink: the brand red dark enough for small text on white (5.2:1). #FF3358 stays for large display type and decoration. */
   pinkInk: '#D6173F',
   /** Nature green: success, "open", confirmations. */
@@ -63,7 +71,19 @@ export const mono = {
   letterSpacing: '.14em',
 } as const;
 
-export const radius = { sm: 8, md: 12, lg: 18, xl: 24, pill: 999 } as const;
+/** Radius scale: 8 / 14 / 20 / 28 / pill. */
+export const radius = { sm: 8, md: 14, lg: 20, xl: 28, pill: 999 } as const;
+
+/** The three shadows of the design system (also --s1/--s2/--s3 in global.css). Nothing else. */
+export const elevation = {
+  s1: '0 1px 2px rgba(23,0,40,.12)',
+  s2: '0 0 0 1.5px #EBE2FF, 0 18px 40px -28px rgba(52,0,87,.35)',
+  s3: '0 30px 60px -30px rgba(38,0,64,.6)',
+} as const;
+
+/** Motion durations/easing (CSS: --t-fast, --t-ui, --t-reveal). */
+export const ease = [0.2, 0.8, 0.2, 1] as const;
+export const motionT = { fast: 0.15, ui: 0.24, reveal: 0.4 } as const;
 
 export const shadow = {
   card: '0 18px 40px -22px rgba(52,0,87,.45)',
@@ -76,7 +96,7 @@ export const shadow = {
 export const statusColor: Record<string, { bg: string; fg: string }> = {
   confirmed: { bg: '#E2FFEB', fg: '#12B54A' },
   arrived: { bg: '#EBE2FF', fg: '#7333FF' },
-  cancelled: { bg: '#FFE2E7', fg: '#D91E44' },
+  cancelled: { bg: '#FFE2E7', fg: '#D6173F' },
   draft: { bg: '#F7F3FF', fg: '#7333FF' },
   published: { bg: '#E2FFEB', fg: '#12B54A' },
   closed: { bg: '#F1F1F4', fg: '#6B6B78' },
@@ -85,7 +105,7 @@ export const statusColor: Record<string, { bg: string; fg: string }> = {
   shortlisted: { bg: '#E2FFEB', fg: '#12B54A' },
   interviewed: { bg: '#E2F4FF', fg: '#1B6FA8' },
   offered: { bg: '#E2FFEB', fg: '#12B54A' },
-  rejected: { bg: '#FFE2E7', fg: '#D91E44' },
+  rejected: { bg: '#FFE2E7', fg: '#D6173F' },
   hired: { bg: '#33FF74', fg: '#340057' },
 };
 

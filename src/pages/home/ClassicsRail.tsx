@@ -8,7 +8,6 @@ import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
 import { useT, isRtl, useLang } from '../../i18n';
-import { chipInk } from '@/styles/theme';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
@@ -20,21 +19,20 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
     <motion.div
       {...bind}
       onClick={() => a.open()}
-      whileHover={{ y: -6}}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
       style={{
         cursor: 'pointer', flex: '0 0 auto', width: 'min(330px,80vw)', background: '#FFFFFF',
-        borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 0 1.5px #EBE2FF', margin: '8px 0 24px',
+        borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--s2)', margin: '8px 0 32px',
         // stretches with its slide (flex parents) so every card in the rail is the same height
         display: 'flex', flexDirection: 'column',
       }}
     >
-      <div style={{ position: 'relative', height: 225, flexShrink: 0, background: '#EBE2FF' }}>
+      <div style={{ position: 'relative', aspectRatio: '16 / 10', flexShrink: 0, background: '#EBE2FF' }}>
         <Img eager src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <span style={{ position: 'absolute', top: 12, left: 12, background: chipInk(a.catColor), color: a.catFg, fontFamily: "'Chivo Mono',monospace", fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '6px 11px', transform: 'rotate(-4deg)' }}>{a.catBadge}</span>
-        <span style={{ position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: '7px 10px', boxShadow: '0 6px 16px -6px rgba(0,0,0,.5)' }}>
+        <span style={{ position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: '7px 10px', boxShadow: 'var(--s1)' }}>
           {a.priceLabel}
-          <span style={{ background: '#340057', color: '#FFFC33', borderRadius: 4, padding: '2px 5px', fontSize: 9, letterSpacing: '.06em' }}>{rateTag}</span>
+          <span style={{ background: '#340057', color: '#FFFC33', borderRadius: 4, padding: '2px 5px', fontSize: 10, letterSpacing: '.06em' }}>{rateTag}</span>
         </span>
         {a.hasAdd && (
           <button
@@ -53,15 +51,16 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
           </button>
         )}
       </div>
-      <div style={{ padding: '16px 18px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 }}>
-          <div style={{ fontFamily: "'Barlow',sans-serif", fontStyle: 'italic', fontWeight: 800, fontSize: 21, textTransform: 'uppercase' }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></div>
-          <div title={t('Pulse level')} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: a.pulseColor, whiteSpace: 'nowrap' }}>{a.pulseStr}</div>
+      <div className="p-6 max-sm:p-5" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.12em', color: '#5B21B6' }}>{a.catBadge}</span>
+          <span title={t('Pulse level')} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: '#340057', whiteSpace: 'nowrap' }}>{a.pulseStr}</span>
         </div>
-        <div style={{ fontSize: 13.5, color: 'rgba(52,0,87,.68)', lineHeight: 1.5, marginTop: 6, minHeight: 40, marginBottom: 12 }}>{a.blurb}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1px dashed #D9C9F0', paddingTop: 12 }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.6)' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#7333FF' }}>{t('Details →')}</span>
+        <h3 className="v-h3" style={{ marginTop: 8 }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></h3>
+        <div style={{ fontSize: 14, color: 'rgba(52,0,87,.75)', lineHeight: 1.5, marginTop: 8, marginBottom: 16 }}>{a.blurb}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', borderTop: '1.5px dashed #D9C9F0', paddingTop: 12 }}>
+          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, color: 'rgba(52,0,87,.75)' }}>{showsDuration(a.id) ? `${a.dur} · ${a.age}` : a.age}</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#5B21B6' }}>{t('Details →')}</span>
         </div>
       </div>
     </motion.div>
@@ -94,7 +93,7 @@ export function ClassicsRail() {
         </div>
       </div>
       <div id="vrail" data-reveal="1" style={{ padding: '0 clamp(16px,calc((100vw - 1320px)/2 + 40px),calc((100vw - 1320px)/2 + 40px))' }}>
-        <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[18px]" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
+        <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[20px]" className="rail-fade" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
           {/* Embla moves each slide with its own transform when it loops, so the slide is a
               plain wrapper: the card's Motion hover transform would otherwise overwrite it. */}
           {items.map((a) => <div key={a.id} className="flex shrink-0"><RailCard a={a} rateTag={rateTag} /></div>)}

@@ -68,7 +68,7 @@ export default function CouponsPanel() {
           <Field id="cp-to" tag="VALID UNTIL (OPTIONAL)"><input id="cp-to" type="date" value={validTo} onChange={(e) => setValidTo(e.target.value)} className={INPUT} /></Field>
           <Field id="cp-max" tag="MAX USES (OPTIONAL)"><input id="cp-max" type="number" min={1} value={maxUses} onChange={(e) => setMaxUses(e.target.value)} placeholder="unlimited" className={INPUT} /></Field>
         </div>
-        {err && <div role="alert" className="text-[#D91E44] font-semibold text-[13px] mt-[8px]">{err}</div>}
+        {err && <div role="alert" className="text-[#D6173F] font-semibold text-[13px] mt-[8px]">{err}</div>}
         <div className="mt-[12px]"><Btn onClick={() => { void create(); }} disabled={busy || code.trim().length < 3} data-testid="coupon-create">Create code</Btn></div>
       </div>
 

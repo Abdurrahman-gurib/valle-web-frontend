@@ -81,7 +81,7 @@ export const Field = forwardRef<HTMLInputElement, {
         aria-describedby={error ? errId : undefined}
         dir={type === 'text' ? undefined : 'ltr'}
         className="transition-colors focus:!border-valle-violet focus:outline-none"
-        style={{ ...inputStyle, ...(error ? { borderColor: '#D91E44' } : null) }}
+        style={{ ...inputStyle, ...(error ? { borderColor: '#D6173F' } : null) }}
       />
       {error && <div id={errId} role="alert" style={{ fontSize: '12.5px', fontWeight: 600, color: '#B8163A', marginTop: '5px' }}>{error}</div>}
     </div>

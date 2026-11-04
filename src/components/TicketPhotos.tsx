@@ -83,7 +83,7 @@ export function TicketPhotos({ tk, token, onChanged }: { tk: TicketView; token: 
             ))}
           </div>
           <div style={{ fontSize: 12, color: 'rgba(52,0,87,.6)', marginTop: 8 }}>{t('Priced for your party; added to your booking and paid with it.')}</div>
-          {err && <div role="alert" style={{ color: '#D91E44', fontSize: 13, marginTop: 6 }}>{err}</div>}
+          {err && <div role="alert" style={{ color: '#D6173F', fontSize: 13, marginTop: 6 }}>{err}</div>}
         </>
       )}
     </section>

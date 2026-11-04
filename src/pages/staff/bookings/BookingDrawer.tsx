@@ -293,7 +293,7 @@ export function BookingDrawer({ refCode, onClose, onPatched }: {
           )}
 
           {!loading && err && !data && (
-            <div className="text-[14px] font-semibold text-[#D91E44]">{err}</div>
+            <div className="text-[14px] font-semibold text-[#D6173F]">{err}</div>
           )}
 
           {stale && (
@@ -352,7 +352,7 @@ export function BookingDrawer({ refCode, onClose, onPatched }: {
               )}
 
               {err && (
-                <div role="alert" className="mt-3.5 text-[13.5px] leading-[1.5] font-semibold text-[#D91E44]">
+                <div role="alert" className="mt-3.5 text-[13.5px] leading-[1.5] font-semibold text-[#D6173F]">
                   {err}
                 </div>
               )}

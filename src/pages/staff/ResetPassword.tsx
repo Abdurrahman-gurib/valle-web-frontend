@@ -68,7 +68,7 @@ export default function StaffResetPassword() {
                   <input id="reset-pw2" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} disabled={busy} minLength={MIN} required className={cn(inputCls, 'mt-[6px]')} />
                 </div>
                 {error && (
-                  <div role="alert" className="mt-3.5 rounded-xl border-[1.5px] border-[rgba(217,30,68,.35)] bg-[rgba(217,30,68,.1)] px-3.5 py-2.5 text-[13.5px] font-semibold text-[#D91E44]">
+                  <div role="alert" className="mt-3.5 rounded-xl border-[1.5px] border-[rgba(217,30,68,.35)] bg-[rgba(217,30,68,.1)] px-3.5 py-2.5 text-[13.5px] font-semibold text-[#D6173F]">
                     {error}
                   </div>
                 )}

@@ -60,6 +60,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         photo={{ src: '/images/senior/senior-guests-trail.webp', alt: t('A smiling senior guest on a forest trail at VALLÉ, her group walking behind her'), width: 1620, height: 1096, position: '28% 30%' }}
         onBook={() => scrollToId('senior')}
         bookTestId="senior-hero-book"
+        logo
       />
 
       {/* THE TWO PACKAGES */}

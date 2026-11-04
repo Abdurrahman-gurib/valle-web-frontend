@@ -120,7 +120,7 @@ export default function PhotoVideoPage() {
                   <span>{t(r.n)}</span>
                   <span style={{ display: 'inline-flex', alignItems: 'center' }}>
                     <b dir="ltr">{money(rk === 'nr' ? r.nr : r.rr)}</b>
-                    <button type="button" data-testid="swing-book" className="pk-mini-btn" aria-pressed={on} onClick={() => bookSwing(r.n)} aria-label={t('Book {name}', { name: t(r.n) })}>{on ? t('In my day') : t('Book')}</button>
+                    <button type="button" data-testid="swing-book" className="vbtn vbtn-secondary vbtn-sm" aria-pressed={on} onClick={() => bookSwing(r.n)} aria-label={t('Book {name}', { name: t(r.n) })}>{on ? t('In my day') : t('Book')}</button>
                   </span>
                 </li>
               );
@@ -158,7 +158,7 @@ function CineRow({ item }: { item: CineItem }) {
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>{/koi/i.test(item.n) ? <Images aria-hidden style={{ width: 18, height: 18, color: '#7333FF', flexShrink: 0 }} /> : <Clapperboard aria-hidden style={{ width: 18, height: 18, color: '#7333FF', flexShrink: 0 }} />}{t(item.n)}</span>
       <span style={{ display: 'inline-flex', alignItems: 'center' }}>
         <b dir="ltr">{money(item.p)}</b>
-        {item.key && <button type="button" data-testid="cine-book" className="pk-mini-btn" aria-pressed={b.inDay} onClick={b.book} aria-label={t('Book {name}', { name: t(item.n) })}>{b.inDay ? t('In my day') : t('Book')}</button>}
+        {item.key && <button type="button" data-testid="cine-book" className="vbtn vbtn-secondary vbtn-sm" aria-pressed={b.inDay} onClick={b.book} aria-label={t('Book {name}', { name: t(item.n) })}>{b.inDay ? t('In my day') : t('Book')}</button>}
       </span>
     </li>
   );

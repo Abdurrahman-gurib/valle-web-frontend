@@ -53,7 +53,7 @@ export function Footer() {
           <div>
             <div className="inline-block origin-bottom-left -rotate-4">
               <div className="font-display text-[32px] font-black tracking-[-0.01em] italic">VALLÉ</div>
-              <div className="mt-[3px] font-mono text-[9px] font-semibold tracking-[.22em] opacity-70">ADVENATURE™ PARK</div>
+              <div className="mt-[3px] font-mono text-[10px] font-semibold tracking-[.22em] opacity-70">ADVENATURE™ PARK</div>
             </div>
             <p className="mx-0 mt-4 mb-0 max-w-[32ch] text-[14px] leading-[1.6] opacity-75">
               {t('Where nature & adventure collide. Formerly La Vallée des Couleurs, Chamouny, Mauritius.')}

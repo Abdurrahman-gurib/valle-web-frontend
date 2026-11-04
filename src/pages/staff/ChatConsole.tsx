@@ -353,7 +353,7 @@ export default function ChatConsole({ active, onChanged }: {
               </div>
 
               {fileErr && (
-                <div role="alert" className="font-mono text-[9.5px] tracking-[.08em] text-[#D91E44] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
+                <div role="alert" className="font-mono text-[9.5px] tracking-[.08em] text-[#D6173F] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
                   {fileErr.toUpperCase()}
                 </div>
               )}

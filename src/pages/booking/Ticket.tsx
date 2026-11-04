@@ -101,7 +101,7 @@ export default function TicketPage() {
             <h2 className="sr-only">{t('Gate pass')}</h2>
             <img src={tk.qrUrl} alt={t('Ticket QR code {ref}', { ref: tk.refCode })} width={240} height={240} data-testid="ticket-qr" className="inline-block h-[240px] w-[240px] rounded-[14px] border-[1.5px] border-valle-lilac bg-white p-2" />
             <div className="mt-3 font-mono text-[28px] font-bold tracking-[.06em] text-valle-red">{tk.refCode}</div>
-            {tk.status === 'cancelled' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#D91E44]">{t('THIS BOOKING WAS CANCELLED')}</div>}
+            {tk.status === 'cancelled' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#D6173F]">{t('THIS BOOKING WAS CANCELLED')}</div>}
             {tk.status === 'arrived' && <div className="mt-2 font-mono text-[11px] font-bold tracking-[.12em] text-[#1E9E4A]">{t('CHECKED IN · ENJOY THE VALLEY')}</div>}
             <div className="mt-[22px] grid grid-cols-2 gap-3 text-left">
               <Fact tag={t('VISIT')} value={fullDateFromIso(tk.visitDate) || tk.visitDate} />
@@ -158,7 +158,7 @@ export default function TicketPage() {
             {paymentId && (
               <div data-testid="payment-outcome" data-status={payWait ? 'pending' : pay?.status ?? 'unknown'} role="status" className={cn(
                 'mt-[14px] rounded-[14px] border-[1.5px] px-[14px] py-3 text-start text-[14px] font-bold',
-                payWait ? 'border-[#D9C9F0] bg-[#F7F3FF] text-valle-purple' : pay?.status === 'paid' ? 'border-valle-green bg-[#E6FFEE] text-[#1E9E4A]' : 'border-valle-red bg-[#FFE2E7] text-[#D91E44]',
+                payWait ? 'border-[#D9C9F0] bg-[#F7F3FF] text-valle-purple' : pay?.status === 'paid' ? 'border-valle-green bg-[#E6FFEE] text-[#1E9E4A]' : 'border-valle-red bg-[#FFE2E7] text-[#D6173F]',
               )}>
                 {payWait
                   ? t('Confirming your payment…')
@@ -168,7 +168,7 @@ export default function TicketPage() {
               </div>
             )}
             {tk.balance !== undefined && (
-              <div data-testid="ticket-balance" className={cn('mt-1.5 flex justify-between gap-3 text-[14px] font-bold', tk.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
+              <div data-testid="ticket-balance" className={cn('mt-1.5 flex justify-between gap-3 text-[14px] font-bold', tk.balance > 0 ? 'text-[#D6173F]' : 'text-[#1E9E4A]')}>
                 <span>{tk.balance > 0 ? t('To pay on arrival') : t('Paid')}</span>
                 <span className="font-mono">{mur(tk.balance > 0 ? tk.balance : (tk.paidAmount ?? tk.total))}</span>
               </div>
@@ -178,7 +178,7 @@ export default function TicketPage() {
                 <button onClick={() => { void payNow(); }} disabled={paying === 'busy'} data-testid="ticket-pay-online" type="button" className="vbtn vbtn-primary">
                   {paying === 'busy' ? t('Opening secure payment…') : t('Pay {amount} online now', { amount: mur(tk.balance ?? 0) })}
                 </button>
-                {paying === 'error' && <div className="mt-1.5 text-[13px] text-[#D91E44]">{t('Online payment is not available right now. You can pay at the gate.')}</div>}
+                {paying === 'error' && <div className="mt-1.5 text-[13px] text-[#D6173F]">{t('Online payment is not available right now. You can pay at the gate.')}</div>}
               </div>
             )}
             <div className="mt-[22px] flex flex-wrap justify-center gap-2.5" data-print-hide="">
@@ -232,7 +232,7 @@ function TicketParkNotice() {
 function Fact({ tag, value }: { tag: string; value: string }) {
   return (
     <div>
-      <div className="font-mono text-[9.5px] font-bold tracking-[.13em] text-valle-violet">{tag}</div>
+      <div className="font-mono text-[10px] font-bold tracking-[.13em] text-valle-violet">{tag}</div>
       <div className="mt-[3px] text-[14px] font-semibold">{value}</div>
     </div>
   );

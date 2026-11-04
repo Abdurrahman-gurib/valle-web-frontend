@@ -142,7 +142,7 @@ export function StatusChip({ status }: { status: BookingStatus | string }) {
   const skin: Record<string, [string, string]> = {
     confirmed: ['#EBE2FF', '#7333FF'],
     arrived: ['#33FF74', '#340057'],
-    cancelled: ['rgba(217,30,68,.12)', '#D91E44'],
+    cancelled: ['rgba(217,30,68,.12)', '#D6173F'],
     postponed: ['#FFF4D6', '#8A6A00'],
   };
   const [bg, fg] = skin[status] || ['#F7F3FF', '#340057'];
@@ -213,7 +213,7 @@ export function Field({ id, tag, children, hint }: {
       <label htmlFor={id} className={cn(labelCls, 'mb-[5px] block')}>{tag}</label>
       {children}
       {hint && (
-        <div className={cn(monoCls, 'mt-[4px] text-[9.5px] tracking-[.08em] text-[#D91E44]')}>
+        <div className={cn(monoCls, 'mt-[4px] text-[9.5px] tracking-[.08em] text-[#D6173F]')}>
           {hint}
         </div>
       )}

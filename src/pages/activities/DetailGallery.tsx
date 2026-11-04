@@ -21,10 +21,10 @@ function GalRestShot({ g }: { g: GalleryShot }) {
         alt={`${g.tag}: ${g.cap}`}
         surface="dark"
         {...hb}
-        style={{ ...coverImg, objectPosition: 'center 32%', transition: 'transform .7s ease', ...(h ? { transform: 'scale(1.05)' } : undefined) }}
+        style={{ ...coverImg, objectPosition: 'center 32%', transition: 'transform .5s cubic-bezier(.2,.8,.2,1)', ...(h ? { transform: 'scale(1.04)' } : undefined) }}
       />
       <div style={captionShade('14px 16px', '.82')}>
-        <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '5px 10px' }}>{g.tag}</span>
+        <span style={{ background: '#33FF74', color: '#340057', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '5px 10px' }}>{g.tag}</span>
         <div style={{ fontSize: 13.5, color: '#FFFFFF', marginTop: 8, lineHeight: 1.35 }}>{g.cap}</div>
       </div>
     </div>

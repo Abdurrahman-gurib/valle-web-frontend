@@ -7,11 +7,11 @@ import type { Row } from './useVisitorChat';
 /** The visitor chat's building blocks: launcher, panel lockup, bubbles and the typing dots. */
 
 /* Class equivalents of the theme tokens (styles/theme.ts): tint #F7F3FF,
-   pinkDark #D91E44, motion.fast/base/spring easings, shadow.pink/panel. */
+   pinkDark #D6173F, motion.fast/base/spring easings, shadow.pink/panel. */
 export const displayText = 'font-display italic font-black tracking-[-0.01em] leading-[0.9] uppercase';
 export const fadeIn = 'animate-[vfade_.2s_ease_both]';
 export const riseIn = 'animate-[vrise_.34s_cubic-bezier(.2,.7,.2,1)_both]';
-export const fieldLabel = 'font-mono text-[9.5px] font-bold tracking-[.14em] text-valle-violet';
+export const fieldLabel = 'font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet';
 export const inputCls = 'w-full border-[1.5px] border-solid border-valle-lilac bg-[#F7F3FF] rounded-[12px] py-[11px] px-[13px] [font-family:inherit] text-[14px] outline-none text-valle-purple [transition:border-color_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]';
 
 function ChatGlyph() {
@@ -31,7 +31,7 @@ export function Lockup() {
   return (
     <div className="flex flex-col leading-none select-none [transform:rotate(-4deg)] shrink-0 origin-left">
       <span className={cn(displayText, 'text-[25px] text-white')}>VALLÉ</span>
-      <span className="font-mono text-[8.5px] font-bold tracking-[.24em] text-valle-green mt-[3px]">
+      <span className="font-mono text-[10px] font-bold tracking-[.24em] text-valle-green mt-[3px]">
         {t('LIVE CHAT')}
       </span>
     </div>
@@ -68,7 +68,6 @@ export function Launcher({ onClick, unread, bottom, right, reduced }: {
           'absolute inset-0 rounded-[999px] bg-valle-purple group-hover:bg-[#4A0F75] flex items-center justify-center',
           'shadow-[0_10px_26px_-8px_rgba(23,0,40,.45)] group-hover:shadow-[0_14px_30px_-8px_rgba(23,0,40,.5)]',
           '[transition:background_.18s_cubic-bezier(.2,.7,.2,1),box-shadow_.18s_cubic-bezier(.2,.7,.2,1)]',
-          !reduced && 'animate-[vfloat_4.2s_ease-in-out_infinite]',
         )}
       >
         {/* Soft ring that widens on hover, so the launcher reads as a live control. */}
@@ -123,7 +122,7 @@ export function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; v
 
   if (m.sender === 'system') {
     return (
-      <div className={cn('font-mono text-[9.5px] tracking-[.1em] uppercase text-[rgba(52,0,87,.45)] text-center my-[10px] mx-0', enter)}>
+      <div className={cn('font-mono text-[10px] tracking-[.1em] uppercase text-[rgba(52,0,87,.45)] text-center my-[10px] mx-0', enter)}>
         {m.body}
       </div>
     );
@@ -133,7 +132,7 @@ export function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; v
     <div className={cn('flex mb-[9px]', mine ? 'justify-end' : 'justify-start', enter)}>
       <div className={cn('max-w-[82%] min-w-0', m.pending ? 'opacity-70' : 'opacity-100')}>
         {!mine && m.staffName && (
-          <div className="font-mono text-[9px] font-bold tracking-[.14em] text-valle-violet mb-[4px] pl-[2px]">
+          <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-violet mb-[4px] pl-[2px]">
             {m.staffName.toUpperCase()}
           </div>
         )}
@@ -149,7 +148,7 @@ export function Bubble({ m, reduced, visitorKey }: { m: Row; reduced: boolean; v
           {m.body && <div>{linkify(m.body, mine ? '#FFFC33' : color.violet)}</div>}
         </div>
         {m.failed && (
-          <div className="font-mono text-[9px] tracking-[.08em] text-[#D91E44] mt-[4px] text-right">
+          <div className="font-mono text-[10px] tracking-[.08em] text-[#D6173F] mt-[4px] text-right">
             {t('NOT SENT · CHECK YOUR CONNECTION')}
           </div>
         )}

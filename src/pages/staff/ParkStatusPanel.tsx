@@ -46,7 +46,7 @@ export default function ParkStatusPanel() {
     <div data-testid="park-status-panel">
       <Panel title="PARK STATUS TODAY · WHAT GUESTS SEE ON THE SITE, THE TICKET AND TONIGHT'S REMINDER" action={status?.updatedAt ? <span className="font-mono text-[10px] text-[rgba(52,0,87,.7)]">last set {new Date(status.updatedAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}{status.updatedBy ? ' by ' + status.updatedBy : ''}</span> : undefined}>
         <div className="p-[14px] grid gap-[12px]">
-          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {err && <div role="alert" className="text-[#D6173F] text-[13.5px]">{err}</div>}
           {saved && <div role="status" data-testid="park-status-saved" className="text-[#1E9E4A] text-[13.5px] font-semibold">{saved}</div>}
           {!status && !err && <Spinner />}
           {status && (

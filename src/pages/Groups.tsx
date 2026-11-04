@@ -216,7 +216,7 @@ export default function GroupsPage() {
       {!done && (
         <>
           <div className="font-mono text-[12px] font-semibold tracking-[.16em] text-valle-violet">{t('SCHOOLS · COMPANIES · CLUBS')}</div>
-          <h1 className="font-display italic font-black text-[clamp(38px,5.8vw,74px)] leading-[0.86] mt-[10px] mb-0 mx-0 uppercase -rotate-3" style={{ transformOrigin: isRtl() ? 'right bottom' : 'left bottom' }}>
+          <h1 className="v-h1 mt-[14px]">
             {t('Bring the')}<br /><span className="text-valle-violet">{t('whole group.')}</span>
           </h1>
           <p className="text-[16px] leading-[1.6] text-[rgba(52,0,87,.75)] max-w-[60ch] mt-[22px] mb-0 mx-0">
@@ -294,7 +294,7 @@ export default function GroupsPage() {
           <textarea value={list} onChange={(e) => setList(e.target.value)} rows={6} placeholder={'Ariane Léger, 12\nKabir Ramdhun, 11'} className={cn(input, 'mt-[10px] font-mono text-[13px]')} data-testid="group-list" />
           <div className="flex gap-[10px] items-center mt-2 flex-wrap">
             <input ref={fileRef} type="file" accept=".csv,text/csv,text/plain" onChange={(e) => { void onFile(e.target.files?.[0] ?? null); }} aria-label={t('Upload a CSV')} className="text-[13px]" />
-            <span className={cn('font-mono text-[10.5px]', participants.length > headcount ? 'text-[#D91E44]' : 'text-[rgba(52,0,87,.7)]')} data-testid="group-list-count">{t('{n} NAMES', { n: participants.length })}</span>
+            <span className={cn('font-mono text-[10.5px]', participants.length > headcount ? 'text-[#D6173F]' : 'text-[rgba(52,0,87,.7)]')} data-testid="group-list-count">{t('{n} NAMES', { n: participants.length })}</span>
           </div>
 
           <div className={stepLabel}>{t('5 · YOUR QUOTE')}</div>

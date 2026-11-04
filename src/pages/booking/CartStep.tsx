@@ -35,7 +35,7 @@ export function BookCard({ m }: { m: CardModel }) {
       </div>
       <div className="px-[11px] pt-[9px] pb-[11px]">
         <div className="text-[12.5px] leading-tight font-bold">{m.name}</div>
-        <div className="mt-1 font-mono text-[9px] font-bold text-valle-purple/60">{m.priceLabel}</div>
+        <div className="mt-1 font-mono text-[10px] font-bold text-valle-purple/60">{m.priceLabel}</div>
       </div>
     </motion.div>
   );
@@ -121,7 +121,7 @@ function SessionPicker({ line, options, picked, onPick }: { line: SelLine; optio
   const t = useT();
   return (
     <div data-testid={`session-picker-${line.act.id}`} style={{ padding: '0 18px 12px', display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-      <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: picked ? 'rgba(52,0,87,.6)' : '#D91E44' }}>{t('START TIME')}</span>
+      <span style={{ fontFamily: MONO, fontSize: '9.5px', fontWeight: 700, letterSpacing: '.1em', color: picked ? 'rgba(52,0,87,.6)' : '#D6173F' }}>{t('START TIME')}</span>
       {options.map(([tm, lv]) => {
         const on = picked === tm;
         const full = lv === 'full';
@@ -140,7 +140,7 @@ function SessionPicker({ line, options, picked, onPick }: { line: SelLine; optio
           >{tm}{full ? ' · ' + t('FULL') : lv === 'busy' ? ' · ' + t('FEW LEFT') : ''}</button>
         );
       })}
-      {options.length === 0 && <span style={{ fontSize: '12.5px', color: '#D91E44', fontWeight: 600 }}>{t('No session for an afternoon arrival: choose the morning.')}</span>}
+      {options.length === 0 && <span style={{ fontSize: '12.5px', color: '#D6173F', fontWeight: 600 }}>{t('No session for an afternoon arrival: choose the morning.')}</span>}
     </div>
   );
 }

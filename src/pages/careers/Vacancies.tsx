@@ -27,7 +27,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
       role="link"
       tabIndex={0}
       aria-label={t('Open role: {title}', { title: v.title })}
-      className="group cursor-pointer bg-white rounded-[18px] pt-5 px-[22px] pb-[18px] flex flex-col gap-[10px] outline-offset-[3px] shadow-[0_0_0_1.5px_#EBE2FF] hover:shadow-[0_26px_50px_-18px_rgba(52,0,87,.45)] hover:[transform:translateY(-6px)] [transition:transform_.28s_cubic-bezier(.2,.7,.2,1),box-shadow_.28s_cubic-bezier(.2,.7,.2,1)]"
+      className="group h-full cursor-pointer bg-white rounded-[20px] p-6 max-sm:p-5 flex flex-col gap-[10px] outline-offset-[3px] shadow-s2 hover:shadow-[0_26px_50px_-18px_rgba(52,0,87,.45)] hover:[transform:translateY(-4px)] [transition:transform_240ms_cubic-bezier(.2,.8,.2,1),box-shadow_240ms_cubic-bezier(.2,.8,.2,1)] motion-reduce:hover:[transform:none]"
     >
       <div className="flex items-center gap-[10px] justify-between">
         <span className={cn(MONO, 'text-valle-violet')}>{(v.department || t('VALLÉ PARK')).toUpperCase()}</span>
@@ -41,14 +41,14 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
       </div>
 
       {v.summary && (
-        <div className="text-[14px] leading-[1.55] text-[rgba(52,0,87,.72)] flex-1">{v.summary}</div>
+        <div className="text-[14px] leading-[1.55] text-[rgba(52,0,87,.75)]">{v.summary}</div>
       )}
 
-      <div className="mt-1 pt-3 flex items-center gap-3 flex-wrap justify-between" style={{ borderTop: '1px dashed #D9C9F0' }}>
+      <div className="mt-auto pt-4 flex items-center gap-3 flex-wrap justify-between" style={{ borderTop: '1.5px dashed #D9C9F0' }}>
         <span className="font-mono text-[10.5px] font-normal tracking-[.08em] text-[rgba(52,0,87,.7)]">
           {v.salaryRange ? v.salaryRange : closesLabel(v.closesOn)}
         </span>
-        <span className={cn(MONO, 'text-valle-purple group-hover:text-valle-red-ink')}>{t('VIEW ROLE →')}</span>
+        <span className={cn(MONO, 'text-valle-purple group-hover:text-valle-link group-hover:underline underline-offset-4')}>{t('VIEW ROLE →')}</span>
       </div>
     </div>
   );
@@ -189,7 +189,7 @@ export default function VacanciesPage() {
         {state === 'ready' && items.length > 0 && (
           <div
             data-reveal-kids
-            className="grid [grid-template-columns:repeat(auto-fill,minmax(290px,1fr))] gap-4"
+            className="grid [grid-template-columns:repeat(auto-fill,minmax(290px,1fr))] gap-5 items-stretch"
             // With only one or two roles open, cap the track so the cards read as a
             // deliberate group instead of drifting in a four-column void.
             style={{ maxWidth: items.length < 4 ? items.length * 430 : undefined }}

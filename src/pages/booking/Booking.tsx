@@ -386,7 +386,7 @@ export default function BookingPage() {
                     style={{ ...inputStyle, flex: '1 1 180px', minWidth: 0, fontFamily: MONO, textTransform: 'uppercase', borderColor: coupon.offer ? '#33FF74' : '#EBE2FF' }}
                   />
                   <button type="button" onClick={() => { void coupon.tryCoupon(); }} className="vbtn vbtn-secondary">{t('Apply')}</button>
-                  {coupon.couponMsg && <span data-testid="coupon-msg" style={{ fontSize: '13px', fontWeight: 600, color: coupon.offer ? '#1E9E4A' : '#D91E44', flex: '1 1 100%' }}>{coupon.couponMsg}{coupon.offer?.note ? ' · ' + coupon.offer.note : ''}</span>}
+                  {coupon.couponMsg && <span data-testid="coupon-msg" style={{ fontSize: '13px', fontWeight: 600, color: coupon.offer ? '#1E9E4A' : '#D6173F', flex: '1 1 100%' }}>{coupon.couponMsg}{coupon.offer?.note ? ' · ' + coupon.offer.note : ''}</span>}
                 </div>
               </div>
 
@@ -423,7 +423,7 @@ export default function BookingPage() {
                   <button type="button" onClick={() => { void draft.saveForLater(); }} disabled={draft.draftState === 'busy'} data-testid="draft-save" className="vbtn vbtn-secondary vbtn-sm" style={{ whiteSpace: 'normal' }}>
                     {draft.draftState === 'busy' ? t('Saving…') : t('E-mail me a link to come back to this day')}
                   </button>
-                  {draft.draftState === 'error' && <span style={{ color: '#D91E44', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
+                  {draft.draftState === 'error' && <span style={{ color: '#D6173F', fontWeight: 600 }}>{t('We could not save it. Please try again.')}</span>}
                 </>}
           </div>
           {/* The notices ride with the sticky Confirm bar, so they are seen where the button was pressed. */}

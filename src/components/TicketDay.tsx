@@ -77,7 +77,7 @@ export function TicketDay({ tk }: { tk: TicketView }) {
           <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color }}>{tag}</span>
           {s.time && <span style={{ fontFamily: MONO, fontWeight: 800 }}>{s.time}{s.endTime ? `–${s.endTime}` : ''}</span>}
           <span style={{ fontWeight: 700 }}>{s.label}</span>
-          {paused && <span style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', background: '#D6173F', color: '#FFFFFF', padding: '2px 7px', borderRadius: 999 }}>{t('PAUSED')}</span>}
+          {paused && <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#D6173F', color: '#FFFFFF', padding: '2px 7px', borderRadius: 999 }}>{t('PAUSED')}</span>}
         </div>
         {i?.meetingPoint && <div style={{ fontSize: 13 }}>📍 {t('Meet at: {place}', { place: i.meetingPoint })}</div>}
         {isToday && i && i.waitMin !== null && <div style={{ fontSize: 13 }}>⏱ {t(waitLabel(i.waitMin), { n: i.waitMin })}</div>}

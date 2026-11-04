@@ -108,7 +108,7 @@ export function Bubble({ m, reduced }: { m: Row; reduced: boolean }) {
         </div>
         <div className={cn(
           'font-mono text-[9px] tracking-[.08em] mt-[3px]',
-          m.failed ? 'text-[#D91E44]' : 'text-[rgba(52,0,87,.45)]', mine ? 'text-right' : 'text-left',
+          m.failed ? 'text-[#D6173F]' : 'text-[rgba(52,0,87,.45)]', mine ? 'text-right' : 'text-left',
         )}>
           {m.failed ? 'NOT SENT · RECONNECTING' : (mine ? ((m.staffName ? m.staffName + ' · ' : '') + (m.pending ? 'SENDING…' : clockTime(m.createdAt))) : clockTime(m.createdAt))}
         </div>

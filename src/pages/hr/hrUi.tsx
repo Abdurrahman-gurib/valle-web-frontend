@@ -32,7 +32,7 @@ export const fieldCls =
   'transition-[border-color] duration-[180ms] ease-[cubic-bezier(.2,.7,.2,1)]';
 
 const fieldBorder = (error?: string, focused?: boolean) =>
-  error ? 'border-[#D91E44]' : focused ? 'border-valle-violet' : 'border-valle-lilac';
+  error ? 'border-[#D6173F]' : focused ? 'border-valle-violet' : 'border-valle-lilac';
 
 /** Status chip for vacancies and applications, coloured from the shared token map. */
 export function Pill({ value, title }: { value: string; title?: string }) {
@@ -59,7 +59,7 @@ export function MetaPill({ children }: { children: ReactNode }) {
 
 export function FieldError({ id, text }: { id: string; text: string }) {
   return (
-    <div id={id} role="alert" className="text-[12.5px] font-semibold text-[#D91E44] mt-[5px]">
+    <div id={id} role="alert" className="text-[12.5px] font-semibold text-[#D6173F] mt-[5px]">
       {text}
     </div>
   );
@@ -390,7 +390,7 @@ export function Notice({ tone = 'error', children }: { tone?: 'error' | 'ok'; ch
       className={cn(
         'border-[1.5px] border-solid rounded-[12px] py-[10px] px-[14px] text-[13.5px] font-semibold animate-[vfade_.2s_ease_both]',
         err
-          ? 'bg-[rgba(217,30,68,.1)] border-[rgba(217,30,68,.35)] text-[#D91E44]'
+          ? 'bg-[rgba(217,30,68,.1)] border-[rgba(217,30,68,.35)] text-[#D6173F]'
           : 'bg-[#E2FFEB] border-[#12B54A] text-[#12B54A]',
       )}
     >

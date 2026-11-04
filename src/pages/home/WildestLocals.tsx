@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { BtnLabel } from '@/components/ui/valle';
 import { paths, useGoto } from '../../lib/nav';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
@@ -29,12 +30,11 @@ export function WildestLocals() {
         <motion.a
           href={paths.detail('animals')}
           onClick={(e) => { e.preventDefault(); goto.detail('animals'); }}
-          whileHover={{ y: -2}}
           whileTap={{ scale: 0.97 }}
-          className="mt-6 inline-block cursor-pointer rounded-full bg-valle-green px-[30px] py-[15px] text-[15px] font-bold text-valle-purple no-underline"
-          style={{ textDecoration: 'none' }}
+          className="vbtn vbtn-on-dark mt-6"
+          style={{ color: '#340057' }}
         >
-          {t('Meet the animals →')}
+          <BtnLabel>{t('Meet the animals →')}</BtnLabel>
         </motion.a>
       </div>
     </section>

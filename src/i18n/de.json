@@ -1,5 +1,4 @@
 {
-  "‹  Previous": "‹  Zurück",
   "\"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday.\"": "\"Bin ich gerade mit der Zipline in einen Wasserfall hinein- und wieder hinausgeflogen? JA, BIN ICH! Die Guides waren fantastisch, ein toller Geburtstag.\"",
   "\"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again.\"": "\"Traumhafte Ausblicke und Ziplines, die das Adrenalin steigen lassen! Professionelles, herzliches Team. Unbedingt machen – und wiederkommen.\"",
   "\"Never say adventure is impossible. Make it unforgettable!\"": "„Sag nie, Abenteuer sei unmöglich. Mach es unvergesslich!“",
@@ -852,7 +851,6 @@
   "Newly planted terraces and a cascade on the hillside": "Frisch bepflanzte Terrassen und eine Kaskade am Hang",
   "Next photo": "Nächstes Foto",
   "Next photos": "Nächste Fotos",
-  "Next photos  ›": "Nächste Fotos  ›",
   "Ninety seconds of air on the longest cable in the valley.": "Neunzig Sekunden Luft am längsten Seil im Tal.",
   "No engine, no pedals. You control the speed the whole way down a winding mountain track, past the caution chevrons and into the last banked curve. One ride is never enough.": "Kein Motor, keine Pedale. Sie bestimmen das Tempo die ganze kurvige Bergstrecke hinab, vorbei an den Warnschildern und hinein in die letzte Steilkurve. Eine Fahrt ist nie genug.",
   "No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.": "Noch keine Erlebnisse. Tippen Sie oben auf die Karten, um sie hinzuzufügen. Alle Naturpfade sind bereits im Eintritt enthalten.",
@@ -1952,7 +1950,6 @@
   "Team building days for companies, from Rs 2,850 per person, with a quote within one working day.": "Teambuilding-Tage für Firmen ab Rs 2,850 pro Person, Angebot innerhalb eines Werktags.",
   "The park photographer and the cinematic shoot: edited photos and film of your day, delivered on your ticket page.": "Der Parkfotograf und der Cinematic-Dreh: bearbeitete Fotos und Film Ihres Tages, auf Ihrer Ticketseite.",
   "Package classes": "Paketklassen",
-  "SEE THE PRICES →": "PREISE ANSEHEN →",
   "{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park": "{group} · Pakete & Preisliste 2026 · VALLÉ Advenature™ Park",
   "Cinematic shoot at Vallé: the swing by the waterfall": "Cinematic-Shooting in Vallé: die Schaukel am Wasserfall",
   "Plan it with us": "Planen Sie es mit uns",
@@ -2601,5 +2598,7 @@
   "See the route": "Strecke ansehen",
   "TEACHERS AND ACCOMPANYING ADULTS": "LEHRKRÄFTE UND BEGLEITPERSONEN",
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "Der Schüler-Eintritt ({price} pro Schüler) wird einmal für jeden Schüler ab 6 Jahren berechnet; Vorschulkinder haben freien Eintritt. Lehrkräfte und Begleitpersonen zahlen den normalen Erwachseneneintritt ({adult}). Kreuzen Sie an, was die Schüler machen, und geben Sie jeweils die Anzahl an.",
-  "UNDER 6 (FREE)": "UNTER 6 (FREI)"
+  "UNDER 6 (FREE)": "UNTER 6 (FREI)",
+  "Pay at the kiosk on the day": "Bezahlung am Kiosk vor Ort",
+  "See the prices": "Preise ansehen"
 }

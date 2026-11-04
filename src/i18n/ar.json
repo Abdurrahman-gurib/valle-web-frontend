@@ -1,5 +1,4 @@
 {
-  "‹  Previous": "›  السابق",
   "\"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday.\"": "«هل عبرتُ للتو شلالاً على الزيب لاين ذهاباً وإياباً؟ نعم فعلتها! كان المدربون رائعين، وكانت طريقة مذهلة للاحتفال بعيد ميلادي.»",
   "\"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again.\"": "«إطلالات خلابة وخطوط زيب لاين ترفع الأدرينالين! طاقم محترف ومرحِّب. تجربة تستحق التكرار مرة بعد مرة.»",
   "\"Never say adventure is impossible. Make it unforgettable!\"": "«لا تقل أبدًا إن المغامرة مستحيلة. اجعلها لا تُنسى!»",
@@ -852,7 +851,6 @@
   "Newly planted terraces and a cascade on the hillside": "مدرّجات مزروعة حديثًا وشلال صغير على سفح التل",
   "Next photo": "الصورة التالية",
   "Next photos": "الصور التالية",
-  "Next photos  ›": "الصور التالية  ‹",
   "Ninety seconds of air on the longest cable in the valley.": "تسعون ثانية في الهواء على أطول كابل في الوادي.",
   "No engine, no pedals. You control the speed the whole way down a winding mountain track, past the caution chevrons and into the last banked curve. One ride is never enough.": "بلا محرك وبلا دواسات. أنت من يتحكم في السرعة طوال النزول على مسار جبلي متعرّج، مرورًا بعلامات التحذير وحتى المنعطف المائل الأخير. نزلة واحدة لا تكفي أبدًا.",
   "No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.": "لا توجد تجارب بعد. اضغط على البطاقات أعلاه لإضافتها. جميع المسارات الطبيعية مشمولة أصلًا في تذكرة دخولك.",
@@ -1952,7 +1950,6 @@
   "Team building days for companies, from Rs 2,850 per person, with a quote within one working day.": "أيام بناء الفريق للشركات من 2,850 روبية للفرد، مع عرض سعر خلال يوم عمل واحد.",
   "The park photographer and the cinematic shoot: edited photos and film of your day, delivered on your ticket page.": "مصور الحديقة والتصوير السينمائي: صور معدّلة وفيلم ليومك، يُسلَّم على صفحة تذكرتك.",
   "Package classes": "فئات الباقات",
-  "SEE THE PRICES →": "عرض الأسعار ←",
   "{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park": "{group} · الباقات وقائمة أسعار 2026 · VALLÉ Advenature™ Park",
   "Cinematic shoot at Vallé: the swing by the waterfall": "تصوير سينمائي في فالي: الأرجوحة عند الشلال",
   "Plan it with us": "خطّط معنا",
@@ -2601,5 +2598,7 @@
   "See the route": "عرض المسار",
   "TEACHERS AND ACCOMPANYING ADULTS": "المعلمون والبالغون المرافقون",
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "تُضاف رسوم دخول الطلاب ({price} لكل طالب) مرة واحدة لكل طالب بعمر 6 سنوات فأكثر؛ ويدخل طلاب ما قبل الابتدائي مجانًا. يدفع المعلمون والبالغون المرافقون رسوم دخول البالغين العادية ({adult}). اختر ما سيقوم به الطلاب وحدد عدد المشاركين في كل نشاط.",
-  "UNDER 6 (FREE)": "دون 6 سنوات (مجانًا)"
+  "UNDER 6 (FREE)": "دون 6 سنوات (مجانًا)",
+  "Pay at the kiosk on the day": "الدفع عند الكشك في يوم الزيارة",
+  "See the prices": "عرض الأسعار"
 }

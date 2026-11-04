@@ -32,11 +32,11 @@ export function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left:
           <Img src={p.img} alt={p.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, padding: '12px 14px 13px' }}>
-          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
+          <span style={{ background: p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
           <div style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', marginTop: 7, lineHeight: 1 }}>{p.name}</div>
           <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.78)', lineHeight: 1.45, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.sub}</div>
           {p.facts.length > 0 && (
-            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: '3px 10px', fontFamily: MONO, fontSize: 9.5 }}>
+            <div style={{ marginTop: 7, display: 'flex', flexWrap: 'wrap', gap: '3px 10px', fontFamily: MONO, fontSize: 10 }}>
               {p.facts.map((f) => (
                 <span key={f.k}><span style={{ opacity: 0.6 }}>{f.k} </span><b style={{ color: '#FFFC33' }}>{f.v}</b></span>
               ))}
@@ -83,7 +83,7 @@ export function RouteCard({ route, options, overlay }: { route: MapRoute; option
       <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
         <Img src={route.img} alt={t(route.name)} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
-        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color === '#FF3358' ? '#D6173F' : route.color, color: route.fg, fontFamily: MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
+        <span style={{ position: 'absolute', left: 12, top: 12, background: route.color === '#FF3358' ? '#D6173F' : route.color, color: route.fg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
         <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>
       </div>
       <div style={{ padding: '12px 15px 15px' }}>
@@ -96,7 +96,7 @@ export function RouteCard({ route, options, overlay }: { route: MapRoute; option
             <div key={f.k} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, textAlign: 'right' }}><span style={{ opacity: 0.65, textAlign: 'left', flexShrink: 0 }}>{t(f.k)}</span><b>{t(f.v)}</b></div>
           ))}
           {route.facts.filter((f) => f.k === 'NOTE').map((f) => (
-            <div key={f.k} style={{ fontSize: 9.5, opacity: 0.7, lineHeight: 1.4 }}>{t(f.v)}</div>
+            <div key={f.k} style={{ fontSize: 10, opacity: 0.7, lineHeight: 1.4 }}>{t(f.v)}</div>
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
@@ -142,7 +142,7 @@ export function RouteTab({ r, on, onClick }: { r: MapRoute; on: boolean; onClick
       <span style={{ width: 12, height: 12, borderRadius: 999, background: r.color, border: '2px solid ' + (on ? r.fg : '#FFFFFF'), flexShrink: 0, boxShadow: on ? 'none' : `0 0 10px ${r.color}` }} />
       <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
         <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13.5, textTransform: 'uppercase' }}>{t(r.name)}</span>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{t(r.tag)}</span>
+        <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.08em', opacity: 0.8, marginTop: 3 }}>{t(r.tag)}</span>
       </span>
     </button>
   );

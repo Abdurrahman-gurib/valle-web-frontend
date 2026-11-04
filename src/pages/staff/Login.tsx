@@ -167,7 +167,7 @@ export default function StaffLogin() {
             {error && (
               <div
                 role="alert"
-                className="mt-[14px] rounded-[12px] border-[1.5px] border-[rgba(217,30,68,.35)] bg-[rgba(217,30,68,.1)] px-[14px] py-[10px] text-[13.5px] font-semibold text-[#D91E44] [animation:vfade_.2s_ease_both]"
+                className="mt-[14px] rounded-[12px] border-[1.5px] border-[rgba(217,30,68,.35)] bg-[rgba(217,30,68,.1)] px-[14px] py-[10px] text-[13.5px] font-semibold text-[#D6173F] [animation:vfade_.2s_ease_both]"
               >
                 {error}
               </div>

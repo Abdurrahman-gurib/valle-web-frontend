@@ -21,8 +21,8 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
     <motion.a
       href={paths.explore(w.cat)}
       onClick={(e) => { e.preventDefault(); goto.explore(w.cat); }}
-      whileHover={{ y: -6, rotate: -1}}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
       className="relative block h-[400px] cursor-pointer overflow-hidden rounded-[18px] text-inherit"
       style={{ background: w.bg, textDecoration: 'none' }}
     >

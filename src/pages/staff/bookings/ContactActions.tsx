@@ -64,7 +64,7 @@ export function ContactActions({ data }: { data: BookingDetailFull }) {
   const btn = cn(a, 'text-valle-purple no-underline');
   // global a{color} rules beat utilities, so link colour stays inline
   const link: CSSProperties = { color: '#340057', textDecoration: 'none' };
-  const waiversDone = waivers ? (waivers.signed >= waivers.required ? '#1E9E4A' : '#D91E44') : undefined;
+  const waiversDone = waivers ? (waivers.signed >= waivers.required ? '#1E9E4A' : '#D6173F') : undefined;
   return (
     <div className="mb-4 flex flex-wrap gap-1.5" data-testid="contact-actions">
       {wa && <a href={`https://wa.me/${wa}?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" className={a} style={link}>WhatsApp</a>}

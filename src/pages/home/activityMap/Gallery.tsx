@@ -23,9 +23,9 @@ function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big
     >
       <Img src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
-      <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 9 }}><Pulse n={s.thrill} size={9} /></span>
+      <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 10 }}><Pulse n={s.thrill} size={9} /></span>
       <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
-        <span style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{t(s.tag)}</span>
+        <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.1em', color: '#FFFC33', fontWeight: 700, display: 'block' }}>{t(s.tag)}</span>
         {big && <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 16, color: '#FFFFFF', textTransform: 'uppercase', lineHeight: 1.05, display: 'block', marginTop: 4 }}>{t(s.cap)}</span>}
       </span>
     </button>
@@ -52,10 +52,6 @@ export function PhotoWall({ gallery, onOpen }: { gallery: MapGallery; onOpen: (i
         </div>
         {wallPos !== 'start' && <WallArrow side="left" onClick={() => scrollWall(-1)} />}
         {wallPos !== 'end' && <WallArrow side="right" onClick={() => scrollWall(1)} />}
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 2 }}>
-        <GlassBtn small label={t('‹  Previous')} onClick={() => scrollWall(-1)} />
-        <GlassBtn small label={t('Next photos  ›')} onClick={() => scrollWall(1)} />
       </div>
     </div>
   );
@@ -98,7 +94,7 @@ export function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: {
             <div style={{ flex: '1 1 300px', maxWidth: 460 }}>
               <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,.82)', margin: 0 }}>{t(g.copy)}</p>
               <div style={{ ...GLASS, display: 'inline-flex', alignItems: 'center', gap: 12, borderRadius: 999, padding: '8px 16px 8px 14px', marginTop: 14 }}>
-                <span style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.14em', opacity: 0.8 }}>{t('THRILL WITH VALLÉ')}</span>
+                <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.14em', opacity: 0.8 }}>{t('THRILL WITH VALLÉ')}</span>
                 <Pulse n={s.thrill} />
                 <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 800, fontSize: 13, color: '#FFFC33', textTransform: 'uppercase' }}>{t(PULSE_NAMES[s.thrill])}</span>
               </div>

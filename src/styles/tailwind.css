@@ -23,6 +23,12 @@
   --color-valle-green: #33FF74;
   --color-valle-yellow: #FFFC33;
   --color-valle-lilac: #EBE2FF;
+  --color-valle-tint: #F7F3FF;
+  --color-valle-hover: #4A0F75;
+  --color-valle-link: #5B21B6;
+  --shadow-s1: 0 1px 2px rgba(23, 0, 40, .12);
+  --shadow-s2: 0 0 0 1.5px #EBE2FF, 0 18px 40px -28px rgba(52, 0, 87, .35);
+  --shadow-s3: 0 30px 60px -30px rgba(38, 0, 64, .6);
   --font-display: 'Barlow', sans-serif;
   --font-mono: 'Chivo Mono', monospace;
   --font-sans: 'Work Sans', sans-serif;
@@ -39,9 +45,9 @@
   --color-accent-foreground: #340057;
   --color-border: #EBE2FF;
   --color-ring: #7333FF;
-  --radius-lg: 18px;
+  --radius-lg: 20px;
   --radius-md: 14px;
-  --radius-sm: 10px;
+  --radius-sm: 8px;
 }
 
 /*

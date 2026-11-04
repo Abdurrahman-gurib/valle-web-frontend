@@ -32,7 +32,7 @@ function PhoneMock({ label }: { label: string }) {
           {[0, 1, 2, 3, 4].map((k) => tile(muted, k))}
           <span className="relative">
             <img src="/icon-maskable-192.png" alt="" width={96} height={96} loading="lazy" className="block aspect-square h-auto w-full rounded-[13px] shadow-[0_0_0_2px_#33FF74,0_10px_22px_-6px_rgba(51,255,116,.6)]" />
-            <span className="absolute top-full left-1/2 mt-1 -translate-x-1/2 font-mono text-[8.5px] font-bold tracking-[.08em] text-white">VALLÉ</span>
+            <span className="absolute top-full left-1/2 mt-1 -translate-x-1/2 font-mono text-[10px] font-bold tracking-[.08em] text-white">VALLÉ</span>
           </span>
           {[6, 7].map((k) => tile(muted, k))}
         </div>

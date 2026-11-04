@@ -3,12 +3,13 @@ import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
 import { Accordion } from '@/components/ui/accordion';
 
-function InfoTile({ bg, tag, head, children, caps = true }: { bg: string; tag: string; head: string; children: ReactNode; caps?: boolean }) {
+/** One tile of the visit facts: lilac tint with a 3px brand rule on top (one accent per tile). */
+function InfoTile({ rule, tag, head, children, caps = true }: { rule: string; tag: string; head: string; children: ReactNode; caps?: boolean }) {
   return (
-    <div className="rounded-[18px] px-6 py-[22px]" style={{ background: bg }}>
-      <div className="font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70">{tag}</div>
-      <div className={'mt-2 font-display text-[27px] font-black italic ' + (caps ? 'uppercase' : '')}>{head}</div>
-      <div className="mt-1.5 text-sm leading-normal text-valle-purple/70">{children}</div>
+    <div className="rounded-[20px] bg-valle-tint px-6 py-[22px]" style={{ borderTop: `3px solid ${rule}` }}>
+      <div className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/75">{tag}</div>
+      <div className={'mt-2 font-display text-[26px] leading-none font-black italic ' + (caps ? 'uppercase' : '')}>{head}</div>
+      <div className="mt-2 text-sm leading-[1.5] text-valle-purple/80">{children}</div>
     </div>
   );
 }
@@ -23,18 +24,18 @@ export function PlanSection() {
         <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('06 · GOOD TO KNOW')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-        <InfoTile bg="#E2FFEB" tag={t('HOURS')} head="09:00–17:30">{t('Open every day of the week. Last activity departures around 16:00.')}</InfoTile>
-        <InfoTile bg="#FFE2E7" tag={t('TICKETS')} head={t('Pay on arrival')}>{t('Book free online, no cancellation fee. Nature trails included with park entry.')}</InfoTile>
-        <InfoTile bg="#FFFFE2" tag={t('GETTING HERE')} head={t('Chamouny, South')}>
+        <InfoTile rule="#340057" tag={t('HOURS')} head="09:00–17:30">{t('Open every day of the week. Last activity departures around 16:00.')}</InfoTile>
+        <InfoTile rule="#340057" tag={t('TICKETS')} head={t('Pay on arrival')}>{t('Book free online, no cancellation fee. Nature trails included with park entry.')}</InfoTile>
+        <InfoTile rule="#340057" tag={t('GETTING HERE')} head={t('Chamouny, South')}>
           B102, Mare Anguilles, Chamouny. <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z" target="_blank" rel="noopener">{t('Open in Google Maps →')}</a>
         </InfoTile>
-        <InfoTile bg="#EBE2FF" tag={t('TALK TO US')} head="+230 660 4477" caps={false}>
+        <InfoTile rule="#340057" tag={t('TALK TO US')} head="+230 660 4477" caps={false}>
           <a href="https://api.whatsapp.com/send/?phone=23052928841" target="_blank" rel="noopener">{t('WhatsApp us →')}</a> · sales@vallepark.com
         </InfoTile>
       </div>
       {/* the questions the desk hears most, answered from the park rules (21st.dev accordion) */}
-      <div className="mt-4" data-testid="faq">
-        <div className="mb-3 font-mono text-[10.5px] font-semibold tracking-[.14em] text-valle-purple/70 uppercase">{t('Questions before you come')}</div>
+      <div className="mt-12" data-testid="faq">
+        <div className="mb-3 font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/70 uppercase">{t('Questions before you come')}</div>
         <Accordion defaultOpen={['pay']} items={[
           { id: 'pay', title: t('Do I pay when I book?'), content: t('Book free online, no cancellation fee. Nature trails included with park entry.') },
           { id: 'kids', title: t('How much do children pay?'), content: t('Children aged 6 to 11 pay the child rate; under 6 enter free. The Explorer Pass discount applies automatically when three or more different adventure experiences are booked for the same day. Promo and partner codes are applied as shown on the booking page and cannot be combined with another code.') },
@@ -44,7 +45,7 @@ export function PlanSection() {
           { id: 'hours', title: t('When is the park open?'), content: '09:00–17:30 · ' + t('Open every day of the week. Last activity departures around 16:00.') },
         ]} />
       </div>
-      <div className="mt-4 flex flex-wrap items-center gap-5 rounded-[18px] bg-valle-purple px-[26px] py-5">
+      <div className="mt-12 flex flex-wrap items-center gap-5 rounded-[20px] bg-valle-purple px-[26px] py-5">
         <Img src="/images/wlta-logo-1.png" alt={t('World Luxury Travel Awards 2026 winner')} surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 54, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain', flexShrink: 0 }} />
         <div className="min-w-[220px] flex-1 text-[15px] font-semibold text-white">{t('World Luxury Travel Awards 2026 winner, rated Excellent by visitors on TripAdvisor.')}</div>
         <a href="https://www.tripadvisor.com/Attraction_Review-g2359803-d1994858-Reviews-Valle_Advenature_Park-Chamouny.html" target="_blank" rel="noopener" className="font-mono text-[12.5px] font-semibold text-valle-yellow">{t('READ REVIEWS →')}</a>

@@ -11,6 +11,7 @@ import { paths, useGoto } from '../../lib/nav';
 import { money } from '../../lib/format';
 import { useT } from '../../i18n';
 import type { Product } from '../../types';
+import { headingTilt } from '@/components/ui/heading';
 
 /**
  * Shared pieces of the package class pages (/packages/<class>): type styles,
@@ -28,7 +29,8 @@ export const PHONE = '+230 660 4477';
 export const TEL = 'tel:+2306604477';
 /** The course / reason labels of the menu lists: 12.5px and a deep violet, so they stay readable (the sheet's 11px was too faint). */
 export const MENU_DT: CSSProperties = { fontSize: 12.5, color: '#5B21B6' };
-export const H2: CSSProperties = { ...DISPLAY, margin: '10px 0 0', fontSize: 'clamp(32px,4vw,52px)', lineHeight: 0.92, color: '#340057' };
+/** The shared H2 (see components/ui/heading.tsx): -3° tilt from the start edge. */
+export const H2: CSSProperties = { ...DISPLAY, margin: '14px 0 0', fontSize: 'var(--fs-h2)', lineHeight: 0.92, color: '#340057', ...headingTilt(2) };
 
 export const rupees = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
 

@@ -72,7 +72,7 @@ export function LineEditor({ lines, onChange, adults, kids, rate }: {
                 <Counter label="kids" value={l.kids} onChange={(d) => bump(i, 'kids', d)} />
               </>
             )}
-            <button type="button" onClick={() => onChange(lines.filter((_, j) => j !== i))} aria-label="Remove" className="cursor-pointer border-0 bg-transparent text-[16px] text-[#D91E44]">×</button>
+            <button type="button" onClick={() => onChange(lines.filter((_, j) => j !== i))} aria-label="Remove" className="cursor-pointer border-0 bg-transparent text-[16px] text-[#D6173F]">×</button>
           </div>
         );
       })}

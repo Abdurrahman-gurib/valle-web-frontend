@@ -244,7 +244,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
                         <Counter label="kids" value={l.kids} onChange={(d) => bump(i, 'kids', d)} />
                       </>
                     )}
-                    <button onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="Remove" className="cursor-pointer border-0 bg-transparent text-[16px] text-[#D91E44]">×</button>
+                    <button onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="Remove" className="cursor-pointer border-0 bg-transparent text-[16px] text-[#D6173F]">×</button>
                   </div>
                 );
               })}
@@ -296,7 +296,7 @@ export default function NewBookingDrawer({ onClose, onCreated }: { onClose: () =
             <div className="font-mono text-[9.5px] tracking-[.12em] text-valle-violet">TOTAL{summary.hasDiscount ? ' · EXPLORER PASS -15%' : ''}</div>
             <div className="font-display text-[24px] font-black italic" data-testid="new-booking-total">{mur(summary.total)}</div>
           </div>
-          {err && <div role="alert" className="flex-[1_1_100%] text-[13px] font-semibold text-[#D91E44]">{err}</div>}
+          {err && <div role="alert" className="flex-[1_1_100%] text-[13px] font-semibold text-[#D6173F]">{err}</div>}
           {confirmClose ? (
             <div role="alertdialog" aria-label="Unsaved booking" data-testid="nb-discard-confirm" className="flex flex-[1_1_100%] flex-wrap items-center gap-2 rounded-[14px] border-[1.5px] border-solid border-[#FFD24D] bg-[#FFF4D6] px-3 py-2.5">
               <span className="flex-[1_1_200px] text-[13.5px] font-bold">Discard this booking? What you typed will be lost.</span>

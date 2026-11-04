@@ -44,7 +44,7 @@ export default function ForecastPanel() {
         {[14, 30, 60, 90].map((n) => <Btn key={n} variant={days === n ? 'solid' : 'ghost'} onClick={() => setDays(n)}>{n} days</Btn>)}
         <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] ml-auto">BOOKED SO FAR VS THE USUAL LEVEL FOR THAT WEEKDAY</span>
       </div>
-      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D6173F] font-semibold')}>{err}</div>}
       {loading && rows.length === 0 && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
       {rows.length > 0 && (
         <>

@@ -60,7 +60,7 @@ function Polaroid({ f, tilt, big }: { f: Frame; tilt: number; big?: boolean }) {
           <span className="absolute top-[10px] start-[10px] font-mono text-[10px] font-bold tracking-[.14em] bg-valle-yellow text-valle-purple py-[5px] px-2 rounded-[8px]">{f.year}</span>
         )}
       </div>
-      <figcaption className="font-mono font-normal text-[11px] tracking-[.08em] text-[rgba(52,0,87,.7)] mt-[10px] leading-[1.4]">
+      <figcaption className="font-sans font-medium text-[13px] text-[rgba(52,0,87,.8)] mt-[10px] leading-[1.4]">
         {f.caption}
         {f.year && <span className="text-[rgba(52,0,87,.4)]"> · {t('FAMILY ARCHIVE')}</span>}
       </figcaption>

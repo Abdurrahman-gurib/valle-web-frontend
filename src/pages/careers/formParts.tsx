@@ -8,14 +8,14 @@ const labelCls = cn(MONO, 'text-[rgba(52,0,87,.7)] block mb-[7px]');
 function fieldCls(invalid: boolean): string {
   return cn(
     'w-full border-[1.5px] border-solid rounded-[12px] py-3 px-[15px] font-sans text-[15px] text-valle-purple outline-none [transition:border-color_.18s_cubic-bezier(.2,.7,.2,1),background_.18s_cubic-bezier(.2,.7,.2,1)]',
-    invalid ? 'border-[#D91E44] bg-[#FFE2E7]' : 'border-valle-lilac focus:border-valle-violet bg-white',
+    invalid ? 'border-[#D6173F] bg-[#FFE2E7]' : 'border-valle-lilac focus:border-valle-violet bg-white',
   );
 }
 
 function ErrorNote({ id, text }: { id: string; text: string }) {
   const t = useT();
   return (
-    <div id={id} role="alert" className="font-mono text-[10.5px] font-normal text-[#D91E44] mt-[6px] tracking-[.06em]">
+    <div id={id} role="alert" className="font-mono text-[10.5px] font-normal text-[#D6173F] mt-[6px] tracking-[.06em]">
       {t(text)}
     </div>
   );

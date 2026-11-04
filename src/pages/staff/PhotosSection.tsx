@@ -69,7 +69,7 @@ export function PhotosSection({ refCode }: { refCode: string }) {
               {set.count} photo{set.count === 1 ? '' : 's'}{set.photosReadyAt ? ` · guest told ${new Date(set.photosReadyAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}` : ''} · JPEG, PNG, WebP or HEIC, 8 MB each, 120 a booking. They download from the ticket page.
             </div>
             {msg && <div role="status" className="text-[13px] font-semibold text-[#1E9E4A]">{msg}</div>}
-            {err && <div role="alert" className="text-[13px] text-[#D91E44]">{err}</div>}
+            {err && <div role="alert" className="text-[13px] text-[#D6173F]">{err}</div>}
           </>
         )}
       </div>

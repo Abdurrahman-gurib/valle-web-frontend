@@ -92,7 +92,7 @@ export default function ReconciliationPanel({ onChanged }: { onChanged: (force?:
         </div>
       </div>
 
-      {err && <div role="alert" className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {err && <div role="alert" className={cn(CARD, 'p-[14px] mb-[14px] text-[#D6173F] font-semibold')}>{err}</div>}
       {loading && !data && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
 
       {t && (

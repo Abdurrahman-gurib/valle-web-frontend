@@ -103,7 +103,7 @@ export default function SecurityPanel() {
           </>
         )}
         {(error || note) && (
-          <div role={error ? 'alert' : 'status'} className={`mt-3 text-[13.5px] font-semibold ${error ? 'text-[#D91E44]' : 'text-valle-purple'}`}>{error || note}</div>
+          <div role={error ? 'alert' : 'status'} className={`mt-3 text-[13.5px] font-semibold ${error ? 'text-[#D6173F]' : 'text-valle-purple'}`}>{error || note}</div>
         )}
       </div>
     </Panel>

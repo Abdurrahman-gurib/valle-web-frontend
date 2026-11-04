@@ -47,7 +47,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
         promise={t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}
         photo={{ src: '/images/team-building-goggles.webp', alt: t('Colleagues in goggles cheering during a team challenge at Vallé'), width: 781, height: 977, position: 'center 30%' }}
         actions={<>
-          <button type="button" data-testid="team-hero-quote" className="sr-btn sr-btn-primary sr-btn-lg" onClick={() => { requestQuoteFor(t('Corporate package')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
+          <button type="button" data-testid="team-hero-quote" className="vbtn vbtn-on-dark" onClick={() => { requestQuoteFor(t('Corporate package')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
           <CallButton testId="team-phone" />
         </>}
       />
@@ -74,7 +74,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
                 actions={(
                   <div className="sr-actions sr-actions-one" style={{ marginTop: 0 }}>
                     <p className="sr-price-note" style={{ alignItems: 'flex-start', textAlign: 'start', margin: '0 0 6px', paddingTop: 18, borderTop: '1.5px dashed #D9C9F0' }}>{t('Price per person on quote · HRDC refundable*')}</p>
-                    <button type="button" data-testid="team-card-quote" className="sr-btn sr-btn-primary" aria-label={t('Request a quote for {name}', { name: t('Programme {n}', { n: i + 1 }) })} onClick={() => { requestQuoteFor([t('Programme {n}', { n: i + 1 }), ...highlights].join(' · ')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
+                    <button type="button" data-testid="team-card-quote" className="vbtn vbtn-primary" aria-label={t('Request a quote for {name}', { name: t('Programme {n}', { n: i + 1 }) })} onClick={() => { requestQuoteFor([t('Programme {n}', { n: i + 1 }), ...highlights].join(' · ')); onQuote(); }}>{t('Request a quote')} <Fwd /></button>
                   </div>
                 )}
               />

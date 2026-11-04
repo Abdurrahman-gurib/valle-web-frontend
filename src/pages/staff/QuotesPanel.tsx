@@ -64,7 +64,7 @@ export default function QuotesPanel() {
                     <td className={TD}>{r.party}</td>
                     <td className={cn(TD, 'whitespace-normal max-w-[260px] text-[12.5px]')}>{r.preorder.length ? r.preorder.map((l) => `${l.qty} × ${l.item}`).join(', ') : '—'}</td>
                     <td className={cn(TD, 'whitespace-normal max-w-[220px] text-[12.5px]')}>{r.notes || '—'}</td>
-                    <td className={cn(TD, 'font-mono text-[11px] font-bold', r.status === 'confirmed' ? 'text-[#1E9E4A]' : r.status === 'cancelled' ? 'text-[#D91E44]' : 'text-[#8A6A00]')}>{r.status.toUpperCase()}</td>
+                    <td className={cn(TD, 'font-mono text-[11px] font-bold', r.status === 'confirmed' ? 'text-[#1E9E4A]' : r.status === 'cancelled' ? 'text-[#D6173F]' : 'text-[#8A6A00]')}>{r.status.toUpperCase()}</td>
                     <td className={TD}>
                       {r.status === 'requested' && (
                         <div className="inline-flex gap-[6px]">
@@ -80,7 +80,7 @@ export default function QuotesPanel() {
           </div>
         )}
       </Panel>
-      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D6173F] font-semibold')}>{err}</div>}
       {loading && rows.length === 0 && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
       {!loading && rows.length === 0 && !err && (
         <EmptyState title="No quote requests yet" note="Requests sent from the team-building form on the Packages page land here." />

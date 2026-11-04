@@ -140,7 +140,7 @@ export function Header() {
       : 'rgba(255,255,255,.94)';
   const headerBorder = mobileNavOpen || onHeroTop ? '1px solid transparent' : '1px solid #EBE2FF';
 
-  const headerStyle: CSSVars = { background: headerBg, borderBottom: headerBorder, '--fg': headerFg };
+  const headerStyle: CSSVars = { background: headerBg, borderBottom: headerBorder, '--fg': headerFg, '--nav-hover': headerFg === '#FFFFFF' ? 'rgba(255,255,255,.14)' : '#F4EEFF' };
 
   const closeAll = () => { setMega(null); setMobileNavOpen(false); };
   const go = (fn: () => void) => () => { closeAll(); fn(); };

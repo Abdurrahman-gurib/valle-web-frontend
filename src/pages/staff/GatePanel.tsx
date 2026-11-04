@@ -236,17 +236,17 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
               <div className="text-[13px] mt-[4px] text-[rgba(52,0,87,.7)]">
                 {shortDate(view.visitDate)} · {view.slot} · {partyText(view.adults, view.kids, view.infants ?? 0)} · {view.balance > 0 ? `to pay ${money(view.balance)}` : 'paid'}
               </div>
-              {!view.isToday && <div className="font-mono text-[11px] font-bold text-[#D91E44] mt-[6px]">NOT TODAY'S BOOKING</div>}
-              <div data-testid="gate-balance" className={cn('font-mono text-[12px] font-bold mt-[6px]', view.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
+              {!view.isToday && <div className="font-mono text-[11px] font-bold text-[#D6173F] mt-[6px]">NOT TODAY'S BOOKING</div>}
+              <div data-testid="gate-balance" className={cn('font-mono text-[12px] font-bold mt-[6px]', view.balance > 0 ? 'text-[#D6173F]' : 'text-[#1E9E4A]')}>
                 {view.balance > 0 ? `TO COLLECT ${money(view.balance)} · PAID ${money(view.paidAmount)}` : 'FULLY PAID'}{view.adjustmentAmount > 0 ? ` · ${view.adjustmentNote || 'discount'} −${money(view.adjustmentAmount)}` : ''}
               </div>
             </div>
             <div className="text-right grid gap-[6px] justify-items-end">
               <StatusChip status={view.status} />
-              <div data-testid="gate-waiver-count" className={cn('font-mono font-bold text-[15px]', view.missing ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>
+              <div data-testid="gate-waiver-count" className={cn('font-mono font-bold text-[15px]', view.missing ? 'text-[#D6173F]' : 'text-[#1E9E4A]')}>
                 WAIVERS {view.signedCount}/{view.required}
               </div>
-              {view.stops > 0 && <div className="font-mono text-[11px] font-bold text-[#D91E44]">{view.stops} LIMIT WARNING{view.stops > 1 ? 'S' : ''}</div>}
+              {view.stops > 0 && <div className="font-mono text-[11px] font-bold text-[#D6173F]">{view.stops} LIMIT WARNING{view.stops > 1 ? 'S' : ''}</div>}
             </div>
           </div>
 
@@ -280,7 +280,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
                   </span>
                 </div>
                 {w.flags.map((f, i) => (
-                  <div key={i} className={cn('text-[13px] font-bold mt-[4px]', f.level === 'stop' ? 'text-[#D91E44]' : 'text-[#B7791F]')}>
+                  <div key={i} className={cn('text-[13px] font-bold mt-[4px]', f.level === 'stop' ? 'text-[#D6173F]' : 'text-[#B7791F]')}>
                     {f.level === 'stop' ? '⛔' : '⚠'} {f.activity}: {f.message}
                   </div>
                 ))}
@@ -307,7 +307,7 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
             {view.status === 'arrived' ? (
               <div className="font-mono font-bold text-[#1E9E4A] text-[14px]">✓ CHECKED IN</div>
             ) : view.status === 'cancelled' ? (
-              <div className="font-mono font-bold text-[#D91E44] text-[14px]">CANCELLED BOOKING</div>
+              <div className="font-mono font-bold text-[#D6173F] text-[14px]">CANCELLED BOOKING</div>
             ) : blocked ? (
               <div className="grid gap-[8px]">
                 {!override ? (
@@ -362,8 +362,8 @@ export default function GatePanel({ onChanged, onOpenBooking }: { onChanged?: ()
                     <td className="px-[6px] py-[8px] font-mono text-[12px]">{r.refCode}</td>
                     <td className="px-[6px] py-[8px] font-semibold">{r.guestName}</td>
                     <td className="px-[6px] py-[8px]">{r.slot}</td>
-                    <td className={cn('px-[6px] py-[8px] font-mono font-bold', r.signed >= r.party ? 'text-[#1E9E4A]' : 'text-[#D91E44]')}>{Math.min(r.signed, r.party)}/{r.party}</td>
-                    <td className={cn('px-[6px] py-[8px] font-mono text-[12px]', r.balance > 0 ? 'text-[#D91E44]' : 'text-[#1E9E4A]')}>{r.balance > 0 ? money(r.balance) : 'paid'}</td>
+                    <td className={cn('px-[6px] py-[8px] font-mono font-bold', r.signed >= r.party ? 'text-[#1E9E4A]' : 'text-[#D6173F]')}>{Math.min(r.signed, r.party)}/{r.party}</td>
+                    <td className={cn('px-[6px] py-[8px] font-mono text-[12px]', r.balance > 0 ? 'text-[#D6173F]' : 'text-[#1E9E4A]')}>{r.balance > 0 ? money(r.balance) : 'paid'}</td>
                     <td className="px-[6px] py-[8px]"><StatusChip status={r.status} /></td>
                   </tr>
                 ))}

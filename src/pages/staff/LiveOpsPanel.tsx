@@ -33,7 +33,7 @@ export default function LiveOpsPanel() {
     <div data-testid="live-ops-panel" className="mt-[14px]">
       <Panel title="LIVE BOARD · WAITS AND MEETING POINTS ON THE GUEST'S TICKET" action={view?.updatedAt ? <span className="font-mono text-[10px] text-[rgba(52,0,87,.7)]">last set {new Date(view.updatedAt).toLocaleString('en-GB', { timeZone: 'Indian/Mauritius' })}{view.updatedBy ? ' by ' + view.updatedBy : ''}</span> : undefined}>
         <div className="p-[14px] grid gap-[10px]">
-          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {err && <div role="alert" className="text-[#D6173F] text-[13.5px]">{err}</div>}
           {saved && <div role="status" data-testid="live-ops-saved" className="text-[#1E9E4A] text-[13.5px] font-semibold">{saved}</div>}
           {!view && !err && <Spinner />}
           {view && (

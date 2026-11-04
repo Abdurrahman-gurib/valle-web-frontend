@@ -145,7 +145,7 @@ export function ChatWidget() {
     ? 'vfade .2s ease both'
     : (closing
       ? 'vpopout .17s cubic-bezier(.4,0,.9,.4) both'
-      : 'vpop .42s cubic-bezier(.16,1.06,.3,1.12) both');
+      : 'vpop .24s cubic-bezier(.2,.8,.2,1) both');
 
   return (
     <div
@@ -178,7 +178,7 @@ export function ChatWidget() {
                 connected && !reduced && 'animate-[vhalo_2.2s_ease-out_infinite]',
               )}
             />
-            <span className="font-mono text-[9.5px] tracking-[.12em] text-[rgba(255,255,255,.72)]">
+            <span className="font-mono text-[10px] tracking-[.12em] text-[rgba(255,255,255,.72)]">
               {statusLabel}
             </span>
           </div>
@@ -254,7 +254,7 @@ export function ChatWidget() {
                 )}
               >
                 <TypingDots reduced={reduced} />
-                <span className="font-mono text-[9px] tracking-[.12em] text-[rgba(52,0,87,.6)]">
+                <span className="font-mono text-[10px] tracking-[.12em] text-[rgba(52,0,87,.6)]">
                   {t('VALLÉ IS TYPING')}
                 </span>
               </div>
@@ -262,14 +262,14 @@ export function ChatWidget() {
           </div>
 
           {!connected && (
-            <div className="font-mono text-[9.5px] tracking-[.1em] text-[#8A6A00] bg-[rgba(255,176,32,.16)] py-[7px] px-[14px] shrink-0">
+            <div className="font-mono text-[10px] tracking-[.1em] text-[#8A6A00] bg-[rgba(255,176,32,.16)] py-[7px] px-[14px] shrink-0">
               {status === 'connecting' ? t('CONNECTING…') : t('RECONNECTING…')} {t('YOUR MESSAGES WILL STILL GO THROUGH')}
             </div>
           )}
 
           {/* -------------------------------------------------------- composer -- */}
           {fileErr && (
-            <div role="alert" className="font-mono text-[9.5px] tracking-[.08em] text-[#D91E44] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
+            <div role="alert" className="font-mono text-[10px] tracking-[.08em] text-[#D6173F] bg-[#FFE2E7] py-[7px] px-[14px] shrink-0">
               {fileErr.toUpperCase()}
             </div>
           )}

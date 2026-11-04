@@ -128,7 +128,7 @@ export function DrawerActions({ data, busy, editing, saving, onEdit, onCancelEdi
           <span className="flex-[1_1_100%] text-[13.5px] font-bold">Send money back through the payment provider. Up to {money(paid)} on this booking.</span>
           <input value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} inputMode="numeric" placeholder="Amount (Rs)" aria-label="Refund amount" className={cn(inputCls, 'w-[130px]')} data-testid="refund-amount" />
           <input value={refundReason} onChange={(e) => setRefundReason(e.target.value)} placeholder="Reason (shown in the trail)" aria-label="Refund reason" style={inputStyle} className="flex-[1_1_200px]" data-testid="refund-reason" />
-          <Btn variant="danger" onClick={refund} disabled={locked} data-testid="refund-submit">{busy === 'arrived' ? <Spinner color="#D91E44" /> : 'Refund'}</Btn>
+          <Btn variant="danger" onClick={refund} disabled={locked} data-testid="refund-submit">{busy === 'arrived' ? <Spinner color="#D6173F" /> : 'Refund'}</Btn>
           <Btn variant="ghost" onClick={() => setRefundOpen(false)}>Close</Btn>
         </div>
       )}

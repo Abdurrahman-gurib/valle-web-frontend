@@ -1,5 +1,4 @@
 {
-  "‹  Previous": "‹  Précédent",
   "\"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday.\"": "« Est-ce que je viens vraiment de traverser une cascade en tyrolienne ? OUI ! Des moniteurs fantastiques, une super façon de fêter mon anniversaire. »",
   "\"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again.\"": "« Des vues magnifiques et des tyroliennes qui font monter l'adrénaline ! Personnel professionnel et accueillant. À faire et à refaire. »",
   "\"Never say adventure is impossible. Make it unforgettable!\"": "« Ne dites jamais que l'aventure est impossible. Rendez-la inoubliable ! »",
@@ -852,7 +851,6 @@
   "Newly planted terraces and a cascade on the hillside": "Des terrasses fraîchement plantées et une cascade sur le flanc de la colline",
   "Next photo": "Photo suivante",
   "Next photos": "Photos suivantes",
-  "Next photos  ›": "Photos suivantes  ›",
   "Ninety seconds of air on the longest cable in the valley.": "Quatre-vingt-dix secondes en l'air sur le plus long câble de la vallée.",
   "No engine, no pedals. You control the speed the whole way down a winding mountain track, past the caution chevrons and into the last banked curve. One ride is never enough.": "Pas de moteur, pas de pédales. Vous contrôlez votre vitesse tout au long d'une piste de montagne sinueuse, entre les chevrons d'avertissement jusqu'au dernier virage relevé. Une seule descente ne suffit jamais.",
   "No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.": "Aucune expérience pour l'instant. Touchez les cartes ci-dessus pour les ajouter. Tous les sentiers nature sont déjà compris dans votre entrée.",
@@ -1952,7 +1950,6 @@
   "Team building days for companies, from Rs 2,850 per person, with a quote within one working day.": "Journées team building pour les entreprises, à partir de Rs 2,850 par personne, devis sous un jour ouvré.",
   "The park photographer and the cinematic shoot: edited photos and film of your day, delivered on your ticket page.": "Le photographe du parc et le tournage cinématique : photos retouchées et film de votre journée, livrés sur votre page billet.",
   "Package classes": "Catégories de formules",
-  "SEE THE PRICES →": "VOIR LES PRIX →",
   "{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park": "{group} · formules & tarifs 2026 · VALLÉ Advenature™ Park",
   "Cinematic shoot at Vallé: the swing by the waterfall": "Tournage cinématique à Vallé : la balançoire près de la cascade",
   "Plan it with us": "Organisons-le ensemble",
@@ -2601,5 +2598,7 @@
   "See the route": "Voir le parcours",
   "TEACHERS AND ACCOMPANYING ADULTS": "ENSEIGNANTS ET ADULTES ACCOMPAGNATEURS",
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "Le droit d'entrée élève ({price} par élève) est ajouté une fois pour chaque élève de 6 ans et plus ; les élèves de maternelle entrent gratuitement. Les enseignants et adultes accompagnateurs paient l'entrée adulte normale ({adult}). Cochez ce que font les élèves et indiquez combien font chaque activité.",
-  "UNDER 6 (FREE)": "MOINS DE 6 ANS (GRATUIT)"
+  "UNDER 6 (FREE)": "MOINS DE 6 ANS (GRATUIT)",
+  "Pay at the kiosk on the day": "Paiement au kiosque le jour même",
+  "See the prices": "Voir les prix"
 }

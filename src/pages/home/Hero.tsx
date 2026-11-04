@@ -7,7 +7,14 @@ import { useT } from '../../i18n';
 export function Hero() {
   const t = useT();
   const { HERO } = useCatalog();
-  const [heroIdx, setHeroIdx] = useState(0);
+  const [heroIdx, setHeroIdxRaw] = useState(0);
+  // the outgoing slide stays fully visible underneath while the next one fades in over it
+  const [prevIdx, setPrevIdx] = useState(-1);
+  const setHeroIdx = (next: number | ((i: number) => number)) => setHeroIdxRaw((cur) => {
+    const n = typeof next === 'function' ? next(cur) : next;
+    if (n !== cur) setPrevIdx(cur);
+    return n;
+  });
   const copyRef = useRef<HTMLDivElement>(null);
 
   // GSAP entrance timeline: the two headline lines rise in, then the copy and the slide dots.
@@ -21,9 +28,9 @@ export function Hero() {
       if (cancelled) return;
       const ctx = gsap.context(() => {
         gsap.timeline({ defaults: { ease: 'power3.out' } })
-          .from('[data-hero-line]', { yPercent: 60, opacity: 0, rotate: 2, duration: 0.9, stagger: 0.14 })
+          .from('[data-hero-line]', { yPercent: 60, opacity: 0, rotate: 2, duration: 0.9, stagger: 0.1 })
           .from('[data-hero-copy]', { y: 18, opacity: 0, duration: 0.7 }, '-=0.45')
-          .from('[data-hero-dot]', { x: 16, opacity: 0, duration: 0.4, stagger: 0.06 }, '-=0.5');
+          .from('[data-hero-dot]', { x: 16, opacity: 0, duration: 0.4, stagger: 0.1 }, '-=0.5');
       }, root.parentElement ?? root);
       revert = () => ctx.revert();
     });
@@ -57,12 +64,14 @@ export function Hero() {
           placeholder="transparent"
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-            opacity: i === heroIdx ? 1 : 0, transition: 'opacity 1.6s ease', animation: i === heroIdx ? 'vken 16s ease-out infinite alternate' : 'none',
+            opacity: i === heroIdx || i === prevIdx ? 1 : 0, zIndex: i === heroIdx ? 2 : i === prevIdx ? 1 : 0,
+            transition: i === heroIdx ? 'opacity .8s cubic-bezier(.2,.8,.2,1)' : 'none',
+            animation: i === heroIdx || i === prevIdx ? 'vken 16s ease-out infinite alternate' : 'none',
           }}
         />
       ))}
-      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(31,0,51,.88)_0%,rgba(52,0,87,.2)_48%,rgba(31,0,51,.4)_100%)]" />
-      <div ref={copyRef} className="relative mx-auto flex h-full flex-col justify-start px-[clamp(16px,2.5vw,40px)] pt-[clamp(96px,12vh,130px)] pb-0">
+      <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.88)_0%,rgba(52,0,87,.2)_48%,rgba(31,0,51,.4)_100%)]" />
+      <div ref={copyRef} className="relative z-[4] mx-auto flex h-full flex-col justify-start px-[clamp(16px,2.5vw,40px)] pt-[clamp(96px,12vh,130px)] pb-0">
         <div className="origin-bottom-left -rotate-4">
           <h1 className="m-0 font-display text-[clamp(48px,8.4vw,132px)] leading-[0.82] font-black tracking-[-0.01em] text-white uppercase italic">
             <span data-hero-line className="inline-block">{t('Feel the')}</span><br /><span data-hero-line className="inline-block text-valle-yellow">{t('colours.')}</span>
@@ -72,7 +81,7 @@ export function Hero() {
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
       </div>
-      <div className="absolute right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col gap-2">
+      <div className="absolute z-[4] right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col gap-2">
         {HERO.map((src, i) => (
           <button
             key={src}

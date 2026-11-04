@@ -86,7 +86,7 @@ export function PackageCard({
         {badge && <span className="pk-badge">{badge}</span>}
       </div>
       <div className="sr-card-body">
-        <h3 id={titleId} style={{ ...DISPLAY, margin: 0, fontSize: compact ? 'clamp(22px,2vw,26px)' : 'clamp(28px,2.8vw,36px)', lineHeight: 0.95, color: '#340057' }}>{title}</h3>
+        <h3 id={titleId} className="pk-card-title" style={{ ...DISPLAY, margin: 0, fontSize: compact ? "clamp(22px,2vw,26px)" : "clamp(28px,2.8vw,36px)", lineHeight: 1, color: "#340057" }}>{title}</h3>
         {subtitle && <p className="pk-sub">{subtitle}</p>}
         {items.length > 0 && <Eyebrow className="sr-card-label">{label ?? t('WHAT IS INCLUDED')}</Eyebrow>}
         {items.length > 0 && <InclusionList items={items} clock />}
@@ -132,18 +132,18 @@ export function BookActions({ productKey, name, onDetails, bookTestId = 'pkg-boo
     return (
       <div className="sr-visitor" data-testid="pkg-rate-note">
         <p style={{ margin: 0 }}>{blockedText ?? (blocked === 'rr' ? t('This package is sold at the resident rate. You are browsing at the visitor rate.') : t('This package is sold at the visitor rate. You are browsing at the resident rate.'))}</p>
-        <button type="button" className="sr-btn sr-btn-outline" onClick={() => b.setRate(blocked)}>{blocked === 'rr' ? t('I am a resident: switch to the resident rate') : t('I am visiting: switch to the visitor rate')}</button>
+        <button type="button" className="vbtn vbtn-secondary" onClick={() => b.setRate(blocked)}>{blocked === 'rr' ? t('I am a resident: switch to the resident rate') : t('I am visiting: switch to the visitor rate')}</button>
         {/* what is in the package stays readable at either rate */}
-        {onDetails && <button type="button" className="sr-btn sr-btn-outline" onClick={onDetails} aria-label={t('View details of {name}', { name })}>{t('View details')}</button>}
+        {onDetails && <button type="button" className="vbtn vbtn-secondary" onClick={onDetails} aria-label={t('View details of {name}', { name })}>{t('View details')}</button>}
       </div>
     );
   }
   return (
     <div className={onDetails ? 'sr-actions' : 'sr-actions sr-actions-one'}>
-      <button type="button" data-testid={bookTestId} className="sr-btn sr-btn-primary" onClick={b.book}>
+      <button type="button" data-testid={bookTestId} className="vbtn vbtn-primary" onClick={b.book}>
         {b.inDay ? t('In my day · book now') : (bookLabel ?? t('Book {name}', { name }))} <Fwd />
       </button>
-      {onDetails && <button type="button" className="sr-btn sr-btn-outline" onClick={onDetails} aria-label={t('View details of {name}', { name })}>{t('View details')}</button>}
+      {onDetails && <button type="button" className="vbtn vbtn-secondary" onClick={onDetails} aria-label={t('View details of {name}', { name })}>{t('View details')}</button>}
     </div>
   );
 }

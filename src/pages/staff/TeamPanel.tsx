@@ -75,7 +75,7 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
       </Panel>
 
       {(error || note) && (
-        <div role={error ? 'alert' : 'status'} className={`mb-3.5 rounded-xl px-3.5 py-2.5 text-[13.5px] font-semibold ${error ? 'bg-[rgba(217,30,68,.1)] text-[#D91E44]' : 'bg-valle-lilac text-valle-purple'}`}>
+        <div role={error ? 'alert' : 'status'} className={`mb-3.5 rounded-xl px-3.5 py-2.5 text-[13.5px] font-semibold ${error ? 'bg-[rgba(217,30,68,.1)] text-[#D6173F]' : 'bg-valle-lilac text-valle-purple'}`}>
           {error || note}
         </div>
       )}
@@ -101,7 +101,7 @@ export default function TeamPanel({ currentUserId }: { currentUserId: string }) 
                       <td className={tdCls}>
                         <span className="font-semibold">{u.name}</span>
                         {self && <span className="ml-1.5 font-mono text-[10px] tracking-widest text-valle-violet">YOU</span>}
-                        {!u.active && <span className="ml-1.5 font-mono text-[10px] tracking-widest text-[#D91E44]">INACTIVE</span>}
+                        {!u.active && <span className="ml-1.5 font-mono text-[10px] tracking-widest text-[#D6173F]">INACTIVE</span>}
                       </td>
                       <td className={tdCls}>{u.email}</td>
                       <td className={tdCls}>

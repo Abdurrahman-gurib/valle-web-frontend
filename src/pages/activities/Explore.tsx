@@ -124,7 +124,7 @@ export default function ExplorePage() {
         </div>
       ) : (
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 16, marginTop: 24,
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 20, marginTop: 24,
         }}>
           {cards.map((a) => (
             <ActivityCard key={a.id} a={a} rateTag={app.rateTag} kids={cat === 'kids'} />

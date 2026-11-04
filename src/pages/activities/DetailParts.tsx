@@ -33,33 +33,37 @@ export function DetailPricelist({ act, d, kids, catalog }: { act: Activity; d: C
   const paired = pl.some((r) => /single|double/i.test(r.n));
   const rows = paired ? pl : [...pl].sort((x, y) => x[rk] - y[rk]);
   const prices = rows.map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
+  // white panel with the brand stripe on top (Kids Park keeps its own purple identity)
+  const fg = kids ? '#FFFFFF' : '#340057';
   return (
-    <div data-testid={kids ? 'kids-detail-pricelist' : undefined} style={{ marginTop: 26, background: kids ? KP.purple : '#7333FF', borderRadius: kids ? 24 : 18, overflow: 'hidden', boxShadow: '0 18px 40px -18px rgba(52,0,87,.5)' }}>
-      <PanelTop kids={kids} height={10} />
-      <div style={{ padding: '16px 20px 18px' }}>
+    <div data-testid={kids ? 'kids-detail-pricelist' : 'detail-pricelist'} style={{ marginTop: 26, background: kids ? KP.purple : '#FFFFFF', borderRadius: kids ? 24 : 20, overflow: 'hidden', boxShadow: kids ? '0 18px 40px -18px rgba(52,0,87,.5)' : 'var(--s2)' }}>
+      <PanelTop kids={kids} height={8} />
+      <div style={{ padding: '18px 22px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontFamily: BARLOW, fontStyle: kids ? 'normal' : 'italic', fontWeight: 900, fontSize: 20, textTransform: 'uppercase', color: kids ? KP.yellow : '#FFFC33' }}>{t('Pricelist')}</span>
-          <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: '#FFFC33', color: '#340057', borderRadius: 999, padding: '6px 11px' }}>{app.rateTag} ⇄</button>
+          <span style={{ fontFamily: BARLOW, fontStyle: kids ? 'normal' : 'italic', fontWeight: 900, fontSize: 22, lineHeight: 1, textTransform: 'uppercase', color: kids ? KP.yellow : '#340057' }}>{t('Pricelist')}</span>
+          <button onClick={app.openRateGate} title={t('Change rate')} style={{ border: 0, cursor: 'pointer', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', background: kids ? '#FFFC33' : '#340057', color: kids ? '#340057' : '#FFFC33', borderRadius: 999, padding: '7px 12px' }}>{app.rateTag} ⇄</button>
         </div>
         <div style={{ marginTop: 10 }}>
           {prices.map((pr) => {
             const on = d.hasAdd && app.isSelected(act.id, pr.n);
             return (
-              <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px dashed rgba(255,255,255,.28)' }}>
-                <span style={{ fontSize: 14, color: '#FFFFFF', fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
-                <span style={{ background: kids ? KP.yellow : '#FFFC33', color: kids ? '#3A0A46' : '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: kids ? 999 : 6, padding: kids ? '5px 11px' : '5px 9px', whiteSpace: 'nowrap' }}>{pr.p}</span>
+              <div key={pr.n} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: kids ? '1px dashed rgba(255,255,255,.28)' : '1px dashed #D9C9F0' }}>
+                <span style={{ fontSize: 15, color: fg, fontWeight: 500, flex: 1 }}>{t(pr.n)}</span>
+                <span style={{ background: kids ? KP.yellow : '#FFFC33', color: kids ? '#3A0A46' : '#340057', fontFamily: MONO, fontWeight: 700, fontSize: 12.5, borderRadius: kids ? 999 : 8, padding: kids ? '5px 11px' : '5px 9px', whiteSpace: 'nowrap', boxShadow: kids ? undefined : 'inset 0 0 0 1px rgba(52,0,87,.12)' }}>{pr.p}</span>
                 {d.hasAdd && (
                   <button
                     onClick={() => app.toggleSel(act.id, pr.n)}
                     title={on ? t('Remove from My Day') : t('Add this option to My Day')}
-                    style={{ border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, padding: '6px 10px', borderRadius: 999, whiteSpace: 'nowrap', minWidth: 68 }}
+                    style={kids
+                      ? { border: on ? 0 : '1.5px solid rgba(255,255,255,.55)', background: on ? '#33FF74' : 'transparent', color: on ? '#340057' : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, padding: '0 12px', minHeight: 32, borderRadius: 999, whiteSpace: 'nowrap', minWidth: 72 }
+                      : { border: '1.5px solid #340057', background: on ? '#340057' : '#FFFFFF', color: on ? '#FFFFFF' : '#340057', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, padding: '0 12px', minHeight: 32, borderRadius: 999, whiteSpace: 'nowrap', minWidth: 72 }}
                   >{on ? t('✓ Added') : t('+ Add')}</button>
                 )}
               </div>
             );
           })}
         </div>
-        <div style={{ fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.65)', marginTop: 11 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE')}</div>
+        <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: '.08em', color: kids ? 'rgba(255,255,255,.75)' : 'rgba(52,0,87,.7)', marginTop: 12, lineHeight: 1.5 }}>{t('VAT INCLUSIVE · 1 JULY 2026 TO 30 JUNE 2027 · FREE TO BOOK · PAY AT THE GATE')}</div>
       </div>
     </div>
   );

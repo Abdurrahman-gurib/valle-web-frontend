@@ -16,7 +16,7 @@ const TDNUM = cn(TD, 'font-mono text-right text-[12.5px]');
 const STATE: Record<BackupStatus['state'], { label: string; bg: string; fg: string }> = {
   ok: { label: 'ALL GOOD', bg: '#E2FFEB', fg: '#12B54A' },
   warning: { label: 'CHECK OVERDUE', bg: '#FFFFE2', fg: '#8A7A00' },
-  failing: { label: 'FAILING', bg: '#FFE2E7', fg: '#D91E44' },
+  failing: { label: 'FAILING', bg: '#FFE2E7', fg: '#D6173F' },
   unknown: { label: 'NO RUN YET', bg: '#F1F1F4', fg: '#6B6B78' },
 };
 
@@ -49,7 +49,7 @@ function offsite(run: BackupRun): { text: string; color: string } | null {
   const o = run as BackupRun & WithOffsite;
   if (o.offsiteStatus === 'uploaded') return { text: 'Off-site copy: uploaded', color: '#12B54A' };
   if (o.offsiteStatus === 'not_configured') return { text: 'Off-site copy: not configured', color: 'rgba(52,0,87,.6)' };
-  if (o.offsiteStatus === 'failed') return { text: `Off-site copy: failed: ${o.offsiteDetail || 'unknown error'}`, color: '#D91E44' };
+  if (o.offsiteStatus === 'failed') return { text: `Off-site copy: failed: ${o.offsiteDetail || 'unknown error'}`, color: '#D6173F' };
   return null;
 }
 
@@ -77,7 +77,7 @@ export default function BackupsPanel() {
         )}
       >
         <div className="p-[14px]">
-          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {err && <div role="alert" className="text-[#D6173F] text-[13.5px]">{err}</div>}
           {!data && !err && <Spinner />}
           {data && (
             <>
@@ -101,7 +101,7 @@ export default function BackupsPanel() {
                 </p>
               )}
               {data.problems.length > 0 && (
-                <ul data-testid="backup-problems" className={cn('mt-[14px] mx-0 mb-0 pl-[18px] text-[13.5px] leading-[1.55]', data.state === 'failing' ? 'text-[#D91E44]' : 'text-[#8A7A00]')}>
+                <ul data-testid="backup-problems" className={cn('mt-[14px] mx-0 mb-0 pl-[18px] text-[13.5px] leading-[1.55]', data.state === 'failing' ? 'text-[#D6173F]' : 'text-[#8A7A00]')}>
                   {data.problems.map((p) => <li key={p}>{p}</li>)}
                 </ul>
               )}
@@ -125,7 +125,7 @@ export default function BackupsPanel() {
                   <tr key={r.id}>
                     <td className={TD}>{when(r.finishedAt)}</td>
                     <td className={TD}>{KIND[r.kind]}</td>
-                    <td className={cn(TD, 'font-bold', r.ok ? 'text-[#12B54A]' : 'text-[#D91E44]')}>{r.ok ? 'Passed' : 'Failed'}</td>
+                    <td className={cn(TD, 'font-bold', r.ok ? 'text-[#12B54A]' : 'text-[#D6173F]')}>{r.ok ? 'Passed' : 'Failed'}</td>
                     <td className={TDNUM}>{size(r.bytes)}</td>
                     <td className={TDNUM}>{r.rows ? r.rows.toLocaleString('en') : ''}</td>
                     <td className={cn(TD, 'whitespace-normal min-w-[220px] text-[rgba(52,0,87,.7)]')}>

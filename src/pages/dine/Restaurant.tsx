@@ -20,7 +20,7 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-const H2 = 'm-0 origin-bottom-left -rotate-2 font-display text-[clamp(26px,3.4vw,42px)] font-black tracking-[-0.01em] uppercase italic';
+const H2 = 'v-h2';
 /** Allergen codes as small tags; the full word is read out to screen readers. */
 const ALLERGEN_NAMES: Record<string, string> = { GL: _t('Contains gluten'), LACT: _t('Contains lactose') };
 function Allergens({ codes }: { codes?: string[] }) {
@@ -29,7 +29,7 @@ function Allergens({ codes }: { codes?: string[] }) {
   return (
     <span className="mt-1 flex flex-wrap gap-1">
       {codes.map((c) => (
-        <span key={c} title={ALLERGEN_NAMES[c] ? t(ALLERGEN_NAMES[c]) : c} className="rounded-[5px] border border-solid border-valle-purple/30 px-1.5 py-px font-mono text-[9.5px] font-bold tracking-[.06em] text-valle-purple">
+        <span key={c} title={ALLERGEN_NAMES[c] ? t(ALLERGEN_NAMES[c]) : c} className="rounded-[5px] border border-solid border-valle-purple/30 px-1.5 py-px font-mono text-[10px] font-bold tracking-[.06em] text-valle-purple">
           <span aria-hidden>{c}</span>
           <span className="sr-only">{ALLERGEN_NAMES[c] ? t(ALLERGEN_NAMES[c]) : c}</span>
         </span>
@@ -89,7 +89,7 @@ export default function RestaurantPage() {
         <div className="absolute right-[clamp(18px,3vw,36px)] bottom-[clamp(18px,3vw,30px)] left-[clamp(18px,3vw,36px)] text-white">
           <span className="inline-block -rotate-4 rounded-full bg-valle-yellow px-[13px] py-[7px] font-mono text-[10.5px] font-bold tracking-[.1em] text-valle-purple">{r.badge}</span>
           <div className="mt-4 origin-bottom-left -rotate-4">
-            <h1 className="m-0 font-display text-[clamp(36px,5.6vw,76px)] leading-[0.82] font-black tracking-[-0.01em] uppercase italic">{r.name}</h1>
+            <h1 className="v-h1" style={{ transform: 'none' }}>{r.name}</h1>
           </div>
           <div className="mt-3.5 text-[clamp(14px,1.6vw,17px)] opacity-92">{r.tag}</div>
         </div>

@@ -63,7 +63,7 @@ export function TableReservation({ restaurantId, restaurantName, menuGroups }: {
   return (
     <div data-testid="table-reservation">
       {!open && (
-        <button type="button" onClick={() => setOpen(true)} data-testid="table-open" className="vbtn vbtn-primary vbtn-block">
+        <button type="button" onClick={() => setOpen(true)} data-testid="table-open" className="vbtn vbtn-on-dark vbtn-block">
           <BtnLabel>{t('Reserve a table →')}</BtnLabel>
         </button>
       )}

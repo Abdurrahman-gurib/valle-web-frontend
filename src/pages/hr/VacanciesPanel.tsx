@@ -32,8 +32,8 @@ function MiniBtn({ children, onClick, tone = 'ghost', disabled, title }: {
     ghost: cn('border-[1.5px] border-solid border-valle-lilac bg-transparent text-valle-purple', !disabled && 'hover:bg-[#F7F3FF]'),
     dark: cn('border-0 bg-valle-purple text-white', !disabled && 'hover:bg-valle-deep'),
     danger: cn(
-      'border-[1.5px] border-solid border-[#D91E44] bg-transparent text-[#D91E44]',
-      !disabled && 'hover:bg-[#D91E44] hover:text-white',
+      'border-[1.5px] border-solid border-[#D6173F] bg-transparent text-[#D6173F]',
+      !disabled && 'hover:bg-[#D6173F] hover:text-white',
     ),
   };
   return (

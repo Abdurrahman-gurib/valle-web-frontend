@@ -41,8 +41,8 @@ function LoadDots({ load, on }: { load?: AvailabilityDay; on: boolean }) {
 }
 
 const chipFocus = 'transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet';
-const chipOn = 'border-valle-violet bg-valle-violet text-white';
-const chipOff = 'border-valle-lilac bg-white text-valle-purple hover:border-valle-violet/50';
+const chipOn = 'border-valle-purple bg-valle-purple text-white';
+const chipOff = 'border-valle-lilac bg-white text-valle-purple hover:border-valle-purple/50 hover:bg-[#F4EEFF]';
 
 /* 3 · WHEN: date chip */
 function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: () => void; load?: AvailabilityDay }) {
@@ -57,9 +57,9 @@ function DateChip({ o, on, onClick, load }: { o: DateOpt; on: boolean; onClick: 
       whileTap={{ scale: 0.96 }}
       className={cn('cursor-pointer rounded-[14px] border-[1.5px] px-1.5 py-3 text-center font-sans', chipFocus, on ? chipOn : chipOff, full && 'opacity-45')}
     >
-      <div className="font-mono text-[9.5px] font-semibold tracking-[.08em] opacity-70">{o.dow}</div>
+      <div className={cn('font-mono text-[10px] font-semibold tracking-[.08em]', !on && 'opacity-75')}>{o.dow}</div>
       <div className="mt-0.5 font-display text-[22px] font-black italic">{o.dd}</div>
-      <div className="font-mono text-[9.5px] font-semibold opacity-70">{o.mm}</div>
+      <div className={cn('font-mono text-[10px] font-semibold', !on && 'opacity-75')}>{o.mm}</div>
       <LoadDots load={load} on={on} />
     </motion.button>
   );
@@ -82,9 +82,9 @@ function SlotChip({ label, sub, on, onClick, level, closure }: { label: string; 
         on ? chipOn : full ? 'cursor-not-allowed border-valle-lilac bg-[#F7F3FF] text-valle-purple opacity-60' : cn('cursor-pointer', chipOff))}
     >
       <div className="text-[15px] font-bold">{label}</div>
-      <div className="mt-0.5 font-mono text-[10.5px] opacity-70">{sub}</div>
+      <div className={cn('mt-0.5 font-mono text-[10.5px]', !on && 'opacity-75')}>{sub}</div>
       {level && (
-        <div data-testid="slot-level" className={cn('mt-[7px] inline-flex items-center gap-[5px] font-mono text-[9.5px] font-bold tracking-[.08em]', on ? 'text-white' : 'text-valle-purple')}>
+        <div data-testid="slot-level" className={cn('mt-[7px] inline-flex items-center gap-[5px] font-mono text-[10px] font-bold tracking-[.08em]', on ? 'text-white' : 'text-valle-purple')}>
           <span className="inline-block size-[7px] rounded-full" style={{ background: LEVEL_COLOR[level] }} />
           {closure ? t(CLOSURE_LABEL[closure.kind]) + (closure.reason ? ' · ' + closure.reason : '') : t(LEVEL_LABEL[level])}
         </div>

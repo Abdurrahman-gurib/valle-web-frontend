@@ -16,8 +16,8 @@ import { cn } from '@/lib/utils';
 export function ValleCard({ className, children, ...rest }: ComponentProps<typeof motion.div>) {
   return (
     <motion.div
-      whileHover={{ y: -5}}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
       className={cn('group flex flex-col overflow-hidden rounded-[18px] bg-white text-valle-purple shadow-[0_0_0_1.5px_#EBE2FF] relative after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:opacity-0 after:transition-opacity after:duration-300 after:content-[""] hover:after:opacity-100 after:shadow-[0_24px_46px_-18px_rgba(52,0,87,.4)]', className)}
       {...rest}
     >
@@ -66,7 +66,7 @@ export function BtnLabel({ children }: { children: string }) {
 export function CardImage({ src, alt, className, onClick, children, position }: { src: string; alt: string; className?: string; onClick?: () => void; children?: ReactNode; position?: string }) {
   return (
     <div onClick={onClick} className={cn('relative aspect-[16/10] overflow-hidden bg-valle-lilac', onClick && 'cursor-zoom-in', className)}>
-      <div className="size-full transition-transform duration-500 ease-out group-hover:scale-[1.06]">
+      <div className="size-full transition-transform duration-500 ease-out group-hover:scale-[1.04]">
         <Img src={src} alt={alt} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: position ?? 'center' }} />
       </div>
       {children}

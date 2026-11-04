@@ -10,8 +10,8 @@ function RestoTeaser({ href, onGo, img, alt, badge, name, blurb }: { href: strin
     <motion.a
       href={href}
       onClick={(e) => { e.preventDefault(); onGo(); }}
-      whileHover={{ y: -5}}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
       className="group relative block min-h-[400px] cursor-pointer overflow-hidden rounded-[20px] bg-valle-deep text-inherit"
       style={{ textDecoration: 'none' }}
     >

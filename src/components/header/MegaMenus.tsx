@@ -79,17 +79,17 @@ export function ExploreMenu({ go }: { go: Go }) {
           <SpaLink href={paths.explore('nature')} onClick={go(() => goto.explore('nature'))} className={cn(monoLink, 'mb-[14px]')} color="#340057">
             <span aria-hidden className="text-valle-green">●</span> {t('NATURE')} <Fwd />
           </SpaLink>
-          {links('nature', '#7333FF')}
+          {links('nature')}
         </div>
         <div>
           <SpaLink href={paths.explore('kids')} onClick={go(() => goto.explore('kids'))} className={cn(monoLink, 'mb-[14px]')} color="#340057">
             <span aria-hidden className="text-valle-yellow [text-shadow:0_0_1px_rgba(52,0,87,.4)]">●</span> {t('KIDS PARK')} <Fwd />
           </SpaLink>
-          {links('kids', '#7333FF')}
+          {links('kids')}
         </div>
         <div>
           <SpaLink href={paths.explore('tours')} onClick={go(() => goto.explore('tours'))} className={cn(monoLink, 'mb-[14px]')} color="#7333FF">{t('TOURS & GROUPS')} <Fwd /></SpaLink>
-          {links('tours', '#7333FF')}
+          {links('tours')}
           <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mt-[20px]')} color="#7333FF">{t('PACKAGES')} <Fwd /></SpaLink>
           <SpaLink href={paths.team()} onClick={go(goto.team)} className={cn(monoLink, 'mt-[12px]')} color="#7333FF">{t('TEAM BUILDING')} <Fwd /></SpaLink>
           <SpaLink href={paths.dine()} onClick={go(goto.dine)} className={cn(monoLink, 'mt-[12px]')} color="#7333FF">{t('DINE')} <Fwd /></SpaLink>

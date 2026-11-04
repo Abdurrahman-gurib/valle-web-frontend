@@ -88,7 +88,7 @@ export default function ReportsPanel() {
         <span className="font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.7)] ml-auto" title={BASIS_TIP}>VISITS {from} → {to} · BY VISIT DATE ⓘ</span>
       </div>
 
-      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D91E44] font-semibold')}>{err}</div>}
+      {err && <div className={cn(CARD, 'p-[14px] mb-[14px] text-[#D6173F] font-semibold')}>{err}</div>}
       {loading && !summary && <div className="p-[30px] flex justify-center"><Spinner color="#7333FF" /></div>}
 
       {t && (

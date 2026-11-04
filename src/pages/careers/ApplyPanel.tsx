@@ -88,7 +88,7 @@ export function ApplyPanel({ vacancy, app, isMobile }: { vacancy: VacancyDetail;
             />
 
             {app.apiErr && (
-              <div role="alert" className="bg-[#FFE2E7] border-[1.5px] border-solid border-[#D91E44] rounded-[12px] py-[13px] px-4 text-[14px] leading-[1.5] text-valle-purple">
+              <div role="alert" className="bg-[#FFE2E7] border-[1.5px] border-solid border-[#D6173F] rounded-[12px] py-[13px] px-4 text-[14px] leading-[1.5] text-valle-purple">
                 {app.apiErr}
               </div>
             )}

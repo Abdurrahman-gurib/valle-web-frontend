@@ -1,5 +1,4 @@
 {
-  "‹  Previous": "‹  पिछला",
   "\"Did I just zipline in and out of a waterfall? YES I DID! The instructors were fantastic, great way to spend my birthday.\"": "«क्या मैंने सच में झरने के आर-पार ज़िपलाइन की? हाँ, की! प्रशिक्षक शानदार थे, जन्मदिन मनाने का बेहतरीन तरीका।»",
   "\"Magnificent views and ziplines that make the adrenaline rise! Staff professional and welcoming. To do and do again.\"": "«शानदार नज़ारे और एड्रेनालिन बढ़ाने वाली ज़िपलाइनें! स्टाफ़ पेशेवर और मिलनसार। बार-बार करने लायक।»",
   "\"Never say adventure is impossible. Make it unforgettable!\"": "«कभी मत कहो कि रोमांच असंभव है। उसे अविस्मरणीय बनाओ!»",
@@ -852,7 +851,6 @@
   "Newly planted terraces and a cascade on the hillside": "पहाड़ी ढलान पर नई रोपी गई सीढ़ीदार क्यारियाँ और एक झरना",
   "Next photo": "अगली फ़ोटो",
   "Next photos": "अगली फ़ोटो",
-  "Next photos  ›": "अगली फ़ोटो  ›",
   "Ninety seconds of air on the longest cable in the valley.": "घाटी की सबसे लंबी केबल पर नब्बे सेकंड हवा में।",
   "No engine, no pedals. You control the speed the whole way down a winding mountain track, past the caution chevrons and into the last banked curve. One ride is never enough.": "न इंजन, न पैडल। घुमावदार पहाड़ी ट्रैक पर पूरे रास्ते रफ़्तार आपके हाथ में, चेतावनी शेवरॉन के पार और आख़िरी ढलवाँ मोड़ तक। एक राइड कभी काफ़ी नहीं होती।",
   "No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.": "अभी कोई अनुभव नहीं। जोड़ने के लिए ऊपर के कार्ड पर टैप करें। सभी प्रकृति पथ पहले से आपके प्रवेश में शामिल हैं।",
@@ -1952,7 +1950,6 @@
   "Team building days for companies, from Rs 2,850 per person, with a quote within one working day.": "कंपनियों के लिए टीम बिल्डिंग दिन, Rs 2,850 प्रति व्यक्ति से, एक कार्यदिवस में कोटेशन।",
   "The park photographer and the cinematic shoot: edited photos and film of your day, delivered on your ticket page.": "पार्क फ़ोटोग्राफ़र और सिनेमैटिक शूट: आपके दिन की संपादित तस्वीरें और फ़िल्म, आपके टिकट पेज पर।",
   "Package classes": "पैकेज श्रेणियाँ",
-  "SEE THE PRICES →": "कीमतें देखें →",
   "{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park": "{group} · पैकेज और 2026 मूल्य सूची · VALLÉ Advenature™ Park",
   "Cinematic shoot at Vallé: the swing by the waterfall": "वाले में सिनेमैटिक शूट: झरने के पास झूला",
   "Plan it with us": "हमारे साथ योजना बनाएँ",
@@ -2601,5 +2598,7 @@
   "See the route": "मार्ग देखें",
   "TEACHERS AND ACCOMPANYING ADULTS": "शिक्षक और साथ आने वाले वयस्क",
   "The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.": "छात्र प्रवेश शुल्क ({price} प्रति छात्र) 6 वर्ष और अधिक के हर छात्र के लिए एक बार जोड़ा जाता है; प्री-प्राइमरी छात्रों का प्रवेश निःशुल्क है। शिक्षक और साथ आने वाले वयस्क सामान्य वयस्क प्रवेश ({adult}) देते हैं। चुनें कि छात्र क्या करेंगे और हर गतिविधि के लिए संख्या बताएँ।",
-  "UNDER 6 (FREE)": "6 से कम (निःशुल्क)"
+  "UNDER 6 (FREE)": "6 से कम (निःशुल्क)",
+  "Pay at the kiosk on the day": "उसी दिन कियोस्क पर भुगतान करें",
+  "See the prices": "कीमतें देखें"
 }

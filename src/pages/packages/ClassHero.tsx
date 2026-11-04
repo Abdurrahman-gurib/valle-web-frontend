@@ -3,6 +3,7 @@ import { ArrowDown, Phone } from 'lucide-react';
 import { Img } from '../../components/Img';
 import { CurrencyPicker } from '../../components/CurrencyPicker';
 import { useT } from '../../i18n';
+import { headingTilt } from '@/components/ui/heading';
 import { DISPLAY, Eyebrow, PHONE, PRICE, TEL, cover } from './shared';
 
 export interface HeroPhoto { src: string; alt: string; width: number; height: number; position: string }
@@ -13,7 +14,7 @@ export interface HeroPhoto { src: string; alt: string; width: number; height: nu
  * audience chip, a one-line promise, the "from" price, then "Book" (scrolls to
  * the packages) and the call button; the campaign photo fills the other half.
  */
-export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onBook, bookLabel, bookTestId, actions, testId, chipColor = '#D91E44', currency }: {
+export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onBook, bookLabel, bookTestId, actions, testId, chipColor = '#D6173F', currency, logo }: {
   /** id of the h1, also the section's label */
   id: string;
   title: ReactNode;
@@ -32,6 +33,8 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
   chipColor?: string;
   /** the currency picker beside the price (pages whose prices convert) */
   currency?: boolean;
+  /** the yellow VALLÉ logo plate above the title (senior page only, after the official sheet) */
+  logo?: boolean;
 }) {
   const t = useT();
   return (
@@ -40,10 +43,12 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
         <Img src={photo.src} alt={photo.alt} priority surface="dark" width={photo.width} height={photo.height} style={cover(photo.position)} />
       </div>
       <div className="sr-hero-text">
-        <div className="sr-logo">
-          <img src="/images/brand/valle-logo-purple.webp" alt="VALLÉ Advenature™ Park" width={826} height={425} />
-        </div>
-        <h1 id={id} style={{ ...DISPLAY, color: '#FFFFFF', fontSize: 'clamp(46px,6vw,86px)', lineHeight: 0.86, margin: 0 }}>{title}</h1>
+        {logo && (
+          <div className="sr-logo">
+            <img src="/images/brand/valle-logo-purple.webp" alt="VALLÉ Advenature™ Park" width={826} height={425} />
+          </div>
+        )}
+        <h1 id={id} style={{ ...DISPLAY, color: '#FFFFFF', fontSize: 'var(--fs-h1)', lineHeight: 0.9, margin: '8px 0 4px', ...headingTilt(1) }}>{title}</h1>
         <span className="sr-age" style={{ background: chipColor }}>{chip}</span>
         <p className="sr-promise">{promise}</p>
         {from && (
@@ -57,7 +62,7 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
         {currency && !from && <CurrencyPicker fg="#FFFFFF" />}
         <div className="sr-hero-actions">
           {actions ?? (<>
-            <button type="button" data-testid={bookTestId} className="sr-btn sr-btn-primary sr-btn-lg" onClick={onBook}>{bookLabel ?? t('Book a package')} <ArrowDown aria-hidden strokeWidth={2.5} style={{ width: '1.05em', height: '1.05em' }} /></button>
+            <button type="button" data-testid={bookTestId} className="vbtn vbtn-on-dark" onClick={onBook}>{bookLabel ?? t('Book a package')} <ArrowDown aria-hidden strokeWidth={2.5} style={{ width: '1.05em', height: '1.05em' }} /></button>
             <CallButton />
           </>)}
         </div>
@@ -70,7 +75,7 @@ export function ClassHero({ id, title, chip, promise, from, fromNote, photo, onB
 export function CallButton({ testId }: { testId?: string }) {
   const t = useT();
   return (
-    <a href={TEL} data-testid={testId} className="sr-btn sr-btn-ghost sr-btn-lg" aria-label={t('Call VALLÉ on {phone}', { phone: PHONE })}>
+    <a href={TEL} data-testid={testId} className="vbtn vbtn-ghost" aria-label={t('Call VALLÉ on {phone}', { phone: PHONE })}>
       <Phone aria-hidden strokeWidth={2.2} style={{ width: '1em', height: '1em' }} />{t('Call')} <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{PHONE}</span>
     </a>
   );

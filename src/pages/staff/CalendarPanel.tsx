@@ -89,7 +89,7 @@ export default function CalendarPanel() {
     <div data-testid="calendar-panel">
       <Panel title="CALENDAR & CAPACITY · WHAT EACH ARRIVAL SLOT CAN TAKE, AND WHEN THE PARK IS CLOSED" action={<Btn variant="dark" onClick={() => { void save(); }} disabled={busy || !data}>{busy ? <Spinner color="#FFFFFF" /> : 'Save calendar'}</Btn>}>
         <div className="p-[14px] grid gap-[18px]">
-          {err && <div role="alert" className="text-[#D91E44] text-[13.5px]">{err}</div>}
+          {err && <div role="alert" className="text-[#D6173F] text-[13.5px]">{err}</div>}
           {saved && <div role="status" data-testid="calendar-saved" className="text-[#1E9E4A] text-[13.5px] font-semibold">{saved}</div>}
           {!data && !err && <Spinner />}
           {data && (

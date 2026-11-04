@@ -94,7 +94,7 @@ export function BookingMoney({ data }: { data: BookingDetailFull }) {
           <span className="font-semibold">{money(data.paidAmount ?? 0)}</span>
         </div>
         <div className="mt-1.5 flex items-center justify-between gap-3 text-[14px]" data-testid="money-balance">
-          <span className="font-extrabold" style={{ color: refundDue > 0 ? '#8A6A00' : balance > 0 ? '#D91E44' : '#1E9E4A' }}>
+          <span className="font-extrabold" style={{ color: refundDue > 0 ? '#8A6A00' : balance > 0 ? '#D6173F' : '#1E9E4A' }}>
             {refundDue > 0 ? 'Refund due to the guest' : balance > 0 ? 'Balance to collect' : 'Fully paid'}
           </span>
           <span className="inline-flex items-center gap-2.5">

@@ -60,7 +60,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
         currency
         photo={{ src: '/images/packages/student/student-zipline-kid.webp', alt: t('A young student cheering on a zipline in a blue helmet'), width: 961, height: 469, position: '42% 30%' }}
         actions={<>
-          <Link to={paths.groups()} data-testid="student-hero-book" className="sr-btn sr-btn-primary sr-btn-lg">{t('Book a school visit')} <Fwd /></Link>
+          <Link to={paths.groups()} data-testid="student-hero-book" className="vbtn vbtn-on-dark">{t('Book a school visit')} <Fwd /></Link>
           <CallButton />
         </>}
       />
@@ -156,8 +156,8 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
           <li><span aria-hidden>3</span><div><b>{t('Participants and waivers')}</b>{t('Add the list now or later from the ticket; the leader signs one waiver pack for the group.')}</div></li>
         </ol>
         <div className="sr-hero-actions" style={{ marginTop: 24 }}>
-          <Link to={paths.groups()} data-testid="book-school" className="sr-btn sr-btn-primary sr-btn-lg"><BtnLabel>{t('Book a school visit online →')}</BtnLabel></Link>
-          <button type="button" className="sr-btn sr-btn-outline sr-btn-lg" onClick={() => { requestQuoteFor(t('Student package')); onQuote(); }}>{t('Request a quote')}</button>
+          <Link to={paths.groups()} data-testid="book-school" className="vbtn vbtn-primary"><BtnLabel>{t('Book a school visit online →')}</BtnLabel></Link>
+          <button type="button" className="vbtn vbtn-secondary" onClick={() => { requestQuoteFor(t('Student package')); onQuote(); }}>{t('Request a quote')}</button>
         </div>
       </SupportPanel>
 
