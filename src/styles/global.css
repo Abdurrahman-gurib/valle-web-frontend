@@ -483,3 +483,11 @@ html[dir="rtl"] .rail-fade { -webkit-mask-image: linear-gradient(to left, #000 c
 
 /* the home marquee stops on hover/focus and with the hero's pause button */
 .vmarquee[data-paused], *:hover > .vmarquee, *:focus-within > .vmarquee { animation-play-state: paused !important; }
+
+/* explore category chips: one row; scrolls sideways on phones with a faded end */
+.explore-cats { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .explore-cats { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px 32px 2px 2px; margin-inline: -2px; -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+  html[dir="rtl"] .explore-cats { padding: 2px 2px 2px 32px; -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
+  .explore-cats::-webkit-scrollbar { display: none; }
+}

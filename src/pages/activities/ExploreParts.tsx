@@ -15,7 +15,7 @@ const PULSE_CHIPS = [
 ];
 
 /** A filter chip: filled purple when on, white with a lilac ring when off. */
-function Chip({ label, onClick, on }: { label: string; onClick: () => void; on: boolean }) {
+function Chip({ label, onClick, on, big }: { label: string; onClick: () => void; on: boolean; big?: boolean }) {
   const [h, bind] = useHover();
   return (
     <button
@@ -29,9 +29,12 @@ function Chip({ label, onClick, on }: { label: string; onClick: () => void; on: 
         color: on ? '#FFFFFF' : '#340057',
         cursor: 'pointer',
         fontFamily: 'inherit',
-        fontSize: '12.5px',
+        fontSize: big ? '14px' : '12.5px',
         fontWeight: 700,
-        padding: '8px 15px',
+        padding: big ? '0 18px' : '8px 15px',
+        minHeight: big ? 40 : undefined,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
         borderRadius: 999,
         transition: 'all .15s',
         ...(h ? { transform: 'translateY(-1px)' } : undefined),
@@ -80,11 +83,29 @@ export function AdmissionBar() {
   );
 }
 
+const CATEGORY_CHIPS = [
+  { key: 'all', label: _t('All') },
+  { key: 'adventure', label: _t('Adventure') },
+  { key: 'nature', label: _t('Nature') },
+  { key: 'kids', label: _t('Kids Park') },
+  { key: 'tours', label: _t('Tours') },
+];
+
+/** The category chips above the pulse filter: one row, scrolling on phones. */
+export function CategoryChips({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useT();
+  return (
+    <div role="group" aria-label={t('Category')} data-testid="category-chips" className="explore-cats" style={{ marginTop: 22 }}>
+      {CATEGORY_CHIPS.map((c) => <Chip key={c.key} label={t(c.label)} onClick={() => onChange(c.key)} on={value === c.key} big />)}
+    </div>
+  );
+}
+
 /** Pulse-level chips and the result count. */
 export function PulseFilter({ value, onChange, resultCount }: { value: string; onChange: (v: string) => void; resultCount: string }) {
   const t = useT();
   return (
-    <div style={{ margin: '22px 0 0', padding: '14px 0', borderBottom: '1px solid #EBE2FF' }}>
+    <div style={{ margin: '4px 0 0', padding: '10px 0 14px', borderBottom: '1px solid #EBE2FF' }}>
       <div role="group" aria-labelledby="pulse-label" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 10 }}>
         <span id="pulse-label" style={{ fontFamily: MONO, fontSize: 11, fontWeight: 600, letterSpacing: '.12em', color: 'rgba(52,0,87,.75)', marginInlineEnd: 4 }}>{t('PULSE LEVEL')}</span>
         {PULSE_CHIPS.map((c) => <Chip key={c.key} label={t(c.label)} onClick={() => onChange(c.key)} on={value === c.key} />)}

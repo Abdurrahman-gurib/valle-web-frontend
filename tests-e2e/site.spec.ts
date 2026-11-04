@@ -214,8 +214,11 @@ test.describe('explore', () => {
 
   test('category filter from URL works', async ({ page }) => {
     await page.goto('/explore?cat=kids');
-    await expect(page.getByText('Pirate Ship')).toBeVisible();
+    // the Kids Park pricelist above the cards names the rides too, so look at the cards
+    await expect(page.getByTestId('activity-card').filter({ hasText: 'Pirate Ship' })).toBeVisible();
     await expect(page.getByText('Zipline Adventures')).toBeHidden();
+    await expect(page.getByTestId('kids-pricelist')).toBeVisible();
+    await expect(page.getByTestId('category-chips').getByRole('button', { name: 'Kids Park' })).toHaveAttribute('aria-pressed', 'true');
   });
 });
 
@@ -336,8 +339,9 @@ test.describe('regressions', () => {
 
   test('explore filters survive a trip through an experience page', async ({ page }) => {
     await page.goto('/explore?cat=kids');
-    await expect(page.getByText('Pirate Ship')).toBeVisible();
-    await page.getByText('Pirate Ship').first().click();
+    const pirate = page.getByTestId('activity-card').filter({ hasText: 'Pirate Ship' });
+    await expect(pirate).toBeVisible();
+    await pirate.getByRole('link', { name: 'Pirate Ship' }).click();
     await expect(page).toHaveURL(/\/activities\/pirate/);
     await page.getByText(/All experiences/i).first().click();
     await expect(page).toHaveURL(/cat=kids/);
@@ -447,7 +451,8 @@ test.describe('packages', () => {
     const cards = page.getByTestId('resident-package');
     await expect(cards).toHaveCount(cat.PACKS.resident.length);
     for (const [i, p] of cat.PACKS.resident.entries()) await expect(cards.nth(i).getByTestId('resident-price')).toHaveText(p.single);
-    await expect(page.getByTestId('kids-pricelist')).toBeVisible();
+    // the Kids Park pricelist moved to the Kids Park page; the resident page links to it
+    await expect(page.getByTestId('kids-pricelist-link')).toHaveAttribute('href', /\/explore\?cat=kids#kids-prices$/);
     await expectNoHorizontalScroll(page);
     await cards.nth(0).getByTestId('pkg-book').click();
     await expect(page).toHaveURL(/\/booking$/);

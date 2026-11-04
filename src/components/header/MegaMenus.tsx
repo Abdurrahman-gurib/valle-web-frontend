@@ -6,16 +6,16 @@ import { paths, useGoto } from '../../lib/nav';
 import { useT } from '../../i18n';
 import { StripesSm } from '../Stripes';
 import { Img } from '../Img';
-import { KidsParkLogo, MegaLink, SpaLink, megaPanel, monoLink } from './parts';
+import { MegaLink, SpaLink, megaPanel, monoLink } from './parts';
 
-/** valle-red-ink: the brand red dark enough for small text (see tailwind.css). */
-const RED_INK = '#D6173F';
+/** Link/selected text colour of the design system. */
+const LINK = '#5B21B6';
 import type { MenuGroup } from './packageGroups';
 
 /** `go` closes the menus and then runs the navigation. */
 type Go = (fn: () => void) => () => void;
 
-/** Desktop packages mega menu: the package groups in CSS columns, plus the VIP teaser. */
+/** Desktop packages mega menu: day packages and packages by group, plus the VIP teaser. */
 export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
   const t = useT();
   const goto = useGoto();
@@ -25,17 +25,13 @@ export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
       <StripesSm />
       <div className="max-w-[1320px] mx-auto pt-[28px] px-[clamp(16px,3.5vw,40px)] pb-[32px] flex gap-[clamp(20px,3vw,44px)] flex-wrap items-start">
         <div className="flex-1 min-w-[220px]">
-          <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mb-[14px]')} color={RED_INK}>
+          <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mb-[20px]')} color={LINK}>
             {t('ALL PACKAGES')} <Fwd />
           </SpaLink>
-          {/* CSS columns pack the groups top to bottom, so a short group never leaves a gap under it */}
-          <div className="[column-width:170px] [column-gap:24px]" data-testid="packages-menu">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-[32px] gap-y-[16px]" data-testid="packages-menu">
             {groups.map((g) => (
-              <div key={g.title} className="break-inside-avoid mb-[16px]">
-                <div className="font-mono text-[12.5px] font-bold tracking-[.14em] text-valle-violet mb-[6px] flex items-center gap-2">
-                  {g.title}
-                  {g.kids && <KidsParkLogo width={40} />}
-                </div>
+              <div key={g.title}>
+                <div className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/75 mb-[6px] pb-[6px] border-b border-solid border-valle-lilac">{g.title}</div>
                 {g.links.map(([name, href]) => (
                   <MegaLink key={href} name={name} href={href} onClick={go(() => navigate(href))} />
                 ))}
@@ -43,10 +39,10 @@ export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
             ))}
           </div>
         </div>
-        <div className="flex-[0_0_280px] bg-valle-purple rounded-[16px] py-[18px] px-[20px] text-white">
+        <div className="flex-[0_0_280px] bg-valle-purple rounded-[20px] py-[18px] px-[20px] text-white">
           <div className="font-mono text-[10px] font-bold tracking-[.14em] text-valle-green">{t('MOST BOOKED')}</div>
           <div className="font-display italic font-black text-[24px] uppercase mt-[6px]">{t('VIP Ultimate')}</div>
-          <div className="text-[13.5px] text-[rgba(255,255,255,.78)] mt-[6px] leading-[1.45]">
+          <div className="text-[13.5px] text-[rgba(255,255,255,.8)] mt-[6px] leading-[1.45]">
             {t('Everything in the valley, private guide, butler service and lunch. Souvenir gift included.')}
           </div>
           <SpaLink href={paths.packages('vip')} onClick={go(() => goto.packages('vip'))} className="block cursor-pointer font-mono text-[11px] font-bold tracking-[.1em] mt-[12px]" color="#FFFC33">
@@ -58,10 +54,40 @@ export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
   );
 }
 
+/** Desktop dine menu: the two restaurants (with their photos) and the kids menu. */
+export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
+  const t = useT();
+  const navigate = useNavigate();
+  const catalog = useCatalog();
+  const img = (id: string) => catalog.RESTOS[id]?.img;
+  return (
+    <div className={megaPanel}>
+      <StripesSm />
+      <div className="max-w-[1320px] mx-auto pt-[28px] px-[clamp(16px,3.5vw,40px)] pb-[32px] grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-[clamp(16px,2vw,28px)]" data-testid="dine-menu">
+        {links.map(([name, href], i) => {
+          const id = href.includes('citronelle') ? 'citronelle' : 'chamouze';
+          const src = i < 2 ? img(id) : undefined;
+          return (
+            <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="group block rounded-[20px] overflow-hidden bg-white shadow-s2 [transition:transform_var(--t-ui)] hover:[transform:translateY(-4px)]" color="#340057">
+              {src
+                ? <span className="block relative aspect-[16/9] bg-valle-lilac"><Img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /></span>
+                : <span className="flex aspect-[16/9] items-center justify-center bg-valle-tint font-display italic font-black text-[28px] uppercase text-valle-purple">{t('Kids menu')}</span>}
+              <span className="flex items-center justify-between gap-2 px-[18px] py-[14px] font-display italic font-black text-[19px] uppercase">
+                {name}<span className="text-valle-link"><Fwd /></span>
+              </span>
+            </SpaLink>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /** Desktop explore mega menu: the four categories with their experiences, plus the zipline teaser. */
 export function ExploreMenu({ go }: { go: Go }) {
   const t = useT();
   const goto = useGoto();
+  const navigate = useNavigate();
   const catalog = useCatalog();
   const links = (cat: string, hoverColor?: string) => catalog.ACTS.filter((a) => a.cat === cat).map((a) => (
     <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor={hoverColor} />
@@ -72,27 +98,26 @@ export function ExploreMenu({ go }: { go: Go }) {
       <StripesSm />
       <div className="max-w-[1320px] mx-auto pt-[30px] px-[clamp(16px,3.5vw,40px)] pb-[36px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[clamp(20px,3vw,44px)]">
         <div>
-          <SpaLink href={paths.explore('adventure')} onClick={go(() => goto.explore('adventure'))} className={cn(monoLink, 'mb-[14px]')} color={RED_INK}>{t('ADVENTURE')} <Fwd /></SpaLink>
+          <SpaLink href={paths.explore('adventure')} onClick={go(() => goto.explore('adventure'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>{t('ADVENTURE')} <Fwd /></SpaLink>
           {links('adventure')}
         </div>
         <div>
-          <SpaLink href={paths.explore('nature')} onClick={go(() => goto.explore('nature'))} className={cn(monoLink, 'mb-[14px]')} color="#340057">
-            <span aria-hidden className="text-valle-green">●</span> {t('NATURE')} <Fwd />
+          <SpaLink href={paths.explore('nature')} onClick={go(() => goto.explore('nature'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
+            {t('NATURE')} <Fwd />
           </SpaLink>
           {links('nature')}
         </div>
         <div>
-          <SpaLink href={paths.explore('kids')} onClick={go(() => goto.explore('kids'))} className={cn(monoLink, 'mb-[14px]')} color="#340057">
-            <span aria-hidden className="text-valle-yellow [text-shadow:0_0_1px_rgba(52,0,87,.4)]">●</span> {t('KIDS PARK')} <Fwd />
+          <SpaLink href={paths.explore('kids')} onClick={go(() => goto.explore('kids'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
+            {t('KIDS PARK')} <Fwd />
           </SpaLink>
           {links('kids')}
+          <MegaLink name={t('Vallé Kids Park pricelist')} href={paths.explore('kids') + '#kids-prices'} onClick={go(() => navigate(paths.explore('kids') + '#kids-prices'))} />
         </div>
         <div>
-          <SpaLink href={paths.explore('tours')} onClick={go(() => goto.explore('tours'))} className={cn(monoLink, 'mb-[14px]')} color="#7333FF">{t('TOURS & GROUPS')} <Fwd /></SpaLink>
+          <SpaLink href={paths.explore('tours')} onClick={go(() => goto.explore('tours'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>{t('TOURS')} <Fwd /></SpaLink>
           {links('tours')}
-          <SpaLink href={paths.packages()} onClick={go(() => goto.packages())} className={cn(monoLink, 'mt-[20px]')} color="#7333FF">{t('PACKAGES')} <Fwd /></SpaLink>
-          <SpaLink href={paths.team()} onClick={go(goto.team)} className={cn(monoLink, 'mt-[12px]')} color="#7333FF">{t('TEAM BUILDING')} <Fwd /></SpaLink>
-          <SpaLink href={paths.dine()} onClick={go(goto.dine)} className={cn(monoLink, 'mt-[12px]')} color="#7333FF">{t('DINE')} <Fwd /></SpaLink>
+
         </div>
         <SpaLink
           href={paths.detail('zipline')}

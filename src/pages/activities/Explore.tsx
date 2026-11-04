@@ -2,17 +2,17 @@ import { breadcrumbs, useSeo } from '../../lib/seo';
 import { useEffect, useMemo } from 'react';
 import { ActivityCard } from '../../components/ActivityCard';
 import { CarouselArrows, CarouselTrack, carouselKeys, useCarousel } from '@/components/ui/carousel';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { KidsParkEntrance, kpButton } from '../../components/KidsPark';
 import { useCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { useCardModel } from '../../lib/card';
-import { paths } from '../../lib/nav';
 import { useReveal } from '../../hooks/useReveal';
 import { _t, isRtl, useLang, useT } from '../../i18n';
 import type { CatKey } from '../../types';
-import { AdmissionBar, BuildYourDayCta, NoResults, PulseFilter } from './ExploreParts';
-import { BARLOW, MONO } from './shared';
+import { AdmissionBar, BuildYourDayCta, CategoryChips, NoResults, PulseFilter } from './ExploreParts';
+import { KidsParkSection } from '../packages/KidsParkSection';
+import { MONO } from './shared';
 
 const PULSE_RANGES: Record<string, [number, number]> = {
   any: [1, 5], serene: [1, 2], moderate: [3, 3], extreme: [4, 5],
@@ -56,6 +56,14 @@ export default function ExplorePage() {
   const nature = useCarousel();
   const lang = useLang();
 
+  /** A category chip keeps the pulse filter and drops the search (the chips replace it). */
+  const setCat = (v: string) => {
+    const next = new URLSearchParams(params);
+    if (v === 'all') next.delete('cat');
+    else next.set('cat', v);
+    setParams(next);
+  };
+
   const setPulseLvl = (v: string) => {
     const next = new URLSearchParams(params);
     if (v === 'any') next.delete('pulse');
@@ -83,32 +91,32 @@ export default function ExplorePage() {
 
   return (
     <main ref={ref} style={{ maxWidth: 1320, margin: '0 auto', padding: '104px clamp(16px,3.5vw,40px) 0' }}>
-      {/* the Kids Park category opens on its own entrance arch, the logo as the page heading */}
-      {cat === 'kids' ? (
+      {/* the Kids Park category opens on its own entrance arch, the logo as the page heading, then its pricelist */}
+      {cat === 'kids' ? (<>
         <KidsParkEntrance as="h1" priority>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-            <Link to={paths.packageGroup('resident') + '#kids'} style={kpButton('purple')}>{t('Kids Park prices →')}</Link>
+            <a href="#kids-prices" style={kpButton('purple')}>{t('Kids Park prices →')}</a>
             <span style={{ alignSelf: 'center', fontFamily: MONO, fontSize: 11.5, fontWeight: 700, letterSpacing: '.1em', color: '#3A0A46' }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
           </div>
         </KidsParkEntrance>
-      ) : (
+        <KidsParkSection />
+      </>) : (
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <h1 style={{
-          fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900,
-          // the nature title is a sentence, so it runs smaller, level and with room under the header
-          fontSize: cat === 'nature' ? 'clamp(26px,3.4vw,48px)' : 'clamp(42px,6.4vw,90px)', lineHeight: cat === 'nature' ? 0.95 : 0.82, letterSpacing: '-0.01em',
-          margin: cat === 'nature' ? '14px 0 0' : 0, maxWidth: '18ch', textTransform: 'uppercase', transform: cat === 'nature' ? 'none' : 'rotate(-4deg)', transformOrigin: 'left bottom',
-        }}>{cat === 'nature' ? t('Already included in entrance admission fees') : t('Explore Vallé')}</h1>
+        <div>
+          <h1 className="v-h1" style={{ maxWidth: '18ch' }}>{catName ? t('{name} activities', { name: catName }) : t('Explore Vallé')}</h1>
+          {cat === 'nature' && <p className="v-measure" style={{ margin: '22px 0 0', fontSize: 17, lineHeight: 1.6, color: 'rgba(52,0,87,.8)' }}>{t('Already included in entrance admission fees')}</p>}
+        </div>
         <span style={{
           fontFamily: MONO, fontSize: 12, fontWeight: 600,
-          letterSpacing: '.16em', color: 'rgba(52,0,87,.7)',
+          letterSpacing: '.16em', color: 'rgba(52,0,87,.75)',
         }}>{t('{count} EXPERIENCES · ONE PARK', { count: catalog.ACTS.length })}</span>
       </div>
       )}
 
-      <AdmissionBar />
+      {cat !== 'kids' && <AdmissionBar />}
 
-      {/* the search box and category chips went: categories come from the Explore menu, the search from the header */}
+      {/* category chips (All · Adventure · Nature · Kids Park · Tours), then the pulse filter */}
+      <CategoryChips value={cat} onChange={setCat} />
       <PulseFilter value={pulseLvl} onChange={setPulseLvl} resultCount={resultCount} />
 
       {cat === 'nature' ? (
@@ -123,8 +131,8 @@ export default function ExplorePage() {
           {cards.length > 1 && <CarouselArrows className="mt-3 justify-end" prev={nature.prev} next={nature.next} canPrev={nature.canPrev} canNext={nature.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />}
         </div>
       ) : (
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 20, marginTop: 24,
+        <div id="kids-rides-list" style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(265px,1fr))', gap: 20, marginTop: 24, scrollMarginTop: 96,
         }}>
           {cards.map((a) => (
             <ActivityCard key={a.id} a={a} rateTag={app.rateTag} kids={cat === 'kids'} />

@@ -9,8 +9,8 @@ import { LanguagePicker, LanguageSuggest } from './LanguagePicker';
 import { useLang, useT, _t } from '../i18n';
 import { NavBtn, hamburgerBar, type CSSVars } from './header/parts';
 import { useCompactHeader, useScrolled } from './header/useHeaderLayout';
-import { packageGroups } from './header/packageGroups';
-import { ExploreMenu, PackagesMenu } from './header/MegaMenus';
+import { dineLinks, packageGroups } from './header/packageGroups';
+import { DineMenu, ExploreMenu, PackagesMenu } from './header/MegaMenus';
 import { MobileNav } from './header/MobileNav';
 import { focusablesIn } from '../hooks/useFocusTrap';
 
@@ -20,10 +20,10 @@ void RATE_WORD_KEYS;
 
 // Shorter wording for the top menu only, where French and Italian run long.
 // English falls back to the plain label.
-const MENU_KEYS = [_t('menu:Plan your visit'), _t('menu:Our story'), _t('menu:Vacancies')];
+const MENU_KEYS = [_t('menu:Plan your visit'), _t('menu:Our story'), _t('menu:Groups & schools')];
 void MENU_KEYS;
 
-type Mega = 'explore' | 'pkg' | null;
+type Mega = 'explore' | 'pkg' | 'dine' | null;
 /** Hover intent: a short wait before a menu opens, a longer one before it closes, so the pointer can cross into the panel. */
 const HOVER_OPEN_MS = 120;
 const HOVER_CLOSE_MS = 220;
@@ -38,18 +38,19 @@ export function Header() {
   const navigate = useNavigate();
   const t = useT();
   const menu = (en: string) => { const k = 'menu:' + en; const s = t(k); return s === k ? t(en) : s; };
-  // Careers lives outside the catalog-driven nav helpers, so it routes directly.
-  const gotoVacancies = () => navigate(paths.vacancies());
+  const gotoGroups = () => navigate(paths.groups());
 
   const scrolled = useScrolled();
   const [mega, setMega] = useState<Mega>(null);
   const megaOpen = mega === 'explore';
   const megaPkgOpen = mega === 'pkg';
+  const megaDineOpen = mega === 'dine';
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchQ, setSearchQ] = useState('');
   const headerRef = useRef<HTMLElement>(null);
   const exploreBtn = useRef<HTMLButtonElement>(null);
   const pkgBtn = useRef<HTMLButtonElement>(null);
+  const dineBtn = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openedBy = useRef<'hover' | 'click' | 'key'>('click');
@@ -61,7 +62,7 @@ export function Header() {
   }, [location]);
   useEffect(() => () => { if (hoverTimer.current) clearTimeout(hoverTimer.current); }, []);
 
-  const triggerOf = (m: Mega) => (m === 'explore' ? exploreBtn.current : m === 'pkg' ? pkgBtn.current : null);
+  const triggerOf = (m: Mega) => (m === 'explore' ? exploreBtn.current : m === 'pkg' ? pkgBtn.current : m === 'dine' ? dineBtn.current : null);
   const focusFirstLink = () => requestAnimationFrame(() => { if (panelRef.current) focusablesIn(panelRef.current)[0]?.focus(); });
 
   // ---- hover (mouse only: a tap is a click) -------------------------------
@@ -113,7 +114,7 @@ export function Header() {
   // Escape from anywhere (a hover-opened menu) and focus leaving trigger + panel close the menu
   useEffect(() => {
     if (!mega) return;
-    const tr = mega === 'explore' ? exploreBtn.current : pkgBtn.current;
+    const tr = triggerOf(mega);
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       const inMenu = !!panelRef.current?.contains(document.activeElement) || document.activeElement === tr;
@@ -131,7 +132,7 @@ export function Header() {
   }, [mega]);
 
   const isHome = location.pathname === '/';
-  const onHeroTop = isHome && !scrolled && !mobileNavOpen && !megaOpen && !megaPkgOpen;
+  const onHeroTop = isHome && !scrolled && !mobileNavOpen && !mega;
   const headerFg = mobileNavOpen || onHeroTop ? '#FFFFFF' : '#340057';
   const headerBg = mobileNavOpen
     ? '#260040'
@@ -186,10 +187,13 @@ export function Header() {
                   snug={lang !== 'en'} label={t('Packages')} chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} btnRef={pkgBtn} controls="mega-packages"
                   onClick={onTriggerClick('pkg')} onKeyDown={onTriggerKey('pkg')} onPointerEnter={hoverIn('pkg')} onPointerLeave={hoverOut}
                 />
+                <NavBtn snug={lang !== 'en'} label={menu('Groups & schools')} href={paths.groups()} color={headerFg} onClick={go(gotoGroups)} />
                 <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
-                <NavBtn snug={lang !== 'en'} label={t('Dine')} href={paths.dine()} color={headerFg} onClick={go(goto.dine)} />
+                <NavBtn
+                  snug={lang !== 'en'} label={t('Dine')} chev={megaDineOpen ? '▲' : '▼'} color={headerFg} btnRef={dineBtn} controls="mega-dine"
+                  onClick={onTriggerClick('dine')} onKeyDown={onTriggerKey('dine')} onPointerEnter={hoverIn('dine')} onPointerLeave={hoverOut}
+                />
                 <NavBtn snug={lang !== 'en'} label={menu('Our story')} href={paths.story()} color={headerFg} onClick={go(goto.story)} />
-                <NavBtn snug={lang !== 'en'} label={menu('Vacancies')} href={paths.vacancies()} color={headerFg} onClick={go(gotoVacancies)} />
               </nav>
               <div className="flex items-center gap-[10px] justify-self-end">
                 <button
@@ -272,12 +276,12 @@ export function Header() {
           // pointer and keys of the open panel; the panel itself is positioned against the header
           <div
             ref={panelRef}
-            id={megaPkgOpen ? 'mega-packages' : 'mega-explore'}
+            id={megaPkgOpen ? 'mega-packages' : megaDineOpen ? 'mega-dine' : 'mega-explore'}
             onPointerEnter={(e) => { if (e.pointerType === 'mouse') clearHover(); }}
             onPointerLeave={hoverOut}
             onKeyDown={onPanelKey}
           >
-            {megaPkgOpen ? <PackagesMenu groups={pkgGroups} go={go} /> : <ExploreMenu go={go} />}
+            {megaPkgOpen ? <PackagesMenu groups={pkgGroups} go={go} /> : megaDineOpen ? <DineMenu links={dineLinks(t)} go={go} /> : <ExploreMenu go={go} />}
           </div>
         )}
       </header>
@@ -285,7 +289,7 @@ export function Header() {
       {mobileNavOpen && (
         <MobileNav
           groups={pkgGroups} go={go} searchQ={searchQ} setSearchQ={setSearchQ} onSearch={searchGo}
-          close={() => setMobileNavOpen(false)} gotoVacancies={gotoVacancies} header={() => headerRef.current}
+          close={() => setMobileNavOpen(false)} gotoGroups={gotoGroups} dine={dineLinks(t)} header={() => headerRef.current}
         />
       )}
 

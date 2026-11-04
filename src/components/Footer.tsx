@@ -1,5 +1,5 @@
 import { useCatalog } from '../store/CatalogContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
 import { paths, useGoto } from '../lib/nav';
@@ -36,8 +36,13 @@ function FootLink({ label, onClick, hoverColor, href }: { label: string; onClick
   );
 }
 
+/** The column heads: real headings, so the footer reads as sections. */
+const colHead = 'm-0 font-mono text-[11px] font-bold tracking-[.12em] text-white/75';
+const MAPS = 'https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z';
+
 export function Footer() {
   const goto = useGoto();
+  const navigate = useNavigate();
   const t = useT();
   const catalog = useCatalog();
   return (
@@ -71,45 +76,54 @@ export function Footer() {
             </div>
           </div>
           <div>
-            <div className="font-mono text-[10.5px] font-semibold tracking-[.16em] opacity-60">{t('EXPLORE')}</div>
+            <h2 className={colHead}>{t('EXPLORE')}</h2>
             <div className="mt-2.5">
               <FootLink label={t('All {n} experiences', { n: catalog.ACTS.length })} href={paths.explore('all')} onClick={() => goto.explore('all')} hoverColor="#FFFC33" />
-              <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FF3358" />
-              <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#33FF74" />
+              <FootLink label={t('Adventure')} href={paths.explore('adventure')} onClick={() => goto.explore('adventure')} hoverColor="#FFFC33" />
+              <FootLink label={t('Nature')} href={paths.explore('nature')} onClick={() => goto.explore('nature')} hoverColor="#FFFC33" />
               <FootLink label={t('Kids Park')} href={paths.explore('kids')} onClick={() => goto.explore('kids')} hoverColor="#FFFC33" />
-              <FootLink label={t('Tours & Groups')} href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
+              <FootLink label={t('Tours')} href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
               <FootLink label={t('Packages')} href={paths.packages()} onClick={() => goto.packages()} hoverColor="#FFFC33" />
-              <FootLink label={t('Team building')} href={paths.team()} onClick={() => goto.team()} hoverColor="#FFFC33" />
-              <FootLink label={t('Restaurants')} href={paths.dine()} onClick={() => goto.dine()} hoverColor="#FFFC33" />
               <FootLink label="Le Chamouzé" href={paths.resto('chamouze')} onClick={() => goto.resto('chamouze')} hoverColor="#FFFC33" />
               <FootLink label="La Citronelle" href={paths.resto('citronelle')} onClick={() => goto.resto('citronelle')} hoverColor="#FFFC33" />
-              <FootLink label={t('Book your day')} href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FF3358" />
-              <FootLink label={t('Careers')} href={paths.vacancies()} onClick={() => goto.vacancies()} hoverColor="#FFFC33" />
+              <FootLink label={t('Book your day')} href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FFFC33" />
             </div>
           </div>
           <div>
-            <div className="font-mono text-[10.5px] font-semibold tracking-[.16em] opacity-60">{t('VISIT')}</div>
-            <div className="mt-3 text-[14.5px] leading-[1.7] opacity-88">
+            <h2 className={colHead}>{t('VISIT')}</h2>
+            <div className="mt-3 text-[14.5px] leading-[1.7] opacity-90">
               {t('Open daily 09:00 – 17:30')}<br />B102, Mare Anguilles<br />{t('Chamouny, Mauritius')}
             </div>
-            <div className="mt-3 text-[14.5px] leading-[1.7]">
+            <div className="mt-2">
+              <a href={MAPS} target="_blank" rel="noopener" className="block py-[7px] text-[15px] font-medium" style={{ color: '#FFFC33' }}>{t('Directions · Google Maps ↗')}</a>
+              <FootLink label={t('Plan your visit')} href={paths.plan()} onClick={() => goto.plan()} hoverColor="#FFFC33" />
+              <FootLink label={t('Our story')} href={paths.story()} onClick={() => goto.story()} hoverColor="#FFFC33" />
+            </div>
+            <div className="mt-2 text-[14.5px] leading-[1.7]">
               <a href="tel:+2306604477" style={{ color: '#FFFC33' }}>+230 660 4477</a><br />
               <a href="mailto:sales@vallepark.com" style={{ color: '#FFFC33' }}>sales@vallepark.com</a>
             </div>
           </div>
           <div>
-            <div className="font-mono text-[10.5px] font-semibold tracking-[.16em] opacity-60">{t('RECOGNISED BY')}</div>
-            <Img
-              src="/images/wlta-logo-1.png"
-              alt={t('World Luxury Travel Awards 2026 winner')}
-              surface="dark"
-              placeholder="transparent"
-              width={614}
-              height={614}
-              style={{ height: 60, width: 'auto', marginTop: 14, aspectRatio: '1 / 1', objectFit: 'contain' }}
-            />
-            <div className="mt-2 text-[12.5px] opacity-60">World Luxury Travel Awards 2026</div>
-            <div className="mt-[18px] font-mono text-[13px] font-semibold tracking-[.1em] text-valle-yellow">VALLEPARK.COM</div>
+            <h2 className={colHead}>{t('GROUPS')}</h2>
+            <div className="mt-2.5">
+              <FootLink label={t('Schools')} href={paths.packageGroup('student')} onClick={() => navigate(paths.packageGroup('student'))} hoverColor="#FFFC33" />
+              <FootLink label={t('Companies')} href={paths.packageGroup('corporate')} onClick={() => navigate(paths.packageGroup('corporate'))} hoverColor="#FFFC33" />
+              <FootLink label={t('Groups of 10+')} href={paths.groups()} onClick={() => navigate(paths.groups())} hoverColor="#FFFC33" />
+              <FootLink label={t('Careers')} href={paths.vacancies()} onClick={() => goto.vacancies()} hoverColor="#FFFC33" />
+            </div>
+            <div className="mt-6 flex items-center gap-3">
+              <Img
+                src="/images/wlta-logo-1.png"
+                alt={t('World Luxury Travel Awards 2026 winner')}
+                surface="dark"
+                placeholder="transparent"
+                width={614}
+                height={614}
+                style={{ height: 52, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain' }}
+              />
+              <div className="text-[12.5px] leading-[1.4] opacity-75">World Luxury Travel Awards 2026</div>
+            </div>
           </div>
         </div>
         <div className="mx-auto mt-[38px] mb-0 flex max-w-[1320px] flex-wrap justify-between gap-3.5 border-0 border-t border-solid border-white/16 px-[clamp(16px,3.5vw,40px)] pt-[22px] pb-0 font-mono text-[11px] opacity-60">

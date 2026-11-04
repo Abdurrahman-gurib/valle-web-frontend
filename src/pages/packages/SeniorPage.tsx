@@ -9,7 +9,7 @@ import { ClassHero } from './ClassHero';
 import { BookActions, PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
-import { Eyebrow, H2, MENU_DT, QuoteLink, SectionHeader, cardItems, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
+import { Eyebrow, H2, MENU_DT, QuoteLink, GroupLink, SectionHeader, cardItems, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
 import { requestQuoteFor } from './QuoteForm';
 
 /**
@@ -113,7 +113,7 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         items={[
           { icon: UserCheck, title: t('Who it is for'), text: t('Guests aged 55 and above. Companions aged 12 and over pay the same package price.') },
           { icon: Footprints, title: t('What to bring'), text: t('Comfortable walking shoes and sun protection. The jeep visit is seated.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={() => { requestQuoteFor(t('Senior citizen')); onQuote(); }} label={t('Request a group quote')} /> },
+          { icon: Users, title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Senior citizen')); onQuote(); }} label={t('Request a group quote')} /></div> },
           validity,
         ]}
       />

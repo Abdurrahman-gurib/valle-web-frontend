@@ -54,6 +54,11 @@ export function QuoteLink({ onClick, label }: { onClick: () => void; label: stri
   return <button type="button" className="sr-link sr-link-btn" onClick={onClick}>{label} <Fwd /></button>;
 }
 
+/** The text link to the group booking page (/groups), for groups of 10 or more. */
+export function GroupLink({ label }: { label: string }) {
+  return <Link to={paths.groups()} className="sr-link" data-testid="groups-link">{label} <Fwd /></Link>;
+}
+
 /** The validity note every class page closes its "Good to know" with. */
 export function useValidityItem(): { icon: LucideIcon; title: string; text: string } {
   const t = useT();

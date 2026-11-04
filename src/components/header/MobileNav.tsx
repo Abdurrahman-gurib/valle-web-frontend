@@ -1,5 +1,6 @@
 import { Fwd } from '@/components/ui/arrows';
 import type { ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useApp } from '../../store/AppStore';
@@ -7,7 +8,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { paths, useGoto } from '../../lib/nav';
 import { useT, _t } from '../../i18n';
 import { Stripes } from '../Stripes';
-import { KidsParkLogo, SpaLink, mobileNavRow } from './parts';
+import { SpaLink, mobileNavRow } from './parts';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { MenuGroup } from './packageGroups';
 
@@ -30,8 +31,9 @@ function NavRow({ href, onClick, delay, arrow = 'text-[rgba(255,252,51,.7)]', ch
 }
 
 /** The compact layout's full-screen menu under the header bar. */
-export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, gotoVacancies, header }: {
-  groups: MenuGroup[]; go: Go; searchQ: string; setSearchQ: (q: string) => void; onSearch: () => void; close: () => void; gotoVacancies: () => void;
+export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, gotoGroups, dine, header }: {
+  groups: MenuGroup[]; go: Go; searchQ: string; setSearchQ: (q: string) => void; onSearch: () => void; close: () => void; gotoGroups: () => void;
+  dine: [string, string][];
   /** The header bar stays usable (and in the Tab cycle) while the menu covers the page. */
   header: () => HTMLElement | null;
 }) {
@@ -85,17 +87,14 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
       </div>
       <NavRow href={paths.home()} onClick={go(goto.home)} delay="[animation-delay:.1s]">{t('Home')}</NavRow>
       <NavRow href={paths.explore('all')} onClick={go(() => goto.explore('all'))} delay="[animation-delay:.14s]" arrow="text-valle-yellow">{t('All {n} experiences', { n: catalog.ACTS.length })}</NavRow>
-      <NavRow href={paths.packages()} onClick={go(() => goto.packages())} delay="[animation-delay:.16s]">{t('Packages & team building')}</NavRow>
+      <NavRow href={paths.packages()} onClick={go(() => goto.packages())} delay="[animation-delay:.16s]">{t('Packages')}</NavRow>
       {/* the packages menu's groups, folded so the overlay stays short */}
       <details data-testid="mobile-packages-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.17s]">
-        <summary className="cursor-pointer py-[12px] font-mono text-[11.5px] font-bold tracking-[.12em] text-valle-yellow">{t('ALL PACKAGE GROUPS & MENUS')}</summary>
+        <summary className="cursor-pointer py-[12px] font-mono text-[11.5px] font-bold tracking-[.12em] text-valle-yellow">{t('ALL PACKAGES BY TYPE')}</summary>
         <div className="grid grid-cols-[1fr_1fr] gap-x-[14px] gap-y-[12px] pb-[14px]">
           {groups.map((g) => (
             <div key={g.title} className="min-w-0">
-              <div className="font-mono text-[10.5px] font-bold tracking-[.12em] text-valle-green mb-[3px] flex items-center gap-1.5">
-                {g.title}
-                {g.kids && <KidsParkLogo width={30} />}
-              </div>
+              <div className="font-mono text-[10.5px] font-bold tracking-[.12em] text-valle-green mb-[3px]">{g.title}</div>
               {g.links.map(([name, href]) => (
                 <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="block py-[5px] text-[14px] font-medium leading-[1.3]" color="#FFFFFF">{name}</SpaLink>
               ))}
@@ -107,10 +106,19 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
         <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
         <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>
       </button>
-      <NavRow href={paths.plan()} onClick={go(goto.plan)} delay="[animation-delay:.18s]">{t('Plan your visit')}</NavRow>
-      <NavRow href={paths.dine()} onClick={go(goto.dine)} delay="[animation-delay:.22s]">{t('Dine')}</NavRow>
+      <NavRow href={paths.groups()} onClick={go(gotoGroups)} delay="[animation-delay:.18s]">{t('Groups & schools')}</NavRow>
+      <NavRow href={paths.plan()} onClick={go(goto.plan)} delay="[animation-delay:.2s]">{t('Plan your visit')}</NavRow>
+      <details data-testid="mobile-dine-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.22s]">
+        <summary className="group/dine flex cursor-pointer list-none items-center justify-between py-[12px] text-[16.5px] font-semibold text-white [&::-webkit-details-marker]:hidden">
+          {t('Dine')}<ChevronDown aria-hidden size={18} strokeWidth={2.5} className="text-[rgba(255,252,51,.7)] [transition:transform_var(--t-fast)] group-open/dine:rotate-180" />
+        </summary>
+        <div className="grid gap-[2px] pb-[12px]">
+          {dine.map(([name, href]) => (
+            <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="block py-[7px] text-[15px] font-medium" color="#FFFFFF">{name}</SpaLink>
+          ))}
+        </div>
+      </details>
       <NavRow href={paths.story()} onClick={go(goto.story)} delay="[animation-delay:.26s]">{t('Our story')}</NavRow>
-      <NavRow href={paths.vacancies()} onClick={go(gotoVacancies)} delay="[animation-delay:.28s]">{t('Vacancies')}</NavRow>
       <button type="button" onClick={() => { close(); app.openDay(); }} className={cn(mobileNavRow, 'border-x-0 border-t-0 bg-transparent px-0 [animation-delay:.3s]')}>
         <span className="flex gap-[10px] items-center">
           {t('My Day')}

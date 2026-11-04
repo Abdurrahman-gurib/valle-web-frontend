@@ -6,8 +6,8 @@ import type { PackModalData } from '../../components/PackageModal';
 import { ClassHero } from './ClassHero';
 import { ProductCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
-import { KidsParkSection } from './KidsParkSection';
-import { QuoteLink, SectionHeader, cardItems, fgOn, photoFor, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
+import { KidsParkLink } from './KidsParkSection';
+import { QuoteLink, GroupLink, SectionHeader, cardItems, fgOn, photoFor, rupees, scrollToId, useValidityItem, type PagePhoto } from './shared';
 import { requestQuoteFor } from './QuoteForm';
 
 /**
@@ -61,14 +61,14 @@ export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => vo
         </div>
       </section>
 
-      <KidsParkSection />
+      <KidsParkLink />
 
       <GoodToKnow
         id="resident-know-title"
         items={[
           { icon: IdCard, title: t('Who qualifies'), text: t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.') },
           { icon: Shuffle, title: t('Your choice on the day'), text: t('Where a package offers the Nepalese Bridge OR the Bicycle Zipline, pick the one you prefer at the park.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Clubs and associations get a tailored quote within one working day.'), action: <QuoteLink onClick={() => { requestQuoteFor(t('Resident package')); onQuote(); }} label={t('Request a group quote')} /> },
+          { icon: Users, title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Resident package')); onQuote(); }} label={t('Request a group quote')} /></div> },
           validity,
         ]}
       />
