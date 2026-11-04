@@ -505,3 +505,11 @@ html[dir="rtl"] .rail-fade { -webkit-mask-image: linear-gradient(to left, #000 c
 .home-info li svg { width: 17px; height: 17px; color: #5B21B6; flex-shrink: 0; }
 .home-info a { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 720px) { .home-info ul { border-radius: 20px; justify-content: flex-start; flex-direction: column; gap: 10px; padding: 16px 18px; } }
+
+/* home "Who's coming?": on phones each audience is a compact row (photo beside the text) */
+@media (max-width: 640px) {
+  .aud-card { flex-direction: row; }
+  .aud-card .v-card-media { aspect-ratio: auto; width: 112px; flex-shrink: 0; }
+  .aud-card .v-card-body { padding: 16px; gap: 6px; }
+  .aud-card .v-card-foot { padding-top: 10px; }
+}

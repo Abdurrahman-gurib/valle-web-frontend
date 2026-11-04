@@ -4,6 +4,7 @@ import { Hero } from './home/Hero';
 import { SlopeMarquee } from './home/SlopeMarquee';
 import { InfoStrip } from './home/InfoStrip';
 import { QuickPlan } from './home/QuickPlan';
+import { PackageStrip, WhosComing } from './home/HomeExtras';
 import { ParkMap } from './home/ParkMap';
 import { ClassicsRail } from './home/ClassicsRail';
 import { WildestLocals } from './home/WildestLocals';
@@ -24,6 +25,9 @@ export default function HomePage() {
       <SlopeMarquee />
       <InfoStrip />
       <QuickPlan />
+      {/* optional additions (G5): who is coming, and three packages from the catalog */}
+      <WhosComing />
+      <PackageStrip />
       <ParkMap />
       <ClassicsRail />
       <WildestLocals />
