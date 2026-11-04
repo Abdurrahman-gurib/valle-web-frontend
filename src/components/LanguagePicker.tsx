@@ -9,7 +9,8 @@ export function useSwitchLang(): (lang: Lang) => void {
   const { pathname, search, hash } = useLocation();
   const navigate = useNavigate();
   return (lang: Lang) => {
-    try { localStorage.setItem('valle_lang', lang); } catch { /* ignore */ }
+    // a choice made here (English included) also silences the language offer for good
+    try { localStorage.setItem('valle_lang', lang); localStorage.setItem('valle_lang_chosen', '1'); } catch { /* ignore */ }
     navigate(localizePath(stripLang(pathname) + search + hash, lang));
   };
 }
@@ -45,14 +46,14 @@ export function LanguagePicker({ fg, compact }: { fg: string; compact?: boolean 
           border: `1.5px solid ${h || open ? '#7333FF' : (fg === '#FFFFFF' ? 'rgba(255,255,255,.55)' : 'rgba(115,51,255,.5)')}`,
           background: h || open ? '#7333FF' : 'transparent', cursor: 'pointer',
           fontFamily: MONO, fontSize: compact ? 10 : 11, fontWeight: 700, letterSpacing: compact ? '.06em' : '.1em',
-          color: h || open ? '#FFFFFF' : fg, padding: compact ? '8px 9px' : '9px 12px', borderRadius: 999,
-          whiteSpace: 'nowrap', lineHeight: 1,
+          color: h || open ? '#FFFFFF' : fg, padding: compact ? '0 8px' : '9px 12px', borderRadius: 999,
+          whiteSpace: 'nowrap', lineHeight: 1, ...(compact ? { minHeight: 40, minWidth: 40 } : null),
         }}
       >
         {LANG_META[lang].short} ▾
       </button>
       {open && (
-        <div role="listbox" aria-label="Language" style={{
+        <div role="listbox" aria-label={tr('Language')} style={{
           position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 190, background: '#FFFFFF', color: '#340057',
           borderRadius: 16, boxShadow: '0 24px 60px -18px rgba(31,0,51,.55), 0 0 0 1.5px #EBE2FF', padding: 8, animation: 'vfadeup .2s ease both',
           fontFamily: "'Work Sans',sans-serif",
@@ -98,24 +99,24 @@ export function LanguageSuggest() {
     if (lang !== 'en') { setTarget(null); return; }
     try {
       if (localStorage.getItem('valle_lang_dismissed') === '1') return;
-      if (localStorage.getItem('valle_lang') === 'en' && localStorage.getItem('valle_lang_chosen') === '1') return;
+      if (localStorage.getItem('valle_lang_chosen') === '1') return;
     } catch { /* ignore */ }
     const pref = (navigator.languages?.[0] || navigator.language || '').slice(0, 2).toLowerCase();
     if (isLang(pref) && pref !== 'en') setTarget(pref);
   }, [lang]);
 
   if (!target) return null;
-  const dismiss = () => { try { localStorage.setItem('valle_lang_dismissed', '1'); } catch { /* ignore */ } setTarget(null); };
+  const dismiss = () => { try { localStorage.setItem('valle_lang_dismissed', '1'); localStorage.setItem('valle_lang_chosen', '1'); } catch { /* ignore */ } setTarget(null); };
   return (
-    <div role="region" aria-label="Language" data-testid="language-suggest" lang={target} dir={LANG_META[target].dir} style={{
+    <div role="region" aria-label={tr('Language', undefined, target)} data-testid="language-suggest" lang={target} dir={LANG_META[target].dir} style={{
       position: 'relative', zIndex: 61, background: '#340057', color: '#FFFFFF', fontFamily: "'Work Sans',sans-serif",
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap', paddingBlock: 9, paddingInline: '16px 44px', fontSize: 13.5,
     }}>
       <span>{tr('This site is also available in {language}.', { language: LANG_META[target].name }, target)}</span>
-      <button onClick={() => switchTo(target)} style={{ border: 0, background: '#FFFC33', color: '#340057', fontWeight: 700, fontSize: 13, padding: '6px 14px', borderRadius: 999, cursor: 'pointer' }}>
+      <button onClick={() => switchTo(target)} style={{ border: 0, background: '#FFFC33', color: '#340057', fontWeight: 700, fontSize: 13, padding: '0 14px', minHeight: 32, borderRadius: 999, cursor: 'pointer' }}>
         {tr('Switch to {language}', { language: LANG_META[target].name }, target)}
       </button>
-      <button onClick={dismiss} aria-label="Dismiss" style={{ position: 'absolute', insetInlineEnd: 10, top: '50%', transform: 'translateY(-50%)', border: 0, background: 'transparent', color: '#FFFFFF', fontSize: 18, cursor: 'pointer' }}>×</button>
+      <button onClick={dismiss} aria-label={tr('Dismiss', undefined, target)} style={{ position: 'absolute', insetInlineEnd: 4, top: '50%', transform: 'translateY(-50%)', border: 0, background: 'transparent', color: '#FFFFFF', fontSize: 18, cursor: 'pointer', width: 40, height: 40 }}>×</button>
     </div>
   );
 }

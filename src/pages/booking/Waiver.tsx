@@ -314,7 +314,7 @@ export default function WaiverPage() {
               </Section>
 
               <Section n="5" title={minor ? t('Signature of the Legal Guardian') : t('Signature of the Participant')}>
-                <SignaturePad ref={pad} label={t('Sign here with your finger')} clearLabel={t('Clear signature')} undoLabel={t('Undo')} onChange={setHasInk} />
+                <SignaturePad ref={pad} label={t('Sign with your finger, mouse or type your name')} clearLabel={t('Clear signature')} undoLabel={t('Undo')} onChange={setHasInk} />
               </Section>
 
               {err && <div role="alert" className="mt-[14px] rounded-[12px] border-[1.5px] border-valle-red bg-[#FFE2E7] px-[14px] py-2.5 text-[14px] font-semibold">{err}</div>}

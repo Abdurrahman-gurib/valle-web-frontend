@@ -45,21 +45,7 @@ function optimistic(chat: VisitorChat, body: string, extra: Partial<Row> = {}): 
 }
 
 /** Live `prefers-reduced-motion` reading; drives every animation in the chat widget. */
-export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  });
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const onChange = () => setReduced(mq.matches);
-    onChange();
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  return reduced;
-}
+export { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
 /**
  * The visitor's side of the live chat: the socket, the message list (with

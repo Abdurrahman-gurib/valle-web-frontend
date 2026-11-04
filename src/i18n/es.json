@@ -1343,7 +1343,7 @@
   "The colours": "Los colores",
   "THE COLOURS": "LOS COLORES",
   "The colours today, trails and viewpoints around them": "Los colores hoy, con senderos y miradores a su alrededor",
-  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "LA ROSA DE LOS VIENTOS INDICA EL NORTE. LA ROSE DES VENTS INDIQUE LE NORD.",
+  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "LA ROSA DE LOS VIENTOS INDICA EL NORTE.",
   "The complete flight: every cable in the network. It opens with The Signature 1.5 km across the valley, climbs the northern ridge over the Coloured Earth and both waterfalls, then finishes with the western chain up the Kazmaël slopes and back into the hub. Around 3 hours of air time.": "El vuelo completo: todos los cables de la red. Empieza con The Signature, 1,5 km a través del valle, sube por la cresta norte sobre la Tierra de Colores y las dos cascadas, y termina con la cadena occidental por las laderas de Kazmaël y de vuelta al centro. Unas 3 horas en el aire.",
   "The convoy pauses above the Chamouzé falls, right beside the restaurant terrace.": "El convoy se detiene sobre la cascada de Chamouzé, justo al lado de la terraza del restaurante.",
   "THE CROSSING": "EL CRUCE",
@@ -2531,5 +2531,18 @@
   "Your choice on the day": "Tú eliges el mismo día",
   "Your quote": "Tu presupuesto",
   "per student · park visit · VAT inclusive": "por alumno · visita al parque · IVA incluido",
-  "single · VAT inclusive": "individual · IVA incluido"
+  "single · VAT inclusive": "individual · IVA incluido",
+  "Adults": "Adultos",
+  "Dismiss": "Cerrar",
+  "Draw instead": "Dibujar la firma",
+  "Fewer: {what}": "Menos: {what}",
+  "More: {what}": "Más: {what}",
+  "Gate pass": "Pase de entrada",
+  "Language": "Idioma",
+  "Search experiences": "Buscar experiencias",
+  "Sign with your finger, mouse or type your name": "Firma con el dedo, el ratón o escribe tu nombre",
+  "Skip to main content": "Saltar al contenido principal",
+  "Type my name instead": "Escribir mi nombre",
+  "Type your full name as your signature": "Escribe tu nombre completo como firma",
+  "Your day and booking summary": "Tu día y el resumen de la reserva"
 }

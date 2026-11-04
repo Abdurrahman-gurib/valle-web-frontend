@@ -8,12 +8,18 @@
 @import 'tailwindcss/utilities.css' layer(utilities);
 @source '../';
 
+/* Short viewports (a phone in landscape): `short:h-[54px]` and so on. */
+@custom-variant short (@media (max-height: 480px));
+
 /* VALLÉ brand tokens, available as bg-valle-purple, text-valle-red, font-display… */
 @theme {
   --color-valle-purple: #340057;
   --color-valle-deep: #260040;
   --color-valle-violet: #7333FF;
   --color-valle-red: #FF3358;
+  /* the same red, dark enough (5.2:1 on white, 4.7:1 on #F7F3FF; white on it 5.2:1) for small text and chips;
+     #FF3358 stays for large display type and decoration */
+  --color-valle-red-ink: #D6173F;
   --color-valle-green: #33FF74;
   --color-valle-yellow: #FFFC33;
   --color-valle-lilac: #EBE2FF;

@@ -1,5 +1,5 @@
 import { useEscape } from '../hooks/useEscape';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getConsent, onConsentOpen, setConsent } from '../lib/consent';
 import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,7 @@ function Btn({ label, primary, onClick, testId }: { label: string; primary?: boo
       type="button"
       onClick={onClick}
       data-testid={testId}
-      className={cn('vbtn', primary ? 'vbtn-primary' : 'vbtn-secondary')}
+      className={cn('vbtn max-sm:min-h-[40px] max-sm:px-4 max-sm:text-[13.5px] short:min-h-[40px] short:px-4', primary ? 'vbtn-primary' : 'vbtn-secondary')}
     >{label}</button>
   );
 }
@@ -49,26 +49,40 @@ export function CookieConsent() {
 
   // Escape folds the settings back; it never counts as a choice
   useEscape(open && details, () => setDetails(false));
+
+  // Publish the notice's height so the chat launcher can sit above it instead of under it.
+  const box = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = box.current;
+    const root = document.documentElement;
+    if (!open || !el) { root.style.removeProperty('--valle-cookie-h'); return; }
+    const put = () => root.style.setProperty('--valle-cookie-h', Math.ceil(el.getBoundingClientRect().height) + 'px');
+    put();
+    const ro = new ResizeObserver(put);
+    ro.observe(el);
+    return () => { ro.disconnect(); root.style.removeProperty('--valle-cookie-h'); };
+  }, [open]);
   if (!open) return null;
 
   const acknowledge = () => { setConsent('essential'); setOpen(false); setDetails(false); };
 
   return (
-    <div
-      role="dialog"
+    // A notice, not a modal: a labelled region the page stays usable around. Compact on
+    // phones, at 200% zoom and in landscape (no display heading, smaller type and button).
+    <section
+      ref={box}
       aria-label={t('Cookies and storage')}
-      aria-live="polite"
       data-nosnippet=""
-      className="pointer-events-none fixed right-0 bottom-0 left-0 z-[125] p-[clamp(10px,2vw,20px)] pb-[max(clamp(10px,2vw,20px),env(safe-area-inset-bottom,0px))]"
+      className="pointer-events-none fixed right-0 bottom-0 left-0 z-[125] p-[clamp(8px,2vw,20px)] pb-[max(clamp(8px,2vw,20px),env(safe-area-inset-bottom,0px))]"
     >
-      <div className="pointer-events-auto mx-auto my-0 max-h-[min(80vh,640px)] w-[min(920px,100%)] animate-[vfadeup_.35s_ease_both] overflow-y-auto rounded-[20px] bg-white p-[clamp(16px,2.6vw,24px)] font-sans text-valle-purple shadow-[0_30px_70px_-20px_rgba(31,0,51,.6),0_0_0_1.5px_#EBE2FF]">
-        <div className="flex flex-wrap items-start gap-[18px]">
-          <div className="min-w-0 flex-[1_1_360px]">
+      <div className="pointer-events-auto mx-auto my-0 max-h-[min(60vh,640px)] w-[min(920px,100%)] animate-[vfadeup_.35s_ease_both] overflow-y-auto rounded-[16px] sm:rounded-[20px] bg-white p-[clamp(12px,2.6vw,24px)] short:p-[10px] font-sans text-valle-purple shadow-[0_30px_70px_-20px_rgba(31,0,51,.6),0_0_0_1.5px_#EBE2FF]">
+        <div className="flex flex-wrap items-center gap-x-[18px] gap-y-[10px]">
+          <div className="min-w-0 flex-[1_1_300px]">
             <div className="font-mono text-[10.5px] font-bold tracking-[.14em] text-valle-violet">{t('COOKIES & STORAGE')}</div>
-            <div className="mt-1.5 origin-bottom-left -rotate-2 font-display text-[clamp(22px,3vw,28px)] leading-[0.95] font-black uppercase italic">
+            <div className="mt-1.5 origin-bottom-left -rotate-2 font-display text-[clamp(22px,3vw,28px)] leading-[0.95] font-black uppercase italic max-sm:hidden short:hidden">
               {t('A small trail of crumbs')}
             </div>
-            <p className="mx-0 mt-2.5 mb-0 text-[14px] leading-[1.55] text-valle-purple/75">
+            <p className="mx-0 mt-1.5 sm:mt-2.5 mb-0 text-[13px] sm:text-[14px] leading-[1.5] text-valle-purple/75">
               {t('We store your rate and your My Day picks in this browser so the site works. No advertising cookies, no tracking, nothing sold on.')}{' '}
               <button onClick={() => setDetails((d) => !d)} aria-expanded={details} className="vbtn-link underline">
                 {details ? t('Hide details') : t('What we store')}
@@ -94,6 +108,6 @@ export function CookieConsent() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

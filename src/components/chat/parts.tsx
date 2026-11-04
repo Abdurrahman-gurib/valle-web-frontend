@@ -48,12 +48,13 @@ export function Lockup() {
  * 58x58 and only the painted circle bobs, by at most 5px.
  */
 export function Launcher({ onClick, unread, bottom, right, reduced }: {
-  onClick: () => void; unread: number; bottom: number; right: number; reduced: boolean;
+  onClick: () => void; unread: number; bottom: number | string; right: number; reduced: boolean;
 }) {
   const t = useT();
   return (
     <button
       onClick={onClick}
+      data-chat-launcher=""
       aria-label={unread > 0 ? (unread === 1 ? t('Open chat, {n} new message', { n: unread }) : t('Open chat, {n} new messages', { n: unread })) : t('Open chat')}
       className={cn(
         'press group fixed z-[85] w-[58px] h-[58px] p-0 border-0 bg-transparent text-white cursor-pointer',

@@ -1343,7 +1343,7 @@
   "The colours": "रंग",
   "THE COLOURS": "रंग",
   "The colours today, trails and viewpoints around them": "आज के रंग, चारों ओर रास्ते और दृश्य-बिंदु",
-  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "दिशा-सूचक उत्तर दिखाता है। LA ROSE DES VENTS INDIQUE LE NORD.",
+  "THE COMPASS ROSE INDICATES NORTH. LA ROSE DES VENTS INDIQUE LE NORD.": "दिशा-सूचक उत्तर दिशा दिखाता है।",
   "The complete flight: every cable in the network. It opens with The Signature 1.5 km across the valley, climbs the northern ridge over the Coloured Earth and both waterfalls, then finishes with the western chain up the Kazmaël slopes and back into the hub. Around 3 hours of air time.": "पूरी उड़ान: नेटवर्क की हर केबल। यह घाटी के आर-पार 1.5 किमी की The Signature से शुरू होती है, रंगीन धरती और दोनों झरनों के ऊपर उत्तरी धार पर चढ़ती है, फिर Kazmaël की ढलानों पर पश्चिमी शृंखला के साथ केंद्र में लौटकर समाप्त होती है। लगभग 3 घंटे हवा में।",
   "The convoy pauses above the Chamouzé falls, right beside the restaurant terrace.": "काफ़िला Chamouzé झरने के ऊपर रुकता है, रेस्तराँ की छत के ठीक बगल में।",
   "THE CROSSING": "पार-यात्रा",
@@ -2531,5 +2531,18 @@
   "Your choice on the day": "उसी दिन आपकी पसंद",
   "Your quote": "आपका कोटेशन",
   "per student · park visit · VAT inclusive": "प्रति छात्र · पार्क विज़िट · VAT सहित",
-  "single · VAT inclusive": "सिंगल · VAT सहित"
+  "single · VAT inclusive": "सिंगल · VAT सहित",
+  "Adults": "वयस्क",
+  "Dismiss": "बंद करें",
+  "Draw instead": "इसके बजाय हाथ से बनाएँ",
+  "Fewer: {what}": "कम करें: {what}",
+  "More: {what}": "बढ़ाएँ: {what}",
+  "Gate pass": "प्रवेश पास",
+  "Language": "भाषा",
+  "Search experiences": "अनुभव खोजें",
+  "Sign with your finger, mouse or type your name": "उँगली या माउस से हस्ताक्षर करें, या अपना नाम लिखें",
+  "Skip to main content": "मुख्य सामग्री पर जाएँ",
+  "Type my name instead": "इसके बजाय मेरा नाम लिखें",
+  "Type your full name as your signature": "हस्ताक्षर के रूप में अपना पूरा नाम लिखें",
+  "Your day and booking summary": "आपका दिन और बुकिंग सारांश"
 }

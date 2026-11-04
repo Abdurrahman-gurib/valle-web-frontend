@@ -1,9 +1,12 @@
 import type { MapKeyItem } from '../../../data/maps';
-import { useT } from '../../../i18n';
+import { useLang, useT } from '../../../i18n';
 
 /** The sheet's key column, laid out like the walking-trail sitemap's "KEY / LÉGENDE". */
 export function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boolean }) {
   const t = useT();
+  // The printed sheet is bilingual English | French. On the English page the key keeps
+  // that look; in any other language the translated label stands alone (no mixed languages).
+  const bilingual = useLang() === 'en';
   return (
     <div style={{ display: 'grid', gridTemplateColumns: compact ? 'repeat(auto-fill, minmax(150px, 1fr))' : '1fr', gap: compact ? '6px 14px' : 10 }}>
       {items.map((k) => (
@@ -16,7 +19,7 @@ export function MapKey({ items, compact }: { items: MapKeyItem[]; compact: boole
             <span style={{ width: 14, height: 14, borderRadius: 999, background: k.swatch, border: '2px solid #FFFFFF', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,.35)' }} />
           )}
           <span style={{ fontSize: compact ? 10.5 : 12, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.2 }}>
-            {t(k.label)}{k.fr && <span style={{ opacity: 0.6, fontWeight: 400 }}> | {k.fr}</span>}
+            {t(k.label)}{bilingual && k.fr && <span lang="fr" style={{ opacity: 0.75, fontWeight: 400 }}> | {k.fr}</span>}
           </span>
         </div>
       ))}
