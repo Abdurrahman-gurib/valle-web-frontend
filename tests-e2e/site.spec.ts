@@ -150,12 +150,12 @@ test.describe('chat composer', () => {
     await page.getByRole('button', { name: /open chat/i }).click();
     const skip = page.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
-    await expect(page.getByLabel('Message')).toBeVisible();
-    await page.getByLabel('Message').fill('See you Sunday ');
+    await expect(page.getByRole('textbox', { name: 'Message', exact: true })).toBeVisible();
+    await page.getByRole('textbox', { name: 'Message', exact: true }).fill('See you Sunday ');
     await page.getByRole('button', { name: /insert an emoji/i }).click();
     await expect(page.getByTestId('emoji-picker')).toBeVisible();
     await page.getByRole('button', { name: 'Insert 🎉' }).click();
-    await expect(page.getByLabel('Message')).toHaveValue('See you Sunday 🎉');
+    await expect(page.getByRole('textbox', { name: 'Message', exact: true })).toHaveValue('See you Sunday 🎉');
     await expect(page.getByTestId('emoji-picker')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /attach a photo/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /record a voice note/i })).toBeVisible();
@@ -193,7 +193,7 @@ test.describe('home', () => {
   test('park map pin opens a popup', async ({ page }) => {
     await page.goto('/');
     // pin "A": Park Entrance & Reception (the quad and zipline maps have their own "A" pins)
-    await page.getByRole('button', { name: 'A', exact: true }).and(page.locator('[title="Park Entrance & Reception"]')).first().click();
+    await page.getByRole('button', { name: 'A · Park Entrance & Reception' }).first().click();
     await expect(page.getByText('Park Entrance & Reception')).toBeVisible();
   });
 });
@@ -863,12 +863,16 @@ test.describe('timed sessions on the booking page', () => {
     await expect(picker).toBeVisible();
     await expect(picker.getByRole('button', { name: /09:30/ })).toBeDisabled();
     await expect(picker.getByRole('button', { name: /14:00/ })).toContainText('FEW LEFT');
-    // no time yet: the confirm refuses and names the activity
+    // no time yet: the sticky button does not confirm, it sends the guest back to the date and time step
     await page.getByPlaceholder(/name/i).first().fill('Timed Guest');
     await page.getByPlaceholder(/email/i).first().fill('timed@example.com');
-    await page.getByRole('button', { name: /Confirm and pay on arrival/i }).click();
-    await expect(page.getByText(/Pick a start time for Zipline/)).toBeVisible();
+    const sticky = page.getByTestId('sticky-action');
+    await expect(sticky).toHaveAttribute('data-step', 'when');
+    await sticky.click();
+    await expect(page.locator('#step-when')).toBeInViewport();
     await picker.getByRole('button', { name: /10:30/ }).click();
+    // with a time picked the same button now confirms
+    await expect(sticky).toHaveAttribute('data-step', 'confirm');
     await expect(page.getByTestId('hold-note')).toBeVisible({ timeout: 10000 });
     expect(held?.items?.[0]).toMatchObject({ id: 'zipline', time: '10:30' });
   });

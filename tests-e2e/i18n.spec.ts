@@ -119,8 +119,12 @@ test.describe('booking in another language', () => {
     await page.goto('/fr/booking');
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    // the confirm button carries the French label (its text arrow is drawn as an icon)
-    const label = (d['Confirm and pay on arrival →'] ?? '__missing__').replace(/\s*[→←]\s*$/, '');
-    await expect(page.getByRole('button', { name: label })).toBeVisible();
+    // the sticky booking button follows the state (date, then details, then confirm) and speaks French
+    const sticky = page.getByTestId('sticky-action');
+    await expect(sticky).toBeVisible();
+    const strip = (k: string) => (d[k] ?? '__missing__').replace(/\s*[↓→←]\s*$/, '');
+    const labels = ['Next: pick a date ↓', 'Next: your details ↓', 'Confirm and pay on arrival →'].map(strip);
+    const text = (await sticky.innerText()).replace(/\s*[↓→←]\s*$/, '').trim();
+    expect(labels).toContain(text);
   });
 });

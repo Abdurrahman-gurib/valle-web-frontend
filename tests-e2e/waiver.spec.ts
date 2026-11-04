@@ -81,7 +81,7 @@ test.describe('digital waiver (guest)', () => {
 
     await fillParticipant(page, { name: 'Aisha Rahman', birth: '1990-04-12', height: '165', weight: '60' });
     await page.getByTestId('w-submit').click();
-    await expect(page.getByRole('status')).toContainText('Aisha Rahman');
+    await expect(page.getByRole('status').filter({ hasText: 'Aisha Rahman' })).toBeVisible();
     // the guest's PDF copy is one click away and really is a PDF
     const pdfHref = await page.getByTestId('waiver-pdf').first().getAttribute('href');
     const pdf = await page.request.get(pdfHref!);

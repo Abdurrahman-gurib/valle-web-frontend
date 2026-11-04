@@ -244,8 +244,8 @@ test.describe('staff dashboard', () => {
     await visitor.getByRole('button', { name: /open chat/i }).click();
     const skip = visitor.getByRole('button', { name: /skip/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
-    await visitor.getByLabel('Message').fill(`Do you have lockers? needle-${tag}`);
-    await visitor.getByLabel('Message').press('Enter');
+    await visitor.getByRole('textbox', { name: 'Message', exact: true }).fill(`Do you have lockers? needle-${tag}`);
+    await visitor.getByRole('textbox', { name: 'Message', exact: true }).press('Enter');
     await expect(visitor.getByText(`needle-${tag}`)).toBeVisible({ timeout: 15000 });
 
     await page.getByRole('button', { name: /^chat/i }).first().click();
@@ -339,7 +339,7 @@ test.describe('staff dashboard', () => {
     if (await skip.isVisible().catch(() => false)) await skip.click();
 
     const tag = Math.random().toString(36).slice(2, 8);
-    await visitor.getByLabel('Message').fill(`Photo ${tag} https://vallepark.com/menu`);
+    await visitor.getByRole('textbox', { name: 'Message', exact: true }).fill(`Photo ${tag} https://vallepark.com/menu`);
     // a 1x1 PNG straight from memory
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
     await visitor.getByTestId('chat-file-input').setInputFiles({ name: `photo-${tag}.png`, mimeType: 'image/png', buffer: png });
@@ -391,8 +391,8 @@ test.describe('staff dashboard', () => {
     // fixed string could select one of those instead of the thread under test.
     const tag = Math.random().toString(36).slice(2, 8);
     const question = `E2E ${tag}: are the ziplines open on Sunday?`;
-    await visitor.getByLabel('Message').fill(question);
-    await visitor.getByLabel('Message').press('Enter');
+    await visitor.getByRole('textbox', { name: 'Message', exact: true }).fill(question);
+    await visitor.getByRole('textbox', { name: 'Message', exact: true }).press('Enter');
     await expect(visitor.getByText(question)).toBeVisible({ timeout: 15000 });
 
     // staff sees it live and answers
