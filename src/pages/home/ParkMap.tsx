@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Img } from '../../components/Img';
 import type { Pin } from '../../types';
 import { useT, fwd } from '../../i18n';
+import { chipInk } from '@/styles/theme';
 
 interface SelPinModel {
   name: string;
@@ -32,6 +33,8 @@ export function PinButton({ p, i, on, isMobile, onClick, scale = 1 }: { p: Pick<
       title={p.name}
       className={cn(
         'absolute flex -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-solid border-white p-0 font-mono leading-none font-bold transition-all duration-200 ease-[ease] hover:scale-[1.18]',
+        // invisible hit area: at least 24px to tap even where the drawn pin is 17px (mobile sub pins)
+        "before:absolute before:top-1/2 before:left-1/2 before:size-[max(100%,28px)] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:content-['']",
         on ? 'bg-valle-yellow shadow-[0_0_0_7px_rgba(255,252,51,.35),0_6px_16px_rgba(0,0,0,.4)]' : (sub ? 'bg-valle-green shadow-[0_4px_10px_rgba(0,0,0,.35)]' : 'bg-valle-red shadow-[0_4px_10px_rgba(0,0,0,.35)]'),
         sub || on ? 'text-valle-purple' : 'text-white',
       )}
@@ -51,7 +54,7 @@ function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; le
           <Img src={sel.img} alt={sel.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div className="min-w-0 flex-1 px-[13px] pt-[11px] pb-3">
-          <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[8.5px] font-bold tracking-[.08em]" style={{ background: sel.catColor, color: sel.catFg }}>{sel.catBadge}</span>
+          <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[8.5px] font-bold tracking-[.08em]" style={{ background: chipInk(sel.catColor), color: sel.catFg }}>{sel.catBadge}</span>
           <div className="mt-1.5 font-display text-[14.5px] leading-none font-extrabold uppercase italic">{sel.name}</div>
           <div className="mt-[5px] line-clamp-2 text-[11.5px] leading-[1.45] text-valle-purple/70">{sel.sub}</div>
           <button
@@ -64,7 +67,7 @@ function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; le
         <button
           onClick={onClose}
           aria-label={t('Close')}
-          className="absolute top-2 right-2 size-6 cursor-pointer rounded-full border border-solid border-valle-lilac bg-white p-0 text-[12px] leading-none text-valle-purple/60 hover:border-valle-red hover:text-valle-red"
+          className="absolute top-2 right-2 size-6 cursor-pointer rounded-full border border-solid border-valle-lilac bg-white p-0 text-[12px] leading-none text-valle-purple/60 hover:border-valle-red hover:text-valle-red-ink"
         >
           ×
         </button>

@@ -130,7 +130,7 @@ function ThenNow() {
   return (
     <div data-reveal="1" className="mt-[clamp(28px,4vw,48px)]">
       <div className="flex justify-between items-baseline gap-3 flex-wrap">
-        <span className={cn(eyebrow, 'text-valle-red')}>{t('THEN AND NOW · DRAG THE HANDLE')}</span>
+        <span className={cn(eyebrow, 'text-valle-red-ink')}>{t('THEN AND NOW · DRAG THE HANDLE')}</span>
         <span className="font-mono text-[10.5px] font-normal tracking-[.14em] text-[rgba(52,0,87,.7)]">{t('SAME HILL, 1998 AND TODAY')}</span>
       </div>
       <div
@@ -240,7 +240,7 @@ export default function StoryPage() {
               <a key={c.id} href={'#' + c.id} onClick={(e) => { e.preventDefault(); document.getElementById(c.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
                 className={cn(MONO, 'whitespace-nowrap py-[10px] px-[14px] rounded-[999px] [transition:background_.18s_cubic-bezier(.2,.7,.2,1),color_.18s_cubic-bezier(.2,.7,.2,1)]', on ? 'bg-valle-purple' : 'bg-transparent')}
                 style={{ color: on ? '#FFFFFF' : '#340057', textDecoration: 'none' }}>
-                <span className={on ? 'text-valle-yellow' : 'text-valle-red'}>{c.n}</span> {t(c.nav).toUpperCase()}
+                <span className={on ? 'text-valle-yellow' : 'text-valle-red-ink'}>{c.n}</span> {t(c.nav).toUpperCase()}
               </a>
             );
           })}
@@ -335,7 +335,7 @@ export default function StoryPage() {
       </Chapter>
 
       {/* ---- founder ---- */}
-      <section data-reveal="1" className={cn('mt-[clamp(56px,8vw,110px)] bg-valle-red rounded-[24px] overflow-hidden', CARD_SHADOW)}>
+      <section data-reveal="1" className={cn('mt-[clamp(56px,8vw,110px)] bg-valle-red-ink rounded-[24px] overflow-hidden', CARD_SHADOW)}>
         <div className={cn('grid items-stretch', isMobile ? 'grid-cols-[1fr]' : 'grid-cols-[1.1fr_.9fr]')}>
           <div className="p-[clamp(28px,4vw,56px)]">
             <span className={cn(eyebrow, 'text-valle-yellow')}>{t('A MESSAGE FROM OUR FOUNDER')}</span>
@@ -358,7 +358,7 @@ export default function StoryPage() {
       {/* ---- what makes it unlike anywhere ---- */}
       <section className="mt-[clamp(56px,8vw,110px)]">
         <div data-reveal="1">
-          <span className={cn(eyebrow, 'text-valle-red')}>{t('WHY THERE IS ONLY ONE VALLÉ')}</span>
+          <span className={cn(eyebrow, 'text-valle-red-ink')}>{t('WHY THERE IS ONLY ONE VALLÉ')}</span>
           <h2 className={cn(DISPLAY, 'text-[clamp(32px,4.2vw,56px)] text-valle-purple mt-3 mb-0 mx-0 [transform:rotate(-3deg)]')} style={{ transformOrigin: pivot() }}>
             {t('Seven things')} <span className="text-valle-violet">{t('you will not find anywhere else.')}</span>
           </h2>

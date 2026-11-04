@@ -128,7 +128,7 @@ export const ORGANIZATION = {
   logo: abs('/favicon-512.png'),
   image: abs(DEFAULT_IMAGE),
   description: 'Adventure and nature park in Chamouny, Mauritius: ziplines, quad and buggy trails, waterfalls, the 23 Coloured Earth, giant tortoises and a kids park.',
-  telephone: '+230 660 44 77',
+  telephone: '+230 660 4477',
   email: 'sales@vallepark.com',
   address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' },
   geo: { '@type': 'GeoCoordinates', latitude: -20.457614, longitude: 57.4826031 },

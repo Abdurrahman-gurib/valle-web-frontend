@@ -15,6 +15,7 @@ import { KP, KP_PATTERN, KidsParkLogo, KidsProfile } from '../../components/Kids
 import { DetailGallery } from './DetailGallery';
 import { DetailAside, DetailPricelist, RelatedCard, SeeAlso, ZiplineReviews } from './DetailParts';
 import { BARLOW, MONO, sectionLabel } from './shared';
+import { chipInk } from '@/styles/theme';
 
 export default function DetailPage() {
   const t = useT();
@@ -92,7 +93,7 @@ export default function DetailPage() {
           <div>
             {kids
               ? <Link to={paths.explore('kids')} style={{ display: 'inline-block', transform: 'rotate(-4deg)' }}><KidsParkLogo width="clamp(110px,14vw,170px)" priority /></Link>
-              : <span style={{ background: d.catColor, color: d.catFg, fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{d.catBadge}</span>}
+              : <span style={{ background: chipInk(d.catColor), color: d.catFg, fontFamily: MONO, fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '7px 13px', display: 'inline-block', transform: 'rotate(-4deg)' }}>{d.catBadge}</span>}
             <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'left bottom', marginTop: 16 }}>
               <h1 style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(38px,5.8vw,80px)', lineHeight: 0.82, letterSpacing: '-0.01em', margin: 0, textTransform: 'uppercase' }}>{d.name}</h1>
             </div>

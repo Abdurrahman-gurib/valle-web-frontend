@@ -77,7 +77,7 @@ export function TicketDay({ tk }: { tk: TicketView }) {
           <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.14em', color }}>{tag}</span>
           {s.time && <span style={{ fontFamily: MONO, fontWeight: 800 }}>{s.time}{s.endTime ? `–${s.endTime}` : ''}</span>}
           <span style={{ fontWeight: 700 }}>{s.label}</span>
-          {paused && <span style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', background: '#FF3358', color: '#FFFFFF', padding: '2px 7px', borderRadius: 999 }}>{t('PAUSED')}</span>}
+          {paused && <span style={{ fontFamily: MONO, fontSize: 9.5, fontWeight: 700, letterSpacing: '.12em', background: '#D6173F', color: '#FFFFFF', padding: '2px 7px', borderRadius: 999 }}>{t('PAUSED')}</span>}
         </div>
         {i?.meetingPoint && <div style={{ fontSize: 13 }}>📍 {t('Meet at: {place}', { place: i.meetingPoint })}</div>}
         {isToday && i && i.waitMin !== null && <div style={{ fontSize: 13 }}>⏱ {t(waitLabel(i.waitMin), { n: i.waitMin })}</div>}
@@ -95,7 +95,7 @@ export function TicketDay({ tk }: { tk: TicketView }) {
       </div>
       <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
         {isToday && now && stepRow(now, t('NOW'), '#1E9E4A')}
-        {isToday && next && stepRow(next, t('NEXT · BE THERE 15 MIN EARLY'), '#FF3358')}
+        {isToday && next && stepRow(next, t('NEXT · BE THERE 15 MIN EARLY'), '#D6173F')}
         {isToday && !now && !next && steps.some((s) => s.time) && done.length > 0 && <div style={{ fontSize: 13.5, fontWeight: 600 }}>{t('All your timed activities are done. Enjoy the trails, the falls and the restaurant.')}</div>}
         {steps.filter((s) => s !== now && s !== next && !done.includes(s)).map((s) => stepRow(s, s.time ? t('LATER') : t('ANY TIME'), '#EBE2FF'))}
         {done.map((s) => stepRow(s, t('DONE'), '#D9CCF2'))}

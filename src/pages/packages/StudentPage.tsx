@@ -13,6 +13,7 @@ import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
 import { DISPLAY, Eyebrow, H2, MENU_DT, PRICE, SectionHeader, cover, useValidityItem } from './shared';
 import { requestQuoteFor } from './QuoteForm';
+import { chipInk } from '@/styles/theme';
 
 /**
  * The student class page (/packages/student), after the official 2026
@@ -78,7 +79,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
               <article key={g.key} className="sr-card" data-testid="student-group" data-group={g.key} aria-labelledby={`student-group-${gi}`}>
                 <div className="sr-card-photo">
                   <Img src={g.photo.src} alt={t(g.photo.alt)} style={cover(g.photo.position)} />
-                  <span className="sr-card-tag" style={{ background: g.color, textTransform: 'none' }}>{t('From {price}', { price: money(Math.min(...list.filter((r) => !/top-up/i.test(r.n)).map((r) => r.rr))) })}</span>
+                  <span className="sr-card-tag" style={{ background: chipInk(g.color), color: chipInk(g.color) !== g.color ? '#FFFFFF' : undefined, textTransform: 'none' }}>{t('From {price}', { price: money(Math.min(...list.filter((r) => !/top-up/i.test(r.n)).map((r) => r.rr))) })}</span>
                 </div>
                 <div className="sr-card-body">
                   <h3 id={`student-group-${gi}`} style={{ ...DISPLAY, margin: 0, fontSize: 'clamp(28px,2.8vw,36px)', lineHeight: 0.95, color: '#340057' }}>{t(g.title)}</h3>

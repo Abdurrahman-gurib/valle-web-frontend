@@ -15,7 +15,7 @@ export function packageGroups(t: Translate, catalog: Catalog): MenuGroup[] {
     { title: t('RESIDENT PACKAGE'), links: [pk(t('Resident packages'), 'resident')] },
     { title: t('KIDS PARK'), kids: true, links: [pk(t('Vallé Kids Park pricelist'), 'kids'), [t('Kids Park activities'), paths.explore('kids')]] },
     { title: t('SENIOR CITIZEN'), links: [pk(t('Senior citizens 55+'), 'senior')] },
-    { title: t('STUDENT PACKAGE'), links: [pk(t('Student offer'), 'student')] },
+    { title: t('STUDENT PACKAGE'), links: [pk(t('Student package'), 'student')] },
     { title: t('CORPORATE PACKAGE'), links: [pk(t('Team building'), 'team')] },
     { title: t('PHOTO & VIDEO PACKAGE'), links: [pk(t('Photo pricelist'), 'photo'), pk(t('Cinematic experience'), 'cine')] },
     { title: t('RESTAURANTS & MENUS'), links: [[t('Le Chamouzé menu'), paths.resto('chamouze') + '#menu'], [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'], [t('La Citronelle menu'), paths.resto('citronelle') + '#menu']] },

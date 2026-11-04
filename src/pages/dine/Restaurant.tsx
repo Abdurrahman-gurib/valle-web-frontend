@@ -78,7 +78,7 @@ export default function RestaurantPage() {
       <a
         href={paths.dine()}
         onClick={(e) => { e.preventDefault(); goto.dine(); }}
-        className="inline-block cursor-pointer px-0 py-2 font-[inherit] text-[14px] font-bold text-valle-violet! hover:text-valle-red!"
+        className="inline-block cursor-pointer px-0 py-2 font-[inherit] text-[14px] font-bold text-valle-violet! hover:text-valle-red-ink!"
         style={{ textDecoration: 'none' }}
       >{t('← All dining')}</a>
 

@@ -343,7 +343,7 @@ export default function WaiverPage() {
           )}
 
           <p className="mt-6 text-[12.5px] leading-[1.55] text-valle-purple/60">
-            {t('Questions about the waiver? Call +230 660 44 77 or write to {email}.', { email: 'sales@vallepark.com' })}
+            {t('Questions about the waiver? Call +230 660 4477 or write to {email}.', { email: 'sales@vallepark.com' })}
           </p>
         </>
       )}

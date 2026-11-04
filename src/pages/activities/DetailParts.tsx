@@ -87,7 +87,7 @@ export function DetailAside({ act, d, kids, paused, onBook }: { act: Activity; d
           <Fact label={t('MIN AGE')}><div style={factValue}>{act.age}</div></Fact>
           <Fact label={t('PULSE')}>
             <div style={{ ...factValue, color: '#FFFC33' }}>{d.pulseName}</div>
-            {paused && <div data-testid="activity-paused" style={{ marginTop: 6, display: 'inline-block', background: '#FF3358', color: '#FFFFFF', fontSize: 10, letterSpacing: '.14em', fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{t('PAUSED TODAY · WEATHER')}</div>}
+            {paused && <div data-testid="activity-paused" style={{ marginTop: 6, display: 'inline-block', background: '#D6173F', color: '#FFFFFF', fontSize: 10, letterSpacing: '.14em', fontWeight: 700, padding: '4px 8px', borderRadius: 999 }}>{t('PAUSED TODAY · WEATHER')}</div>}
           </Fact>
           <Fact label={t('PRICE')}><div style={factValue}>{d.priceLabel}</div></Fact>
         </div>
@@ -117,7 +117,7 @@ export function ZiplineReviews() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginTop: 12 }}>
         {reviews.map(([bg, quote, by]) => (
           <div key={by} style={{ background: bg, borderRadius: 16, padding: '18px 20px' }}>
-            <div style={{ color: '#FF3358', letterSpacing: 2, fontSize: 13 }}>★★★★★</div>
+            <div style={{ color: '#D6173F', letterSpacing: 2, fontSize: 13 }}>★★★★★</div>
             <div style={{ fontSize: 14.5, lineHeight: 1.55, marginTop: 8, color: 'rgba(52,0,87,.82)' }}>{quote}</div>
             <div style={{ fontFamily: MONO, fontSize: 11, marginTop: 10, color: 'rgba(52,0,87,.6)' }}>{by}</div>
           </div>

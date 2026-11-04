@@ -56,6 +56,8 @@ export interface Pupils { under6: number; kids: number; teens: number }
 
 /** The student price list's entrance row ("Entrance fee · visit of the park"). */
 export const isEntranceRow = (p: Pick<Product, 'name'>) => /^entrance fee/i.test(p.name);
+/** the Kids Park top-up card is priced per card, not per head */
+export const isCardRow = (name: string) => /top-up card/i.test(name);
 /** Rows made for the under-12s: the 4–11 lunch and the Kids Park rides. */
 const forUnder12 = (p: Pick<Product, 'name'>) => /4 to 11|kids park/i.test(p.name);
 /** The 12+ lunch. */
@@ -274,7 +276,7 @@ export default function GroupsPage() {
                 <label className="flex flex-1 basis-[180px] items-center gap-[10px] cursor-pointer">
                   <input type="checkbox" checked={!!picked[it.id]} onChange={(e) => setPicked((p) => ({ ...p, [it.id]: e.target.checked }))} />
                   <span className="flex-1 font-semibold text-[14px]">{it.name}</span>
-                  <span className="font-mono font-bold text-[12.5px] whitespace-nowrap">{mur(it.price)} {t('/ HEAD')}</span>
+                  <span className="font-mono font-bold text-[12.5px] whitespace-nowrap">{mur(it.price)} {isCardRow(it.name) ? t('per card') : t('/ HEAD')}</span>
                 </label>
                 {school && it.p && picked[it.id] && (
                   <label className="flex items-center gap-2 font-mono text-[10px] tracking-[.1em] text-[rgba(52,0,87,.65)]">
@@ -299,7 +301,7 @@ export default function GroupsPage() {
           <div className="bg-white rounded-[18px] shadow-[0_0_0_1.5px_#EBE2FF] mt-3 py-4 px-5" data-testid="group-summary">
             {entry > 0 && <Row label={t('Park entry · {party}', { party: school && entranceRow ? partyLabel(adults, 0) : partyLabel(partyAdults, kids) })} amount={mur(entry)} />}
             {under6 > 0 && <Row label={t('Park entry · {party}', { party: partyLabel(0, 0, under6) }) + ' · ' + t('free')} amount={mur(0)} />}
-            {lines.map((l) => <Row key={l.id} label={`${l.name} · ${l.perHead} ${t('/ HEAD')} × ${l.qty}`} amount={mur(l.amount)} />)}
+            {lines.map((l) => <Row key={l.id} label={`${l.name} · ${l.perHead} ${isCardRow(l.name) ? t('per card') : t('/ HEAD')} × ${l.qty}`} amount={mur(l.amount)} />)}
             {lines.length === 0 && <div className="text-[13.5px] text-[rgba(52,0,87,.6)]">{school ? t('Tick the student rows your visit includes.') : t('Tick the experiences the group will do; park entry is included for everyone.')}</div>}
             <div className="flex justify-between pt-[10px] mt-2 font-extrabold text-[18px]" style={{ borderTop: '1px dashed #D9C9F0' }}>
               <span>{t('Total')}</span><span className="font-mono" data-testid="group-total">{mur(total)}{app.currency !== 'MUR' ? ' (' + money(total) + ')' : ''}</span>

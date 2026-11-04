@@ -24,7 +24,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
   ];
   return (
     <main className="mx-auto min-h-[70vh] max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[140px] pb-[60px]">
-      <div className="font-mono text-[12px] font-bold tracking-[.16em] text-valle-red">{t('404 · NOT FOUND')}</div>
+      <div className="font-mono text-[12px] font-bold tracking-[.16em] text-valle-red-ink">{t('404 · NOT FOUND')}</div>
       <h1 className="mx-0 mt-3.5 mb-0 origin-bottom-left -rotate-4 font-display text-[clamp(40px,7vw,96px)] leading-[0.82] font-black uppercase italic">
         {t('Off the')}<br /><span className="text-valle-violet">{t('trail')}</span>
       </h1>
@@ -37,7 +37,7 @@ export default function NotFoundPage({ what }: { what?: string }) {
         ))}
       </div>
       <p className="mt-10 font-mono text-[11px] tracking-[.1em] text-valle-purple/50">
-        {t('NEED A HAND?')} <a href="mailto:sales@vallepark.com" style={{ color: '#7333FF' }}>SALES@VALLEPARK.COM</a> · <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 44 77</a>
+        {t('NEED A HAND?')} <a href="mailto:sales@vallepark.com" style={{ color: '#7333FF' }}>SALES@VALLEPARK.COM</a> · <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 4477</a>
       </p>
     </main>
   );

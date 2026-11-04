@@ -44,7 +44,7 @@ function GalLeadShot({ g }: { g: GalleryShot }) {
         style={{ ...coverImg, objectPosition: g.pos || '50% 18%', transition: 'transform .7s ease', ...(h ? { transform: 'scale(1.04)' } : undefined) }}
       />
       <div style={captionShade('18px 20px', '.85')}>
-        <span style={{ background: '#FF3358', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{g.tag}</span>
+        <span style={{ background: '#D6173F', color: '#FFFFFF', fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', borderRadius: 999, padding: '6px 11px' }}>{g.tag}</span>
         <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 'clamp(17px,2vw,23px)', color: '#FFFFFF', marginTop: 9, textTransform: 'uppercase', lineHeight: 1.05 }}>{g.cap}</div>
       </div>
     </div>

@@ -134,7 +134,7 @@ export default function VacancyDetailPage() {
 
       {/* ---- role header ---- */}
       <header data-reveal>
-        <div className={cn(MONO, 'text-valle-red')}>{(vacancy.department || t('VALLÉ PARK')).toUpperCase()}</div>
+        <div className={cn(MONO, 'text-valle-red-ink')}>{(vacancy.department || t('VALLÉ PARK')).toUpperCase()}</div>
         <h1 className={cn(DISPLAY, 'text-[clamp(38px,6vw,82px)] text-valle-purple mt-3 mb-0 mx-0 [transform:rotate(-3deg)] origin-bottom-left max-w-[900px]')}>
           {vacancy.title}
         </h1>

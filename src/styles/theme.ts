@@ -16,6 +16,8 @@ export const color = {
   /** Brand red: accents and information (errors, sale strikes, badges). Never a button fill: CTAs use the .vbtn classes (purple). */
   pink: '#FF3358',
   pinkDark: '#D91E44',
+  /** valle-red-ink: the brand red dark enough for small text on white (5.2:1). #FF3358 stays for large display type and decoration. */
+  pinkInk: '#D6173F',
   /** Nature green: success, "open", confirmations. */
   green: '#33FF74',
   greenDeep: '#12B54A',
@@ -86,3 +88,10 @@ export const statusColor: Record<string, { bg: string; fg: string }> = {
   rejected: { bg: '#FFE2E7', fg: '#D91E44' },
   hired: { bg: '#33FF74', fg: '#340057' },
 };
+
+/**
+ * Chip/tag fill for a brand colour that carries small white text: the brand red
+ * (#FF3358) is too light for 10px labels, so it is drawn in valle-red-ink. Other
+ * colours pass through. Catalog data keeps #FF3358.
+ */
+export const chipInk = (c: string): string => (c && c.toUpperCase() === color.pink ? color.pinkInk : c);

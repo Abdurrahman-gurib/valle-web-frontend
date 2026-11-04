@@ -14,7 +14,7 @@ export const QUICK_REPLIES: { label: string; text: string }[] = [
   { label: 'What to bring', text: 'Closed shoes, light clothes you can move in, sunscreen, a hat and water. Lockers are available at reception. Zipline and quad have age, height and weight limits listed on each page.' },
   { label: 'Rain', text: 'The park stays open in light rain and the trails are all the more beautiful for it. Ziplines and quads pause only during storms, and we reschedule at no cost.' },
   { label: 'Groups & team building', text: 'For groups of 10 or more and team-building days, send us the date, group size and what you have in mind on the Packages page, and we will come back with a quote within a day.' },
-  { label: 'Contact', text: 'Call or WhatsApp us on +230 660 44 77, or write to sales@vallepark.com.' },
+  { label: 'Contact', text: 'Call or WhatsApp us on +230 660 4477, or write to sales@vallepark.com.' },
 ];
 
 /** A thread row: server messages plus the optimistic ones still in flight. */

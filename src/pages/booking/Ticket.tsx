@@ -190,7 +190,7 @@ export default function TicketPage() {
             <InstallCard style={{ marginTop: 18 }} />
             <p className="mt-[18px] text-left text-[12.5px] leading-[1.55] text-valle-purple/65">
               {t('Show this QR code at the gate. B102, Mare Anguilles, Chamouny ·')} <a href="https://maps.google.com/?q=Vall%C3%A9+Advenature+Park+Chamouny" style={{ color: '#7333FF' }}>{t('directions')}</a>.{' '}
-              {t('Bring closed shoes, sunscreen and water. Free cancellation: call')} <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 44 77</a> {t('or write to {email}.', { email: 'sales@vallepark.com' })}
+              {t('Bring closed shoes, sunscreen and water. Free cancellation: call')} <a href="tel:+2306604477" style={{ color: '#7333FF' }}>+230 660 4477</a> {t('or write to {email}.', { email: 'sales@vallepark.com' })}
             </p>
           </div>
         </article>

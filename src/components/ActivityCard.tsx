@@ -6,6 +6,7 @@ import { showsDuration } from '../types';
 import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
 import { KP, KP_CONFETTI, KP_FONT } from './KidsPark';
+import { chipInk } from '@/styles/theme';
 
 /**
  * The activity card used across the site (Explore and its categories):
@@ -26,7 +27,7 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
     >
       <div className="relative h-[195px] bg-valle-lilac">
         <Img eager={eager} src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: a.catColor, color: a.catFg }}>{a.catBadge}</span>
+        <span className="absolute top-3 left-3 -rotate-4 rounded-full px-[11px] py-1.5 font-mono text-[10px] font-bold tracking-[.1em]" style={{ background: chipInk(a.catColor), color: a.catFg }}>{a.catBadge}</span>
         <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-valle-yellow px-2.5 py-1.5 font-mono text-[11px] font-bold text-valle-purple shadow-[0_6px_16px_-6px_rgba(0,0,0,.5)]">
           {a.priceLabel}
           <span className="rounded bg-valle-purple px-[5px] py-0.5 text-[9px] tracking-[.06em] text-valle-yellow">{rateTag}</span>

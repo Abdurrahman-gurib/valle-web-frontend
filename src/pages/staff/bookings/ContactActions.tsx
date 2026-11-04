@@ -19,7 +19,7 @@ function confirmationText(d: BookingDetailFull): string {
     lines,
     `Total: ${money(d.total)} · ${(d.balance ?? d.total) > 0 ? `${money(d.balance ?? d.total)} to pay on arrival` : 'paid'}`,
     d.ticketUrl ? `Your ticket with QR code: ${d.ticketUrl}` : '',
-    'Show it at the gate. B102, Mare Anguilles, Chamouny · +230 660 44 77',
+    'Show it at the gate. B102, Mare Anguilles, Chamouny · +230 660 4477',
   ].filter(Boolean).join('\n');
 }
 

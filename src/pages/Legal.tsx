@@ -17,7 +17,7 @@ type Section = { h: string; p: string[] };
 
 const PRIVACY: Section[] = [
   { h: _t('Who we are'), p: [
-    _t('VALLÉ Advenature™ Park is operated by Mare Anguilles Farms Ltd, B102 Mare Anguilles, Chamouny, Mauritius (“we”). We are the data controller for the personal data collected through this website. Write to sales@vallepark.com or call +230 660 44 77 for anything about your data.'),
+    _t('VALLÉ Advenature™ Park is operated by Mare Anguilles Farms Ltd, B102 Mare Anguilles, Chamouny, Mauritius (“we”). We are the data controller for the personal data collected through this website. Write to sales@vallepark.com or call +230 660 4477 for anything about your data.'),
   ] },
   { h: _t('What we collect and why'), p: [
     _t('Booking: your name, phone number, e-mail, nationality, the size of your party, the date and arrival slot, and what you chose. We use it to hold your places, send your ticket and reminder, and welcome you at the gate.'),
@@ -76,7 +76,7 @@ const TERMS: Section[] = [
     _t('Adventure activities carry risks that cannot be removed entirely; the extent of the park’s responsibility and your own is set out in the safety waiver. Nothing in these terms limits a liability that cannot be limited under the laws of Mauritius. These terms are governed by the laws of Mauritius and its courts.'),
   ] },
   { h: _t('Contact'), p: [
-    _t('Mare Anguilles Farms Ltd, B102 Mare Anguilles, Chamouny, Mauritius · sales@vallepark.com · +230 660 44 77. These terms are dated {date}.'),
+    _t('Mare Anguilles Farms Ltd, B102 Mare Anguilles, Chamouny, Mauritius · sales@vallepark.com · +230 660 4477. These terms are dated {date}.'),
   ] },
 ];
 

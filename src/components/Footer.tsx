@@ -93,7 +93,7 @@ export function Footer() {
               {t('Open daily 09:00 – 17:30')}<br />B102, Mare Anguilles<br />{t('Chamouny, Mauritius')}
             </div>
             <div className="mt-3 text-[14.5px] leading-[1.7]">
-              <a href="tel:+2306604477" style={{ color: '#FFFC33' }}>+230 660 44 77</a><br />
+              <a href="tel:+2306604477" style={{ color: '#FFFC33' }}>+230 660 4477</a><br />
               <a href="mailto:sales@vallepark.com" style={{ color: '#FFFC33' }}>sales@vallepark.com</a>
             </div>
           </div>

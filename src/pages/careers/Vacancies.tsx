@@ -48,7 +48,7 @@ function RoleCard({ v, onOpen }: { v: VacancyCard; onOpen: () => void }) {
         <span className="font-mono text-[10.5px] font-normal tracking-[.08em] text-[rgba(52,0,87,.7)]">
           {v.salaryRange ? v.salaryRange : closesLabel(v.closesOn)}
         </span>
-        <span className={cn(MONO, 'text-valle-purple group-hover:text-valle-red')}>{t('VIEW ROLE →')}</span>
+        <span className={cn(MONO, 'text-valle-purple group-hover:text-valle-red-ink')}>{t('VIEW ROLE →')}</span>
       </div>
     </div>
   );
@@ -155,7 +155,7 @@ export default function VacanciesPage() {
       <section id="roles" className="mt-[clamp(36px,4.5vw,60px)]">
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <div className={cn(MONO, 'text-valle-red')}>{t('OPEN ROLES')}</div>
+            <div className={cn(MONO, 'text-valle-red-ink')}>{t('OPEN ROLES')}</div>
             <h2 className={cn(DISPLAY, 'text-[clamp(30px,4vw,54px)] text-valle-purple mt-[10px] mb-0 mx-0 [transform:rotate(-2deg)] origin-bottom-left')}>
               {t('Come and join us')}
             </h2>
