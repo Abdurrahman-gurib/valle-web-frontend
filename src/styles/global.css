@@ -571,3 +571,27 @@ html[dir="rtl"] .pkg-title { transform-origin: right bottom; margin-bottom: 6px;
   .aud-tile, .pkg-card, .aud-photo, .pkg-photo { transition: none !important; }
   .aud-tile:hover, .pkg-card:hover, .aud-tile:hover .aud-photo, .pkg-card:hover .pkg-photo { transform: none; }
 }
+
+/* home hero: the copy sits on the lower part of the photo, just above the tilted marquee, with a fact row and the slide controls on its baseline */
+.home-hero { --hero-pb: clamp(112px, 6.5vw, 136px); --hero-px: clamp(16px, 3.5vw, 56px); }
+.hero-copy { padding: clamp(128px, 15vh, 170px) var(--hero-px) var(--hero-pb); }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.vbtn.hero-cta { min-height: 56px; padding: 0 28px; font-size: 16.5px; }
+.hero-facts { list-style: none; margin: 28px 0 0; padding: 0; display: inline-flex; flex-wrap: wrap; border-radius: var(--r-3); background: rgba(31, 0, 51, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); overflow: hidden; }
+.hero-facts li { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 12px 22px; }
+.hero-facts li + li { border-inline-start: 1px solid rgba(255, 255, 255, .16); }
+.hero-facts li.hero-fact-award { flex-direction: row; align-items: center; gap: 10px; max-width: 250px; }
+.hero-fact-v { font-family: 'Barlow', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; color: #FFFC33; }
+.hero-fact-k { font-family: 'Chivo Mono', monospace; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: #33FF74; }
+.hero-controls { bottom: calc(var(--hero-pb) + 4px); inset-inline-end: var(--hero-px); }
+@media (max-width: 640px) {
+  .home-hero { --hero-pb: 118px; }
+  .hero-copy { padding-top: 136px; }
+  .hero-ctas { flex-direction: column; margin-top: 24px; }
+  .hero-ctas .vbtn { width: 100%; }
+  .hero-facts { display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin-top: 18px; }
+  .hero-facts li { padding: 10px 14px; }
+  .hero-facts li.hero-fact-award { grid-column: 1 / -1; max-width: none; border-inline-start: 0; border-top: 1px solid rgba(255, 255, 255, .16); }
+  .hero-fact-v { font-size: 24px; }
+  .hero-controls { top: 82px; bottom: auto; }
+}

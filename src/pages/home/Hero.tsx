@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useCatalog } from '../../store/CatalogContext';
+import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
+import { useApp } from '../../store/AppStore';
+import { entryPrices } from '../../store/booking';
+import { money } from '../../lib/format';
 import { Img } from '../../components/Img';
 import { Pause, Play } from 'lucide-react';
+import { Fwd } from '@/components/ui/arrows';
 import { useT } from '../../i18n';
 import { paths, useGoto } from '../../lib/nav';
 import { setHomeMotionPaused, useHomeMotionPaused } from './motionPause';
@@ -10,7 +14,10 @@ import { setHomeMotionPaused, useHomeMotionPaused } from './motionPause';
 export function Hero() {
   const t = useT();
   const goto = useGoto();
-  const { HERO } = useCatalog();
+  const { HERO, ACTS } = useCatalog();
+  const raw = useRawCatalog();
+  const app = useApp();
+  const entryFrom = entryPrices(raw, app.rate === 'nr' ? 'nr' : 'rr').adult;
   const [heroIdx, setHeroIdxRaw] = useState(0);
   // the outgoing slide stays fully visible underneath while the next one fades in over it
   const [prevIdx, setPrevIdx] = useState(-1);
@@ -56,7 +63,7 @@ export function Hero() {
 
   return (
     <section
-      className="relative h-[min(96vh,880px)] min-h-[580px] overflow-hidden bg-valle-deep"
+      className="home-hero relative flex min-h-[max(620px,min(96vh,900px))] flex-col overflow-hidden bg-valle-deep"
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHeld(true); }}
       onPointerLeave={() => setHeld(false)}
       onFocus={() => setHeld(true)}
@@ -85,44 +92,56 @@ export function Hero() {
           }}
         />
       ))}
-      {/* scrim: dark at the bottom and behind the headline and copy (top start), so white text keeps 4.5:1 on every slide */}
-      <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.88)_0%,rgba(52,0,87,.25)_48%,rgba(31,0,51,.55)_100%)]" />
-      <div className="absolute inset-0 z-[3] bg-[linear-gradient(100deg,rgba(31,0,51,.62)_0%,rgba(31,0,51,.35)_38%,rgba(31,0,51,0)_62%)] rtl:bg-[linear-gradient(-100deg,rgba(31,0,51,.62)_0%,rgba(31,0,51,.35)_38%,rgba(31,0,51,0)_62%)]" />
-      <div ref={copyRef} className="relative z-[4] mx-auto flex h-full flex-col justify-start px-[clamp(16px,2.5vw,40px)] pt-[clamp(96px,12vh,130px)] pb-0">
-        <div className="origin-bottom-left -rotate-4">
-          <h1 className="m-0 font-display text-[clamp(48px,8.4vw,132px)] leading-[0.82] font-black tracking-[-0.01em] text-white uppercase italic">
+      {/* scrim: dark at the bottom (where the copy sits) and on the start side, so white text keeps 4.5:1 on every slide */}
+      <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.92)_0%,rgba(31,0,51,.62)_34%,rgba(52,0,87,.18)_62%,rgba(31,0,51,.5)_100%)]" />
+      <div className="absolute inset-0 z-[3] bg-[linear-gradient(100deg,rgba(31,0,51,.6)_0%,rgba(31,0,51,.3)_40%,rgba(31,0,51,0)_64%)] rtl:bg-[linear-gradient(-100deg,rgba(31,0,51,.6)_0%,rgba(31,0,51,.3)_40%,rgba(31,0,51,0)_64%)]" />
+      <div ref={copyRef} className="hero-copy relative z-[4] mt-auto w-full">
+        <div className="origin-bottom-left -rotate-4 rtl:origin-bottom-right">
+          <h1 className="m-0 font-display text-[clamp(52px,8.4vw,138px)] leading-[0.82] font-black tracking-[-0.01em] text-white uppercase italic">
             <span data-hero-line className="inline-block">{t('Feel the')}</span><br /><span data-hero-line className="inline-block text-valle-yellow">{t('colours.')}</span>
           </h1>
         </div>
-        <p data-hero-copy className="mx-0 mt-[22px] mb-0 max-w-[52ch] text-[clamp(15px,1.6vw,18px)] leading-[1.55] text-white [text-shadow:0_1px_12px_rgba(31,0,51,.6)]">
+        <p data-hero-copy className="mx-0 mt-[26px] mb-0 max-w-[46ch] text-[clamp(16px,1.3vw,19px)] leading-[1.55] font-medium text-white [text-shadow:0_1px_12px_rgba(31,0,51,.6)]">
           {t("Where nature & adventure collide: ziplines or waterfalls, quad bikes or giant tortoises. Live the pulse of every breath at Mauritius' only advenature park.")}
         </p>
-        <div data-hero-copy className="mt-7 flex flex-wrap gap-3">
-          <a href={paths.booking()} onClick={(e) => { e.preventDefault(); goto.booking(); }} data-testid="hero-book" className="vbtn vbtn-on-dark" style={{ color: '#340057' }}>{t('Book your day')}</a>
-          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); goto.packages(); }} data-testid="hero-packages" className="vbtn vbtn-ghost" style={{ color: '#FFFFFF' }}>{t('See packages')}</a>
+        <div data-hero-copy className="hero-ctas">
+          <a href={paths.booking()} onClick={(e) => { e.preventDefault(); goto.booking(); }} data-testid="hero-book" className="vbtn vbtn-on-dark hero-cta" style={{ color: '#340057' }}>{t('Book your day')} <Fwd /></a>
+          <a href={paths.packages()} onClick={(e) => { e.preventDefault(); goto.packages(); }} data-testid="hero-packages" className="vbtn vbtn-ghost hero-cta" style={{ color: '#FFFFFF' }}>{t('See packages')}</a>
         </div>
+        {/* real facts only: experience count and entry price from the catalog (at the guest's rate), and the 2026 award */}
+        <ul data-hero-copy className="hero-facts" aria-label={t('Visit at a glance')}>
+          <li><span className="hero-fact-v">{ACTS.length}</span><span className="hero-fact-k">{t('EXPERIENCES')}</span></li>
+          <li><span className="hero-fact-v">{money(entryFrom)}</span><span className="hero-fact-k">{t('PARK ENTRY')}</span></li>
+          <li className="hero-fact-award">
+            <Img src="/images/wlta-logo-1.png" alt="" surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 40, width: 40, objectFit: 'contain', flexShrink: 0 }} />
+            <span className="hero-fact-k" style={{ color: '#FFFFFF', letterSpacing: '.08em', lineHeight: 1.35 }}>{t('World Luxury Travel Awards 2026 winner')}</span>
+          </li>
+        </ul>
       </div>
-      <div className="absolute z-[4] right-[clamp(16px,3.5vw,40px)] bottom-[120px] flex flex-col items-center gap-2">
+      <div className="hero-controls absolute z-[4] flex items-center gap-3">
         <button
           type="button"
           data-testid="hero-pause"
           onClick={() => setHomeMotionPaused(!paused)}
           aria-pressed={paused}
           aria-label={paused ? t('Play the slideshow and the moving banner') : t('Pause the slideshow and the moving banner')}
-          className="mb-2 flex size-[40px] cursor-pointer items-center justify-center rounded-full border-[1.5px] border-solid border-white/70 bg-[rgba(31,0,51,.45)] text-white hover:bg-[rgba(31,0,51,.7)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-yellow"
+          className="flex size-[40px] cursor-pointer items-center justify-center rounded-full border-[1.5px] border-solid border-white/70 bg-[rgba(31,0,51,.45)] text-white hover:bg-[rgba(31,0,51,.7)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-yellow"
         >
           {paused ? <Play size={16} strokeWidth={2.5} aria-hidden /> : <Pause size={16} strokeWidth={2.5} aria-hidden />}
         </button>
-        {HERO.map((src, i) => (
-          <button
-            key={src}
-            data-hero-dot
-            onClick={() => setHeroIdx(i)}
-            aria-label={t('Show slide {n}', { n: i + 1 })}
-            aria-current={i === heroIdx ? 'true' : undefined}
-            className={'size-[9px] cursor-pointer rounded-full border-0 p-0 transition-[background] duration-300 ease-[ease] ' + (i === heroIdx ? 'bg-valle-yellow' : 'bg-white/40')}
-          />
-        ))}
+        <div className="flex items-center">
+          {HERO.map((src, i) => (
+            <button
+              key={src}
+              data-hero-dot
+              onClick={() => setHeroIdx(i)}
+              aria-label={t('Show slide {n}', { n: i + 1 })}
+              aria-current={i === heroIdx ? 'true' : undefined}
+              className={'h-[9px] cursor-pointer rounded-full border-0 p-0 transition-[background,width] duration-300 ease-[ease] motion-reduce:transition-none ' + (i === heroIdx ? 'w-[26px] bg-valle-yellow' : 'w-[9px] bg-white/45')}
+            />
+          ))}
+        </div>
+        <span aria-hidden className="font-mono text-[12px] font-bold tracking-[.12em] text-white/85"><bdi dir="ltr">{String(heroIdx + 1).padStart(2, '0')} / {String(HERO.length).padStart(2, '0')}</bdi></span>
       </div>
     </section>
   );
