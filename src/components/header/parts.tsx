@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 import { cn } from '@/lib/utils';
 import { Img } from '../Img';
+import { ValleIcon, type ValleIconName } from '@/components/ui/ValleIcon';
 
 /** Header building blocks shared by the desktop row, the mega menus and the mobile overlay. */
 
@@ -51,17 +52,26 @@ export function NavBtn({ label, onClick, color, chev, href, snug, btnRef, contro
   );
 }
 
-export function MegaLink({ name, onClick, hoverColor = '#5B21B6', href }: { name: string; onClick: () => void; hoverColor?: string; href: string }) {
+export function MegaLink({ name, onClick, hoverColor = '#5B21B6', href, icon }: {
+  name: string; onClick: () => void; hoverColor?: string; href: string;
+  /** Optional park icon before the name (decorative: the text names the link). */
+  icon?: ValleIconName;
+}) {
   return (
     <SpaLink
       href={href}
       onClick={onClick}
-      className="block cursor-pointer text-[15px] font-medium py-[5.5px] [--c:#340057] hover:[--c:var(--hc)] [transition:transform_var(--t-fast),color_var(--t-fast)] hover:[transform:translateX(3px)] hover:underline underline-offset-4"
+      className={cn(
+        'block cursor-pointer text-[15px] font-medium py-[5.5px] [--c:#340057] hover:[--c:var(--hc)] [transition:transform_var(--t-fast),color_var(--t-fast)] hover:[transform:translateX(3px)] hover:underline underline-offset-4',
+        // a long name wraps under itself (hanging indent), the icon stays on the first line
+        icon && 'group/ml flex items-start gap-[9px] leading-[1.3]',
+      )}
       // the colour reads a class-driven variable, so the hover colour still works inline
       color="var(--c)"
       style={{ '--hc': hoverColor }}
     >
-      {name}
+      {icon && <ValleIcon name={icon} size={18} className="mt-[0.5px] opacity-70 [transition:opacity_var(--t-fast)] group-hover/ml:opacity-100" />}
+      {icon ? <span className="min-w-0">{name}</span> : name}
     </SpaLink>
   );
 }

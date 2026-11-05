@@ -9,16 +9,17 @@ import { paths, useGoto } from '../../lib/nav';
 import { useT, _t } from '../../i18n';
 import { Stripes } from '../Stripes';
 import { SpaLink, mobileNavRow } from './parts';
+import { ValleIcon, type ValleIconName } from '@/components/ui/ValleIcon';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { MenuGroup } from './packageGroups';
 
 type Go = (fn: () => void) => () => void;
 
-const CATEGORY_TILES: [label: string, cat: string, bg: string, fg: string, rot: number][] = [
-  [_t('Adventure'), 'adventure', '#D6173F', '#FFFFFF', -1],
-  [_t('Nature'), 'nature', '#33FF74', '#340057', 1],
-  [_t('Kids Park'), 'kids', '#FFFC33', '#340057', 1],
-  [_t('Tours & Groups'), 'tours', '#7333FF', '#FFFFFF', -1],
+const CATEGORY_TILES: [label: string, cat: string, bg: string, fg: string, rot: number, icon: ValleIconName][] = [
+  [_t('Adventure'), 'adventure', '#D6173F', '#FFFFFF', -1, 'zipline'],
+  [_t('Nature'), 'nature', '#33FF74', '#340057', 1, 'landscape'],
+  [_t('Kids Park'), 'kids', '#FFFC33', '#340057', 1, 'kids-playground'],
+  [_t('Tours & Groups'), 'tours', '#7333FF', '#FFFFFF', -1, 'team-stars'],
 ];
 
 /** One full-width row of the overlay: label left, yellow arrow right. */
@@ -72,16 +73,17 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
         </button>
       </div>
       <div className="grid grid-cols-[1fr_1fr] gap-[8px] mt-[14px] mb-[4px] animate-[vfadeup_.3s_ease_both] [animation-delay:.05s]">
-        {CATEGORY_TILES.map(([label, cat, bg, fg, rot]) => (
+        {CATEGORY_TILES.map(([label, cat, bg, fg, rot, icon]) => (
           <SpaLink
             key={cat}
             href={paths.explore(cat)}
             onClick={go(() => goto.explore(cat))}
-            className="press block cursor-pointer rounded-[12px] py-[13px] px-[14px] font-display italic font-extrabold text-[15px] uppercase"
+            className="press flex items-center gap-[7px] cursor-pointer rounded-[12px] py-[11px] px-[11px] font-display italic font-extrabold text-[15px] leading-[1.1] uppercase"
             color={fg}
             style={{ background: bg, transform: `rotate(${rot}deg)` }}
           >
-            {t(label)}
+            <ValleIcon name={icon} size={20} />
+            <span className="min-w-0">{t(label)}</span>
           </SpaLink>
         ))}
       </div>

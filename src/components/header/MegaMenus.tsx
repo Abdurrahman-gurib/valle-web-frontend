@@ -7,6 +7,7 @@ import { useT } from '../../i18n';
 import { StripesSm } from '../Stripes';
 import { Img } from '../Img';
 import { KidsParkLogo, MegaLink, SpaLink, megaPanel, monoLink } from './parts';
+import { ValleIcon, iconForActivity, type ValleIconName } from '@/components/ui/ValleIcon';
 
 /** Link/selected text colour of the design system. */
 const LINK = '#5B21B6';
@@ -87,6 +88,17 @@ export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
   );
 }
 
+/** An explore column heading: the category's park icon, its name and the arrow. */
+function CatHead({ cat, icon, label, go }: { cat: string; icon: ValleIconName; label: string; go: Go }) {
+  const goto = useGoto();
+  return (
+    <SpaLink href={paths.explore(cat)} onClick={go(() => goto.explore(cat))} className={cn(monoLink, 'mb-[12px] flex items-center gap-[9px]')} color={LINK}>
+      <ValleIcon name={icon} size={22} />
+      <span>{label} <Fwd /></span>
+    </SpaLink>
+  );
+}
+
 /** Desktop explore mega menu: the four categories with their experiences, plus the zipline teaser. */
 export function ExploreMenu({ go }: { go: Go }) {
   const t = useT();
@@ -94,7 +106,7 @@ export function ExploreMenu({ go }: { go: Go }) {
   const navigate = useNavigate();
   const catalog = useCatalog();
   const links = (cat: string, hoverColor?: string) => catalog.ACTS.filter((a) => a.cat === cat).map((a) => (
-    <MegaLink key={a.id} name={a.name} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor={hoverColor} />
+    <MegaLink key={a.id} name={a.name} icon={iconForActivity(a.id, a.cat)} href={paths.detail(a.id)} onClick={go(() => goto.detail(a.id))} hoverColor={hoverColor} />
   ));
 
   return (
@@ -102,24 +114,20 @@ export function ExploreMenu({ go }: { go: Go }) {
       <StripesSm />
       <div className="max-w-[1320px] mx-auto pt-[30px] px-[clamp(16px,3.5vw,40px)] pb-[36px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[clamp(20px,3vw,44px)]">
         <div>
-          <SpaLink href={paths.explore('adventure')} onClick={go(() => goto.explore('adventure'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>{t('ADVENTURE')} <Fwd /></SpaLink>
+          <CatHead cat="adventure" icon="zipline" label={t('ADVENTURE')} go={go} />
           {links('adventure')}
         </div>
         <div>
-          <SpaLink href={paths.explore('nature')} onClick={go(() => goto.explore('nature'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
-            {t('NATURE')} <Fwd />
-          </SpaLink>
+          <CatHead cat="nature" icon="landscape" label={t('NATURE')} go={go} />
           {links('nature')}
         </div>
         <div>
-          <SpaLink href={paths.explore('kids')} onClick={go(() => goto.explore('kids'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
-            {t('KIDS PARK')} <Fwd />
-          </SpaLink>
+          <CatHead cat="kids" icon="kids-playground" label={t('KIDS PARK')} go={go} />
           {links('kids')}
-          <MegaLink name={t('Vallé Kids Park pricelist')} href={paths.explore('kids') + '#kids-prices'} onClick={go(() => navigate(paths.explore('kids') + '#kids-prices'))} />
+          <MegaLink icon="kids-playground" name={t('Vallé Kids Park pricelist')} href={paths.explore('kids') + '#kids-prices'} onClick={go(() => navigate(paths.explore('kids') + '#kids-prices'))} />
         </div>
         <div>
-          <SpaLink href={paths.explore('tours')} onClick={go(() => goto.explore('tours'))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>{t('TOURS')} <Fwd /></SpaLink>
+          <CatHead cat="tours" icon="team-stars" label={t('TOURS')} go={go} />
           {links('tours')}
 
         </div>
