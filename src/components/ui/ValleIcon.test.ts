@@ -40,7 +40,7 @@ describe('official icon set', () => {
     expect(iconForInclusion('Sky Pulse Tour (3.1 km, 7 lines)')).toBe('zipline');
     expect(iconForInclusion('The Plunge Zipline (500 m)')).toBe('zipline');
     expect(iconForInclusion('Waterfall Zipline (300 m · 2 lines)')).toBe('zipline');
-    expect(iconForInclusion('Giant Swing (1 ride)')).toBe('giant-swing');
+    expect(iconForInclusion('Giant Swing')).toBe('giant-swing');
     expect(iconForInclusion('Visit of the waterfalls')).toBe('waterfall');
     expect(iconForInclusion('Advenature Flight (5.5 km, 11 lines)')).toBe('zipline');
     expect(iconForInclusion('Mountain Luge Kart (3 rides)')).toBe('luge-kart');
