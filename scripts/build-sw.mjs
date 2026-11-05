@@ -19,10 +19,12 @@ const list = (dir, test) => (existsSync(join(dist, dir)) ? readdirSync(join(dist
 // Kept out of the install download (it runs after the page has loaded, but on a slow
 // phone it still competes with the photos further down): the staff gate scanner,
 // the back office (Dashboard, reportUi = Recharts), the desktop-only Three.js layer,
-// the other languages' dictionaries and the Arabic / Cyrillic / Devanagari fonts.
+// and the Arabic / Cyrillic / Devanagari fonts (fetched when a page uses them).
 // The worker still caches each of them the first time a page uses it (cache-first
 // on /assets/ and /fonts/), so a French or Hindi visitor keeps theirs offline.
-const NOT_IN_SHELL = /^(jsQR|Dashboard|reportUi|three\.module|(fr|de|it|ar|ru|es|hi)-)[-\w]*\.js$/i;
+// The language dictionaries stay in: the site promises every language offline,
+// and the worker installs after the page has loaded, so they never compete with first paint.
+const NOT_IN_SHELL = /^(jsQR|Dashboard|reportUi|three\.module)[-\w]*\.js$/i;
 const precache = [
   '/',
   ...list('assets', (f) => /\.(js|css)$/.test(f) && !NOT_IN_SHELL.test(f)),
