@@ -90,9 +90,10 @@ const INCLUSION_RULES: [RegExp, ValleIconName][] = [
   [/kids|playground|pirate|coaster|bonding/i, 'kids-playground'],
   [/gopro|photo|cinematic|video|film|stills|captured/i, 'camera'],
   [/swing/i, 'giant-swing'],
-  [/waterfall|cascade/i, 'waterfall'],
   [/animal|tortoise|deer/i, 'tortoise'],
+  // before waterfall, so "Waterfall Zipline" stays a zipline
   [/zip|plunge|flight|\btours?\b|signature/i, 'zipline'],
+  [/waterfall|cascade/i, 'waterfall'],
   [/\btea\b|coffee|café|\bcafe\b|snack|beverage/i, 'tea'],
   [/lunch|menu|restaurant|dinner|meal/i, 'restaurant'],
   [/peak|coloured earth|colored earth|scenery|viewpoint|expedition|hunting/i, 'landscape'],
