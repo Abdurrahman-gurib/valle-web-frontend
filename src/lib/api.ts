@@ -1,6 +1,7 @@
 import { track } from './analytics';
 import type { BookingRequest, BookingResponse, Catalog, QuoteRequest } from '../types';
 import type { FxTable } from './fx';
+import { currentLang } from '../i18n';
 
 const BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -129,15 +130,16 @@ export function createBooking(body: BookingRequest): Promise<BookingResponse> {
 }
 
 // ---- restaurant tables ----
-export interface TableRequest { name: string; email?: string; phone?: string; visitDate: string; visitTime: string; party: number; preorder?: { item: string; qty: number }[]; notes?: string; bookingRef?: string }
+export interface TableRequest { lang?: string; name: string; email?: string; phone?: string; visitDate: string; visitTime: string; party: number; preorder?: { item: string; qty: number }[]; notes?: string; bookingRef?: string }
 export function reserveTable(restaurantId: string, body: TableRequest): Promise<{ id: string; status: 'requested' }> {
-  return request<{ id: string; status: 'requested' }>(`/restaurants/${encodeURIComponent(restaurantId)}/reservations`, { method: 'POST', body: JSON.stringify(body) });
+  // the page language travels with the request: the guest's e-mails are written in it
+  return request<{ id: string; status: 'requested' }>(`/restaurants/${encodeURIComponent(restaurantId)}/reservations`, { method: 'POST', body: JSON.stringify({ lang: currentLang(), ...body }) });
 }
 
 // ---- saved booking drafts ----
 export interface BookingDraftPayload { sel: Record<string, { a?: number; k?: number; u?: number }>; adults: number; kids: number; infants?: number; customDate?: string; dateIdx?: number; slot?: number; name?: string; phone?: string; email?: string; nat?: string }
 export function saveDraft(email: string, payload: BookingDraftPayload): Promise<{ id: string; sent: boolean }> {
-  return request<{ id: string; sent: boolean }>('/bookings/draft', { method: 'POST', body: JSON.stringify({ email, payload }) });
+  return request<{ id: string; sent: boolean }>('/bookings/draft', { method: 'POST', body: JSON.stringify({ email, payload, lang: currentLang() }) });
 }
 export function readDraft(id: string): Promise<BookingDraftPayload> {
   return request<BookingDraftPayload>(`/bookings/draft/${encodeURIComponent(id)}`);
