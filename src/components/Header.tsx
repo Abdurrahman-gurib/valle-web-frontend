@@ -174,7 +174,7 @@ export function Header() {
             style={{ color: headerFg, textDecoration: 'none' }}
           >
             {/* the official lockup, one colour (the header foreground); 100px is the brand minimum */}
-            <ValleLogo decorative className={isMobile ? 'w-[100px]' : 'w-[clamp(100px,9.2vw,132px)] short:w-[100px]'} />
+            <ValleLogo decorative className={isMobile ? 'w-[100px]' : 'w-[clamp(100px,8vw,116px)] short:w-[100px]'} />
           </a>
 
           {!isMobile && (

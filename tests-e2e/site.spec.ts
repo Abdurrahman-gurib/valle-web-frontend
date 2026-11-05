@@ -247,7 +247,9 @@ test.describe('experience detail', () => {
   test('the Giant Swing shows its price, age and a muted inline clip with a pause control', async ({ page }) => {
     await page.goto('/activities/giantswing');
     await expect(page.getByRole('heading', { level: 1, name: /The Giant Swing/i })).toBeVisible();
-    await expect(page.getByText('Giant Swing · 2 rides', { exact: true })).toBeVisible();
+    // a pendulum ride with no ride count (owner, 2026-11-05)
+    await expect(page.getByText('Giant Swing', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/2 rides/i)).toHaveCount(0);
     await expect(page.getByText('Rs 700').first()).toBeVisible();
     await expect(page.getByText('12+', { exact: true }).first()).toBeVisible();
     const video = page.getByTestId('activity-video');
