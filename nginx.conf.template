@@ -232,6 +232,13 @@ server {
         try_files $uri =404;
     }
 
+    # The analytics loader keeps its name across builds: revalidate it, never pin it for 30 days.
+    location = /plausible-init.js {
+        include /etc/nginx/security-headers.conf;
+        add_header Cache-Control "no-cache" always;
+        try_files $uri =404;
+    }
+
     # Long-lived caching for hashed assets and media. Video clips (.mp4) get their
     # video/mp4 type from mime.types and byte ranges (206) from the static module.
     location ~* \.(js|css|woff2|jpg|jpeg|png|webp|avif|svg|ico|pdf|webmanifest|mp4)$ {

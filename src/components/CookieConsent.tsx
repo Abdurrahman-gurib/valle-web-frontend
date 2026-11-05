@@ -34,8 +34,8 @@ function LockedOn({ label }: { label: string }) {
  * Cookie / storage consent banner. Shown once per browser on the first visit
  * (after hydration only, so crawlers and the prerender never see it), and again
  * from the footer's "Cookie settings" link. The site only keeps essential
- * storage (rate, My Day, chat) and runs no analytics or monitoring, so the
- * banner is a notice with one acknowledgement button. See src/lib/consent.ts.
+ * storage (rate, My Day, chat) and counts visits with cookieless Plausible
+ * analytics (no personal data), so no consent is needed and the banner is a notice with one acknowledgement button. See src/lib/consent.ts.
  */
 export function CookieConsent() {
   const [open, setOpen] = useState(false);
@@ -83,7 +83,7 @@ export function CookieConsent() {
               {t('A small trail of crumbs')}
             </div>
             <p className="mx-0 mt-1.5 sm:mt-2.5 mb-0 text-[13px] sm:text-[14px] leading-[1.5] text-valle-purple/75">
-              {t('We store your rate and your My Day picks in this browser so the site works. No advertising cookies, no tracking, nothing sold on.')}{' '}
+              {t('We store your rate and your My Day picks in this browser so the site works. No advertising cookies, no tracking cookies, nothing sold on.')}{' '}
               <button onClick={() => setDetails((d) => !d)} aria-expanded={details} className="vbtn-link underline">
                 {details ? t('Hide details') : t('What we store')}
               </button>

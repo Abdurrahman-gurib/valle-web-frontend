@@ -13,6 +13,7 @@ import { useT } from '../../i18n';
 import type { Product } from '../../types';
 import { headingTilt } from '@/components/ui/heading';
 import { ValleIcon, iconForInclusion, type ValleIconName } from '@/components/ui/ValleIcon';
+import { track } from '../../lib/analytics';
 
 /**
  * Shared pieces of the package class pages (/packages/<class>): type styles,
@@ -162,7 +163,7 @@ export function useProductBooking(key?: string) {
   const inDay = !!key && !!app.sel[id];
   /** A resident-only product while browsing at the visitor rate, or the reverse. */
   const blocked: 'rr' | 'nr' | null = product?.rateOnly === 'rr' && app.rate === 'nr' ? 'rr' : product?.rateOnly === 'nr' && app.rate !== 'nr' ? 'nr' : null;
-  const book = () => { if (key && !inDay) app.toggleSel(id); goto.booking(); };
+  const book = () => { track('Package book', { family: product?.family ?? 'unknown', key: key ?? 'none' }); if (key && !inDay) app.toggleSel(id); goto.booking(); };
   /** Rupee labels for the rate the guest browses at (the catalog's own label when the product is unknown). */
   const nr = app.rate === 'nr';
   const single = product ? money(nr ? product.nr : product.rr) : undefined;

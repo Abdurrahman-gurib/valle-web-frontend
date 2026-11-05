@@ -25,6 +25,7 @@ import { ExplorerPassNote } from '../../components/ExplorerPassNote';
 import { isOut, WhenStep } from './WhenStep';
 import { forgetReceipt, readReceipt, Receipt, saveReceipt, type ConfirmedBooking, type ReceiptSnapshot } from './Receipt';
 import { useAvailability, useCoupon, useHold, useOnlinePayment, useSavedDraft, useSlotFallback } from './bookingHooks';
+import { track } from '../../lib/analytics';
 
 /** /booking: the five steps (1 pick, 2 your day, 3 when, 4 details, 5 pay), then the receipt. */
 export default function BookingPage() {
@@ -34,6 +35,7 @@ export default function BookingPage() {
   // One key per attempt: kept across retries of the same submit, renewed once a booking is written.
   const attemptKey = useRef(newAttemptKey());
   useSeo({ title: t('Book your day · VALLÉ Advenature™ Park'), description: ONLINE_PAYMENT ? t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay online or at the gate. Free to book, no cancellation fee.') : t('Build your day at Vallé: pick ziplines, quad tracks, buggies and more, choose a date and pay at the gate. Free to book, no cancellation fee.'), canonicalPath: '/booking', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Book your day', path: '/booking' }])] });
+  useEffect(() => { track('Booking viewed'); }, []);
   const ref = useReveal<HTMLElement>();
   const catalog = useCatalog();
   const app = useApp();
@@ -230,6 +232,7 @@ export default function BookingPage() {
     let result: ConfirmedBooking;
     try {
       const res = await createBooking(req);
+      track('Booking confirmed', { rate: req.rate, item_count: req.items.length, has_package: cartActs.some((l) => !!l.product) ? 'yes' : 'no' });
       if (res.checkoutUrl) {
         // The provider's hosted page takes over; the ticket page reads the outcome when the guest comes back.
         setRedirecting(true);

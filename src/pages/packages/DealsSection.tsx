@@ -9,6 +9,7 @@ import type { Product, RateKey } from '../../types';
 import { toEnglish, useT } from '../../i18n';
 import { ValleIcon, iconForInclusion } from '@/components/ui/ValleIcon';
 import { BLACK_ITALIC as BARLOW, MONO } from './shared';
+import { track } from '../../lib/analytics';
 
 /** Rotated h2 with its mono tag on the right, over a purple rule. */
 function SectionHead({ id, title, tag, marginTop }: { id?: string; title: ReactNode; tag: string; marginTop: string }) {
@@ -112,7 +113,7 @@ export function DealsSection({ deals }: { deals: Product[] }) {
             accent={DEAL_ACCENTS[i % DEAL_ACCENTS.length]}
             rate={app.rate}
             inDay={inDay(d)}
-            onBook={() => { if (!inDay(d)) app.toggleSel('product:' + d.key); goto.booking(); }}
+            onBook={() => { track('Package book', { family: 'expo', key: d.key }); if (!inDay(d)) app.toggleSel('product:' + d.key); goto.booking(); }}
             onSwitchRate={() => app.setRate('rr')}
           />
         ))}

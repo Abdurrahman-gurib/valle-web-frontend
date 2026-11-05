@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { track } from '../lib/analytics';
 import { LANGS, LANG_META, isLang, localizePath, stripLang, tr, useLang, type Lang } from '../i18n';
 
 const MONO = "'Chivo Mono',monospace";
@@ -11,6 +12,7 @@ export function useSwitchLang(): (lang: Lang) => void {
   return (lang: Lang) => {
     // a choice made here (English included) also silences the language offer for good
     try { localStorage.setItem('valle_lang', lang); localStorage.setItem('valle_lang_chosen', '1'); } catch { /* ignore */ }
+    track('Language switched', { lang });
     navigate(localizePath(stripLang(pathname) + search + hash, lang));
   };
 }

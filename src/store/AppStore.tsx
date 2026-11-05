@@ -1,5 +1,5 @@
 import {
-  createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from 'react';
 import type { BookingSummary, RateKey, Sel, SelEntry } from '../types';
 import { useCatalog } from './CatalogContext';
@@ -10,6 +10,7 @@ import { CURRENCY_STORAGE_KEY, FX_FALLBACK, isCurrency, readStoredCurrency, type
 import { fetchFx } from '../lib/api';
 import { setDisplayCurrency } from '../lib/format';
 import { tr, useLang } from '../i18n';
+import { track } from '../lib/analytics';
 
 interface AppState {
   // rate
@@ -144,6 +145,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [rate, setRateState] = useState<RateKey | null>(readRate);
   const [rateGate, setRateGate] = useState(false);
   const [sel, setSel] = useState<Sel>(readSel);
+  /** The selection as of the last render, so toggleSel can tell an add from a removal outside the updater. */
+  const selNow = useRef(sel);
+  selNow.current = sel;
   const draft0 = readDraft();
   const [adults, setAdults] = useState(draft0.adults ?? 2);
   const [kids, setKids] = useState(draft0.kids ?? 0);
@@ -228,10 +232,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem('valle_rate', r); } catch { /* ignore */ }
     setRateState(r);
     setRateGate(false);
+    track('Rate chosen', { rate: r });
   }, []);
 
   const toggleSel = useCallback((id: string, variant?: string) => {
     const key = selKey(id, variant);
+    if (!selNow.current[key] && !id.startsWith('product:')) track('Add to My Day', { activity: id });
     setSel((s) => {
       const next = { ...s };
       if (next[key]) {

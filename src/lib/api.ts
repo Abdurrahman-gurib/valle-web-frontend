@@ -1,3 +1,4 @@
+import { track } from './analytics';
 import type { BookingRequest, BookingResponse, Catalog, QuoteRequest } from '../types';
 import type { FxTable } from './fx';
 
@@ -115,7 +116,8 @@ export function fetchWaivers(refCode: string, token: string): Promise<WaiverView
   return request<WaiverView>(waiverPath(refCode, token));
 }
 export function signWaiver(refCode: string, token: string, body: WaiverRequest): Promise<WaiverView> {
-  return request<WaiverView>(waiverPath(refCode, token), { method: 'POST', body: JSON.stringify(body) });
+  return request<WaiverView>(waiverPath(refCode, token), { method: 'POST', body: JSON.stringify(body) })
+    .then((view) => { track('Waiver signed'); return view; });
 }
 
 /** A fresh idempotency key for one booking attempt (UUID, as the API expects). */

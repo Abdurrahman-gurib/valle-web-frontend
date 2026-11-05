@@ -1,4 +1,6 @@
 import { useEffect, useId, useState, type CSSProperties, type RefObject } from 'react';
+import { useParams } from 'react-router-dom';
+import { track } from '../../lib/analytics';
 import { BtnLabel } from '../../components/ui/valle';
 import { createQuote } from '../../lib/api';
 import { errorMessage, httpStatus } from '../../lib/errors';
@@ -70,6 +72,8 @@ const EMPTY: Record<Field, string> = { name: '', company: '', email: '', phone: 
 /** The quote request at the foot of every packages page (#quote); the corporate page words it for teams. */
 export function QuoteForm({ anchorRef, corporate }: { anchorRef: RefObject<HTMLDivElement>; corporate: boolean }) {
   const t = useT();
+  /** The package class page the form was sent from (analytics label only). */
+  const quoteClass = useParams<{ group?: string }>().group ?? (corporate ? 'corporate' : 'packages');
   const uid = useId().replace(/:/g, '');
   const fid = (f: Field) => `q${uid}-${f}`;
   const [v, setV] = useState<Record<Field, string>>(EMPTY);
@@ -140,6 +144,7 @@ export function QuoteForm({ anchorRef, corporate }: { anchorRef: RefObject<HTMLD
         message: v.message.trim() || undefined,
       };
       await createQuote(body);
+      track('Quote sent', { class: quoteClass });
       setQSent(true);
     } catch (err) {
       const status = httpStatus(err);

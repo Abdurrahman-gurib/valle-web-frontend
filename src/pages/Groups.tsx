@@ -14,6 +14,7 @@ import { entryPrices } from '../store/booking';
 import { productAmount, type BookingRequest, type BookingResponse, type Product } from '../types';
 import { errorMessage, httpStatus } from '../lib/errors';
 import { localTicketHref } from './booking/Receipt';
+import { track } from '../lib/analytics';
 
 /**
  * /groups: schools, companies and clubs book online with per-head pricing,
@@ -204,6 +205,7 @@ export default function GroupsPage() {
     try {
       const res = await createBooking(req);
       setDone({ ...res, total: res.total });
+      track('Group booking sent', { kind, item_count: lines.length });
       window.scrollTo(0, 0);
     } catch (e) {
       const status = httpStatus(e);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { paths } from '../../lib/nav';
+import { track } from '../../lib/analytics';
 import type { PackageGroup } from '../../lib/packageGroups';
 import { useT } from '../../i18n';
 import { Img } from '../../components/Img';
@@ -57,7 +58,7 @@ export function ClassNav({ classes, current, marginTop, meta }: { classes: Packa
       {classes.map((g) => {
         const ph = CLASS_PHOTO[g.slug];
         return (
-          <Link key={g.slug} to={paths.packageGroup(g.slug)} data-testid={`class-${g.slug}`} className="v-card pk-classcard" style={{ color: '#340057' }}>
+          <Link key={g.slug} to={paths.packageGroup(g.slug)} onClick={() => track('Package prices', { family: g.slug })} data-testid={`class-${g.slug}`} className="v-card pk-classcard" style={{ color: '#340057' }}>
             {ph && (
               <span className="v-card-media">
                 <Img src={ph.src} alt="" style={cover(ph.position)} />

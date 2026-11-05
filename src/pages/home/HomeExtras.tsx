@@ -9,6 +9,7 @@ import { PACKAGE_GROUPS, groupOfSection } from '../../lib/packageGroups';
 import { liveDeals } from '../../lib/deals';
 import { money } from '../../lib/format';
 import { paths } from '../../lib/nav';
+import { track } from '../../lib/analytics';
 import { _t, toEnglish, useT } from '../../i18n';
 import type { PackTier, Packs } from '../../types';
 import { CLASS_PHOTO } from '../packages/ClassNav';
@@ -159,7 +160,7 @@ export function PackageStrip() {
           all = all.filter((x) => x && x !== lead);
           const shown = all.slice(0, feature ? 4 : 3);
           return (
-            <Link key={p.key} to={g ? paths.packageGroup(g.slug) : paths.packages()} className={'pkg-card' + (feature ? ' is-feature' : featured ? ' is-side' : '')}>
+            <Link key={p.key} to={g ? paths.packageGroup(g.slug) : paths.packages()} onClick={() => track('Package prices', { family: p.family, key: p.key })} className={'pkg-card' + (feature ? ' is-feature' : featured ? ' is-side' : '')}>
               <span className="pkg-media">
                 <Img src={ph.src} alt="" className="pkg-photo" style={cover(ph.position)} />
               </span>

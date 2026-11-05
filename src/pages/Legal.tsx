@@ -27,7 +27,8 @@ const PRIVACY: Section[] = [
     _t('Your choices on this device: your rate (resident or visitor), the experiences in “My Day”, your language and currency, and your cookie choice are kept in your browser’s storage, not on our servers.'),
   ] },
   { h: _t('Cookies and storage'), p: [
-    _t('The site sets no advertising cookies, runs no analytics or monitoring tools and allows no third-party tracking. It only keeps what it needs to work in your browser’s storage, as described above. You can review this any time under “Cookie settings” in the footer.'),
+    _t('The site sets no advertising cookies and allows no third-party tracking. It only keeps what it needs to work in your browser’s storage, as described above. You can review this any time under “Cookie settings” in the footer.'),
+    _t('We use Plausible, a privacy-friendly analytics service that sets no cookies and collects no personal data, to count visits and see which pages help guests. Data is aggregated and hosted in the EU.'),
   ] },
   { h: _t('Who else sees your data'), p: [
     _t('Only the providers that make the site run, each bound to use your data for us alone: Railway (hosting in the European Union), Resend (e-mail delivery), and 360dialog and Meta (WhatsApp messages, if you asked for them). Exchange rates come from the Bank of Mauritius without any personal data. We never sell your data.'),
