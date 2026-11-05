@@ -58,7 +58,7 @@ export function StorySection() {
           <div className="mt-7 flex flex-wrap gap-[30px]">
             <Stat value={<CountUp to={23} />} label={t('COLOURS OF EARTH')} color="#FF3358" rule="#FF3358" />
             <Stat value={<CountUp to={5.5} decimals={1} suffix=" KM" />} label={t('LONGEST ZIPLINE')} color="#7333FF" rule="#33FF74" />
-            <Stat value={<CountUp to={catalog.ACTS.length} />} label={t('EXPERIENCES')} color="#340057" rule="#FFFC33" />
+            <Stat value={<CountUp to={catalog.ACTS.length} />} label={t('ACTIVITIES')} color="#340057" rule="#FFFC33" />
           </div>
         </div>
       </div>

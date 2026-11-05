@@ -164,9 +164,9 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
   const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
     ? t('PARK ENTRY')
-    : (cartActs.length > 1 ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length }) : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length }));
+    : (cartActs.length > 1 ? t('{n} ACTIVITIES + ENTRY', { n: cartActs.length }) : t('{n} ACTIVITY + ENTRY', { n: cartActs.length }));
   const ep = entryPrices(catalog, rate);
-  const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD (6 TO 11) · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
+  const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD 6–11 · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
   const coveredN = booking.entryCovered.a + booking.entryCovered.k;
   const allCovered = coveredN > 0 && coveredN === adults + kids;
   const includedWith = booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') : booking.entryIncludedBy === 'senior' ? t('INCLUDED WITH THE SENIOR PACKAGE') : booking.entryIncludedBy ? t('INCLUDED WITH THE STUDENT RATE') : '';
@@ -193,7 +193,7 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
         ))}
         {cartActs.length === 0 && (
           <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.7)' }}>
-            {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
+            {t('No activities yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
           </div>
         )}
       </div>

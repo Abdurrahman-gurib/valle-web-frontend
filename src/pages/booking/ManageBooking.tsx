@@ -9,6 +9,7 @@ import { computeBooking, emptyLines, fitSelToParty, lineEligibility, linesOverPa
 import { PRODUCT_PREFIX, type RateKey, type Sel } from '../../types';
 import { cn } from '@/lib/utils';
 import { errorMessage, httpStatus } from '../../lib/errors';
+import { productDisplayName } from '../../lib/photoTier';
 
 /**
  * "Manage my booking" on the ticket page: date, arrival slot, party and
@@ -57,7 +58,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
   const linesOf = (v: TicketView): Line[] => v.lines.flatMap((l): Line[] => {
     if (l.productKey) {
       const p = (catalog.PRODUCTS ?? []).find((x) => x.key === l.productKey);
-      const name = p?.name ?? l.label.split(' · ')[0];
+      const name = p ? productDisplayName(p) : l.label.split(' · ')[0];
       const flat = p ? p.mode === 'flat' : (l.units ?? 0) > 0;
       return [{ id: PRODUCT_PREFIX + l.productKey, name, variant: '', mode: flat ? 'flat' : 'pp', adults: l.adults ?? 0, kids: l.kids ?? 0, units: l.units ?? 0 }];
     }
@@ -156,7 +157,7 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div>
           <div className="text-[15px] font-extrabold">{t('Manage my booking')}</div>
-          <div className="mt-0.5 text-[13px] text-valle-purple/65">{t('Change the date, the arrival time, your party or your experiences, or cancel. Free, up to the day of your visit.')}</div>
+          <div className="mt-0.5 text-[13px] text-valle-purple/65">{t('Change the date, the arrival time, your party or your activities, or cancel. Free, up to the day of your visit.')}</div>
         </div>
         <button type="button" onClick={() => { setErr(''); setDone(''); if (open) setOpen(false); else openEditor(); }} className={cn(PILL, open ? PILL_OUTLINE : 'vbtn-primary')} data-testid="manage-toggle">{open ? t('Close') : t('Change or cancel')}</button>
       </div>
@@ -182,8 +183,8 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
             <Counter label={t('UNDER 6 (FREE)')} value={infants} onChange={(n) => changeParty({ ...party, infants: n })} min={0} testId="manage-infants" />
           </div>
           <div>
-            <div className="font-mono text-[10px] tracking-[.1em] text-valle-purple/60">{t('EXPERIENCES')}</div>
-            {lines.length === 0 && <div className="mt-1.5 text-[13px] text-valle-purple/60">{t('Park entry only. Add an experience below.')}</div>}
+            <div className="font-mono text-[10px] tracking-[.1em] text-valle-purple/60">{t('ACTIVITIES')}</div>
+            {lines.length === 0 && <div className="mt-1.5 text-[13px] text-valle-purple/60">{t('Park entry only. Add an activity below.')}</div>}
             {lines.map((l, i) => {
               const el = lineEligibility(catalog, l.id);
               const caps = lineCaps(el, party);
@@ -203,8 +204,8 @@ export function ManageBooking({ tk, token, onChanged }: { tk: TicketView; token:
               );
             })}
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <select value={addId} onChange={(e) => setAddId(e.target.value)} className={cn(input, 'flex-[1_1_220px]')} aria-label={t('Add an experience')} data-testid="manage-add-select">
-                <option value="">{t('Add an experience…')}</option>
+              <select value={addId} onChange={(e) => setAddId(e.target.value)} className={cn(input, 'flex-[1_1_220px]')} aria-label={t('Add an activity')} data-testid="manage-add-select">
+                <option value="">{t('Add an activity…')}</option>
                 {acts.filter((a) => !lines.some((l) => l.id === a.id && l.variant === '')).map((a) => <option key={a.id} value={a.id}>{a.name} · {t('from')} {mur(priceFor(catalog, a, rate))}</option>)}
               </select>
               <button type="button" onClick={addLine} disabled={!addId} className={cn(PILL, PILL_OUTLINE)} data-testid="manage-add">{t('Add')}</button>

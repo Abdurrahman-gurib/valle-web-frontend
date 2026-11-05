@@ -132,7 +132,7 @@ export default function ExclusivePage({ onDetails }: { onDetails: (p: PackModalD
             name={pk.name}
             title={<>{pk.name}<br /><span style={{ color: '#33FF74' }}>{t('Package')}</span></>}
             titleId={`diamond-feature-${i}`}
-            chip={pk.badge ?? t('SOUVENIR GIFT OFFERED')}
+            chip={pk.badge ? pk.badge.replace(/^(?:RR|NR)\s*·\s*/, '') : t('SOUVENIR GIFT OFFERED')}
             lead={t('Everything in the VIP day, plus a stone-cooking lunch at Le Chamouzé, a three-hour hunting expedition and a cinematic film of your whole visit.')}
             items={pk.items}
             english={raw.PACKS.diamond?.[i]?.items}

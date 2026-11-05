@@ -38,7 +38,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
         {WAY_ICON[w.cat] && <ValleIcon name={WAY_ICON[w.cat]} size={38} className="mb-2.5 block" />}
         <div className="origin-bottom-left -rotate-4 font-display text-[30px] font-black uppercase italic">{t(w.title)}</div>
         <div className={'mt-[7px] text-[13.5px] leading-[1.45] ' + (w.light ? 'opacity-95' : 'opacity-90')}>{t(w.sub)}</div>
-        <div className="mt-3 inline-block pt-2.5 font-mono text-[11.5px] font-bold tracking-[.08em]" style={{ borderTop: '1px dashed ' + (w.light ? 'rgba(255,255,255,.5)' : 'rgba(52,0,87,.45)') }}>{t('{n} EXPERIENCES →', { n: count })}</div>
+        <div className="mt-3 inline-block pt-2.5 font-mono text-[11.5px] font-bold tracking-[.08em]" style={{ borderTop: '1px dashed ' + (w.light ? 'rgba(255,255,255,.5)' : 'rgba(52,0,87,.45)') }}>{t('{n} ACTIVITIES →', { n: count })}</div>
       </div>
     </motion.a>
   );

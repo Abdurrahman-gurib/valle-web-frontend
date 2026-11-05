@@ -8,6 +8,7 @@ import { paths, useGoto } from '../../lib/nav';
 import { money } from '../../lib/format';
 import { _t, useT } from '../../i18n';
 import type { CineItem } from '../../types';
+import { photoTierLabel } from '../../lib/photoTier';
 import { ClassHero } from './ClassHero';
 import { ProductCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
@@ -70,16 +71,16 @@ export default function PhotoVideoPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 22 }}>
           <div className="pk-rate" role="group" aria-label={t('Rate')}>
             <button type="button" aria-pressed={rk === 'rr'} onClick={() => app.setRate('rr')}>{t('Resident')}</button>
-            <button type="button" aria-pressed={rk === 'nr'} onClick={() => app.setRate('nr')}>{t('Non-resident')}</button>
+            <button type="button" aria-pressed={rk === 'nr'} onClick={() => app.setRate('nr')}>{t('Visitor')}</button>
           </div>
-          <Eyebrow>{rk === 'rr' ? t('RESIDENT RATE (RR)') : t('NON-RESIDENT RATE (NR)')}</Eyebrow>
+          <Eyebrow>{rk === 'rr' ? t('RESIDENT PRICES') : t('VISITOR PRICES')}</Eyebrow>
         </div>
         <div className="sr-cards-4">
           {tiers.map((ph, i) => {
             const p = TIER_PHOTOS[i % TIER_PHOTOS.length];
             return (
-              <ProductCard key={ph.key ?? ph.name} compact testId="photo-tier" productKey={ph.key} name={ph.name} titleId={`photo-tier-${i}`}
-                photo={{ src: p.src, alt: t(p.alt), position: p.position }} tag={ph.name} tagColor={ph.color} title={ph.act}
+              <ProductCard key={ph.key ?? ph.name} compact testId="photo-tier" productKey={ph.key} name={photoTierLabel(ph.act)} titleId={`photo-tier-${i}`}
+                photo={{ src: p.src, alt: t(p.alt), position: p.position }} tag={t('PARK PHOTOGRAPHER')} tagColor={ph.color} title={photoTierLabel(ph.act)}
                 items={[{ text: t('All captured photos'), english: 'All captured photos' }, { text: t('1 print included'), english: '1 print included' }]}
                 fallbackSingle={ph.single} fallbackDbl={ph.dbl} bookTestId="photo-book" bookLabel={t('Book this photo pack')} />
             );

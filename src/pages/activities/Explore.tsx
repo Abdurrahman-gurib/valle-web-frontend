@@ -35,10 +35,10 @@ export default function ExplorePage() {
   const isCat = (k: string): k is CatKey => Object.hasOwn(catalog.CAT, k);
   const catName = cat !== 'all' && isCat(cat) ? catalog.CAT[cat].name : '';
   useSeo({
-    title: catName ? t('{name} experiences · VALLÉ Advenature™ Park', { name: catName }) : t('All {count} experiences · VALLÉ Advenature™ Park', { count: catalog.ACTS.length }),
+    title: catName ? t('{name} activities · VALLÉ Advenature™ Park', { name: catName }) : t('All {count} activities · VALLÉ Advenature™ Park', { count: catalog.ACTS.length }),
     description: catName
-      ? t('{name} at Vallé Advenature Park, Chamouny: every {lower} experience with prices, age limits and thrill level.', { name: catName, lower: catName.toLowerCase() })
-      : t('Every experience in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.'),
+      ? t('{name} at Vallé Advenature Park, Chamouny: every {lower} activity with prices, age limits and thrill level.', { name: catName, lower: catName.toLowerCase() })
+      : t('Every activity in the valley: ziplines, quad and buggy trails, the Nepalese bridge, luge kart, waterfalls, the 23 Coloured Earth, giant tortoises and the Kids Park.'),
     canonicalPath: catName ? `/explore?cat=${cat}` : '/explore',
     noindex: Boolean(q) || pulseLvl !== 'any',
     jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }, ...(catName ? [{ name: catName, path: `/explore?cat=${cat}` }] : [])])],
@@ -104,7 +104,7 @@ export default function ExplorePage() {
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
           <h1 className="v-h1" style={{ maxWidth: '18ch' }}>{catName ? t('{name} activities', { name: catName }) : t('Explore Vallé')}</h1>
-          {cat === 'nature' && <p className="v-measure" style={{ margin: '22px 0 0', fontSize: 17, lineHeight: 1.6, color: 'rgba(52,0,87,.8)' }}>{t('Already included in entrance admission fees')}</p>}
+          {cat === 'nature' && <p className="v-measure" style={{ margin: '22px 0 0', fontSize: 17, lineHeight: 1.6, color: 'rgba(52,0,87,.8)' }}>{t('Already included in your park entry')}</p>}
         </div>
         <span style={{
           fontFamily: MONO, fontSize: 12, fontWeight: 600,
@@ -121,7 +121,7 @@ export default function ExplorePage() {
 
       {cat === 'nature' ? (
         <div style={{ marginTop: 24 }} data-testid="nature-carousel">
-          <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in entrance admission fees')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
+          <CarouselTrack viewportRef={nature.viewportRef} label={t('Already included in your park entry')} onKeyDown={carouselKeys(nature.prev, nature.next, isRtl(lang))}>
             {cards.map((a) => (
               <div key={a.id} className="min-w-0 shrink-0 grow-0 basis-[min(300px,82vw)] py-2">
                 <ActivityCard a={a} rateTag={app.rateBadge} eager />

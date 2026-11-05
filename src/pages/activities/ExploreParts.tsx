@@ -4,7 +4,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { useGoto } from '../../lib/nav';
 import { money } from '../../lib/format';
 import { useHover } from '../../hooks/useHover';
-import { _t, useT } from '../../i18n';
+import { _t, tr, useT } from '../../i18n';
 import { BARLOW, MONO } from './shared';
 
 const PULSE_CHIPS = [
@@ -45,20 +45,24 @@ function Chip({ label, onClick, on, big }: { label: string; onClick: () => void;
   );
 }
 
-/** The purple admission strip: entry prices at the current rate and the rate switch. */
+/** The catalog's entry rows ("6 to 11 years old") in the site's age words: adults 12+, children 6–11, under 6. */
+const AGE_WORDS: [string, string][] = [['12 years old & above', _t('Adults 12+')], ['6 to 11 years old', _t('Children 6–11')], ['1 to 5 years old', _t('Under 6')]];
+const ageLabel = (n: string): string => AGE_WORDS.find(([en]) => n === en || n === tr(en))?.[1] ?? n;
+
+/** The purple park-entry strip: entry prices at the current rate and the rate switch. */
 export function AdmissionBar() {
   const t = useT();
   const app = useApp();
   const catalog = useCatalog();
   const [hRate, bindRate] = useHover();
   const rk = app.rate === 'nr' ? 'nr' : 'rr';
-  const rows = (catalog.PL.admission || []).map((r) => ({ n: r.n, p: r[rk] ? money(r[rk]) : t('FREE') }));
+  const rows = (catalog.PL.admission || []).map((r) => ({ n: ageLabel(r.n), p: r[rk] ? money(r[rk]) : t('FREE') }));
   return (
     <div style={{ marginTop: 20, background: '#340057', borderRadius: 18, overflow: 'hidden' }}>
       <div style={{ height: 8, background: 'repeating-linear-gradient(-45deg,#33FF74 0 12px,#340057 12px 24px)' }} />
       <div style={{ padding: '14px 20px 16px', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FFFC33' }}>{t('ADMISSION FEE')} · {app.rateTag}</div>
+          <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.14em', color: '#FFFC33' }}>{t('PARK ENTRY')}</div>
           <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 900, fontSize: 22, textTransform: 'uppercase', color: '#FFFFFF', marginTop: 2 }}>{t('{rate} prices', { rate: app.rateWord })}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 1 }}>
@@ -137,7 +141,7 @@ export function BuildYourDayCta() {
       <div style={{ flex: 1, minWidth: 240 }}>
         <div style={{ fontFamily: BARLOW, fontStyle: 'italic', fontWeight: 800, fontSize: 24, color: '#FFFFFF', textTransform: 'uppercase' }}>{t("Can't decide? Build your day as you go.")}</div>
         <div style={{ fontSize: 14, color: 'rgba(255,255,255,.75)', marginTop: 5 }}>
-          {t('Add experiences to My Day, then book them all in one step, pay on arrival.')}
+          {t('Add activities to My Day, then book them all in one step, pay on arrival.')}
         </div>
       </div>
       <button type="button" onClick={goto.booking} className="vbtn vbtn-on-dark"><BtnLabel>{label}</BtnLabel></button>

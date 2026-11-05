@@ -3,6 +3,7 @@ import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
 import { parseSelKey } from '../lib/sel';
 import { useT } from '../i18n';
+import { productDisplayName } from '../lib/photoTier';
 
 /**
  * Polite live region for My Day: "Added Zipline Adventures to My Day · 2 items".
@@ -29,7 +30,7 @@ export function MyDayAnnouncer() {
     const { id, variant } = parseSelKey(key);
     const act = catalog.ACTS.find((a) => a.id === id);
     const product = id.startsWith('product:') ? (catalog.PRODUCTS ?? []).find((p) => 'product:' + p.key === id) : undefined;
-    const base = act?.name ?? (product ? t(product.name) : id);
+    const base = act?.name ?? (product ? t(productDisplayName(product)) : id);
     const name = variant ? base + ' · ' + t(variant) : base;
     const n = keys.length;
     const count = n === 1 ? t('1 item') : t('{n} items', { n });

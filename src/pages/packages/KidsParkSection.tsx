@@ -18,7 +18,7 @@ export function KidsParkSection() {
   const t = useT();
   const catalog = useCatalog();
   const raw = useRawCatalog();
-  const { rate, rateTag } = useApp();
+  const { rate } = useApp();
   const rk = rate ?? 'rr';
   /** The Kids Park ride a price line is for ("Roller Coaster Zipline" is the Bonding Roller Coaster Zipline). */
   const rideOf = (n: string) => {
@@ -32,7 +32,7 @@ export function KidsParkSection() {
           <div aria-hidden style={{ height: 22, ...KP_CONFETTI }} />
           <div style={{ padding: '18px 22px 22px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 13, borderRadius: 12, padding: '8px 13px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{t('KIDS PARK PRICELIST · {rate}', { rate: rateTag })}</span>
+              <span style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46', fontSize: 13, borderRadius: 12, padding: '8px 13px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{t('KIDS PARK PRICELIST · {rate}', { rate: rate === 'nr' ? t('VISITOR PRICES') : t('RESIDENT PRICES') })}</span>
               <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, letterSpacing: '.1em', color: KP.lime }}>{t('PAY WITH POINTS · 10 POINTS = RS 100')}</span>
             </div>
             <div style={{ marginTop: 14 }}>

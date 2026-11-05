@@ -88,8 +88,8 @@ export function MyDayDrawer() {
     cartActs.length === 0
       ? t('PARK ENTRY')
       : cartActs.length > 1
-        ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length })
-        : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length });
+        ? t('{n} ACTIVITIES + ENTRY', { n: cartActs.length })
+        : t('{n} ACTIVITY + ENTRY', { n: cartActs.length });
   const entryAmt = money(app.booking.entry);
 
   return (

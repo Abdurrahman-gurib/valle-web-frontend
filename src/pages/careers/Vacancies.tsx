@@ -131,7 +131,7 @@ export default function VacanciesPage() {
               {t('Guides, riders, cooks, gardeners, hosts: every day at Vallé Advenature™ Park is run by people who love this valley. If you want an office with ziplines over it, start here.')}
             </p>
             <div className="flex gap-2 flex-wrap mt-[26px]">
-              {[t('{n} EXPERIENCES', { n: catalog.ACTS.length }), t('OPEN DAILY · 09:00–17:30'), t('ONE TEAM')].map((chip) => (
+              {[t('{n} ACTIVITIES', { n: catalog.ACTS.length }), t('OPEN DAILY · 09:00–17:30'), t('ONE TEAM')].map((chip) => (
                 <span key={chip} className="font-mono text-[10.5px] font-normal tracking-[.12em] text-[rgba(255,255,255,.85)] bg-[rgba(255,255,255,.1)] rounded-[8px] py-[9px] px-3">{chip}</span>
               ))}
             </div>

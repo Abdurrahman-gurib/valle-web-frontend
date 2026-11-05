@@ -157,7 +157,7 @@ export function ZiplineReviews() {
 export function SeeAlso({ act, catName }: { act: Activity; catName: string }) {
   const t = useT();
   const links: [label: string, href: string][] = [
-    [t('All {category} experiences', { category: catName.toLowerCase() }), paths.explore(act.cat)],
+    [t('All {category} activities', { category: catName.toLowerCase() }), paths.explore(act.cat)],
     [t('Packages & 2026 prices'), paths.packages()],
     [t('Book your day'), paths.booking()],
     [t('Plan your visit'), paths.plan()],

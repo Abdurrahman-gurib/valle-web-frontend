@@ -43,7 +43,7 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
         id="team-hero-title"
         testId="team-hero"
         title={<>{t('Need a stronger team?')}<br />{before}<span style={{ color: '#FFFC33' }}>VALLÉ</span>{after}</>}
-        chip={t('TEAM BUILDING EXPERIENCES')}
+        chip={t('TEAM BUILDING ACTIVITIES')}
         promise={t('Trust, laughter and a bit of adrenaline, facilitated by certified trainers. Programs scale from 10 to 300+ people, and HRDC refunds can apply.')}
         photo={{ src: '/images/team-building-goggles.webp', alt: t('Colleagues in goggles cheering during a team challenge at Vallé'), width: 781, height: 977, position: 'center 30%' }}
         actions={<>

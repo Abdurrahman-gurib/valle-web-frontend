@@ -60,7 +60,7 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
           onChange={(e) => setSearchQ(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') onSearch(); }}
           placeholder={t('Search ziplines, tortoises, waterfalls…')}
-          aria-label={t('Search experiences')}
+          aria-label={t('Search activities')}
           type="search"
           enterKeyHint="search"
         />

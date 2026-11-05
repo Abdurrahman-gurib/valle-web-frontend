@@ -47,8 +47,8 @@ export default function DetailPage() {
         ...(act.mode === 'pp' || act.mode === 'flat' ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'MUR', lowPrice: rp ? rp[0] : act.price, highPrice: rp ? rp[1] : act.price, url: abs(paths.booking()), availability: 'https://schema.org/InStock' } } : {}),
       },
     ],
-  } : { title: t('Experience not found · VALLÉ Advenature™ Park'), description: t('That experience is not in the valley.'), noindex: true });
-  if (!act) return <NotFoundPage what={t('that experience')} />;
+  } : { title: t('Activity not found · VALLÉ Advenature™ Park'), description: t('That activity is not in the valley.'), noindex: true });
+  if (!act) return <NotFoundPage what={t('that activity')} />;
 
   const d = card(act);
   const related = catalog.ACTS.filter((a) => a.cat === act.cat && a.id !== act.id).slice(0, 4).map(card);

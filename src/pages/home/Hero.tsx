@@ -110,7 +110,7 @@ export function Hero() {
         </div>
         {/* real facts only: experience count and entry price from the catalog (at the guest's rate), and the 2026 award */}
         <ul data-hero-copy className="hero-facts" aria-label={t('Visit at a glance')}>
-          <li><span className="hero-fact-v">{ACTS.length}</span><span className="hero-fact-k">{t('EXPERIENCES')}</span></li>
+          <li><span className="hero-fact-v">{ACTS.length}</span><span className="hero-fact-k">{t('ACTIVITIES')}</span></li>
           <li><span className="hero-fact-v">{money(entryFrom)}</span><span className="hero-fact-k">{t('PARK ENTRY')}</span></li>
           <li className="hero-fact-award">
             <Img src="/images/wlta-logo-1.png" alt="" surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 40, width: 40, objectFit: 'contain', flexShrink: 0 }} />
