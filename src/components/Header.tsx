@@ -146,7 +146,7 @@ export function Header() {
 
   const closeAll = () => { setMega(null); setMobileNavOpen(false); };
   const go = (fn: () => void) => () => { closeAll(); fn(); };
-  const pkgGroups = packageGroups(t, catalog);
+  const pkgGroups = packageGroups(t, catalog, app.rate);
 
   const searchGo = () => { closeAll(); goto.explore('all', searchQ.trim() || undefined); };
 
