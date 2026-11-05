@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Check, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ValleIcon, iconForActivity, type ValleIconName } from '@/components/ui/ValleIcon';
 import type { SelLine } from '../../types';
 import { productAmount } from '../../types';
 import { useApp } from '../../store/AppStore';
@@ -79,6 +80,8 @@ function CartLine({ line }: { line: SelLine }) {
     ? money(price) + ' ' + tr(a.flatLabel || '').toUpperCase()
     : t('{adult} /ADULT · {child} /CHILD', { adult: money(price), child: money(Math.round(price * 0.5)) });
   const unitName = flatUnitName(a.flatLabel, t);
+  // the park's icon for the line: the activity's, or the camera for photo and film packages
+  const icon: ValleIconName | undefined = p ? (/photo|cine/i.test(p.family) ? 'camera' : undefined) : iconForActivity(a.id, a.cat);
   const childTag = el.infants ? t('CHILD UNDER 12') : t('CHILD 6–11');
   const stepper = (tag: string, k: 'a' | 'k' | 'u') => (
     <Stepper tag={tag} val={c[k] || 0} inc={() => app.bumpSel(line.key, k, 1)} dec={() => app.bumpSel(line.key, k, -1)} boxBg="#F7F3FF" btnBg="#FFFFFF" />
@@ -92,7 +95,10 @@ function CartLine({ line }: { line: SelLine }) {
         <img src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ flex: 1, minWidth: '130px' }}>
-        <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{a.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
+          {icon && <ValleIcon name={icon} size={18} style={{ color: '#7333FF' }} />}
+          <span>{a.name}</span>
+        </div>
         {line.variant && <div style={{ fontSize: '11.5px', color: '#7333FF', fontWeight: 600, marginTop: '2px' }}>{t(line.variant)}</div>}
         <div style={noteStyle}>{each}</div>
         {(ageNote || driveNote) && <div data-testid={`age-note-${a.id}`} style={{ fontSize: '12px', fontWeight: 600, color: nobody ? '#B8163A' : '#7333FF', marginTop: '4px', lineHeight: 1.4 }}>{[ageNote, driveNote].filter(Boolean).join(' ')}</div>}

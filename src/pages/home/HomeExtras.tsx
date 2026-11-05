@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
+import { ValleIcon, iconForInclusion, type ValleIconName } from '@/components/ui/ValleIcon';
 import { Img } from '../../components/Img';
 import { Fwd } from '@/components/ui/arrows';
 import { useApp } from '../../store/AppStore';
@@ -8,7 +9,7 @@ import { PACKAGE_GROUPS, groupOfSection } from '../../lib/packageGroups';
 import { liveDeals } from '../../lib/deals';
 import { money } from '../../lib/format';
 import { paths } from '../../lib/nav';
-import { _t, useT } from '../../i18n';
+import { _t, toEnglish, useT } from '../../i18n';
 import type { PackTier, Packs } from '../../types';
 import { CLASS_PHOTO } from '../packages/ClassNav';
 
@@ -26,17 +27,17 @@ function Head({ title, tag }: { title: string; tag: string }) {
 }
 
 interface Audience {
-  key: string; title: string; sub: string; chip: string; to: () => string;
+  key: string; title: string; sub: string; chip: string; to: () => string; icon?: ValleIconName;
   photo: { src: string; position: string };
   /** Brand colour of the tile and whether its text is white (dark gradient) or purple (light gradient). */
   rgb: string; light: boolean;
 }
 
 const AUDIENCES: Audience[] = [
-  { key: 'families', title: _t('Families'), chip: _t('KIDS PARK'), sub: _t('The Kids Park, gentle first thrills and the nature trails.'), to: () => paths.explore('kids'), photo: { src: '/images/bridge-family.webp', position: '30% 30%' }, rgb: '38,224,103', light: false },
+  { key: 'families', icon: 'kids-playground', title: _t('Families'), chip: _t('KIDS PARK'), sub: _t('The Kids Park, gentle first thrills and the nature trails.'), to: () => paths.explore('kids'), photo: { src: '/images/bridge-family.webp', position: '30% 30%' }, rgb: '38,224,103', light: false },
   { key: 'schools', title: _t('Schools'), chip: _t('STUDENT RATE'), sub: _t('School outings at the student rate, from pre-primary to secondary.'), to: () => paths.packageGroup('student'), photo: { src: '/images/packages/student/student-zipline-kid.webp', position: '22% 30%' }, rgb: '250,246,44', light: false },
-  { key: 'companies', title: _t('Companies'), chip: _t('TEAM BUILDING'), sub: _t('Team building days with facilitators, quoted for your group.'), to: () => paths.packageGroup('corporate'), photo: { src: '/images/team-building-goggles.webp', position: 'center 20%' }, rgb: '101,38,240', light: true },
-  { key: 'seniors', title: _t('Seniors 55+'), chip: _t('55+'), sub: _t('Two gentle day packages with lunch and a tea break.'), to: () => paths.packageGroup('senior'), photo: { src: '/images/senior/senior-guests-trail.webp', position: '30% 30%' }, rgb: '214,23,63', light: true },
+  { key: 'companies', icon: 'team-stars', title: _t('Companies'), chip: _t('TEAM BUILDING'), sub: _t('Team building days with facilitators, quoted for your group.'), to: () => paths.packageGroup('corporate'), photo: { src: '/images/team-building-goggles.webp', position: 'center 20%' }, rgb: '101,38,240', light: true },
+  { key: 'seniors', icon: 'tea', title: _t('Seniors 55+'), chip: _t('55+'), sub: _t('Two gentle day packages with lunch and a tea break.'), to: () => paths.packageGroup('senior'), photo: { src: '/images/senior/senior-guests-trail.webp', position: '30% 30%' }, rgb: '214,23,63', light: true },
   { key: 'residents', title: _t('Residents'), chip: _t('WITH ID'), sub: _t('Per-person days at the resident rate, with a Mauritian ID or permit.'), to: () => paths.packageGroup('resident'), photo: { src: '/images/bridge-laugh.webp', position: '62% 25%' }, rgb: '52,0,87', light: true },
 ];
 
@@ -51,7 +52,7 @@ export function WhosComing() {
           <Link key={a.key} to={a.to()} className="aud-tile" style={{ background: `rgb(${a.rgb})`, color: a.light ? '#FFFFFF' : '#340057' }}>
             <Img src={a.photo.src} alt="" placeholder={`rgb(${a.rgb})`} className="aud-photo" style={cover(a.photo.position)} />
             <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(${a.rgb},.97) 20%, rgba(${a.rgb},.66) 38%, rgba(${a.rgb},0) 60%)` }} />
-            <span className="aud-chip">{t(a.chip)}</span>
+            <span className="aud-chip">{a.icon && <ValleIcon name={a.icon} size={16} />}{t(a.chip)}</span>
             <span className="relative mt-auto flex flex-col p-[18px] pt-0">
               <span className="aud-title">{t(a.title)}</span>
               <span className="aud-sub mt-2 text-[13.5px] leading-[1.45]" style={{ opacity: a.light ? 0.95 : 0.9 }}>{t(a.sub)}</span>
@@ -170,7 +171,10 @@ export function PackageStrip() {
                 {shown.length > 0 && (
                   <ul className="pkg-list">
                     {shown.map((s) => (
-                      <li key={s}><Check aria-hidden className="mt-0.5 size-4 shrink-0 text-valle-green" strokeWidth={3} />{s}</li>
+                      <li key={s}>{(() => {
+                        const icon = iconForInclusion(toEnglish(s));
+                        return icon ? <ValleIcon name={icon} size={18} className="shrink-0 text-valle-green" /> : <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-valle-green" strokeWidth={3} />;
+                      })()}{s}</li>
                     ))}
                     {all.length > shown.length && <li className="pkg-more">{t('+{n} more', { n: all.length - shown.length })}</li>}
                   </ul>

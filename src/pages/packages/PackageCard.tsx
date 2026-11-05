@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { Img } from '../../components/Img';
 import { useT } from '../../i18n';
-import { DISPLAY, Eyebrow, PRICE, cover, inclusionIcon, splitDuration, useProductBooking } from './shared';
+import { DISPLAY, Eyebrow, PRICE, cover, InclusionGlyph, splitDuration, useProductBooking } from './shared';
 
 export interface CardPhoto { src: string; alt: string; position?: string }
 /** One inclusion: the line shown (page language) and the English catalog line its icon is read from. */
@@ -17,12 +17,11 @@ export function InclusionList({ items, clock, className }: { items: CardItem[]; 
   return (
     <ol className={className ? 'sr-incl ' + className : 'sr-incl'}>
       {items.map((it, i) => {
-        const Icon = inclusionIcon(it.english);
         const [text, hint] = splitDuration(it.text);
         return (
           <li key={it.text + i}>
             <span aria-hidden className="sr-incl-n">{i + 1}</span>
-            <Icon aria-hidden className="sr-incl-icon" strokeWidth={1.9} />
+            <InclusionGlyph english={it.english} className="sr-incl-icon" size={21} />
             <span className="sr-incl-text">{text}</span>
             {hint && <span className="sr-chip">{clock && isTime(hint) && <Clock aria-hidden strokeWidth={2.2} />}{hint}</span>}
           </li>

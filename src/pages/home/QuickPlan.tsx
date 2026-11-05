@@ -4,6 +4,9 @@ import { Img } from '../../components/Img';
 import { useCatalog } from '../../store/CatalogContext';
 import type { CatKey } from '../../types';
 import { _t, useT } from '../../i18n';
+import { ValleIcon, type ValleIconName } from '@/components/ui/ValleIcon';
+
+const WAY_ICON: Record<CatKey, ValleIconName> = { adventure: 'zipline', nature: 'landscape', kids: 'kids-playground', tours: 'team-stars' };
 
 interface WayCard { cat: CatKey; num: string; img: string; alt: string; title: string; sub: string; bg: string; gradient: string; light: boolean }
 
@@ -32,6 +35,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
       {/* the Kids Park tile carries the park's own logo (decorative: the tile is already named) */}
       {w.cat === 'kids' && <Img src="/images/kids-park/kids-park-logo.webp" alt="" width={900} height={641} placeholder="transparent" className="absolute top-3 right-3 rotate-3" style={{ width: 96, height: 'auto', aspectRatio: '900 / 641', filter: 'drop-shadow(0 6px 10px rgba(31,0,51,.35))' }} />}
       <div className={'absolute right-5 bottom-[18px] left-5 ' + (w.light ? 'text-white' : 'text-valle-purple')}>
+        {WAY_ICON[w.cat] && <ValleIcon name={WAY_ICON[w.cat]} size={38} className="mb-2.5 block" />}
         <div className="origin-bottom-left -rotate-4 font-display text-[30px] font-black uppercase italic">{t(w.title)}</div>
         <div className={'mt-[7px] text-[13.5px] leading-[1.45] ' + (w.light ? 'opacity-95' : 'opacity-90')}>{t(w.sub)}</div>
         <div className="mt-3 inline-block pt-2.5 font-mono text-[11.5px] font-bold tracking-[.08em]" style={{ borderTop: '1px dashed ' + (w.light ? 'rgba(255,255,255,.5)' : 'rgba(52,0,87,.45)') }}>{t('{n} EXPERIENCES →', { n: count })}</div>

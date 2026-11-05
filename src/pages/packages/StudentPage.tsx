@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Baby, Backpack, FileSignature, GraduationCap, Leaf, School, UtensilsCrossed, Users, type LucideIcon } from 'lucide-react';
+import { Baby, Backpack, FileSignature, GraduationCap, Leaf, School, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { BtnLabel } from '@/components/ui/valle';
 import { Img } from '../../components/Img';
@@ -7,6 +7,7 @@ import { useCatalog } from '../../store/CatalogContext';
 import { paths } from '../../lib/nav';
 import { money } from '../../lib/format';
 import { _t, useT } from '../../i18n';
+import { ValleIcon, iconForInclusion } from '@/components/ui/ValleIcon';
 import type { PriceRow } from '../../types';
 import { ClassHero, CallButton } from './ClassHero';
 import { GoodToKnow } from './GoodToKnow';
@@ -91,7 +92,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
                       const sub = /top-up/i.test(r.n) ? t('PER CARD') : common ? '' : hint;
                       return (
                         <li key={r.n} data-testid="student-row">
-                          <span>{label}{sub && <span className="pk-row-hint">{sub.toUpperCase()}</span>}</span>
+                          <span className="pk-row-label">{(() => { const icon = iconForInclusion(r.n); return icon ? <ValleIcon name={icon} size={18} className="pk-row-icon" /> : null; })()}<span>{label}{sub && <span className="pk-row-hint">{sub.toUpperCase()}</span>}</span></span>
                           <b dir="ltr">{money(r.rr)}</b>
                         </li>
                       );
@@ -164,7 +165,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
       <GoodToKnow
         id="student-know-title"
         items={[
-          { icon: Users, title: t('Group size'), text: t('A group booking is for 10 people or more. For fewer, book a day the usual way.') },
+          { icon: 'team-stars', title: t('Group size'), text: t('A group booking is for 10 people or more. For fewer, book a day the usual way.') },
           { icon: School, title: t('Deposit'), text: t('Free to book; the deposit is paid within 7 days and the balance on the day.') },
           { icon: FileSignature, title: t('Waivers'), text: t('One waiver pack for the leader to sign, from the group’s ticket.') },
           validity,

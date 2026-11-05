@@ -100,10 +100,10 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
       <GoodToKnow
         id="team-know-title"
         items={[
-          { icon: Users, title: t('Group size'), text: t('Programmes scale from 10 to more than 300 people.'), action: <GroupLink label={t('Coming without a programme? Book as a group')} /> },
+          { icon: 'team-stars', title: t('Group size'), text: t('Programmes scale from 10 to more than 300 people.'), action: <GroupLink label={t('Coming without a programme? Book as a group')} /> },
           { icon: CloudRain, title: t('If it rains'), text: t('An indoor backup is ready, so the day goes ahead.') },
           { icon: MessageSquareQuote, title: t('Your quote'), text: t('Tell us about your group and we will send a tailored quote.'), action: <QuoteLink onClick={onQuote} label={t('Request a quote')} /> },
-          { icon: UtensilsCrossed, title: t('Lunch and logistics'), text: t('A wellness lunch and water are included; menus and logistics are tailored to your group.') },
+          { icon: 'restaurant', title: t('Lunch and logistics'), text: t('A wellness lunch and water are included; menus and logistics are tailored to your group.') },
         ]}
       />
     </div>

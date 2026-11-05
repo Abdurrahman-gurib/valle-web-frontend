@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Camera, Package, UtensilsCrossed } from 'lucide-react';
+import { Package } from 'lucide-react';
+import { ValleIcon } from '@/components/ui/ValleIcon';
 import type { ReactNode } from 'react';
 import { useApp } from '../../store/AppStore';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
@@ -63,12 +64,12 @@ export function DayExtras() {
   return (
     <div style={{ display: 'grid', gap: 8, marginTop: 14 }} data-testid="day-extras">
       {photo && (
-        <Line to={paths.packageGroup('photo-video')} testId="upsell-photo" icon={<Camera size={18} strokeWidth={2.2} />}>
+        <Line to={paths.packageGroup('photo-video')} testId="upsell-photo" icon={<ValleIcon name="camera" size={20} />}>
           {t('Add the park photographer · from {price}', { price: money(photo.price) })}
         </Line>
       )}
       {lunch != null && (
-        <Line to={paths.resto('chamouze') + '#menu'} testId="upsell-lunch" icon={<UtensilsCrossed size={18} strokeWidth={2.2} />}>
+        <Line to={paths.resto('chamouze') + '#menu'} testId="upsell-lunch" icon={<ValleIcon name="restaurant" size={20} />}>
           {t('Add lunch at Le Chamouzé · from {price}', { price: money(lunch) })}
         </Line>
       )}

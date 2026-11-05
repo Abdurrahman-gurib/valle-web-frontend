@@ -161,3 +161,16 @@ export function localizeData<T>(data: T, lang: Lang): T {
 
 /** For tests and the extractor. */
 export const dictionaries = DICTS;
+
+const REVERSE: Partial<Record<Lang, Map<string, string>>> = {};
+/** The English source of a translated string (for reading meaning from text, e.g. which icon a line gets); unknown text comes back as is. */
+export function toEnglish(s: string, lang: Lang = current): string {
+  if (lang === 'en') return s;
+  let m = REVERSE[lang];
+  if (!m || m.size === 0) {
+    m = new Map();
+    for (const [en, x] of Object.entries(DICTS[lang])) if (x && !m.has(x)) m.set(x, en);
+    if (isDictLoaded(lang)) REVERSE[lang] = m;
+  }
+  return m.get(s) ?? s;
+}

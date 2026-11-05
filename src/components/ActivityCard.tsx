@@ -4,6 +4,7 @@ import { paths } from '../lib/nav';
 import type { CardModel } from '../lib/card';
 import { useT } from '../i18n';
 import { cn } from '@/lib/utils';
+import { ValleIcon, iconForActivity } from '@/components/ui/ValleIcon';
 import { KP, KP_CONFETTI, KP_FONT } from './KidsPark';
 
 /**
@@ -37,7 +38,10 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
       </div>
       <div className="flex flex-1 flex-col p-6 max-sm:p-5 text-valle-purple">
         <div className="flex items-center justify-between gap-2.5">
-          <span className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-link">{a.catBadge}</span>
+          <span className="inline-flex items-center gap-2 font-mono text-[11px] font-bold tracking-[.12em] text-valle-link">
+            {(() => { const icon = iconForActivity(a.id, a.cat); return icon ? <ValleIcon name={icon} size={22} className="text-valle-purple" /> : null; })()}
+            {a.catBadge}
+          </span>
           <span title={t('Pulse level')} className="text-[11px] font-bold tracking-[.13em] whitespace-nowrap text-valle-purple">{a.pulseStr}</span>
         </div>
         <h3 className="v-h3 mt-2">
@@ -96,7 +100,10 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
           <div title={t('Pulse level')} className="text-[10.5px] font-bold tracking-[.13em] whitespace-nowrap" style={{ color: KP.yellow }}>{a.pulseStr}</div>
         </div>
         <div className="mt-1.5 flex-1 text-[13.5px] leading-normal text-white/85">{a.blurb}</div>
-        <div className="mt-3 pt-[11px] font-mono text-[11px] text-white/80" style={{ borderTop: `2px dotted ${KP.lime}` }}>{a.meta}</div>
+        <div className="mt-3 flex items-center gap-2 pt-[11px] font-mono text-[11px] text-white/80" style={{ borderTop: `2px dotted ${KP.lime}` }}>
+          {(() => { const icon = iconForActivity(a.id, a.cat); return icon ? <ValleIcon name={icon} size={18} style={{ color: KP.yellow }} /> : null; })()}
+          {a.meta}
+        </div>
         {a.hasAdd && (
           <motion.button
             type="button"

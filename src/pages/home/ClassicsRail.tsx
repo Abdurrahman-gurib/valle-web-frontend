@@ -7,6 +7,7 @@ import { useHover } from '../../hooks/useHover';
 import { Img } from '../../components/Img';
 import { paths } from '../../lib/nav';
 import { useT, isRtl, useLang } from '../../i18n';
+import { ValleIcon, iconForActivity } from '@/components/ui/ValleIcon';
 
 const RAIL_IDS = ['zipline', 'quad', 'coloured', 'nepalese', 'waterfalls', 'luge', 'animals', 'bicycle'];
 
@@ -54,7 +55,10 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
       </div>
       <div className="p-6 max-sm:p-5" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.12em', color: '#5B21B6' }}>{a.catBadge}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: "'Chivo Mono',monospace", fontSize: 11, fontWeight: 700, letterSpacing: '.12em', color: '#5B21B6' }}>
+            {(() => { const icon = iconForActivity(a.id, a.cat); return icon ? <ValleIcon name={icon} size={22} style={{ color: '#340057' }} /> : null; })()}
+            {a.catBadge}
+          </span>
           <span title={t('Pulse level')} style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', color: '#340057', whiteSpace: 'nowrap' }}>{a.pulseStr}</span>
         </div>
         <h3 className="v-h3" style={{ marginTop: 8 }}><a href={paths.detail(a.id)} onClick={(e) => { e.preventDefault(); e.stopPropagation(); a.open(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</a></h3>

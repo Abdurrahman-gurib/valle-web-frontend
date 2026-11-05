@@ -1,4 +1,4 @@
-import { Footprints, IdCard, Users } from 'lucide-react';
+import { IdCard, Users } from 'lucide-react';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { useApp } from '../../store/AppStore';
 import { money } from '../../lib/format';
@@ -171,7 +171,7 @@ export default function ExclusivePage({ onDetails }: { onDetails: (p: PackModalD
         items={[
           { icon: Users, title: t('Single or double'), text: t('The single price is for one guest; the double price is for two guests booked together.') },
           { icon: IdCard, title: t('Driving the quad'), text: t('A driving licence is required to drive the quad. Passengers are welcome.') },
-          { icon: Footprints, title: t('What to wear'), text: t('Closed shoes for the ziplines, and clothes that can take some mud. Ziplines are weather dependent.') },
+          { icon: 'boots', title: t('What to wear'), text: t('Closed shoes for the ziplines, and clothes that can take some mud. Ziplines are weather dependent.') },
           validity,
         ]}
       />

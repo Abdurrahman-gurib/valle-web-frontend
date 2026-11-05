@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Fwd } from '@/components/ui/arrows';
 import {
-  Bike, Binoculars, Cable, CalendarDays, Camera, Car, Check, Clapperboard, Coffee, ConciergeBell, CupSoda, Flame, Flag, Footprints, Gift,
+  Bike, Binoculars, Cable, Camera, Car, Check, Clapperboard, Coffee, ConciergeBell, CupSoda, Flame, Flag, Footprints, Gift,
   GlassWater, Images, Mountain, Printer, Salad, Ticket, Trophy, UtensilsCrossed, Waves, type LucideIcon,
 } from 'lucide-react';
 import { useCatalog } from '../../store/CatalogContext';
@@ -12,6 +12,7 @@ import { money } from '../../lib/format';
 import { useT } from '../../i18n';
 import type { Product } from '../../types';
 import { headingTilt } from '@/components/ui/heading';
+import { ValleIcon, iconForInclusion, type ValleIconName } from '@/components/ui/ValleIcon';
 
 /**
  * Shared pieces of the package class pages (/packages/<class>): type styles,
@@ -60,9 +61,9 @@ export function GroupLink({ label }: { label: string }) {
 }
 
 /** The validity note every class page closes its "Good to know" with. */
-export function useValidityItem(): { icon: LucideIcon; title: string; text: string } {
+export function useValidityItem(): { icon: ValleIconName; title: string; text: string } {
   const t = useT();
-  return { icon: CalendarDays, title: t('Validity'), text: t('1 July 2026 to 30 June 2027') };
+  return { icon: 'events', title: t('Validity'), text: t('1 July 2026 to 30 June 2027') };
 }
 
 export function Eyebrow({ children, color = '#7333FF', className }: { children: ReactNode; color?: string; className?: string }) {
@@ -139,6 +140,17 @@ const ICON_RULES: [RegExp, LucideIcon][] = [
   [/stills|captured/i, Images],
 ];
 export const inclusionIcon = (english: string): LucideIcon => ICON_RULES.find(([re]) => re.test(english))?.[1] ?? Check;
+
+/**
+ * The glyph of one inclusion: the park's official icon when one fits the
+ * English line, else the Lucide line icon (a check when nothing matches).
+ */
+export function InclusionGlyph({ english, className, size = 20, strokeWidth = 1.9 }: { english: string; className?: string; size?: number; strokeWidth?: number }) {
+  const name = iconForInclusion(english);
+  if (name) return <ValleIcon name={name} size={size} className={className} />;
+  const Icon = inclusionIcon(english);
+  return <Icon aria-hidden className={className} strokeWidth={strokeWidth} />;
+}
 
 /** What booking a catalog product looks like from a card: in My Day yet, which rate it is sold at, and the action. */
 export function useProductBooking(key?: string) {

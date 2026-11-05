@@ -3,7 +3,8 @@ import type { CSSProperties, MouseEvent } from 'react';
 import { useHover } from '../hooks/useHover';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { Img } from './Img';
-import { useT } from '../i18n';
+import { toEnglish, useT } from '../i18n';
+import { ValleIcon, iconForInclusion } from '@/components/ui/ValleIcon';
 import { useApp } from '../store/AppStore';
 import { useGoto } from '../lib/nav';
 
@@ -153,7 +154,12 @@ export function PackageModal({ pack, onClose }: { pack: PackModalData | null; on
           <div style={{ marginTop: 6 }}>
             {pack.items.map((pi) => (
               <div key={pi.t} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '5px 0', fontSize: 14.5, color: 'rgba(52,0,87,.85)' }}>
-                <span style={{ color: pack.color, fontWeight: 800, flexShrink: 0 }}>●</span>
+                {(() => {
+                  const icon = iconForInclusion(toEnglish(pi.t));
+                  return icon
+                    ? <ValleIcon name={icon} size={18} style={{ color: '#7333FF', marginTop: 1 }} />
+                    : <span style={{ color: pack.color, fontWeight: 800, flexShrink: 0, width: 18, textAlign: 'center' }}>●</span>;
+                })()}
                 <span>{pi.t}</span>
               </div>
             ))}

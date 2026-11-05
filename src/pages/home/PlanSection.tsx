@@ -6,11 +6,13 @@ import { useRawCatalog } from '../../store/CatalogContext';
 import { entryPrices } from '../../store/booking';
 import { mur } from '../../lib/format';
 import { Accordion } from '@/components/ui/accordion';
+import { ValleIcon, type ValleIconName } from '@/components/ui/ValleIcon';
 
 /** One tile of the visit facts: lilac tint with a 3px brand rule on top (one accent per tile). */
-function InfoTile({ rule, tag, head, children, caps = true }: { rule: string; tag: string; head: string; children: ReactNode; caps?: boolean }) {
+function InfoTile({ rule, tag, head, children, caps = true, icon }: { rule: string; tag: string; head: string; children: ReactNode; caps?: boolean; icon?: ValleIconName }) {
   return (
-    <div className="rounded-[20px] bg-valle-tint px-6 py-[22px]" style={{ borderTop: `3px solid ${rule}` }}>
+    <div className={"relative rounded-[20px] bg-valle-tint px-6 py-[22px]" + (icon ? " pe-16" : "")} style={{ borderTop: `3px solid ${rule}` }}>
+      {icon && <ValleIcon name={icon} size={30} className="absolute end-5 top-[18px] text-valle-purple" />}
       <div className="font-mono text-[11px] font-bold tracking-[.12em] text-valle-purple/75">{tag}</div>
       <div className={'mt-2 font-display text-[26px] leading-none font-black italic ' + (caps ? 'uppercase' : '')}>{head}</div>
       <div className="mt-2 text-sm leading-[1.5] text-valle-purple/80">{children}</div>
@@ -31,9 +33,9 @@ export function PlanSection() {
         <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('06 · GOOD TO KNOW')}</span>
       </div>
       <div data-reveal-kids="1" className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-        <InfoTile rule="#340057" tag={t('HOURS')} head="09:00–17:30">{t('Open every day of the week. Last activity departures around 16:00.')}</InfoTile>
+        <InfoTile rule="#340057" icon="events" tag={t('HOURS')} head="09:00–17:30">{t('Open every day of the week. Last activity departures around 16:00.')}</InfoTile>
         <InfoTile rule="#340057" tag={t('TICKETS')} head={t('Pay on arrival')}>{t('Book free online, no cancellation fee. Nature trails included with park entry.')}</InfoTile>
-        <InfoTile rule="#340057" tag={t('GETTING HERE')} head={t('Chamouny, South')}>
+        <InfoTile rule="#340057" icon="meeting-point" tag={t('GETTING HERE')} head={t('Chamouny, South')}>
           B102, Mare Anguilles, Chamouny. <a href="https://www.google.com/maps/place/Vall%C3%A9+Advenature+Park+(formerly+La+Vall%C3%A9e+des+Couleurs)/@-20.457614,57.4826031,17z" target="_blank" rel="noopener">{t('Open in Google Maps →')}</a>
         </InfoTile>
         <InfoTile rule="#340057" tag={t('TALK TO US')} head="+230 660 4477" caps={false}>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CupSoda, Footprints, IceCreamCone, Leaf, Salad, UserCheck, Users, UtensilsCrossed, type LucideIcon } from 'lucide-react';
+import { CupSoda, IceCreamCone, Leaf, Salad, UserCheck, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import { Fwd } from '@/components/ui/arrows';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { paths } from '../../lib/nav';
@@ -112,8 +112,8 @@ export default function SeniorPage({ onQuote, onDetails }: { onQuote: () => void
         id="senior-know-title"
         items={[
           { icon: UserCheck, title: t('Who it is for'), text: t('Guests aged 55 and above. Companions aged 12 and over pay the same package price.') },
-          { icon: Footprints, title: t('What to bring'), text: t('Comfortable walking shoes and sun protection. The jeep visit is seated.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Senior citizen')); onQuote(); }} label={t('Request a group quote')} /></div> },
+          { icon: 'boots', title: t('What to bring'), text: t('Comfortable walking shoes and sun protection. The jeep visit is seated.') },
+          { icon: 'team-stars', title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Senior citizen')); onQuote(); }} label={t('Request a group quote')} /></div> },
           validity,
         ]}
       />

@@ -1,4 +1,4 @@
-import { IdCard, Shuffle, Users } from 'lucide-react';
+import { IdCard, Shuffle } from 'lucide-react';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { money } from '../../lib/format';
 import { _t, useT } from '../../i18n';
@@ -68,7 +68,7 @@ export default function ResidentPage({ onQuote, onDetails }: { onQuote: () => vo
         items={[
           { icon: IdCard, title: t('Who qualifies'), text: t('Resident rates apply upon presentation of a valid Mauritian National ID card, Residence Permit, Occupation Permit, Permanent Residence Permit, or valid work/dependent permit confirming residency in Mauritius.') },
           { icon: Shuffle, title: t('Your choice on the day'), text: t('Where a package offers the Nepalese Bridge OR the Bicycle Zipline, pick the one you prefer at the park.') },
-          { icon: Users, title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Resident package')); onQuote(); }} label={t('Request a group quote')} /></div> },
+          { icon: 'team-stars', title: t('Coming as a group?'), text: t('Ten people or more book online as a group with per-head prices; clubs and associations can also ask for a tailored quote.'), action: <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto' }}><GroupLink label={t('Book as a group')} /><QuoteLink onClick={() => { requestQuoteFor(t('Resident package')); onQuote(); }} label={t('Request a group quote')} /></div> },
           validity,
         ]}
       />

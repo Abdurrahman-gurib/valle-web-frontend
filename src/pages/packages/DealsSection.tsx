@@ -6,7 +6,8 @@ import { paths, useGoto } from '../../lib/nav';
 import { money, shortDateFromIso } from '../../lib/format';
 import { dealSaving } from '../../lib/deals';
 import type { Product, RateKey } from '../../types';
-import { useT } from '../../i18n';
+import { toEnglish, useT } from '../../i18n';
+import { ValleIcon, iconForInclusion } from '@/components/ui/ValleIcon';
 import { BLACK_ITALIC as BARLOW, MONO } from './shared';
 
 /** Rotated h2 with its mono tag on the right, over a purple rule. */
@@ -56,6 +57,7 @@ function DealCard({ deal, accent, rate, inDay, onBook, onSwitchRate }: { deal: P
           {(deal.contents ?? []).map((c, i) => (
             <li key={c} className="flex items-center gap-2.5 py-[5px] text-[14px] text-valle-purple/85" style={{ borderBottom: '1px dashed #EBE2FF' }}>
               <span aria-hidden className="flex size-[22px] shrink-0 items-center justify-center rounded-full font-mono text-[10.5px] font-bold" style={{ background: accent, color: accentFg }}>{i + 1}</span>
+              {(() => { const icon = iconForInclusion(toEnglish(c)); return icon ? <ValleIcon name={icon} size={18} className="text-[#7333FF]" /> : null; })()}
               <span>{c}</span>
             </li>
           ))}

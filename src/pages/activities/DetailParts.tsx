@@ -1,6 +1,7 @@
 import { Fwd } from '@/components/ui/arrows';
 import { motion } from 'motion/react';
 import { Check, Plus } from 'lucide-react';
+import { ValleIcon, iconForActivity } from '@/components/ui/ValleIcon';
 import type { CSSProperties, ReactNode } from 'react';
 import { BtnLabel, ValleButton, ValleCard } from '@/components/ui/valle';
 import { cn } from '@/lib/utils';
@@ -89,6 +90,15 @@ export function DetailAside({ act, d, kids, paused, onBook }: { act: Activity; d
     <div style={{ background: kids ? KP.purple : '#340057', color: '#FFFFFF', borderRadius: kids ? 26 : 20, padding: '0 0 26px', position: 'sticky', top: 90, overflow: 'hidden' }}>
       <PanelTop kids={kids} height={8} />
       <div style={{ padding: '22px 26px 0' }}>
+        {(() => {
+          const icon = iconForActivity(act.id, act.cat);
+          return icon ? (
+            <div data-testid="detail-icon" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,.2)', fontFamily: MONO, fontSize: 11, fontWeight: 700, letterSpacing: '.14em' }}>
+              <ValleIcon name={icon} size={28} style={{ color: '#FFFC33' }} />
+              <span>{d.catBadge}</span>
+            </div>
+          ) : null;
+        })()}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontFamily: MONO }}>
           {showsDuration(act.id) && <Fact label={t('DURATION')}><div style={factValue}>{act.dur}</div></Fact>}
           <Fact label={t('MIN AGE')}><div style={factValue}>{act.age}</div></Fact>
