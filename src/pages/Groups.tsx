@@ -220,8 +220,8 @@ export default function GroupsPage() {
       {!done && (
         <>
           <div className="font-mono text-[12px] font-semibold tracking-[.16em] text-valle-violet">{t('SCHOOLS · COMPANIES · CLUBS')}</div>
-          {/* the -4° tilt lifts the right end of a wide heading by ~7% of its width: room so it never touches the label (inline, as .v-h1 resets margin outside the Tailwind layers) */}
-          <h1 className="v-h1" style={{ marginTop: 'clamp(44px, 7vw, 96px)' }}>
+          {/* the -4° tilt lifts the right end of a wide heading by ~7% of its width: room in em so it scales with the heading at any zoom (inline, as .v-h1 resets margin outside the Tailwind layers) */}
+          <h1 className="v-h1" style={{ marginTop: '.62em' }}>
             {t('Bring the')}<br /><span className="text-valle-violet">{t('whole group.')}</span>
           </h1>
           <p className="text-[16px] leading-[1.6] text-[rgba(52,0,87,.75)] max-w-[60ch] mt-[22px] mb-0 mx-0">
