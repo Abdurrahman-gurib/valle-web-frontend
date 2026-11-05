@@ -1,5 +1,5 @@
 import type { BookingRow } from '../types';
-import { io, type Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { ChatMessage, ConversationSummary } from '../types';
 import {
   fetchVisitorMessages, listConversationMessages, listConversations,
@@ -36,7 +36,9 @@ function chatUrl(): string {
   return '/chat';
 }
 
-function newSocket(): Socket {
+/** socket.io loads with the first chat that opens, not with every page. */
+async function newSocket(): Promise<Socket> {
+  const { io } = await import('socket.io-client');
   return io(chatUrl(), {
     path: '/socket.io',
     withCredentials: true,
@@ -109,7 +111,11 @@ export class VisitorChat extends Emitter<VisitorChatEvents> {
     this.name = name;
     this.email = email;
 
-    const socket = newSocket();
+    void newSocket().then((socket) => this.attach(socket), () => { this.setStatus('reconnecting'); this.startPolling(POLL_MS); });
+  }
+
+  private attach(socket: Socket): void {
+    if (this.closed) { socket.disconnect(); return; }
     this.socket = socket;
 
     socket.on('connect', () => {
@@ -266,7 +272,11 @@ export class StaffChat extends Emitter<StaffChatEvents> {
     if (this.started) return;
     this.started = true;
 
-    const socket = newSocket();
+    void newSocket().then((socket) => this.attach(socket), () => { this.setStatus('reconnecting'); this.startPolling(POLL_MS); });
+  }
+
+  private attach(socket: Socket): void {
+    if (this.closed) { socket.disconnect(); return; }
     this.socket = socket;
 
     socket.on('connect', () => {

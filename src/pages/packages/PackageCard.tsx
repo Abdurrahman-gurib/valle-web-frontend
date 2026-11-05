@@ -80,7 +80,7 @@ export function PackageCard({
   return (
     <article data-testid={testId} data-key={dataKey} aria-labelledby={titleId} className={'sr-card' + (compact ? ' pk-compact' : '')}>
       <div className="sr-card-photo">
-        <Img src={photo.src} alt={photo.alt} style={cover(photo.position)} />
+        <Img src={photo.src} alt={photo.alt} sizes="(max-width: 640px) 100vw, 50vw" style={cover(photo.position)} />
         <span className="sr-card-tag" style={{ background: tagColor, color: tagFg }}>{tag}</span>
         {badge && <span className="pk-badge">{badge}</span>}
       </div>

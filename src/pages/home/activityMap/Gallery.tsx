@@ -21,7 +21,7 @@ function GalleryTile({ s, onClick, big }: { s: MapShot; onClick: () => void; big
         boxShadow: h ? '0 18px 40px -18px rgba(0,0,0,.8)' : 'none', transition: 'box-shadow .3s ease',
       }}
     >
-      <Img src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
+      <Img src={s.src} alt={`${t(s.tag)}: ${t(s.cap)}`} sizes={big ? '480px' : '240px'} surface="dark" placeholder="#2E0A4E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%', display: 'block', transform: h ? 'scale(1.06)' : 'scale(1)', transition: 'transform .5s ease' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 55%)', opacity: h ? 1 : 0.85, transition: 'opacity .3s' }} />
       <span style={{ position: 'absolute', top: 8, right: 8, ...GLASS, borderRadius: 999, padding: '3px 8px', fontSize: 10 }}><Pulse n={s.thrill} size={9} /></span>
       <span style={{ position: 'absolute', left: 10, right: 10, bottom: 9, textAlign: 'left' }}>
@@ -115,7 +115,7 @@ export function ValleLightbox({ g, idx, onClose, onStep, onPick, cta, onCta }: {
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginTop: 12, padding: '2px 0 6px', scrollbarWidth: 'none' }}>
             {g.shots.map((sh, i) => (
               <button key={sh.src} onClick={() => onPick(i)} aria-label={t(sh.tag)} style={{ flexShrink: 0, width: 92, height: 62, borderRadius: 10, overflow: 'hidden', padding: 0, cursor: 'pointer', border: '2px solid ' + (i === idx ? '#FFFC33' : 'rgba(255,255,255,.12)'), opacity: i === idx ? 1 : 0.65, transition: 'all .2s', background: '#260040' }}>
-                <Img src={sh.src} alt="" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <Img src={sh.src} alt="" sizes="92px" surface="dark" placeholder="#2E0A4E" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </button>
             ))}
           </div>

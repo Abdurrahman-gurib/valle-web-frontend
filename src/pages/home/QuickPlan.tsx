@@ -29,7 +29,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
       className="relative block h-[400px] cursor-pointer overflow-hidden rounded-[18px] text-inherit"
       style={{ background: w.bg, textDecoration: 'none' }}
     >
-      <Img src={w.img} alt={t('{name} at Vallé Advenature™ Park', { name: t(w.alt) })} placeholder={w.bg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      <Img src={w.img} sizes="(max-width: 640px) 150vw, (max-width: 1100px) 50vw, 33vw" alt={t('{name} at Vallé Advenature™ Park', { name: t(w.alt) })} placeholder={w.bg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       <div className="absolute inset-0" style={{ background: w.gradient }} />
       <span className="absolute top-3.5 left-3.5 -rotate-4 rounded-full bg-white/95 px-[11px] py-1.5 font-mono text-[11px] font-bold text-valle-purple">{w.num}</span>
       {/* the Kids Park tile carries the park's own logo (decorative: the tile is already named) */}

@@ -131,7 +131,7 @@ export default function PhotoVideoPage() {
         </SupportPanel>
         <div data-testid="cine-gallery" className="pk-gallery">
           {GALLERY.map((g) => (
-            <div key={g}><Img src={`/images/shoot/${g}.webp`} alt={t('Cinematic shoot at Vallé: the swing by the waterfall')} width={1600} height={899} style={cover('65% 35%')} /></div>
+            <div key={g}><Img src={`/images/shoot/${g}.webp`} sizes="(max-width: 900px) 50vw, 25vw" alt={t('Cinematic shoot at Vallé: the swing by the waterfall')} width={1600} height={899} style={cover('65% 35%')} /></div>
           ))}
         </div>
       </div>

@@ -60,7 +60,7 @@ export function ClassNav({ classes, current, marginTop, meta }: { classes: Packa
           <Link key={g.slug} to={paths.packageGroup(g.slug)} data-testid={`class-${g.slug}`} className="v-card pk-classcard" style={{ color: '#340057' }}>
             {ph && (
               <span className="v-card-media">
-                <Img src={ph.src} alt="" style={cover(ph.position)} />
+                <Img src={ph.src} alt="" sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" style={cover(ph.position)} />
               </span>
             )}
             <span className="v-card-body">

@@ -113,12 +113,12 @@ export function Footer() {
             </div>
             <div className="mt-6 flex items-center gap-3">
               <Img
-                src="/images/wlta-logo-1.png"
+                src="/images/wlta-logo-160.webp"
                 alt={t('World Luxury Travel Awards 2026 winner')}
                 surface="dark"
                 placeholder="transparent"
-                width={614}
-                height={614}
+                width={160}
+                height={160}
                 style={{ height: 52, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain' }}
               />
               <div className="text-[12.5px] leading-[1.4] opacity-75">World Luxury Travel Awards 2026</div>

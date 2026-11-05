@@ -75,7 +75,7 @@ export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
           return (
             <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="group block rounded-[20px] overflow-hidden bg-white shadow-s2 [transition:transform_var(--t-ui)] hover:[transform:translateY(-4px)]" color="#340057">
               {src
-                ? <span className="block relative aspect-[16/9] bg-valle-lilac"><Img src={src} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /></span>
+                ? <span className="block relative aspect-[16/9] bg-valle-lilac"><Img src={src} alt="" sizes="320px" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} /></span>
                 : <span aria-hidden className="flex aspect-[16/9] items-center justify-center bg-valle-tint font-display italic font-black text-[28px] uppercase text-valle-purple">{t('Kids menu')}</span>}
               <span className="flex items-center justify-between gap-2 px-[18px] py-[14px] font-display italic font-black text-[19px] uppercase">
                 {name}<span className="text-valle-link"><Fwd /></span>
@@ -136,7 +136,7 @@ export function ExploreMenu({ go }: { go: Go }) {
           onClick={go(() => goto.detail('zipline'))}
           className="block cursor-pointer rounded-[16px] overflow-hidden relative min-h-[210px] bg-valle-purple [transition:transform_.2s_ease] hover:[transform:translateY(-3px)]"
         >
-          <Img src="/images/ziplineadventures.avif" alt={t('Zipline Adventures')} surface="dark" placeholder="#340057" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
+          <Img src="/images/ziplineadventures.avif" sizes="480px" alt={t('Zipline Adventures')} surface="dark" placeholder="#340057" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
           <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(31,0,51,.9),rgba(31,0,51,0)_60%)]" />
           <div className="absolute left-[16px] right-[16px] bottom-[14px] text-white">
             <div className="font-mono text-[10px] font-semibold tracking-[.16em] text-valle-yellow">{t('MOST LOVED')}</div>

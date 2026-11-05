@@ -29,7 +29,7 @@ export function ActivityCard({ a, rateTag, eager, kids }: { a: CardModel; rateTa
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-valle-lilac">
         <div className="size-full transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-          <Img eager={eager} src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Img eager={eager} src={a.img} alt={a.name} sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <span className="absolute end-3 bottom-3 inline-flex items-center gap-1.5 rounded-lg bg-valle-yellow px-2.5 py-1.5 font-mono text-[11px] font-bold text-valle-purple shadow-s1">
           {a.priceLabel}
@@ -85,7 +85,7 @@ function KidsActivityCard({ a, rateTag, eager }: { a: CardModel; rateTag: string
       data-testid="activity-card"
     >
       <div className="relative h-[195px]" style={{ background: KP.lime }}>
-        <Img eager={eager} src={a.img} alt={a.name} placeholder={KP.lime} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img eager={eager} src={a.img} alt={a.name} sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" placeholder={KP.lime} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] shadow-[0_6px_16px_-6px_rgba(0,0,0,.5)]" style={{ ...KP_FONT, background: KP.yellow, color: '#3A0A46' }}>
           {a.priceLabel}
           <span className="rounded-full px-[6px] py-0.5 font-mono text-[10px] tracking-[.06em]" style={{ background: KP.purple, color: KP.yellow }}>{rateTag}</span>

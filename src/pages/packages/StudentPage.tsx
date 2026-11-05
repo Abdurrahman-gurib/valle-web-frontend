@@ -79,7 +79,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
             return (
               <article key={g.key} className="sr-card" data-testid="student-group" data-group={g.key} aria-labelledby={`student-group-${gi}`}>
                 <div className="sr-card-photo">
-                  <Img src={g.photo.src} alt={t(g.photo.alt)} style={cover(g.photo.position)} />
+                  <Img src={g.photo.src} alt={t(g.photo.alt)} sizes="(max-width: 640px) 100vw, 50vw" style={cover(g.photo.position)} />
                   <span className="sr-card-tag" style={{ background: chipInk(g.color), color: chipInk(g.color) !== g.color ? '#FFFFFF' : undefined, textTransform: 'none' }}>{t('From {price}', { price: money(Math.min(...list.filter((r) => !/top-up/i.test(r.n)).map((r) => r.rr))) })}</span>
                 </div>
                 <div className="sr-card-body">

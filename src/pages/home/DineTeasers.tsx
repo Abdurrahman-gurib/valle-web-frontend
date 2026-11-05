@@ -16,7 +16,7 @@ function RestoTeaser({ href, onGo, img, alt, badge, name, blurb }: { href: strin
       style={{ textDecoration: 'none' }}
     >
       <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-        <Img src={img} alt={alt} surface="dark" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img src={img} alt={alt} sizes="(max-width: 640px) 150vw, 50vw" surface="dark" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(31,0,51,.92)] to-[rgba(31,0,51,.05)] to-55%" />
       <span className="absolute top-4 left-4 -rotate-4 rounded-full bg-valle-yellow px-[13px] py-[7px] font-mono text-[10px] font-bold tracking-[.1em] text-valle-purple">{badge}</span>

@@ -88,7 +88,7 @@ export default function DetailPage() {
 
       <div style={{ position: 'relative', borderRadius: kids ? 30 : 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12, ...(kids ? { boxShadow: `0 0 0 5px ${KP.lime}, 0 0 0 9px ${KP.purple}`, margin: '17px 9px 0' } : null) }}>
         {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
-        <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
+        <Img src={act.img} alt={act.name} priority sizes="(max-aspect-ratio: 4/5) 150vw, 100vw" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.8), rgba(31,0,51,0) 55%)' }} />
         <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(18px,3vw,30px)', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
           <div>

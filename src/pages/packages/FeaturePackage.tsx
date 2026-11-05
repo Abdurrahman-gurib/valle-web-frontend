@@ -22,12 +22,12 @@ export function FeaturePackage({ eyebrow, testId, productKey, name, title, title
     <article className="pk-feature" data-testid={testId} data-key={productKey} aria-labelledby={titleId}>
       <div className="pk-feature-left">
         <div className="pk-feature-photo">
-          <Img src={photo.src} alt={photo.alt} surface="dark" width={photo.width} height={photo.height} style={cover(photo.position)} />
+          <Img src={photo.src} alt={photo.alt} sizes="(max-width: 900px) 100vw, 50vw" surface="dark" width={photo.width} height={photo.height} style={cover(photo.position)} />
         </div>
         {mosaic && (
           <div className="pk-feature-mosaic">
             {mosaic.map((m) => (
-              <div key={m.src}><Img src={m.src} alt={m.alt} surface="dark" width={m.width} height={m.height} style={cover(m.position)} /></div>
+              <div key={m.src}><Img src={m.src} alt={m.alt} sizes="(max-width: 900px) 33vw, 18vw" surface="dark" width={m.width} height={m.height} style={cover(m.position)} /></div>
             ))}
           </div>
         )}

@@ -29,7 +29,7 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
       }}
     >
       <div style={{ position: 'relative', aspectRatio: '16 / 10', flexShrink: 0, background: '#EBE2FF' }}>
-        <Img eager src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img eager src={a.img} alt={a.name} sizes="(max-width: 640px) 85vw, 360px" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <span style={{ position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: '7px 10px', boxShadow: 'var(--s1)' }}>
           {a.priceLabel}
           <span style={{ background: '#340057', color: '#FFFC33', borderRadius: 4, padding: '2px 5px', fontSize: 10, letterSpacing: '.06em' }}>{rateTag}</span>

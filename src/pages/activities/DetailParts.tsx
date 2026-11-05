@@ -177,7 +177,7 @@ export function RelatedCard({ a }: { a: CardModel }) {
   return (
     <ValleCard onClick={a.open} className="cursor-pointer rounded-2xl" data-testid="related-card">
       <div className="relative h-[150px] bg-valle-lilac">
-        <Img src={a.img} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img src={a.img} alt={a.name} sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {a.hasAdd && (
           <motion.button
             type="button"

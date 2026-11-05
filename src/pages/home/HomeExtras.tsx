@@ -50,7 +50,7 @@ export function WhosComing() {
       <div className="aud-row">
         {AUDIENCES.map((a) => (
           <Link key={a.key} to={a.to()} className="aud-tile" style={{ background: `rgb(${a.rgb})`, color: a.light ? '#FFFFFF' : '#340057' }}>
-            <Img src={a.photo.src} alt="" placeholder={`rgb(${a.rgb})`} className="aud-photo" style={cover(a.photo.position)} />
+            <Img src={a.photo.src} alt="" sizes="(max-width: 900px) 140vw, 25vw" placeholder={`rgb(${a.rgb})`} className="aud-photo" style={cover(a.photo.position)} />
             <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(${a.rgb},.97) 20%, rgba(${a.rgb},.66) 38%, rgba(${a.rgb},0) 60%)` }} />
             <span className="aud-chip">{a.icon && <ValleIcon name={a.icon} size={16} />}{t(a.chip)}</span>
             <span className="relative mt-auto flex flex-col p-[18px] pt-0">
@@ -161,7 +161,7 @@ export function PackageStrip() {
           return (
             <Link key={p.key} to={g ? paths.packageGroup(g.slug) : paths.packages()} className={'pkg-card' + (feature ? ' is-feature' : featured ? ' is-side' : '')}>
               <span className="pkg-media">
-                <Img src={ph.src} alt="" className="pkg-photo" style={cover(ph.position)} />
+                <Img src={ph.src} alt="" sizes="(max-width: 640px) 100vw, 50vw" className="pkg-photo" style={cover(ph.position)} />
               </span>
               <span aria-hidden className="pkg-stripe" />
               <span className="pkg-body">

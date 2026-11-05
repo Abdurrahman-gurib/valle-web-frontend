@@ -103,7 +103,7 @@ export function TicketDay({ tk }: { tk: TicketView }) {
 
       <div style={{ marginTop: 12, position: 'relative', background: '#2E0A4E', borderRadius: 12, padding: 6 }} data-testid="ticket-map">
         <div style={{ position: 'relative' }}>
-          <Img src="/images/park-sitemap.webp" alt={t('Park map with your booked stops')} surface="dark" placeholder="#2E0A4E" width={1879} height={1327} style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: '1879 / 1327', borderRadius: 8 }} />
+          <Img src="/images/park-sitemap.webp" srcSet="" alt={t('Park map with your booked stops')} surface="dark" placeholder="#2E0A4E" width={1879} height={1327} style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: '1879 / 1327', borderRadius: 8 }} />
           {pins.map((p, i) => <PinButton key={p.n} p={p} i={i} on={litPins.includes(p)} isMobile={isMobile} onClick={() => undefined} scale={0.8} />)}
           {pos && pos.px >= 0 && (
             <div data-testid="you-are-here" title={t('You (approximate)')} style={{ position: 'absolute', left: pos.px + '%', top: pos.py + '%', transform: 'translate(-50%,-50%)', width: 16, height: 16, borderRadius: 999, background: '#33B5FF', border: '3px solid #FFFFFF', boxShadow: '0 0 0 8px rgba(51,181,255,.3)' }} />

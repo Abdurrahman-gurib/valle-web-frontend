@@ -19,6 +19,7 @@ function GalRestShot({ g }: { g: GalleryShot }) {
       <Img eager
         src={g.src}
         alt={`${g.tag}: ${g.cap}`}
+        sizes="(max-width: 768px) 50vw, 25vw"
         surface="dark"
         {...hb}
         style={{ ...coverImg, objectPosition: 'center 32%', transition: 'transform .5s cubic-bezier(.2,.8,.2,1)', ...(h ? { transform: 'scale(1.04)' } : undefined) }}
@@ -62,9 +63,19 @@ function GalleryVideo({ src, poster, label }: { src: string; poster: string; lab
   const ref = useRef<HTMLVideoElement>(null);
   const userPaused = useRef(false);
   const [playing, setPlaying] = useState(false);
+  // the clip is not fetched until it is about to scroll into view (the poster shows until then)
+  const [near, setNear] = useState(false);
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
+    if (!v || near) return;
+    if (typeof IntersectionObserver === 'undefined') { setNear(true); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) setNear(true); }, { rootMargin: '300px 0px' });
+    io.observe(v);
+    return () => io.disconnect();
+  }, [near]);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v || !near) return;
     v.muted = true;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
     const io = new IntersectionObserver(([e]) => {
@@ -74,10 +85,11 @@ function GalleryVideo({ src, poster, label }: { src: string; poster: string; lab
     }, { threshold: 0.25 });
     io.observe(v);
     return () => io.disconnect();
-  }, []);
+  }, [near]);
   const toggle = () => {
     const v = ref.current;
     if (!v) return;
+    if (!v.getAttribute('src')) { v.src = src; setNear(true); }
     if (v.paused) {
       userPaused.current = false;
       v.play().catch(() => undefined);
@@ -91,7 +103,7 @@ function GalleryVideo({ src, poster, label }: { src: string; poster: string; lab
       <video
         ref={ref}
         data-testid="activity-video"
-        src={src}
+        src={near ? src : undefined}
         poster={poster}
         muted
         loop

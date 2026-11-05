@@ -137,7 +137,7 @@ export default function RestaurantPage() {
           <CarouselTrack viewportRef={gal.viewportRef} label={t('Inside the restaurant')} gap="gap-3" onKeyDown={carouselKeys(gal.prev, gal.next, isRtl(lang))}>
             {rGallery.map((g) => (
               <div key={g.src} className="shrink-0 grow-0 basis-[clamp(255px,36vw,375px)]">
-                <Img eager src={g.src} alt={g.alt} style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
+                <Img eager src={g.src} alt={g.alt} sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
               </div>
             ))}
           </CarouselTrack>
@@ -193,7 +193,7 @@ export default function RestaurantPage() {
           style={{ color: 'inherit', textDecoration: 'none' }}
         >
           <div className="min-h-[200px] min-w-[260px] flex-1 bg-valle-lilac">
-            <Img src={other.img} alt={other.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Img src={other.img} alt={other.name} sizes="(max-width: 640px) 100vw, 50vw" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div className="flex min-w-[260px] flex-[1.6] flex-col justify-center px-7 py-6">
             <div className="font-display text-[26px] font-extrabold uppercase italic">{other.name}</div>
