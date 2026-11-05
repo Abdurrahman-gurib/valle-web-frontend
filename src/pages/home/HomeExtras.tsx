@@ -36,10 +36,10 @@ interface Audience {
 
 const AUDIENCES: Audience[] = [
   { key: 'families', icon: 'kids-playground', title: _t('Families'), chip: _t('KIDS PARK'), sub: _t('The Kids Park, gentle first thrills and the nature trails.'), to: () => paths.explore('kids'), photo: { src: '/images/bridge-family.webp', position: '30% 30%' }, rgb: '38,224,103', light: false },
-  { key: 'schools', title: _t('Schools'), chip: _t('STUDENT RATE'), sub: _t('School outings at the student rate, from pre-primary to secondary.'), to: () => paths.packageGroup('student'), photo: { src: '/images/packages/student/student-zipline-kid.webp', position: '22% 30%' }, rgb: '250,246,44', light: false },
+  { key: 'schools', icon: 'zipline', title: _t('Schools'), chip: _t('STUDENT RATE'), sub: _t('School outings at the student rate, from pre-primary to secondary.'), to: () => paths.packageGroup('student'), photo: { src: '/images/packages/student/student-zipline-kid.webp', position: '22% 30%' }, rgb: '250,246,44', light: false },
   { key: 'companies', icon: 'team-stars', title: _t('Companies'), chip: _t('TEAM BUILDING'), sub: _t('Team building days with facilitators, quoted for your group.'), to: () => paths.packageGroup('corporate'), photo: { src: '/images/team-building-goggles.webp', position: 'center 20%' }, rgb: '101,38,240', light: true },
   { key: 'seniors', icon: 'tea', title: _t('Seniors 55+'), chip: _t('55+'), sub: _t('Two gentle day packages with lunch and a tea break.'), to: () => paths.packageGroup('senior'), photo: { src: '/images/senior/senior-guests-trail.webp', position: '30% 30%' }, rgb: '214,23,63', light: true },
-  { key: 'residents', title: _t('Residents'), chip: _t('WITH ID'), sub: _t('Per-person days at the resident rate, with a Mauritian ID or permit.'), to: () => paths.packageGroup('resident'), photo: { src: '/images/bridge-laugh.webp', position: '62% 25%' }, rgb: '52,0,87', light: true },
+  { key: 'residents', icon: 'meeting-point', title: _t('Residents'), chip: _t('WITH ID'), sub: _t('Per-person days at the resident rate, with a Mauritian ID or permit.'), to: () => paths.packageGroup('resident'), photo: { src: '/images/bridge-laugh.webp', position: '62% 25%' }, rgb: '52,0,87', light: true },
 ];
 
 /** "Who's coming?": a photo tile per audience in the "Choose your day" family, each into its own page. */
