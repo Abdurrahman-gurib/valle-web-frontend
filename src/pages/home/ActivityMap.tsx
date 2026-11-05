@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { ValleLogo } from '@/components/ui/ValleLogo';
 import { useApp } from '../../store/AppStore';
 import { useGoto } from '../../lib/nav';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -222,7 +223,7 @@ export function ActivityMap({ eyebrow, title, intro, map, alt, routes, pins, dra
               {/* Vallé band along the bottom of the sheet */}
               <div style={{ gridColumn: '1 / -1', background: '#FFFC33', color: '#340057', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '10px 22px', clipPath: 'polygon(0 22%, 100% 0, 100% 100%, 0 100%)', marginTop: -6 }}>
                 <span style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.12em', marginTop: 6 }}>{sheet.foot}</span>
-                <span style={{ fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 26, letterSpacing: '-0.02em', marginTop: 6 }}>VALLÉ<span style={{ fontSize: 10, fontFamily: MONO, fontStyle: 'normal', fontWeight: 700, letterSpacing: '.08em', marginLeft: 6, verticalAlign: 'middle' }}>ADVENATURE™ PARK</span></span>
+                <ValleLogo width={100} className="mt-[6px]" />
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', padding: '14px 8px 2px', fontFamily: MONO, fontSize: 10.5, letterSpacing: '.08em', color: 'rgba(255,255,255,.7)' }}>

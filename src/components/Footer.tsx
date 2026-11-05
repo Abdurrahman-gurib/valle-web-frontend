@@ -1,4 +1,5 @@
 import { useCatalog } from '../store/CatalogContext';
+import { ValleLogo } from '@/components/ui/ValleLogo';
 import { Link, useNavigate } from 'react-router-dom';
 import { Stripes } from './Stripes';
 import { openConsentSettings } from '../lib/consent';
@@ -56,11 +57,9 @@ export function Footer() {
         </div>
         <div className="mx-auto mt-[clamp(24px,4vw,44px)] mb-0 grid max-w-[1320px] [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))] gap-[clamp(24px,4vw,48px)] px-[clamp(16px,3.5vw,40px)] py-0">
           <div>
-            <div className="inline-block origin-bottom-left -rotate-4">
-              <div className="font-display text-[32px] font-black tracking-[-0.01em] italic">VALLÉ</div>
-              <div className="mt-[3px] font-mono text-[10px] font-semibold tracking-[.22em] opacity-70">ADVENATURE™ PARK</div>
-            </div>
-            <p className="mx-0 mt-4 mb-0 max-w-[32ch] text-[14px] leading-[1.6] opacity-75">
+            {/* official lockup in white on purple; the paragraph keeps a third of its height clear */}
+            <ValleLogo className="w-[170px] text-white" />
+            <p className="mx-0 mt-[28px] mb-0 max-w-[32ch] text-[14px] leading-[1.6] opacity-75">
               {t('Where nature & adventure collide. Formerly La Vallée des Couleurs, Chamouny, Mauritius.')}
             </p>
             <div className="mt-[18px] flex flex-wrap gap-2.5">

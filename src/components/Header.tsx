@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent as RKeyboardEvent, type MouseEvent as RMouseEvent, type PointerEvent as RPointerEvent } from 'react';
+import { ValleLogo } from '@/components/ui/ValleLogo';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../store/AppStore';
 import { useCatalog } from '../store/CatalogContext';
@@ -169,11 +170,11 @@ export function Header() {
             href="/"
             aria-label={t('VALLÉ Advenature Park, home')}
             onClick={(e) => { e.preventDefault(); go(goto.home)(); }}
-            className="cursor-pointer flex flex-col leading-none select-none [transform:rotate(-4deg)] shrink-0 justify-self-start"
-            style={{ color: 'inherit', textDecoration: 'none' }}
+            className="cursor-pointer flex items-center select-none shrink-0 justify-self-start"
+            style={{ color: headerFg, textDecoration: 'none' }}
           >
-            <span className={cn('font-display italic font-black tracking-[-0.01em]', isMobile ? 'text-[24px]' : 'text-[27px]')} style={{ color: headerFg }}>VALLÉ</span>
-            <span className={cn('font-mono font-semibold opacity-75 mt-[2px]', isMobile ? 'text-[7px] tracking-[.16em]' : 'text-[8px] tracking-[.22em]')} style={{ color: headerFg }}>ADVENATURE™ PARK</span>
+            {/* the official lockup, one colour (the header foreground); 100px is the brand minimum */}
+            <ValleLogo decorative className={isMobile ? 'w-[100px]' : 'w-[clamp(100px,9.2vw,132px)] short:w-[100px]'} />
           </a>
 
           {!isMobile && (
