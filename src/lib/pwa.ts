@@ -139,9 +139,42 @@ export function registerServiceWorker(): void {
   if (!import.meta.env.PROD || !hasWindow || !('serviceWorker' in navigator)) return;
   // the back office is online-only; a guest's phone is where offline matters
   if (/^\/(staff|hr)(\/|$)/.test(window.location.pathname)) return;
-  const register = () => { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => { /* private mode, blocked storage: the site works without it */ }); };
+  const register = () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then((reg) => keepFresh(reg))
+      .catch(() => { /* private mode, blocked storage: the site works without it */ });
+  };
   if (document.readyState === 'complete') register();
   else window.addEventListener('load', register, { once: true });
+}
+
+/** Pages where a reload would lose what the guest is typing. */
+const BUSY_PAGE = /^(\/(fr|de|it|ar|ru|es|hi))?\/(booking|waiver|groups|vacancies\/[^/]+)(\/|$)/;
+
+/**
+ * A tab left open (or put to sleep by the browser) keeps running the old app
+ * after a deploy, since moving between pages never reloads it. Ask the worker
+ * for updates when the tab comes back and every 30 minutes; when a new worker
+ * takes over, reload once at a safe moment: right away on a page with nothing
+ * to lose, otherwise the next time the guest leaves the tab and comes back.
+ */
+function keepFresh(reg: ServiceWorkerRegistration): void {
+  let hadController = !!navigator.serviceWorker.controller;
+  let pending = false;
+  const safe = () => !BUSY_PAGE.test(window.location.pathname)
+    && !document.activeElement?.matches('input, textarea, select, [contenteditable="true"], canvas');
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) { hadController = true; return; } // first install: this page is already current
+    if (safe()) window.location.reload();
+    else pending = true;
+  });
+  const check = () => { reg.update().catch(() => undefined); };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (pending && safe()) { window.location.reload(); return; }
+    check();
+  });
+  window.setInterval(check, 30 * 60_000);
 }
 
 /** Hands the worker the activity-card photos to keep, unless the guest is saving data or on a slow link. */
