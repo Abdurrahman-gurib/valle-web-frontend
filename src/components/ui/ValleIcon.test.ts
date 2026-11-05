@@ -48,11 +48,15 @@ describe('official icon set', () => {
     expect(iconForInclusion('Private guide (zipline & quad)')).toBe('team-stars');
     expect(iconForInclusion('Lunch, Discovery Menu')).toBe('restaurant');
     expect(iconForInclusion('Tea break')).toBe('tea');
+    expect(iconForInclusion('Jeep Expedition to The Peak')).toBe('jeep');
+    expect(iconForInclusion('Souvenir gift')).toBe('gift');
+    expect(iconForInclusion('Team games')).toBe('games');
+    expect(iconForInclusion('Water and soft drinks')).toBe('water');
     expect(iconForInclusion('GoPro rental (full day) + photo')).toBe('camera');
     expect(iconForInclusion('Full-day cinematic video')).toBe('camera');
     expect(iconForInclusion('The Peak')).toBe('landscape');
     expect(iconForInclusion('Nepalese Bridge (350 m)')).toBe('nepalese-bridge');
-    expect(iconForInclusion('Souvenir gift')).toBeUndefined();
-    expect(iconForInclusion('Visit by jeep (45 min)')).toBeUndefined();
+    expect(iconForInclusion('Souvenir gift')).toBe('gift');
+    expect(iconForInclusion('Visit by jeep (45 min)')).toBe('jeep');
   });
 });

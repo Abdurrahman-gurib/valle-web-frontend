@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 export const VALLE_ICONS = [
   'luge-kart', 'team-stars', 'bicycle-zipline', 'tea', 'nature-sprout', 'kids-playground', 'camera', 'nepalese-bridge',
   'quad', 'restaurant', 'zipline', 'events', 'meeting-point', 'landscape', 'boots',
-  'giant-swing', 'tortoise', 'waterfall',
+  'giant-swing', 'tortoise', 'waterfall', 'jeep', 'gift', 'games', 'water',
 ] as const;
 export type ValleIconName = (typeof VALLE_ICONS)[number];
 
@@ -82,6 +82,10 @@ export function iconForActivity(id: string, cat?: string): ValleIconName | undef
 
 /** Ordered: the first rule that matches the English line wins. */
 const INCLUSION_RULES: [RegExp, ValleIconName][] = [
+  [/\bjeep|4x4/i, 'jeep'],
+  [/gift|souvenir/i, 'gift'],
+  [/\bgames?\b|treasure hunt/i, 'games'],
+  [/\bwater\b|bottle/i, 'water'],
   [/butler|guide|\bvip\b|\bteam|private|group expedition/i, 'team-stars'],
   [/bicycle/i, 'bicycle-zipline'],
   [/luge/i, 'luge-kart'],
