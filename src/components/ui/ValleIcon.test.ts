@@ -20,9 +20,11 @@ describe('official icon set', () => {
     expect(iconForActivity('nepalese')).toBe('nepalese-bridge');
     expect(iconForActivity('peak')).toBe('landscape');
     expect(iconForActivity('coloured', 'nature')).toBe('landscape');
-    expect(iconForActivity('waterfalls', 'nature')).toBe('landscape');
+    expect(iconForActivity('waterfalls', 'nature')).toBe('waterfall');
     expect(iconForActivity('trees', 'nature')).toBe('nature-sprout');
-    expect(iconForActivity('animals', 'nature')).toBe('nature-sprout');
+    expect(iconForActivity('animals', 'nature')).toBe('tortoise');
+    expect(iconForActivity('giantswing', 'adventure')).toBe('giant-swing');
+    expect(iconForActivity('swing', 'adventure')).toBe('giant-swing');
     expect(iconForActivity('bonding', 'kids')).toBe('kids-playground');
     expect(iconForActivity('miniquad', 'kids')).toBe('kids-playground');
     expect(iconForActivity('private', 'tours')).toBe('team-stars');

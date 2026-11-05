@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 export const VALLE_ICONS = [
   'luge-kart', 'team-stars', 'bicycle-zipline', 'tea', 'nature-sprout', 'kids-playground', 'camera', 'nepalese-bridge',
   'quad', 'restaurant', 'zipline', 'events', 'meeting-point', 'landscape', 'boots',
+  'giant-swing', 'tortoise', 'waterfall',
 ] as const;
 export type ValleIconName = (typeof VALLE_ICONS)[number];
 
@@ -62,9 +63,12 @@ export function iconForActivity(id: string, cat?: string): ValleIconName | undef
   if (/nepal|bridge/.test(s)) return 'nepalese-bridge';
   if (/quad|buggy/.test(s) && !/mini/.test(s)) return 'quad';
   if (KIDS_IDS.test(s)) return 'kids-playground';
-  if (/zip|tour|plunge|flight|swing/.test(s)) return 'zipline';
-  if (/peak|coloured|colored|earth|waterfall|scenic|view/.test(s)) return 'landscape';
-  if (/tree|rock|garden|trail|nature|animal|tortoise|deer|eco/.test(s)) return 'nature-sprout';
+  if (/swing/.test(s)) return 'giant-swing';
+  if (/waterfall|cascade/.test(s)) return 'waterfall';
+  if (/animal|tortoise|deer/.test(s)) return 'tortoise';
+  if (/zip|tour|plunge|flight/.test(s)) return 'zipline';
+  if (/peak|coloured|colored|earth|scenic|view/.test(s)) return 'landscape';
+  if (/tree|rock|garden|trail|nature|eco/.test(s)) return 'nature-sprout';
   if (/expedition|private|group|team|vip/.test(s)) return 'team-stars';
   if (/photo|cinematic|gopro|film|video/.test(s)) return 'camera';
   if (/lunch|restaurant|menu|dine/.test(s)) return 'restaurant';
@@ -85,11 +89,14 @@ const INCLUSION_RULES: [RegExp, ValleIconName][] = [
   [/quad|buggy/i, 'quad'],
   [/kids|playground|pirate|coaster|bonding/i, 'kids-playground'],
   [/gopro|photo|cinematic|video|film|stills|captured/i, 'camera'],
-  [/zip|plunge|flight|\btours?\b|signature|swing/i, 'zipline'],
+  [/swing/i, 'giant-swing'],
+  [/waterfall|cascade/i, 'waterfall'],
+  [/animal|tortoise|deer/i, 'tortoise'],
+  [/zip|plunge|flight|\btours?\b|signature/i, 'zipline'],
   [/\btea\b|coffee|café|\bcafe\b|snack|beverage/i, 'tea'],
   [/lunch|menu|restaurant|dinner|meal/i, 'restaurant'],
-  [/peak|coloured earth|colored earth|waterfall|scenery|viewpoint|expedition|hunting/i, 'landscape'],
-  [/tree|rock|garden|nature|trail|\beco|animal|tortoise|koi|pond/i, 'nature-sprout'],
+  [/peak|coloured earth|colored earth|scenery|viewpoint|expedition|hunting/i, 'landscape'],
+  [/tree|rock|garden|nature|trail|\beco|koi|pond/i, 'nature-sprout'],
   [/admission|entrance|\bentry\b|meeting point/i, 'meeting-point'],
   [/\bevents?\b|calendar|validity|\bdates?\b/i, 'events'],
   [/\bwear\b|shoe|boot|\bwalk/i, 'boots'],
