@@ -13,6 +13,7 @@ import { flatUnitName, money } from '../../lib/format';
 import { useHover } from '../../hooks/useHover';
 import { tr, useT } from '../../i18n';
 import { MONO, StepLabel, Stepper } from './bookingUi';
+import { Img, srcSetFor } from '../../components/Img';
 
 /* 1 · TAP TO ADD EXPERIENCES: pick card */
 export function BookCard({ m }: { m: CardModel }) {
@@ -29,7 +30,7 @@ export function BookCard({ m }: { m: CardModel }) {
       className={cn('cursor-pointer overflow-hidden rounded-[14px] border-[1.5px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-valle-violet', on ? 'border-valle-violet bg-valle-violet/[.08]' : 'border-valle-lilac bg-white')}
     >
       <div className="relative h-[86px] bg-valle-lilac">
-        <img src={m.img} alt={m.name} className="block size-full object-cover" />
+        <Img src={m.img} alt={m.name} sizes="240px" className="block size-full object-cover" />
         <span className={cn('absolute top-2 right-2 flex size-6 items-center justify-center rounded-full border-[1.5px] border-white', on ? 'bg-valle-green text-valle-purple' : 'bg-valle-purple/50 text-white')}>
           {on ? <Check size={13} strokeWidth={3} aria-hidden /> : <Plus size={13} strokeWidth={3} aria-hidden />}
         </span>
@@ -92,7 +93,7 @@ function CartLine({ line }: { line: SelLine }) {
         onClick={() => (p ? goto.packages() : goto.detail(a.id))}
         style={{ width: '52px', height: '52px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, cursor: 'pointer', background: '#EBE2FF' }}
       >
-        <img src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img srcSet={srcSetFor(a.img)} sizes="52px" src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ flex: 1, minWidth: '130px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
@@ -164,9 +165,9 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
   const cartActs = booking.selLines;
   const cartCountLabel = cartActs.length === 0
     ? t('PARK ENTRY')
-    : (cartActs.length > 1 ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length }) : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length }));
+    : (cartActs.length > 1 ? t('{n} ACTIVITIES + ENTRY', { n: cartActs.length }) : t('{n} ACTIVITY + ENTRY', { n: cartActs.length }));
   const ep = entryPrices(catalog, rate);
-  const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD (6 TO 11) · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
+  const entryNote = t('{adult} /ADULT (12+) · {child} /CHILD 6–11 · UNDER 6 FREE', { adult: money(ep.adult), child: money(ep.child) });
   const coveredN = booking.entryCovered.a + booking.entryCovered.k;
   const allCovered = coveredN > 0 && coveredN === adults + kids;
   const includedWith = booking.entryIncludedBy === 'expo' ? t('INCLUDED WITH THE EXPO DEAL') : booking.entryIncludedBy === 'senior' ? t('INCLUDED WITH THE SENIOR PACKAGE') : booking.entryIncludedBy ? t('INCLUDED WITH THE STUDENT RATE') : '';
@@ -193,7 +194,7 @@ export function CartStep({ times, setTime, hasSessions, timesFor }: {
         ))}
         {cartActs.length === 0 && (
           <div style={{ padding: '15px 18px', borderTop: '1px dashed #EBE2FF', fontSize: '13.5px', color: 'rgba(52,0,87,.7)' }}>
-            {t('No experiences yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
+            {t('No activities yet. Tap the cards above to add them. All nature trails are already covered by your entry.')}
           </div>
         )}
       </div>

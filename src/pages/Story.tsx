@@ -383,7 +383,7 @@ export default function StoryPage() {
             { n: '3', l: t('WATERFALLS'), c: color.green },
             { n: '11', l: t('ZIPLINES · 5.5 KM'), c: color.violet },
             { n: '50+', l: t('ENDEMIC TREE SPECIES'), c: color.yellow },
-            { n: '21', l: t('EXPERIENCES'), c: color.green },
+            { n: '21', l: t('ACTIVITIES'), c: color.green },
           ].map((s) => (
             <div key={s.l}>
               <div className={cn(DISPLAY, 'text-[clamp(36px,4.6vw,56px)]')} style={{ color: s.c }}>{s.n}</div>

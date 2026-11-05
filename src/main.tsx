@@ -27,6 +27,12 @@ void Promise.all([
   createRoot(document.getElementById('root')!).render(
     tree,
   );
+  // the other pages only after this one has fully loaded (its photos come first), and
+  // not at all on a slow or data-saving connection: they load when the guest opens them
   const idle = (cb: () => void) => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 2500));
-  idle(() => { void preloadAllPages().catch(() => undefined); });
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn && (conn.saveData || /2g|3g/.test(conn.effectiveType || ''))) return;
+  const later = () => idle(() => { void preloadAllPages().catch(() => undefined); });
+  if (document.readyState === 'complete') later();
+  else window.addEventListener('load', later, { once: true });
 });

@@ -77,14 +77,14 @@ export function RateGate() {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 12, marginTop: 20 }}>
             <RateCard
-              tag={t('RR · RESIDENT RATE')}
+              tag={t('RESIDENT RATE')}
               title={t('I live in Mauritius')}
               body={t('Resident rate · adults {adult} entry, kids {child}, under 6 free.', { adult: mur(rr.adult), child: mur(rr.child) })}
               cta={t('SHOW RESIDENT PRICES') + ' ' + fwd()}
               onClick={() => app.setRate('rr')}
             />
             <RateCard
-              tag={t('NR · NON-RESIDENT RATE')}
+              tag={t('VISITOR RATE')}
               title={t('I am visiting')}
               body={t('Visitor rate · adults {adult} entry, kids {child}, under 6 free.', { adult: mur(nr.adult), child: mur(nr.child) })}
               cta={t('SHOW VISITOR PRICES') + ' ' + fwd()}

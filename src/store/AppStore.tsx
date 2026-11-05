@@ -15,7 +15,7 @@ import { track } from '../lib/analytics';
 interface AppState {
   // rate
   rate: RateKey | null;
-  rateTag: string;              // 'RR' | 'NR'
+  rateTag: string;              // 'RESIDENT' | 'VISITOR' (guest UI shows no RR/NR codes)
   rateWord: string;             // 'Resident' | 'Visitor'
   /** The badge beside a price: 'VISITOR PRICE' | 'RESIDENT PRICE'. */
   rateBadge: string;
@@ -296,7 +296,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(() => ({
     rate,
-    rateTag: rate === 'nr' ? 'NR' : 'RR',
+    rateTag: rate === 'nr' ? tr('VISITOR') : tr('RESIDENT'),
     rateWord: rate === 'nr' ? tr('Visitor') : tr('Resident'),
     rateBadge: rate === 'nr' ? tr('VISITOR PRICE') : tr('RESIDENT PRICE'),
     rateGateOpen: !rate || rateGate,

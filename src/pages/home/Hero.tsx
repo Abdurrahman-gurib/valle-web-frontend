@@ -10,6 +10,9 @@ import { useT } from '../../i18n';
 import { paths, useGoto } from '../../lib/nav';
 import { setHomeMotionPaused, useHomeMotionPaused } from './motionPause';
 
+/** The hero is taller than wide on a phone: object-fit crops the landscape photo, so the copy is picked for 1.5x the screen width. */
+const HERO_SIZES = '(max-aspect-ratio: 4/5) 150vw, 100vw';
+
 /** Full-bleed home hero with crossfading slideshow, Ken Burns zoom and slide dots. */
 export function Hero() {
   const t = useT();
@@ -27,6 +30,17 @@ export function Hero() {
     return n;
   });
   const copyRef = useRef<HTMLDivElement>(null);
+  // Only the first slide is in the page at the start; each later slide joins one step
+  // ahead of its turn (the first time after the page has loaded), so a phone on a slow
+  // network downloads one hero photo up front instead of five.
+  const [armed, setArmed] = useState(1);
+  useEffect(() => {
+    const arm = () => setArmed((n) => Math.max(n, 2));
+    if (document.readyState === 'complete') { const timer = window.setTimeout(arm, 1200); return () => window.clearTimeout(timer); }
+    window.addEventListener('load', arm, { once: true });
+    return () => window.removeEventListener('load', arm);
+  }, []);
+  useEffect(() => { if (heroIdx > 0) setArmed((n) => Math.min(HERO.length, Math.max(n, heroIdx + 2))); }, [heroIdx, HERO.length]);
 
   // GSAP entrance timeline: the two headline lines rise in, then the copy and the slide dots.
   // GSAP loads on demand and skips the whole thing for reduced-motion visitors.
@@ -73,15 +87,17 @@ export function Hero() {
         src="/images/valle-zipline-adventure-mauritius.avif"
         alt={t('Zipline flight over the Vallé Advenature™ Park valley')}
         priority
+        sizes={HERO_SIZES}
         surface="dark"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
       />
-      {HERO.map((src, i) => (
+      {HERO.map((src, i) => (i >= armed && i !== heroIdx ? null : (
         <Img
           key={src}
           src={src}
           alt={t('VALLÉ Advenature™ Park, slide {n}', { n: i + 1 })}
           priority={i === 0}
+          sizes={HERO_SIZES}
           surface="dark"
           placeholder="transparent"
           style={{
@@ -91,7 +107,7 @@ export function Hero() {
             animation: i === heroIdx || i === prevIdx ? 'vken 16s ease-out infinite alternate' : 'none', animationPlayState: paused || held ? 'paused' : 'running',
           }}
         />
-      ))}
+      )))}
       {/* scrim: dark at the bottom (where the copy sits) and on the start side, so white text keeps 4.5:1 on every slide */}
       <div className="absolute inset-0 z-[3] bg-[linear-gradient(to_top,rgba(31,0,51,.92)_0%,rgba(31,0,51,.62)_34%,rgba(52,0,87,.18)_62%,rgba(31,0,51,.5)_100%)]" />
       <div className="absolute inset-0 z-[3] bg-[linear-gradient(100deg,rgba(31,0,51,.6)_0%,rgba(31,0,51,.3)_40%,rgba(31,0,51,0)_64%)] rtl:bg-[linear-gradient(-100deg,rgba(31,0,51,.6)_0%,rgba(31,0,51,.3)_40%,rgba(31,0,51,0)_64%)]" />
@@ -110,10 +126,10 @@ export function Hero() {
         </div>
         {/* real facts only: experience count and entry price from the catalog (at the guest's rate), and the 2026 award */}
         <ul data-hero-copy className="hero-facts" aria-label={t('Visit at a glance')}>
-          <li><span className="hero-fact-v">{ACTS.length}</span><span className="hero-fact-k">{t('EXPERIENCES')}</span></li>
+          <li><span className="hero-fact-v">{ACTS.length}</span><span className="hero-fact-k">{t('ACTIVITIES')}</span></li>
           <li><span className="hero-fact-v">{money(entryFrom)}</span><span className="hero-fact-k">{t('PARK ENTRY')}</span></li>
           <li className="hero-fact-award">
-            <Img src="/images/wlta-logo-1.png" alt="" surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 40, width: 40, objectFit: 'contain', flexShrink: 0 }} />
+            <Img src="/images/wlta-logo-160.webp" alt="" surface="dark" placeholder="transparent" width={160} height={160} style={{ height: 40, width: 40, objectFit: 'contain', flexShrink: 0 }} />
             <span className="hero-fact-k" style={{ color: '#FFFFFF', letterSpacing: '.08em', lineHeight: 1.35 }}>{t('World Luxury Travel Awards 2026 winner')}</span>
           </li>
         </ul>

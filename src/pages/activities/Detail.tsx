@@ -48,8 +48,8 @@ export default function DetailPage() {
       // the experience with its 2026 price range, both rates (Google product snippet)
       ...(act.mode === 'pp' || act.mode === 'flat' ? [activityProduct({ name: act.name, description: act.blurb, image: abs(act.img), url: abs(paths.detail(act.id)), prices: activityPrices(act, raw) })].filter((x): x is Record<string, unknown> => x !== null) : []),
     ],
-  } : { title: t('Experience not found · VALLÉ Advenature™ Park'), description: t('That experience is not in the valley.'), noindex: true });
-  if (!act) return <NotFoundPage what={t('that experience')} />;
+  } : { title: t('Activity not found · VALLÉ Advenature™ Park'), description: t('That activity is not in the valley.'), noindex: true });
+  if (!act) return <NotFoundPage what={t('that activity')} />;
 
   const d = card(act);
   const related = catalog.ACTS.filter((a) => a.cat === act.cat && a.id !== act.id).slice(0, 4).map(card);
@@ -89,7 +89,7 @@ export default function DetailPage() {
 
       <div style={{ position: 'relative', borderRadius: kids ? 30 : 24, overflow: 'hidden', height: 'min(68vh,620px)', minHeight: 340, background: '#EBE2FF', marginTop: 12, ...(kids ? { boxShadow: `0 0 0 5px ${KP.lime}, 0 0 0 9px ${KP.purple}`, margin: '17px 9px 0' } : null) }}>
         {/* most cover photos are square: keep the upper-middle (faces, the waterfall top) rather than the dead centre */}
-        <Img src={act.img} alt={act.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
+        <Img src={act.img} alt={act.name} priority sizes="(max-aspect-ratio: 4/5) 150vw, 100vw" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 38%' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.8), rgba(31,0,51,0) 55%)' }} />
         <div style={{ position: 'absolute', left: 'clamp(18px,3vw,36px)', right: 'clamp(18px,3vw,36px)', bottom: 'clamp(18px,3vw,30px)', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
           <div>

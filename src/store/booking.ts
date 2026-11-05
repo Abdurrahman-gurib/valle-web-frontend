@@ -3,6 +3,7 @@ import { ENTRY_INCLUDED_FAMILIES, PRODUCT_PREFIX, productAmount } from '../types
 import { money, partyLabel } from '../lib/format';
 import { parseSelKey } from '../lib/sel';
 import { tr } from '../i18n';
+import { productDisplayName } from '../lib/photoTier';
 import { defaultCounts, eligibility, lineCaps, type Eligibility } from '../lib/ages';
 
 /** A product's own photo; a family picture only when the catalog has none. */
@@ -126,7 +127,7 @@ export function computeBooking(
     const key = PRODUCT_PREFIX + p.key;
     if (!sel[key]) continue;
     const act = {
-      id: key, name: p.name, img: p.image || PRODUCT_FALLBACK_IMG[p.family] || DEFAULT_PRODUCT_IMG, cat: 'package', mode: p.mode === 'flat' ? 'flat' : 'pp',
+      id: key, name: productDisplayName(p), img: p.image || PRODUCT_FALLBACK_IMG[p.family] || DEFAULT_PRODUCT_IMG, cat: 'package', mode: p.mode === 'flat' ? 'flat' : 'pp',
       flatLabel: p.family === 'cine' ? '/ film' : null, price: rate === 'nr' ? p.nr : p.rr, blurb: p.note, thrill: 0, duration: '', age: '', detail: '', facts: [],
     } as unknown as Activity;
     selLines.push({ key, act, variant: '', price: rate === 'nr' ? p.nr : p.rr, qty: sel[key] || {}, product: p });

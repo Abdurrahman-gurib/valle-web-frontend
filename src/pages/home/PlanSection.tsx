@@ -43,7 +43,7 @@ export function PlanSection() {
         <Accordion defaultOpen={['pay']} items={faq.map((q) => ({ id: q.id, title: q.question, content: q.answer }))} />
       </div>
       <div className="mt-12 flex flex-wrap items-center gap-5 rounded-[20px] bg-valle-purple px-[26px] py-5">
-        <Img src="/images/wlta-logo-1.png" alt={t('World Luxury Travel Awards 2026 winner')} surface="dark" placeholder="transparent" width={614} height={614} style={{ height: 54, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain', flexShrink: 0 }} />
+        <Img src="/images/wlta-logo-160.webp" alt={t('World Luxury Travel Awards 2026 winner')} surface="dark" placeholder="transparent" width={160} height={160} style={{ height: 54, width: 'auto', aspectRatio: '1 / 1', objectFit: 'contain', flexShrink: 0 }} />
         <div className="min-w-[220px] flex-1 text-[15px] font-semibold text-white">{t('World Luxury Travel Awards 2026 winner, rated Excellent by visitors on TripAdvisor.')}</div>
         <a href="https://www.tripadvisor.com/Attraction_Review-g2359803-d1994858-Reviews-Valle_Advenature_Park-Chamouny.html" target="_blank" rel="noopener" className="font-mono text-[12.5px] font-semibold text-valle-yellow">{t('READ REVIEWS →')}</a>
       </div>

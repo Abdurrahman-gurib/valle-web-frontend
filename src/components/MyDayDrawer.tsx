@@ -43,7 +43,7 @@ function CartRow({ line }: { line: SelLine }) {
         aria-label={a.name}
         className="h-[46px] w-[46px] shrink-0 cursor-pointer overflow-hidden rounded-[10px] bg-valle-lilac p-0"
       >
-        <Img src={a.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Img src={a.img} alt="" sizes="160px" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </button>
       <div className="min-w-0 flex-1">
         <div className="truncate text-[13px] font-bold">{a.name}</div>
@@ -88,8 +88,8 @@ export function MyDayDrawer() {
     cartActs.length === 0
       ? t('PARK ENTRY')
       : cartActs.length > 1
-        ? t('{n} EXPERIENCES + ENTRY', { n: cartActs.length })
-        : t('{n} EXPERIENCE + ENTRY', { n: cartActs.length });
+        ? t('{n} ACTIVITIES + ENTRY', { n: cartActs.length })
+        : t('{n} ACTIVITY + ENTRY', { n: cartActs.length });
   const entryAmt = money(app.booking.entry);
 
   return (

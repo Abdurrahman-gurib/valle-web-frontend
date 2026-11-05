@@ -29,7 +29,7 @@ export function MapPopup({ p, left, top, transform, onClose }: { p: Popup; left:
     <div style={{ position: 'absolute', left, top, transform, pointerEvents: 'none', zIndex: 7, width: 'min(360px,94%)' }}>
       <div style={{ ...GLASS, pointerEvents: 'auto', position: 'relative', display: 'flex', width: '100%', borderRadius: 16, overflow: 'hidden', animation: 'vfadeup .22s ease both' }}>
         <div style={{ width: 108, flexShrink: 0, background: 'rgba(255,255,255,.08)' }}>
-          <Img src={p.img} alt={p.name} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Img src={p.img} alt={p.name} sizes="108px" priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, padding: '12px 14px 13px' }}>
           <span style={{ background: p.badgeColor === '#FF3358' ? '#D6173F' : p.badgeColor, color: p.badgeFg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.08em', borderRadius: 999, padding: '4px 8px', display: 'inline-block', transform: 'rotate(-3deg)' }}>{p.badge}</span>
@@ -81,7 +81,7 @@ export function RouteCard({ route, options, overlay }: { route: MapRoute; option
       }}
     >
       <div {...bindImg} style={{ position: 'relative', height: overlay ? 132 : 170, overflow: 'hidden' }}>
-        <Img src={route.img} alt={t(route.name)} priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
+        <Img src={route.img} alt={t(route.name)} sizes="360px" priority surface="dark" placeholder="transparent" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: hImg ? 'scale(1.05)' : 'scale(1)', transition: 'transform .6s ease' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(31,0,51,.85), rgba(31,0,51,0) 60%)' }} />
         <span style={{ position: 'absolute', left: 12, top: 12, background: route.color === '#FF3358' ? '#D6173F' : route.color, color: route.fg, fontFamily: MONO, fontSize: 10, fontWeight: 700, letterSpacing: '.1em', borderRadius: 999, padding: '5px 10px', transform: 'rotate(-3deg)' }}>{t(route.tag)}</span>
         <div style={{ position: 'absolute', left: 14, right: 14, bottom: 10, fontFamily: HEAD, fontStyle: 'italic', fontWeight: 900, fontSize: 23, textTransform: 'uppercase', lineHeight: 0.95, textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{t(route.name)}</div>

@@ -16,11 +16,17 @@ if (!existsSync(swPath)) throw new Error('dist/sw.js is missing: public/sw.js sh
 
 const list = (dir, test) => (existsSync(join(dist, dir)) ? readdirSync(join(dist, dir)).filter(test).map((f) => `/${dir}/${f}`) : []);
 
+// Kept out of the install download (it runs after the page has loaded, but on a slow
+// phone it still competes with the photos further down): the staff gate scanner,
+// the back office (Dashboard, reportUi = Recharts), the desktop-only Three.js layer,
+// the other languages' dictionaries and the Arabic / Cyrillic / Devanagari fonts.
+// The worker still caches each of them the first time a page uses it (cache-first
+// on /assets/ and /fonts/), so a French or Hindi visitor keeps theirs offline.
+const NOT_IN_SHELL = /^(jsQR|Dashboard|reportUi|three\.module|(fr|de|it|ar|ru|es|hi)-)[-\w]*\.js$/i;
 const precache = [
   '/',
-  // the app bundle and styles; jsQR is the staff gate scanner and stays out of guests' phones
-  ...list('assets', (f) => /\.(js|css)$/.test(f) && !/^jsQR/i.test(f)),
-  ...list('fonts', (f) => f.endsWith('.woff2')),
+  ...list('assets', (f) => /\.(js|css)$/.test(f) && !NOT_IN_SHELL.test(f)),
+  ...list('fonts', (f) => /^font-\d+\.woff2$/.test(f)),
   '/favicon.svg', '/favicon-192.png', '/favicon-512.png', '/apple-touch-icon.png',
   '/icon-maskable-192.png', '/icon-maskable-512.png',
 ].filter((url) => url === '/' || existsSync(join(dist, url.slice(1))));

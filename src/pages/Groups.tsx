@@ -267,15 +267,15 @@ export default function GroupsPage() {
           </div>
           {slotLevel && (slotLevel === 'full' || slotLevel === 'closed') && (
             <div role="alert" className="mt-[10px] bg-[#FFE2E7] border-[1.5px] border-solid border-valle-red rounded-[12px] py-[10px] px-[14px] text-[13.5px] font-semibold">
-              {slotLevel === 'closed' ? t('The park is closed for that arrival slot. Pick another day.') : t('That arrival slot is fully booked on this date. Pick the other slot or another day.')}
+              {slotLevel === 'closed' ? t('The park is closed at that arrival time. Pick another day.') : t('That arrival time is fully booked on this date. Pick the other arrival time or another day.')}
             </div>
           )}
           <div className="font-mono text-[10.5px] text-[rgba(52,0,87,.7)] mt-2">{t('HEADCOUNT {n} · GROUPS ARE 10 OR MORE', { n: headcount })}</div>
 
-          <div className={stepLabel}>{school ? t('3 · STUDENT PRICELIST · PER PUPIL') : t('3 · EXPERIENCES · PER PERSON')}</div>
+          <div className={stepLabel}>{school ? t('3 · STUDENT PRICELIST · PER PUPIL') : t('3 · ACTIVITIES · PER PERSON')}</div>
           {school && (
             <p className="text-[13.5px] leading-[1.55] text-[rgba(52,0,87,.75)] mt-2 mb-0 mx-0 max-w-[70ch]" data-testid="group-entry-note">
-              {t('The student entrance fee ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.', { price: mur(entranceRow ? (rate === 'nr' ? entranceRow.nr : entranceRow.rr) : 0), adult: mur(ep.adult) })}
+              {t('The student park entry ({price} per pupil) is added once for every pupil aged 6 and over; pre-primary pupils enter free. Teachers and accompanying adults pay the normal adult entry ({adult}). Tick what the pupils do and set how many do each.', { price: mur(entranceRow ? (rate === 'nr' ? entranceRow.nr : entranceRow.rr) : 0), adult: mur(ep.adult) })}
             </p>
           )}
           <div className="grid [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))] gap-[10px] mt-3" data-testid="group-items">
@@ -310,7 +310,7 @@ export default function GroupsPage() {
             {entry > 0 && <Row label={t('Park entry · {party}', { party: school && entranceRow ? partyLabel(adults, 0) : partyLabel(partyAdults, kids) })} amount={mur(entry)} />}
             {under6 > 0 && <Row label={t('Park entry · {party}', { party: partyLabel(0, 0, under6) }) + ' · ' + t('free')} amount={mur(0)} />}
             {lines.map((l) => <Row key={l.id} label={`${l.name} · ${l.perHead} ${isCardRow(l.name) ? t('per card') : t('/ HEAD')} × ${l.qty}`} amount={mur(l.amount)} />)}
-            {lines.length === 0 && <div className="text-[13.5px] text-[rgba(52,0,87,.6)]">{school ? t('Tick the student rows your visit includes.') : t('Tick the experiences the group will do; park entry is included for everyone.')}</div>}
+            {lines.length === 0 && <div className="text-[13.5px] text-[rgba(52,0,87,.6)]">{school ? t('Tick the student rows your visit includes.') : t('Tick the activities the group will do; park entry is included for everyone.')}</div>}
             <div className="flex justify-between pt-[10px] mt-2 font-extrabold text-[18px]" style={{ borderTop: '1px dashed #D9C9F0' }}>
               <span>{t('Total')}</span><span className="font-mono" data-testid="group-total">{mur(total)}{app.currency !== 'MUR' ? ' (' + money(total) + ')' : ''}</span>
             </div>

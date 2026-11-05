@@ -143,7 +143,7 @@ export default function BookingPage() {
   /** Experiences in the cart that have no room left in the chosen slot (from the picker's per-activity levels). */
   const activityFull = cartActs.filter((l) => selectedLoad?.activities?.[l.act.id]?.[slotKey] === 'full').map((l) => l.act.name);
   const activityFullMsg = activityFull.length > 0
-    ? t('{names}: fully booked for the {slot} on this date. Pick the other slot, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })
+    ? t('{names}: fully booked for the {slot} on this date. Pick the other arrival time, another day, or remove it from your day.', { names: activityFull.join(', '), slot: slot === 0 ? t('morning') : t('afternoon') })
     : '';
 
   const holdKey = JSON.stringify([selectedIso, slotKey, adults, kids, infants, cartActs.map((l) => [l.act.id, l.qty.a, l.qty.k, l.qty.u, times[l.key] || ''])]);
@@ -164,17 +164,17 @@ export default function BookingPage() {
     if (wrongRate) {
       return wrongRate.product?.rateOnly === 'rr'
         ? t('{name} is for residents only: choose the resident rate or remove it from your day.', { name: wrongRate.act.name })
-        : t('{name} is for visitors only: choose the non-resident rate or remove it from your day.', { name: wrongRate.act.name });
+        : t('{name} is for visitors only: choose the visitor rate or remove it from your day.', { name: wrongRate.act.name });
     }
     if (overParty.length > 0) return t('{names}: more people than in your party. Lower the counts or change the party.', { names: overParty.join(', ') });
     if (nobodyOn.length > 0) return t('Nobody in your party is counted on {names}. Add people to it or remove it.', { names: nobodyOn.join(', ') });
     if (needsTime.length > 0) return t('Pick a start time for {names}.', { names: needsTime.join(', ') });
     if (selectedSlotFull || activityFull.length > 0) {
       return selectedSlotLevel === 'closed'
-        ? t('The park is closed for that arrival slot. Pick another day.')
+        ? t('The park is closed at that arrival time. Pick another day.')
         : activityFull.length > 0
         ? activityFullMsg
-        : t('That arrival slot is fully booked on this date. Pick the other slot or another day.');
+        : t('That arrival time is fully booked on this date. Pick the other arrival time or another day.');
     }
     return '';
   };
@@ -271,7 +271,7 @@ export default function BookingPage() {
         : codeUsed
         ? t('This code has just been fully used. Remove it or try another.')
         : status === 409
-        ? (/^That arrival slot is fully booked/.test(msg) ? t('That arrival slot is fully booked on this date. Pick the other slot or another day.') : msg)
+        ? (/^That arrival slot is fully booked/.test(msg) ? t('That arrival time is fully booked on this date. Pick the other arrival time or another day.') : msg)
         : status
         ? errorMessage(e, t('We could not confirm your booking. Please try again.'))
         : t('We could not reach the booking desk. Check your connection and try again, or WhatsApp us on {phone}.', { phone: '+230 5292 8841' }));

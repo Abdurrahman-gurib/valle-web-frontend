@@ -6,6 +6,7 @@ import { mur } from '../lib/format';
 import { useCatalog } from '../store/CatalogContext';
 import { productAmount, type RateKey } from '../types';
 import { errorMessage } from '../lib/errors';
+import { productDisplayName } from '../lib/photoTier';
 
 const MONO = "'Chivo Mono',monospace";
 
@@ -77,7 +78,7 @@ export function TicketPhotos({ tk, token, onChanged }: { tk: TicketView; token: 
           <div style={{ display: 'grid', gap: 6, marginTop: 10 }}>
             {tiers.map((p) => (
               <button key={p.key} type="button" disabled={busy !== null} onClick={() => { void addPackage(p.key); }} data-testid={`add-photo-${p.key}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', textAlign: 'start', background: '#FFFFFF', border: '1.5px solid #EBE2FF', borderRadius: 12, padding: '10px 12px', cursor: 'pointer', fontFamily: 'inherit', color: '#340057' }}>
-                <span><strong>{p.name}</strong>{p.note ? <span style={{ color: 'rgba(52,0,87,.65)' }}> · {p.note}</span> : null}</span>
+                <span><strong>{productDisplayName(p)}</strong></span>
                 <span style={{ fontFamily: MONO, fontWeight: 700, whiteSpace: 'nowrap' }}>{busy === p.key ? '…' : mur(productAmount(p, rate, tk.adults, tk.kids, 1))}</span>
               </button>
             ))}

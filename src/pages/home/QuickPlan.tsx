@@ -29,7 +29,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
       className="relative block h-[400px] cursor-pointer overflow-hidden rounded-[18px] text-inherit"
       style={{ background: w.bg, textDecoration: 'none' }}
     >
-      <Img src={w.img} alt={t('{name} at Vallé Advenature™ Park', { name: t(w.alt) })} placeholder={w.bg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      <Img src={w.img} sizes="(max-width: 640px) 150vw, (max-width: 1100px) 50vw, 33vw" alt={t('{name} at Vallé Advenature™ Park', { name: t(w.alt) })} placeholder={w.bg} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       <div className="absolute inset-0" style={{ background: w.gradient }} />
       <span className="absolute top-3.5 left-3.5 -rotate-4 rounded-full bg-white/95 px-[11px] py-1.5 font-mono text-[11px] font-bold text-valle-purple">{w.num}</span>
       {/* the Kids Park tile carries the park's own logo (decorative: the tile is already named) */}
@@ -38,7 +38,7 @@ function WayCardEl({ w, count }: { w: WayCard; count: number }) {
         {WAY_ICON[w.cat] && <ValleIcon name={WAY_ICON[w.cat]} size={38} className="mb-2.5 block" />}
         <div className="origin-bottom-left -rotate-4 font-display text-[30px] font-black uppercase italic">{t(w.title)}</div>
         <div className={'mt-[7px] text-[13.5px] leading-[1.45] ' + (w.light ? 'opacity-95' : 'opacity-90')}>{t(w.sub)}</div>
-        <div className="mt-3 inline-block pt-2.5 font-mono text-[11.5px] font-bold tracking-[.08em]" style={{ borderTop: '1px dashed ' + (w.light ? 'rgba(255,255,255,.5)' : 'rgba(52,0,87,.45)') }}>{t('{n} EXPERIENCES →', { n: count })}</div>
+        <div className="mt-3 inline-block pt-2.5 font-mono text-[11.5px] font-bold tracking-[.08em]" style={{ borderTop: '1px dashed ' + (w.light ? 'rgba(255,255,255,.5)' : 'rgba(52,0,87,.45)') }}>{t('{n} ACTIVITIES →', { n: count })}</div>
       </div>
     </motion.a>
   );

@@ -79,7 +79,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
             return (
               <article key={g.key} className="sr-card" data-testid="student-group" data-group={g.key} aria-labelledby={`student-group-${gi}`}>
                 <div className="sr-card-photo">
-                  <Img src={g.photo.src} alt={t(g.photo.alt)} style={cover(g.photo.position)} />
+                  <Img src={g.photo.src} alt={t(g.photo.alt)} sizes="(max-width: 640px) 100vw, 50vw" style={cover(g.photo.position)} />
                   <span className="sr-card-tag" style={{ background: chipInk(g.color), color: chipInk(g.color) !== g.color ? '#FFFFFF' : undefined, textTransform: 'none' }}>{t('From {price}', { price: money(Math.min(...list.filter((r) => !/top-up/i.test(r.n)).map((r) => r.rr))) })}</span>
                 </div>
                 <div className="sr-card-body">
@@ -153,7 +153,7 @@ export default function StudentPage({ onQuote }: { onQuote: () => void }) {
         <h2 id="student-book-title" style={H2}>{t('Book a school visit online')}</h2>
         <ol className="pk-steps">
           <li><span aria-hidden>1</span><div><b>{t('Who is coming')}</b>{t('The school, the teacher in charge and the number of students and adults.')}</div></li>
-          <li><span aria-hidden>2</span><div><b>{t('Date and student rows')}</b>{t('Pick the day and arrival slot, then tick the student rows your visit includes.')}</div></li>
+          <li><span aria-hidden>2</span><div><b>{t('Date and student rows')}</b>{t('Pick the day and arrival time, then tick the student rows your visit includes.')}</div></li>
           <li><span aria-hidden>3</span><div><b>{t('Participants and waivers')}</b>{t('Add the list now or later from the ticket; the leader signs one waiver pack for the group.')}</div></li>
         </ol>
         <div className="sr-hero-actions" style={{ marginTop: 24 }}>

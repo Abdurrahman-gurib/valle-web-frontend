@@ -12,7 +12,7 @@ export function SupportPanel({ id, photo, aside, children, testId, reverse }: { 
     <section aria-labelledby={id} className={'sr-section sr-lunch' + (reverse ? ' pk-reverse' : '')} data-testid={testId}>
       {photo ? (
         <div className="sr-lunch-photo">
-          <Img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} style={cover(photo.position)} />
+          <Img src={photo.src} alt={photo.alt} sizes="(max-width: 900px) 100vw, 50vw" width={photo.width} height={photo.height} style={cover(photo.position)} />
         </div>
       ) : <div className="pk-aside">{aside}</div>}
       <div className="sr-lunch-text">{children}</div>

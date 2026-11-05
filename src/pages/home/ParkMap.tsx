@@ -53,7 +53,7 @@ function PinPopup({ sel, left, top, transform, onClose }: { sel: SelPinModel; le
     <div className="pointer-events-none absolute z-[6] w-[min(320px,94%)]" style={{ left, top, transform }}>
       <div className="pointer-events-auto relative flex w-full animate-[vfadeup_.22s_ease_both] overflow-hidden rounded-[14px] bg-white shadow-[0_18px_44px_-10px_rgba(31,0,51,.65)]">
         <div className="w-24 shrink-0 bg-valle-lilac">
-          <Img src={sel.img} alt={sel.name} priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Img src={sel.img} alt={sel.name} sizes="96px" priority style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <div className="min-w-0 flex-1 px-[13px] pt-[11px] pb-3">
           <span className="inline-block -rotate-3 rounded-full px-2 py-1 font-mono text-[10px] font-bold tracking-[.08em]" style={{ background: chipInk(sel.catColor), color: sel.catFg }}>{sel.catBadge}</span>
@@ -142,6 +142,7 @@ export function ParkMap() {
                   <div className="relative">
                     <Img
                       src="/images/park-sitemap.webp"
+                      srcSet="" // zoomable: always the full-size map
                       alt={t('Vallé official walking trail sitemap: ten lettered stops on a 1.8 km loop')}
                       surface="dark"
                       placeholder="#2E0A4E"
