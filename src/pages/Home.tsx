@@ -14,10 +14,13 @@ import { PlanSection } from './home/PlanSection';
 import { CtaBanner } from './home/CtaBanner';
 import { InstallSection } from './home/InstallSection';
 import { useT } from '../i18n';
+import { usePlanFaq } from './home/faq';
+import { faqPage } from '../lib/structuredData';
 
 export default function HomePage() {
   const t = useT();
-  useSeo({ title: t('VALLÉ Advenature™ Park · Ziplines, quad trails & nature in Chamouny, Mauritius'), description: t('Fly the longest ziplines in Mauritius, ride quad and buggy trails, walk to two waterfalls and the 23 Coloured Earth, and let the kids loose in their own park. Open daily in Chamouny.'), canonicalPath: '/', jsonLd: [{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'VALLÉ Advenature™ Park', url: abs('/'), potentialAction: { '@type': 'SearchAction', target: abs('/explore?q={search_term_string}'), 'query-input': 'required name=search_term_string' } }] });
+  const faq = usePlanFaq();
+  useSeo({ title: t('VALLÉ Advenature™ Park · Ziplines, quad trails & nature in Chamouny, Mauritius'), description: t('Fly the longest ziplines in Mauritius, ride quad and buggy trails, walk to two waterfalls and the 23 Coloured Earth, and let the kids loose in their own park. Open daily in Chamouny.'), canonicalPath: '/', jsonLd: [{ '@context': 'https://schema.org', '@type': 'WebSite', name: 'VALLÉ Advenature™ Park', url: abs('/'), potentialAction: { '@type': 'SearchAction', target: abs('/explore?q={search_term_string}'), 'query-input': 'required name=search_term_string' } }, faqPage(faq)] });
   const ref = useReveal<HTMLElement>();
   return (
     <main ref={ref}>

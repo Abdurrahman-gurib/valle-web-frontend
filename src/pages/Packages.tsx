@@ -1,17 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
 import { paths } from '../lib/nav';
 import NotFoundPage from './NotFound';
-import { PACKAGE_GROUPS, classFrom, packageGroupOf } from '../lib/packageGroups';
+import { CLASS_LISTED, PACKAGE_GROUPS, classFrom, packageGroupOf } from '../lib/packageGroups';
+import { packageItemList, productPrice } from '../lib/structuredData';
 import { useApp } from '../store/AppStore';
 import { money } from '../lib/format';
-import { breadcrumbs, useSeo } from '../lib/seo';
+import { abs, breadcrumbs, useSeo } from '../lib/seo';
 import { useEffect, useRef, useState } from 'react';
 import { useCatalog } from '../store/CatalogContext';
 import { useReveal } from '../hooks/useReveal';
 import { liveDeals } from '../lib/deals';
 import { PackageModal, type PackModalData } from '../components/PackageModal';
 import { CurrencyPicker } from '../components/CurrencyPicker';
-import { useT } from '../i18n';
+import { localizePath, useT } from '../i18n';
 import SeniorPage from './packages/SeniorPage';
 import ExclusivePage from './packages/ExclusivePage';
 import ResidentPage from './packages/ResidentPage';
@@ -37,10 +38,18 @@ export default function PackagesPage() {
   const t = useT();
   const { group: groupSlug } = useParams<{ group?: string }>();
   const group = packageGroupOf(groupSlug);
-  useSeo(group
-    ? { title: t('{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park', { group: t(group.title) }), description: t(group.intro), canonicalPath: '/packages/' + group.slug, image: CLASS_IMAGE[group.slug] ?? '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }, { name: group.title, path: '/packages/' + group.slug }])] }
-    : { title: t('Packages & 2026 pricelist · VALLÉ Advenature™ Park'), description: t('Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.'), canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
   const catalog = useCatalog();
+  /** The class's packages with their 2026 prices, as an ItemList (each item links to its section). */
+  const itemList = group ? packageItemList({
+    name: t(group.title),
+    url: abs(localizePath('/packages/' + group.slug)),
+    items: (CLASS_LISTED[group.slug] ?? []).flatMap(({ family, section }) => (catalog.PRODUCTS ?? [])
+      .filter((p) => p.family === family)
+      .flatMap((p) => { const price = productPrice(p); return price ? [{ name: p.name, image: p.image ? abs(p.image) : undefined, url: abs(localizePath('/packages/' + group.slug)) + '#' + section, price, description: p.note || undefined }] : []; })),
+  }) : null;
+  useSeo(group
+    ? { title: t('{group} · packages & 2026 pricelist · VALLÉ Advenature™ Park', { group: t(group.title) }), description: t(group.intro), canonicalPath: '/packages/' + group.slug, image: CLASS_IMAGE[group.slug] ?? '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }, { name: group.title, path: '/packages/' + group.slug }]), ...(itemList ? [itemList] : [])] }
+    : { title: t('Packages & 2026 pricelist · VALLÉ Advenature™ Park'), description: t('Light, Standard, Exclusive, VIP and Diamond days, resident and senior packages, student and Kids Park pricelists, combos, cinematic shoots and team building. All 2026 prices, VAT inclusive.'), canonicalPath: '/packages', image: '/images/vip-ultimate-buggy-coloured-earth.avif', jsonLd: [breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Packages', path: '/packages' }])] });
   const ref = useReveal<HTMLElement>();
   const [pk, setPk] = useState<PackModalData | null>(null);
 

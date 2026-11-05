@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import NotFoundPage from '../NotFound';
 import { abs, breadcrumbs, useSeo } from '../../lib/seo';
+import { activityPrices, activityProduct } from '../../lib/structuredData';
 import { paths, useGoto } from '../../lib/nav';
 import { useCatalog, useRawCatalog } from '../../store/CatalogContext';
 import { Ruler } from 'lucide-react';
@@ -30,7 +31,6 @@ export default function DetailPage() {
 
   const act = catalog.ACTS.find((a) => a.id === id);
   const catName = act ? catalog.CAT[act.cat].name : '';
-  const rp = act ? catalog.RATEP[act.id] : undefined;
   const parkStatus = useParkStatus();
   const paused = !!act && (parkStatus?.state === 'closed' || !!parkStatus?.pausedActivities.includes(act.id));
   useSeo(act ? {
@@ -44,8 +44,9 @@ export default function DetailPage() {
         '@context': 'https://schema.org', '@type': 'TouristAttraction', name: act.name, description: act.blurb,
         image: abs(act.img), url: abs(paths.detail(act.id)), isAccessibleForFree: act.mode === 'entry',
         containedInPlace: { '@type': 'TouristAttraction', name: 'VALLÉ Advenature™ Park', address: { '@type': 'PostalAddress', addressLocality: 'Chamouny', addressCountry: 'MU' } },
-        ...(act.mode === 'pp' || act.mode === 'flat' ? { offers: { '@type': 'AggregateOffer', priceCurrency: 'MUR', lowPrice: rp ? rp[0] : act.price, highPrice: rp ? rp[1] : act.price, url: abs(paths.booking()), availability: 'https://schema.org/InStock' } } : {}),
       },
+      // the experience with its 2026 price range, both rates (Google product snippet)
+      ...(act.mode === 'pp' || act.mode === 'flat' ? [activityProduct({ name: act.name, description: act.blurb, image: abs(act.img), url: abs(paths.detail(act.id)), prices: activityPrices(act, raw) })].filter((x): x is Record<string, unknown> => x !== null) : []),
     ],
   } : { title: t('Experience not found · VALLÉ Advenature™ Park'), description: t('That experience is not in the valley.'), noindex: true });
   if (!act) return <NotFoundPage what={t('that experience')} />;

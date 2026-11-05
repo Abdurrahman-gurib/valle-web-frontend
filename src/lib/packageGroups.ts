@@ -29,6 +29,16 @@ const CLASS_FAMILIES: Record<string, string[]> = {
   photo: ['photo', 'cine'],
 };
 
+/** The product families listed on a class page, each with the section it is shown in (for structured data). */
+export const CLASS_LISTED: Record<string, { family: string; section: string }[]> = {
+  deals: [{ family: 'expo', section: 'deals' }],
+  exclusive: ['ls', 'ex', 'vip', 'diamond', 'combo'].map((f) => ({ family: f, section: f })),
+  resident: [{ family: 'resident', section: 'resident' }],
+  senior: [{ family: 'senior', section: 'senior' }],
+  student: [{ family: 'student', section: 'student' }],
+  'photo-video': [{ family: 'photo', section: 'photo' }, { family: 'cine', section: 'cine' }],
+};
+
 interface PricedProduct { family: string; rr: number; nr: number; rateOnly: 'rr' | 'nr' | null }
 
 /**
