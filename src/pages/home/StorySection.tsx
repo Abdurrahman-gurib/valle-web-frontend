@@ -51,10 +51,12 @@ export function StorySection() {
           <a
             href={paths.story()}
             onClick={(e) => { e.preventDefault(); goto.story(); }}
-            className="mt-[18px] inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.14em] text-[#5B21B6] underline-offset-4 hover:text-[#5B21B6] hover:underline"
+            className="vbtn vbtn-primary mt-6 inline-flex"
+            style={{ color: '#FFFFFF', textDecoration: 'none' }}
           >
-            {t('READ THE FULL STORY, FROM THE TEA FIELD OF 1998')} <span aria-hidden><Fwd /></span>
+            {t('Discover our story')} <span aria-hidden><Fwd /></span>
           </a>
+          <p className="mt-3 mb-0 font-mono text-[11px] font-semibold tracking-[.14em] text-valle-purple/70">{t('FROM THE TEA FIELD OF 1998 TO TODAY')}</p>
           <div className="mt-7 flex flex-wrap gap-[30px]">
             <Stat value={<CountUp to={23} />} label={t('COLOURS OF EARTH')} color="#FF3358" rule="#FF3358" />
             <Stat value={<CountUp to={5.5} decimals={1} suffix=" KM" />} label={t('LONGEST ZIPLINE')} color="#7333FF" rule="#33FF74" />

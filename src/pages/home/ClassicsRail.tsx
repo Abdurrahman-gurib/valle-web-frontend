@@ -28,8 +28,9 @@ function RailCard({ a, rateTag }: { a: CardModel; rateTag: string }) {
         display: 'flex', flexDirection: 'column',
       }}
     >
-      <div style={{ position: 'relative', aspectRatio: '16 / 10', flexShrink: 0, background: '#EBE2FF' }}>
-        <Img eager src={a.img} alt={a.name} sizes="(max-width: 640px) 85vw, 360px" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {/* minHeight 0: an aspect-ratio box otherwise grows to the photo's own height, so every photo is the same size */}
+      <div style={{ position: 'relative', aspectRatio: '16 / 10', minHeight: 0, flexShrink: 0, overflow: 'hidden', background: '#EBE2FF' }}>
+        <Img eager src={a.img} alt={a.name} sizes="(max-width: 640px) 85vw, 360px" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
         <span style={{ position: 'absolute', bottom: 12, right: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFC33', color: '#340057', fontFamily: "'Chivo Mono',monospace", fontSize: 11.5, fontWeight: 700, borderRadius: 8, padding: '7px 10px', boxShadow: 'var(--s1)' }}>
           {a.priceLabel}
           <span style={{ background: '#340057', color: '#FFFC33', borderRadius: 4, padding: '2px 5px', fontSize: 10, letterSpacing: '.06em' }}>{rateTag}</span>
@@ -98,10 +99,11 @@ export function ClassicsRail() {
         </div>
       </div>
       <div id="vrail" data-reveal="1" style={{ padding: '0 clamp(16px,calc((100vw - 1320px)/2 + 40px),calc((100vw - 1320px)/2 + 40px))' }}>
-        <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-[20px]" className="rail-fade" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
+        <CarouselTrack viewportRef={c.viewportRef} label={t('Go big.') + ' ' + t('Go wild.')} gap="gap-0" className="rail-fade" onKeyDown={carouselKeys(c.prev, c.next, isRtl(lang))}>
           {/* Embla moves each slide with its own transform when it loops, so the slide is a
               plain wrapper: the card's Motion hover transform would otherwise overwrite it. */}
-          {items.map((a) => <div key={a.id} className="flex shrink-0"><RailCard a={a} rateTag={rateTag} /></div>)}
+          {/* spacing as slide padding, not gap: a looping carousel ignores gap at the seam, so cards touched there */}
+          {items.map((a) => <div key={a.id} className="flex shrink-0 pe-[20px]"><RailCard a={a} rateTag={rateTag} /></div>)}
         </CarouselTrack>
       </div>
     </section>
