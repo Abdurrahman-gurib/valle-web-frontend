@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { Img } from '../components/Img';
+import { groupLinks, type GroupAudience } from '../components/header/packageGroups';
+import { Fwd } from '@/components/ui/arrows';
 import { Stripes } from '../components/Stripes';
 import { cn } from '../lib/utils';
 import { BtnLabel } from '@/components/ui/valle';
@@ -97,6 +100,17 @@ export default function GroupsPage() {
   });
 
   const [kind, setKind] = useState<Kind>('school');
+  const location = useLocation();
+  // /groups?for=school|club (from the menu) opens the form on that kind of group
+  useEffect(() => {
+    const f = new URLSearchParams(location.search).get('for');
+    if (f === 'school' || f === 'club' || f === 'company' || f === 'other') setKind(f);
+  }, [location.search]);
+  const chooseAudience = (a: GroupAudience) => {
+    setKind(a === 'club' ? 'club' : 'school');
+    const el = document.getElementById('book');
+    if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 84), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
   const [org, setOrg] = useState('');
   const [leader, setLeader] = useState('');
   const [email, setEmail] = useState('');
@@ -231,7 +245,32 @@ export default function GroupsPage() {
             {' '}<Link to={paths.team()} className="font-semibold whitespace-nowrap" style={{ color: '#5B21B6' }}>{t('Team building →')}</Link>
           </p>
 
-          <div className={stepLabel}>{t('1 · WHO IS COMING')}</div>
+          {/* who it is for: schools and clubs book below, team building starts with a quote */}
+          <div className="grid gap-[clamp(14px,2vw,22px)] mt-9 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]" data-testid="group-audiences">
+            {groupLinks(t).map((l) => {
+              const active = l.key !== 'team' && (l.key === 'club' ? kind === 'club' : kind === 'school');
+              const body = (
+                <>
+                  <span className="relative block aspect-[16/10] bg-valle-lilac">
+                    <Img src={l.photo.src} alt={l.photo.alt} sizes="(max-width: 860px) 100vw, 380px" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: l.photo.position }} />
+                  </span>
+                  <span className="flex flex-1 flex-col px-5 pt-4 pb-5 text-start">
+                    <span className="font-display text-[24px] leading-none font-black uppercase italic">{l.title}</span>
+                    <span className="mt-2 text-[14.5px] leading-[1.5] text-valle-purple/75">{l.sub}</span>
+                    <span className="mt-auto pt-4 font-mono text-[11.5px] font-bold tracking-[.1em] uppercase" style={{ color: '#5B21B6' }}>
+                      {l.key === 'team' ? t('See the programmes') : active ? t('Selected below') : t('Book this group')} <Fwd />
+                    </span>
+                  </span>
+                </>
+              );
+              const card = cn('flex flex-col overflow-hidden rounded-[20px] bg-white text-valle-purple border-[1.5px] border-solid [transition:transform_var(--t-ui),border-color_var(--t-ui)] hover:[transform:translateY(-3px)] motion-reduce:hover:transform-none', active ? 'border-valle-violet shadow-[0_0_0_3px_rgba(115,51,255,.18)]' : 'border-valle-lilac');
+              return l.key === 'team'
+                ? <Link key={l.key} to={l.href} className={card} style={{ textDecoration: 'none' }} data-testid="group-audience-team">{body}</Link>
+                : <button key={l.key} type="button" onClick={() => chooseAudience(l.key)} aria-pressed={active} className={cn(card, 'cursor-pointer p-0 [font-family:inherit]')} data-testid={`group-audience-${l.key}`}>{body}</button>;
+            })}
+          </div>
+
+          <div id="book" className={stepLabel}>{t('1 · WHO IS COMING')}</div>
           <p className="mt-2 mb-0 text-[13px] text-[rgba(52,0,87,.75)]">{t('Fields marked * are required.')}</p>
           <div className="grid [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))] gap-3 mt-3">
             <label className={label}>{t('TYPE OF GROUP')}

@@ -11,7 +11,7 @@ import { Stripes } from '../Stripes';
 import { SpaLink, mobileNavRow } from './parts';
 import { ValleIcon, type ValleIconName } from '@/components/ui/ValleIcon';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import type { MenuGroup } from './packageGroups';
+import { groupLinks, type MenuGroup } from './packageGroups';
 
 type Go = (fn: () => void) => () => void;
 
@@ -108,7 +108,17 @@ export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, go
         <span className="flex gap-[7px]">{t('Prices shown:')}<span className="text-[rgba(255,255,255,.72)]">{t(app.rateWord)}</span></span>
         <span className="font-mono text-[11px] font-bold bg-valle-yellow text-valle-purple rounded-[999px] py-[5px] px-[10px] whitespace-nowrap">{app.rateTag} ⇄</span>
       </button>
-      <NavRow href={paths.groups()} onClick={go(gotoGroups)} delay="[animation-delay:.18s]">{t('Groups & schools')}</NavRow>
+      <details data-testid="mobile-groups-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.18s]">
+        <summary className="group/groups flex cursor-pointer list-none items-center justify-between py-[12px] text-[16.5px] font-semibold text-white [&::-webkit-details-marker]:hidden">
+          {t('Groups & schools')}<ChevronDown aria-hidden size={18} strokeWidth={2.5} className="text-[rgba(255,252,51,.7)] [transition:transform_var(--t-fast)] group-open/groups:rotate-180" />
+        </summary>
+        <div className="grid gap-[2px] pb-[12px]">
+          {groupLinks(t).map((l) => (
+            <SpaLink key={l.key} href={l.href} onClick={go(() => navigate(l.href))} className="block py-[7px] text-[15px] font-medium" color="#FFFFFF">{l.title}</SpaLink>
+          ))}
+          <SpaLink href={paths.groups()} onClick={go(gotoGroups)} className="block py-[7px] font-mono text-[11.5px] font-bold tracking-[.12em] text-valle-yellow" color="#FFFC33">{t('BOOK FOR 10 OR MORE')}</SpaLink>
+        </div>
+      </details>
       <NavRow href={paths.plan()} onClick={go(goto.plan)} delay="[animation-delay:.2s]">{t('Plan your visit')}</NavRow>
       <details data-testid="mobile-dine-menu" className="border-b border-solid border-[rgba(255,255,255,.16)] animate-[vfadeup_.3s_ease_both] [animation-delay:.22s]">
         <summary className="group/dine flex cursor-pointer list-none items-center justify-between py-[12px] text-[16.5px] font-semibold text-white [&::-webkit-details-marker]:hidden">

@@ -11,7 +11,7 @@ import { ValleIcon, iconForActivity, type ValleIconName } from '@/components/ui/
 
 /** Link/selected text colour of the design system. */
 const LINK = '#5B21B6';
-import type { MenuGroup } from './packageGroups';
+import type { GroupLink, MenuGroup } from './packageGroups';
 
 /** `go` closes the menus and then runs the navigation. */
 type Go = (fn: () => void) => () => void;
@@ -83,6 +83,35 @@ export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
             </SpaLink>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+/** Desktop groups menu: schools, team building and clubs, each with its photo and one line on how it works. */
+export function GroupsMenu({ links, go }: { links: GroupLink[]; go: Go }) {
+  const t = useT();
+  const navigate = useNavigate();
+  return (
+    <div className={megaPanel}>
+      <StripesSm />
+      <div className="max-w-[1320px] mx-auto pt-[26px] px-[clamp(16px,3.5vw,40px)] pb-[32px]">
+        <SpaLink href={paths.groups()} onClick={go(() => navigate(paths.groups()))} className={cn(monoLink, 'mb-[14px]')} color={LINK}>
+          {t('BOOK FOR 10 OR MORE')} <Fwd />
+        </SpaLink>
+        <div className="grid grid-cols-3 gap-[clamp(16px,2vw,28px)]" data-testid="groups-menu">
+          {links.map((l) => (
+            <SpaLink key={l.key} href={l.href} onClick={go(() => navigate(l.href))} className="group flex flex-col rounded-[20px] overflow-hidden bg-white shadow-s2 [transition:transform_var(--t-ui)] hover:[transform:translateY(-4px)]" color="#340057">
+              <span className="block relative aspect-[16/8] bg-valle-lilac">
+                <Img src={l.photo.src} alt="" sizes="400px" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: l.photo.position }} />
+              </span>
+              <span className="flex items-center justify-between gap-2 px-[18px] pt-[14px] font-display italic font-black text-[19px] uppercase">
+                {l.title}<span className="text-valle-link"><Fwd /></span>
+              </span>
+              <span className="block px-[18px] pt-[4px] pb-[16px] text-[13.5px] leading-[1.45] text-valle-purple/75">{l.sub}</span>
+            </SpaLink>
+          ))}
+        </div>
       </div>
     </div>
   );

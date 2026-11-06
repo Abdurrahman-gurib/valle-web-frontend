@@ -59,7 +59,7 @@ test.describe('our story', () => {
 
   test('the home teaser links to the full story and the header entry opens it', async ({ page }, info) => {
     await page.goto('/');
-    await page.getByRole('link', { name: /READ THE FULL STORY/ }).click();
+    await page.getByRole('link', { name: /Discover our story/i }).click();
     await expect(page).toHaveURL(/\/story$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('to the sky');
     if (info.project.name === 'desktop') {

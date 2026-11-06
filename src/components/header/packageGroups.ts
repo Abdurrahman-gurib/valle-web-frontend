@@ -38,3 +38,28 @@ export function dineLinks(t: Translate): [name: string, href: string][] {
     [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'],
   ];
 }
+
+/** Who a group visit is for: the Groups & schools menu and the cards on /groups. */
+export type GroupAudience = 'school' | 'team' | 'club';
+export interface GroupLink { key: GroupAudience; title: string; sub: string; href: string; photo: { src: string; position: string; alt: string } }
+
+/** Schools and clubs book online on /groups; team building starts with a quote on the corporate page. */
+export function groupLinks(t: Translate): GroupLink[] {
+  return [
+    {
+      key: 'school', title: t('School trips'), href: paths.groups() + '?for=school#book',
+      sub: t('Student prices per pupil, free entry for pre-primary pupils, and one waiver pack the teacher signs for the class.'),
+      photo: { src: '/images/packages/student/student-zipline-kid.webp', position: '42% 30%', alt: t('A young student cheering on a zipline in a blue helmet') },
+    },
+    {
+      key: 'team', title: t('Team building'), href: paths.team(),
+      sub: t('Games and activities with certified facilitators, ending around a wellness lunch. For 10 to 300+ people, quoted for your team.'),
+      photo: { src: '/images/team-building-goggles.webp', position: 'center 25%', alt: t('Colleagues in goggles cheering during a team challenge at Vallé') },
+    },
+    {
+      key: 'club', title: t('Groups & clubs'), href: paths.groups() + '?for=club#book',
+      sub: t('Friends, clubs and associations of ten or more: per-head prices online, a participant list and a small deposit.'),
+      photo: { src: '/images/group-new-1.webp', position: 'center 55%', alt: t('A VALLÉ jeep full of visitors crossing the green valley') },
+    },
+  ];
+}

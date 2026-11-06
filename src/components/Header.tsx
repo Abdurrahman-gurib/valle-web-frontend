@@ -10,8 +10,8 @@ import { LanguagePicker, LanguageSuggest } from './LanguagePicker';
 import { useLang, useT, _t } from '../i18n';
 import { NavBtn, hamburgerBar, type CSSVars } from './header/parts';
 import { useCompactHeader, useScrolled } from './header/useHeaderLayout';
-import { dineLinks, packageGroups } from './header/packageGroups';
-import { DineMenu, ExploreMenu, PackagesMenu } from './header/MegaMenus';
+import { dineLinks, groupLinks, packageGroups } from './header/packageGroups';
+import { DineMenu, ExploreMenu, GroupsMenu, PackagesMenu } from './header/MegaMenus';
 import { MobileNav } from './header/MobileNav';
 import { focusablesIn } from '../hooks/useFocusTrap';
 
@@ -24,7 +24,7 @@ void RATE_WORD_KEYS;
 const MENU_KEYS = [_t('menu:Plan your visit'), _t('menu:Our story'), _t('menu:Groups & schools')];
 void MENU_KEYS;
 
-type Mega = 'explore' | 'pkg' | 'dine' | null;
+type Mega = 'explore' | 'pkg' | 'groups' | 'dine' | null;
 /** Hover intent: a short wait before a menu opens, a longer one before it closes, so the pointer can cross into the panel. */
 const HOVER_OPEN_MS = 120;
 const HOVER_CLOSE_MS = 220;
@@ -46,12 +46,14 @@ export function Header() {
   const megaOpen = mega === 'explore';
   const megaPkgOpen = mega === 'pkg';
   const megaDineOpen = mega === 'dine';
+  const megaGroupsOpen = mega === 'groups';
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchQ, setSearchQ] = useState('');
   const headerRef = useRef<HTMLElement>(null);
   const exploreBtn = useRef<HTMLButtonElement>(null);
   const pkgBtn = useRef<HTMLButtonElement>(null);
   const dineBtn = useRef<HTMLButtonElement>(null);
+  const groupsBtn = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openedBy = useRef<'hover' | 'click' | 'key'>('click');
@@ -63,7 +65,7 @@ export function Header() {
   }, [location]);
   useEffect(() => () => { if (hoverTimer.current) clearTimeout(hoverTimer.current); }, []);
 
-  const triggerOf = (m: Mega) => (m === 'explore' ? exploreBtn.current : m === 'pkg' ? pkgBtn.current : m === 'dine' ? dineBtn.current : null);
+  const triggerOf = (m: Mega) => (m === 'explore' ? exploreBtn.current : m === 'pkg' ? pkgBtn.current : m === 'dine' ? dineBtn.current : m === 'groups' ? groupsBtn.current : null);
   const focusFirstLink = () => requestAnimationFrame(() => { if (panelRef.current) focusablesIn(panelRef.current)[0]?.focus(); });
 
   // ---- hover (mouse only: a tap is a click) -------------------------------
@@ -188,7 +190,10 @@ export function Header() {
                   snug={lang !== 'en'} label={t('Packages')} chev={megaPkgOpen ? '▲' : '▼'} color={headerFg} btnRef={pkgBtn} controls="mega-packages"
                   onClick={onTriggerClick('pkg')} onKeyDown={onTriggerKey('pkg')} onPointerEnter={hoverIn('pkg')} onPointerLeave={hoverOut}
                 />
-                <NavBtn snug={lang !== 'en'} label={menu('Groups & schools')} href={paths.groups()} color={headerFg} onClick={go(gotoGroups)} />
+                <NavBtn
+                  snug={lang !== 'en'} label={menu('Groups & schools')} chev={megaGroupsOpen ? '▲' : '▼'} color={headerFg} btnRef={groupsBtn} controls="mega-groups"
+                  onClick={onTriggerClick('groups')} onKeyDown={onTriggerKey('groups')} onPointerEnter={hoverIn('groups')} onPointerLeave={hoverOut}
+                />
                 <NavBtn snug={lang !== 'en'} label={menu('Plan your visit')} href={paths.plan()} color={headerFg} onClick={go(goto.plan)} />
                 <NavBtn
                   snug={lang !== 'en'} label={t('Dine')} chev={megaDineOpen ? '▲' : '▼'} color={headerFg} btnRef={dineBtn} controls="mega-dine"
@@ -278,12 +283,12 @@ export function Header() {
           // pointer and keys of the open panel; the panel itself is positioned against the header
           <div
             ref={panelRef}
-            id={megaPkgOpen ? 'mega-packages' : megaDineOpen ? 'mega-dine' : 'mega-explore'}
+            id={megaPkgOpen ? 'mega-packages' : megaDineOpen ? 'mega-dine' : megaGroupsOpen ? 'mega-groups' : 'mega-explore'}
             onPointerEnter={(e) => { if (e.pointerType === 'mouse') clearHover(); }}
             onPointerLeave={hoverOut}
             onKeyDown={onPanelKey}
           >
-            {megaPkgOpen ? <PackagesMenu groups={pkgGroups} go={go} /> : megaDineOpen ? <DineMenu links={dineLinks(t)} go={go} /> : <ExploreMenu go={go} />}
+            {megaPkgOpen ? <PackagesMenu groups={pkgGroups} go={go} /> : megaDineOpen ? <DineMenu links={dineLinks(t)} go={go} /> : megaGroupsOpen ? <GroupsMenu links={groupLinks(t)} go={go} /> : <ExploreMenu go={go} />}
           </div>
         )}
       </header>
