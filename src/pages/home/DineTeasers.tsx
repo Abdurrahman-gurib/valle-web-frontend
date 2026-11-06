@@ -35,17 +35,19 @@ export function DineTeasers() {
   const catalog = useCatalog();
   const goto = useGoto();
   const cham = catalog.RESTOS['chamouze'];
-  const cit = catalog.RESTOS['citronelle'];
-  if (!cham || !cit) return null;
+  const big = catalog.RESTOS['citronelle'];
+  const cafe = catalog.RESTOS['palmiste'];
+  if (!cham || !big) return null;
   return (
     <section id="dine" data-screen-label="Restaurants" className="mx-auto max-w-[1320px] px-[clamp(16px,3.5vw,40px)] pt-[clamp(56px,8vw,104px)]">
       <div className="mb-7 flex flex-wrap items-baseline justify-between gap-5 pb-7" style={{ borderBottom: '2px solid #340057' }}>
         <h2 className="m-0 origin-bottom-left -rotate-4 font-display text-[clamp(30px,4.6vw,64px)] leading-[0.85] font-black tracking-[-0.01em] uppercase italic">{t('Taste the soul')}</h2>
         <span className="font-mono text-xs font-semibold tracking-[.16em] text-valle-purple/70">{t('04 · DINE IN THE VALLEY')}</span>
       </div>
-      <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(300px,1fr))]">
+      <div data-reveal-kids="1" className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
         <RestoTeaser href={paths.resto('chamouze')} onGo={() => goto.resto('chamouze')} img={cham.img} alt={t('Le Chamouzé restaurant overlooking the waterfall')} badge={t('WATERFALL DINING')} name="Le Chamouzé" blurb={t('Mauritian–European fusion beside a cascading waterfall. Open daily 11:30 – 16:30 · {price}.', { price: cham.price })} />
-        <RestoTeaser href={paths.resto('citronelle')} onGo={() => goto.resto('citronelle')} img={cit.img} alt={t('La Citronelle riverside restaurant')} badge={t('RIVERSIDE · EVENTS TO 400')} name="La Citronelle" blurb={t('Refined Indian cuisine in a rustic lakeside setting. 11:30 – 16:30 · à la carte from Rs 600.')} />
+        <RestoTeaser href={paths.resto('citronelle')} onGo={() => goto.resto('citronelle')} img={big.img} alt={t('The dining pavilion of La Bigarade')} badge={t('RIVERSIDE · EVENTS TO 400')} name="La Bigarade" blurb={t('Indian and Mauritian cuisine beside a quiet river. 11:30 – 16:30 · à la carte from Rs 400.')} />
+        {cafe && <RestoTeaser href={paths.resto('palmiste')} onGo={() => goto.resto('palmiste')} img={cafe.img} alt={t('A cappuccino and croissants at Le Palmiste café')} badge={t('CAFÉ · COFFEE & PASTRIES')} name="Le Palmiste" blurb={t('Coffee, pastries and freshly baked bread on a calm terrace. Open daily 09:00 – 17:30.')} />}
       </div>
     </section>
   );

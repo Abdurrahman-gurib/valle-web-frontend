@@ -60,7 +60,7 @@ export function PackagesMenu({ groups, go }: { groups: MenuGroup[]; go: Go }) {
 }
 
 /** Desktop dine menu: the two restaurants (with their photos) and the kids menu. */
-export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
+export function DineMenu({ links, go }: { links: [string, string, string?][]; go: Go }) {
   const t = useT();
   const navigate = useNavigate();
   const catalog = useCatalog();
@@ -69,9 +69,9 @@ export function DineMenu({ links, go }: { links: [string, string][]; go: Go }) {
     <div className={megaPanel}>
       <StripesSm />
       <div className="max-w-[1320px] mx-auto pt-[28px] px-[clamp(16px,3.5vw,40px)] pb-[32px] grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-[clamp(16px,2vw,28px)]" data-testid="dine-menu">
-        {links.map(([name, href], i) => {
-          const id = href.includes('citronelle') ? 'citronelle' : 'chamouze';
-          const src = i < 2 ? img(id) : undefined;
+        {links.map(([name, href, id]) => {
+          // the kids menu tile shows the park's printed kids menu card (Kids Park design)
+          const src = id ? img(id) : href.includes('kids-menu') ? '/images/kids-menu-card.webp' : undefined;
           return (
             <SpaLink key={href} href={href} onClick={go(() => navigate(href))} className="group block rounded-[20px] overflow-hidden bg-white shadow-s2 [transition:transform_var(--t-ui)] hover:[transform:translateY(-4px)]" color="#340057">
               {src

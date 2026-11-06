@@ -7,6 +7,7 @@ import { cn } from '../../lib/utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Img } from '../../components/Img';
 import { Stripes } from '../../components/Stripes';
+import { PhotoStrip } from '../../components/PhotoStrip';
 import { listVacancies } from '../../lib/careersApi';
 import type { VacancyCard } from '../../types';
 import { paths } from '../../lib/nav';
@@ -150,6 +151,21 @@ export default function VacanciesPage() {
           </div>
         </div>
       </section>
+
+      {/* ---- the people who run the park, at their posts ---- */}
+      <PhotoStrip
+        id="careers-team-title"
+        eyebrow={t('THE TEAM AT WORK')}
+        title={t('Meet the people of the valley')}
+        photos={[
+          { src: '/images/staff-front-desk.webp', alt: t('A front desk host smiling at the reception counter'), caption: t('Front desk') },
+          { src: '/images/staff-equipment-zone.webp', alt: t('A team member at the equipment zone counter'), caption: t('Equipment zone') },
+          { src: '/images/staff-zipline-guide.webp', alt: t('A zipline guide giving a thumbs up on the line'), caption: t('Zipline guide') },
+          { src: '/images/staff-quad-base.webp', alt: t('A quad instructor in front of the quad fleet'), caption: t('Quad base') },
+          { src: '/images/staff-kids-park.webp', alt: t('A Kids Park attendant beside the playground'), caption: t('Kids Park') },
+          { src: '/images/staff-guest-services.webp', alt: t('A guest services host at the welcome desk'), caption: t('Guest services') },
+        ]}
+      />
 
       {/* ---- open roles ---- */}
       <section id="roles" className="mt-[clamp(36px,4.5vw,60px)]">

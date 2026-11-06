@@ -185,7 +185,7 @@ export function ParkMap() {
         </div>
         <div className="mt-[18px] flex flex-wrap items-baseline justify-between gap-[18px] rounded-[16px] border-[1.5px] border-dashed border-white/35 px-[22px] py-4 text-white/80">
           <div className="min-w-[260px] flex-1 text-[13.5px] leading-[1.55]">
-            {t("From the entrance the trail climbs past the Kids Park, La Citronelle and the Green Zone's tortoises and albino deer to the Luge Kart zone, then loops back along the 23 Coloured Earth, both waterfalls and La Tour viewpoint.")}
+            {t("From the entrance the trail climbs past the Kids Park, La Bigarade and the Green Zone's tortoises and albino deer to the Luge Kart zone, then loops back along the 23 Coloured Earth, both waterfalls and La Tour viewpoint.")}
           </div>
           <div className="font-mono text-[11px] opacity-80">{t('A ENTRANCE · F 23 COLOURED EARTH · GZ WILDLIFE')}</div>
         </div>

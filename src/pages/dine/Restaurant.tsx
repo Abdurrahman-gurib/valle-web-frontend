@@ -53,8 +53,9 @@ export default function RestaurantPage() {
   const { RESTOS } = useCatalog();
   const { id } = useParams<{ id: string }>();
 
-  const valid = id === 'chamouze' || id === 'citronelle';
-  const r = valid ? RESTOS[id as string] : undefined;
+  const r = id && Object.prototype.hasOwnProperty.call(RESTOS, id) ? RESTOS[id] : undefined;
+  /** A café (Le Palmiste) has no printed menu or table booking: guests walk in and order at the counter. */
+  const cafe = !!r && !(r.menuGroups?.length) && !r.menuPdf;
   useSeo(r ? {
     title: t('{name} · {badge} · VALLÉ Advenature™ Park', { name: r.name, badge: r.badge.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) }),
     description: r.tag + ' ' + r.cuisine + '. ' + r.hours + '.',
@@ -62,13 +63,12 @@ export default function RestaurantPage() {
     image: r.img,
     jsonLd: [
       breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Dine', path: '/#dine' }, { name: r.name, path: paths.resto(id as string) }]),
-      { '@context': 'https://schema.org', '@type': 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: PHONE, address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, hasMenu: abs(r.menuPdf), openingHours: r.hours },
+      { '@context': 'https://schema.org', '@type': cafe ? 'CafeOrCoffeeShop' : 'Restaurant', name: r.name, image: abs(r.img), url: abs(paths.resto(id as string)), servesCuisine: r.cuisine, priceRange: r.price, description: r.about, telephone: PHONE, address: { '@type': 'PostalAddress', streetAddress: 'B102, Mare Anguilles', addressLocality: 'Chamouny', addressCountry: 'MU' }, ...(r.menuPdf ? { hasMenu: abs(r.menuPdf) } : {}), openingHours: r.hours },
     ],
   } : { title: t('Restaurant not found · VALLÉ Advenature™ Park'), description: t('That restaurant is not in the valley.'), noindex: true });
   if (!r) return <NotFoundPage what={t('that restaurant')} />;
 
-  const otherId = id === 'chamouze' ? 'citronelle' : 'chamouze';
-  const other = RESTOS[otherId];
+  const others = Object.entries(RESTOS).filter(([k]) => k !== id);
   const rGallery = (r.gallery || []).map((src) => ({ src, alt: r.name }));
   const rMenuGroups = r.menuGroups || [];
   const rMenuPdf = r.menuPdf || '';
@@ -116,13 +116,13 @@ export default function RestaurantPage() {
               <a href={DIRECTIONS_URL} target="_blank" rel="noopener" data-testid="resto-directions" className="mt-1.5 inline-block font-bold underline underline-offset-[3px]" style={{ color: '#FFFC33' }}>{t('Directions (Google Maps) ↗')}</a>
             </div>
             <div className="mx-0 my-5 h-px bg-white/20" />
-            <TableReservation restaurantId={id as string} restaurantName={r.name} menuGroups={rMenuGroups} />
+            {!cafe && <TableReservation restaurantId={id as string} restaurantName={r.name} menuGroups={rMenuGroups} />}
             <a
               href="tel:+2306604477"
               className="mt-2.5 block rounded-full border-[1.5px] border-solid border-white/50 px-0 py-[13px] text-center text-[14px] font-bold"
               style={{ color: '#FFFFFF' }}
             >{t('Call')} <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{PHONE}</span></a>
-            <div className="mt-3 text-center font-mono text-[10px] opacity-60">{t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
+            <div className="mt-3 text-center font-mono text-[10px] opacity-60">{cafe ? t('WALK IN · ORDER AT THE COUNTER') : t('WALK-INS WELCOME · GROUPS SHOULD RESERVE')}</div>
           </div>
         </div>
       </div>
@@ -130,11 +130,11 @@ export default function RestaurantPage() {
       {/* Gallery */}
       <div className="mt-[clamp(40px,6vw,64px)]">
         <div className={HEAD}>
-          <h2 className={H2}>{t('Inside the restaurant')}</h2>
+          <h2 className={H2}>{cafe ? t('Inside the café') : t('Inside the restaurant')}</h2>
           <CarouselArrows prev={gal.prev} next={gal.next} canPrev={gal.canPrev} canNext={gal.canNext} labels={{ prev: t('Previous'), next: t('Next') }} />
         </div>
         <div id="vgal" className="pt-[18px] pb-[14px]">
-          <CarouselTrack viewportRef={gal.viewportRef} label={t('Inside the restaurant')} gap="gap-3" onKeyDown={carouselKeys(gal.prev, gal.next, isRtl(lang))}>
+          <CarouselTrack viewportRef={gal.viewportRef} label={cafe ? t('Inside the café') : t('Inside the restaurant')} gap="gap-3" onKeyDown={carouselKeys(gal.prev, gal.next, isRtl(lang))}>
             {rGallery.map((g) => (
               <div key={g.src} className="shrink-0 grow-0 basis-[clamp(255px,36vw,375px)]">
                 <Img eager src={g.src} alt={g.alt} sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw" style={{ height: 'clamp(170px,24vw,250px)', width: '100%', borderRadius: 14, objectFit: 'cover', display: 'block' }} />
@@ -144,8 +144,8 @@ export default function RestaurantPage() {
         </div>
       </div>
 
-      {/* Menu & prices (the header's "menu" links land here) */}
-      <div id="menu" className="mt-[clamp(32px,5vw,52px)]">
+      {/* Menu & prices (the header's "menu" links land here); a café has none */}
+      {!cafe && <div id="menu" className="mt-[clamp(32px,5vw,52px)]">
         <div className={HEAD + ' mb-[18px]'}>
           <h2 className={H2}>{t('Menu & prices')}</h2>
           {rMenuPdf !== '' && (
@@ -179,28 +179,33 @@ export default function RestaurantPage() {
           ))}
         </div>
         <div className="mt-3.5 font-mono text-[11px] text-valle-purple/70">{t('PRICES IN MAURITIAN RUPEES, VAT INCLUSIVE · MENUS EVOLVE WITH THE SEASON')}</div>
-      </div>
+      </div>}
 
       {/* Also in the valley */}
       <div className="mt-[clamp(40px,6vw,64px)]">
         <div className={HEAD + ' mb-[18px]'}>
           <h2 className={H2}>{t('Also in the valley')}</h2>
         </div>
-        <a
-          href={paths.resto(otherId)}
-          onClick={(e) => { e.preventDefault(); goto.resto(otherId); }}
-          className="flex cursor-pointer flex-wrap overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1.5px_#EBE2FF] transition-[transform,box-shadow] duration-[.25s] ease-[ease] hover:shadow-[0_18px_36px_-16px_rgba(52,0,87,.4)] hover:[transform:translateY(-4px)]"
-          style={{ color: 'inherit', textDecoration: 'none' }}
-        >
-          <div className="min-h-[200px] min-w-[260px] flex-1 bg-valle-lilac">
-            <Img src={other.img} alt={other.name} sizes="(max-width: 640px) 100vw, 50vw" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <div className="flex min-w-[260px] flex-[1.6] flex-col justify-center px-7 py-6">
-            <div className="font-display text-[26px] font-extrabold uppercase italic">{other.name}</div>
-            <div className="mt-1.5 text-[14.5px] leading-[1.5] text-valle-purple/70">{other.tag}</div>
-            <div className="mt-3 text-[13.5px] font-bold text-valle-violet">{t('Visit →')}</div>
-          </div>
-        </a>
+        <div className="grid [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))] gap-4" data-testid="also-in-valley">
+          {others.map(([oid, other]) => (
+            <a
+              key={oid}
+              href={paths.resto(oid)}
+              onClick={(e) => { e.preventDefault(); goto.resto(oid); }}
+              className="flex cursor-pointer flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1.5px_#EBE2FF] transition-[transform,box-shadow] duration-[.25s] ease-[ease] hover:shadow-[0_18px_36px_-16px_rgba(52,0,87,.4)] hover:[transform:translateY(-4px)] motion-reduce:hover:transform-none"
+              style={{ color: 'inherit', textDecoration: 'none' }}
+            >
+              <div className="relative aspect-[16/9] bg-valle-lilac">
+                <Img src={other.img} alt={other.name} sizes="(max-width: 640px) 100vw, 50vw" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div className="flex flex-1 flex-col px-6 py-5">
+                <div className="font-display text-[24px] font-extrabold uppercase italic">{other.name}</div>
+                <div className="mt-1.5 text-[14.5px] leading-[1.5] text-valle-purple/70">{other.tag}</div>
+                <div className="mt-auto pt-3 text-[13.5px] font-bold text-valle-violet">{t('Visit →')}</div>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     </main>
   );

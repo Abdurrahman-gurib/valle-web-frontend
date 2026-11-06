@@ -6,6 +6,7 @@ import { ClassHero, CallButton } from './ClassHero';
 import { PackageCard } from './PackageCard';
 import { GoodToKnow } from './GoodToKnow';
 import { SupportPanel } from './SupportPanel';
+import { PhotoStrip } from '../../components/PhotoStrip';
 import { requestQuoteFor } from './QuoteForm';
 import { Eyebrow, H2, MENU_DT, QuoteLink, GroupLink, SectionHeader, cardItems, splitDuration } from './shared';
 
@@ -82,6 +83,18 @@ export default function CorporatePage({ onQuote }: { onQuote: () => void }) {
           })}
         </div>
       </section>
+
+      <PhotoStrip
+        id="team-days-title"
+        eyebrow={t('TEAM DAYS AT VALLÉ')}
+        title={t('Games, challenges and the bridge')}
+        photos={[
+          { src: '/images/team-connect-four.webp', alt: t('A colleague playing giant connect four on the lawn'), caption: t('Lawn games') },
+          { src: '/images/team-line-challenge.webp', alt: t('A team linked together for a walking challenge'), caption: t('Team challenge') },
+          { src: '/images/team-facilitator.webp', alt: t('A facilitator coaching a team during a challenge'), caption: t('Certified facilitators') },
+          { src: '/images/team-bridge.webp', alt: t('Colleagues in helmets crossing the Nepalese Bridge'), caption: t('Nepalese Bridge') },
+        ]}
+      />
 
       <SupportPanel id="team-why-title" photo={{ src: '/images/shoot/luge-03.webp', alt: t('A group of friends racing down the luge track together'), width: 1600, height: 899, position: 'center 50%' }}>
         <Eyebrow>{t('WHY TEAMS COME TO VALLÉ')}</Eyebrow>

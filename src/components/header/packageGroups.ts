@@ -24,17 +24,19 @@ export function packageGroups(t: Translate, catalog: Catalog, rate: RateKey | nu
     { title: t('STUDENT PACKAGE'), links: [pk(t('Student package'), 'student')] },
     { title: t('CORPORATE PACKAGE'), links: [pk(t('Team building'), 'team')] },
     { title: t('PHOTO & VIDEO PACKAGE'), links: [pk(t('Photo pricelist'), 'photo'), pk(t('Cinematic experience'), 'cine')] },
-    { title: t('RESTAURANTS & MENUS'), links: [[t('Le Chamouzé menu'), paths.resto('chamouze') + '#menu'], [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'], [t('La Citronelle menu'), paths.resto('citronelle') + '#menu']] },
+    { title: t('RESTAURANTS & MENUS'), links: [[t('Le Chamouzé menu'), paths.resto('chamouze') + '#menu'], [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'], [t('La Bigarade menu'), paths.resto('citronelle') + '#menu'], [t('Le Palmiste café'), paths.resto('palmiste')]] },
   ];
   if (rate === 'nr') return [exclusive, ...others];
   return [...deals, ...(rate === 'rr' ? [resident, exclusive] : [exclusive, resident]), ...others];
 }
 
 /** The Dine menu: the two restaurants and the kids menu. */
-export function dineLinks(t: Translate): [name: string, href: string][] {
+export function dineLinks(t: Translate): [name: string, href: string, restoId?: string][] {
+  // La Bigarade keeps the id and address it had as "La Citronelle"
   return [
-    ['Le Chamouzé', paths.resto('chamouze')],
-    ['La Citronelle', paths.resto('citronelle')],
+    ['Le Chamouzé', paths.resto('chamouze'), 'chamouze'],
+    ['La Bigarade', paths.resto('citronelle'), 'citronelle'],
+    ['Le Palmiste', paths.resto('palmiste'), 'palmiste'],
     [t('Kids menu'), paths.resto('chamouze') + '#kids-menu'],
   ];
 }

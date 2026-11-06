@@ -84,7 +84,8 @@ export function Footer() {
               <FootLink label={t('Tours')} href={paths.explore('tours')} onClick={() => goto.explore('tours')} hoverColor="#FFFC33" />
               <FootLink label={t('Packages')} href={paths.packages()} onClick={() => goto.packages()} hoverColor="#FFFC33" />
               <FootLink label="Le Chamouzé" href={paths.resto('chamouze')} onClick={() => goto.resto('chamouze')} hoverColor="#FFFC33" />
-              <FootLink label="La Citronelle" href={paths.resto('citronelle')} onClick={() => goto.resto('citronelle')} hoverColor="#FFFC33" />
+              <FootLink label="La Bigarade" href={paths.resto('citronelle')} onClick={() => goto.resto('citronelle')} hoverColor="#FFFC33" />
+              <FootLink label="Le Palmiste" href={paths.resto('palmiste')} onClick={() => goto.resto('palmiste')} hoverColor="#FFFC33" />
               <FootLink label={t('Book your day')} href={paths.booking()} onClick={() => goto.booking()} hoverColor="#FFFC33" />
             </div>
           </div>

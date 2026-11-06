@@ -548,11 +548,11 @@ test.describe('packages', () => {
 test.describe('restaurants', () => {
   test.beforeEach(async ({ page }) => { await preselectRate(page); });
 
-  test('chamouze shows menu and links to citronelle', async ({ page }) => {
+  test('chamouze shows menu and links to La Bigarade', async ({ page }) => {
     await page.goto('/dine/chamouze');
     await expect(page.getByRole('heading', { name: /Le Chamouzé/i }).first()).toBeVisible();
     await expect(page.getByText('Burrata Salad', { exact: true })).toBeVisible();
-    await page.getByText('La Citronelle', { exact: true }).last().click();
+    await page.getByTestId('also-in-valley').getByText('La Bigarade', { exact: true }).click();
     await expect(page).toHaveURL(/\/dine\/citronelle/);
     await expect(page.getByText('Veg Thali', { exact: true })).toBeVisible();
     await expectNoHorizontalScroll(page);

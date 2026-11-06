@@ -34,7 +34,7 @@ function NavRow({ href, onClick, delay, arrow = 'text-[rgba(255,252,51,.7)]', ch
 /** The compact layout's full-screen menu under the header bar. */
 export function MobileNav({ groups, go, searchQ, setSearchQ, onSearch, close, gotoGroups, dine, header }: {
   groups: MenuGroup[]; go: Go; searchQ: string; setSearchQ: (q: string) => void; onSearch: () => void; close: () => void; gotoGroups: () => void;
-  dine: [string, string][];
+  dine: [string, string, string?][];
   /** The header bar stays usable (and in the Tab cycle) while the menu covers the page. */
   header: () => HTMLElement | null;
 }) {
