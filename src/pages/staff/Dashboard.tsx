@@ -19,6 +19,7 @@ import CouponsPanel from './CouponsPanel';
 import ReportsPanel from './ReportsPanel';
 import BackupsPanel from './BackupsPanel';
 import CalendarPanel from './CalendarPanel';
+import GroupPaymentPanel from './GroupPaymentPanel';
 import ReconciliationPanel from './ReconciliationPanel';
 import ForecastPanel from './ForecastPanel';
 import QuotesPanel from './QuotesPanel';
@@ -290,7 +291,7 @@ export default function StaffDashboard() {
         {tab === 'reconciliation' && <ReconciliationPanel onChanged={reloadStats} />}
         {tab === 'forecast' && <ForecastPanel />}
         {tab === 'quotes' && <QuotesPanel />}
-        {tab === 'calendar' && String(auth.user.role) === 'manager' && <CalendarPanel />}
+        {tab === 'calendar' && String(auth.user.role) === 'manager' && <><CalendarPanel /><GroupPaymentPanel /></>}
         {tab === 'team' && String(auth.user.role) === 'manager' && <TeamPanel currentUserId={auth.user.id} />}
         {tab === 'security' && <SecurityPanel />}
         <div className={tab === 'chat' ? 'block' : 'hidden'}>

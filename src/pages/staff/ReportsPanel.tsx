@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { mur } from '../../lib/format';
 import { revenueParts } from './reportMath';
+import { partyText } from './bookings/partyLines';
 import {
   exportUrl, getExperienceSales, getNationalities, getSalesSummary,
   type ExperienceRow, type NationalityRow, type SalesSummary,
@@ -96,7 +97,7 @@ export default function ReportsPanel() {
           <div className={cn('grid gap-[12px] mb-[14px] grid-cols-[repeat(auto-fit,minmax(150px,1fr))]', loading ? 'opacity-[.6]' : 'opacity-100')}>
             <Kpi tag="REVENUE" value={mur(t.revenue)} sub={`${mur(t.entryRevenue)} entry · ${mur(t.experienceRevenue)} experiences · ${mur(t.productRevenue ?? 0)} packages & products`} accent="#7333FF" title={BASIS_TIP} />
             <Kpi tag="BOOKINGS" value={String(t.bookings)} sub={`${t.cancelled} cancelled`} />
-            <Kpi tag="GUESTS" value={String(t.guests)} sub={`${t.adults} adults · ${t.kids} children`} />
+            <Kpi tag="GUESTS" value={String(t.guests)} sub={partyText(t.adults, t.kids, t.infants ?? 0)} />
             <Kpi tag="AVERAGE TICKET" value={mur(t.avgTicket)} sub="per booking" />
             <Kpi tag="PAID ONLINE" value={mur(t.onlineRevenue)} sub={`${mur(t.gateRevenue)} at the gate`} accent="#33FF74" />
             <Kpi testId="kpi-discounts" tag="DISCOUNTS" value={mur(t.discounts)} sub={`${mur(t.passDiscounts ?? t.discounts)} Explorer Pass · ${mur(t.offerDiscounts ?? 0)} codes, FOC & manual`} accent="#FFFC33" />

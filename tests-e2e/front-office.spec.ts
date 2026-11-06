@@ -232,6 +232,26 @@ test.describe('calendar and capacity', () => {
       await page.request.put('/api/staff/ops/calendar', { data: { slotCapacity: original.slotCapacity <= 5000 ? original.slotCapacity : undefined, closures: original.closures, activityCapacity: original.activityCapacity } });
     }
   });
+
+  test('a manager enters the school deposit bank details in the back office', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+    test.skip(!(await apiUp(page)), 'API not running');
+    const original = ((await (await page.request.get('/api/staff/ops/group-payment')).json()) as { bankDetails: string }).bankDetails;
+    try {
+      await page.goto('/staff');
+      await expect(page.getByRole('button', { name: /sign out/i })).toBeVisible({ timeout: 15000 });
+      await page.getByRole('button', { name: 'Calendar' }).click();
+      const panel = page.getByTestId('group-payment-panel');
+      const box = panel.getByLabel(/bank transfer details/i);
+      await box.fill('Bank: Test Bank\nAccount: 123 456\nReference: your booking reference');
+      await panel.getByRole('button', { name: 'Save details' }).click();
+      await expect(panel.getByRole('status')).toContainText('Saved');
+      const stored = (await (await page.request.get('/api/staff/ops/group-payment')).json()) as { bankDetails: string };
+      expect(stored.bankDetails).toBe('Bank: Test Bank\nAccount: 123 456\nReference: your booking reference');
+    } finally {
+      await page.request.put('/api/staff/ops/group-payment', { data: { bankDetails: original } });
+    }
+  });
 });
 
 test.describe('timed sessions', () => {

@@ -173,7 +173,7 @@ export default function ReconciliationPanel({ onChanged }: { onChanged: (force?:
                         <td className={cn(TD, 'font-mono font-bold text-[12.5px]')}>{r.refCode}</td>
                         <td className={TD}>{SLOT_LABEL[r.slot] ?? r.slot}</td>
                         <td className={cn(TD, 'font-semibold')}>{r.guestName}<div className="font-mono text-[10px] text-[rgba(52,0,87,.7)]">{r.phone || r.email}</div></td>
-                        <td className={TD}>{partyText(r.adults, r.kids)}</td>
+                        <td className={TD}>{partyText(r.adults, r.kids, r.infants ?? 0)}</td>
                         <td className={TD}>{r.nationality || '—'}</td>
                         <td className={TD}>{PAY_LABEL[r.payMode] ?? r.payMode}</td>
                         <td className={TDNUM}>{mur(r.total)}</td>

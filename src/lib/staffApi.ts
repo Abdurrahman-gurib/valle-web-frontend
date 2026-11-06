@@ -198,6 +198,8 @@ export interface SalesSummary {
   from: string; to: string;
   totals: {
     bookings: number; cancelled: number; guests: number; adults: number; kids: number; revenue: number;
+    /** free under-6s (older API: absent) */
+    infants?: number;
     entryRevenue: number; experienceRevenue: number; discounts: number; avgTicket: number; onlineRevenue: number; gateRevenue: number;
     /** packages, photos and other product lines; anything else in the subtotal */
     productRevenue?: number; otherRevenue?: number;
@@ -210,7 +212,7 @@ export interface SalesSummary {
 export interface NationalityRow { nationality: string; bookings: number; guests: number; revenue: number; share: number }
 export interface ExperienceRow { experienceId: string; name?: string; label: string; bookings: number; adults: number; kids: number; units: number; revenue: number }
 export interface ReconciliationRow {
-  refCode: string; guestName: string; slot: string; payMode: string; status: string; adults: number; kids: number; total: number;
+  refCode: string; guestName: string; slot: string; payMode: string; status: string; adults: number; kids: number; infants?: number; total: number;
   nationality: string; phone: string; email: string;
   paid?: number; refundDue?: number;
   /** payments recorded for this booking on the day, per method */
@@ -264,6 +266,9 @@ export interface CalendarView {
   experiences: { id: string; name: string; priceMode: string }[];
 }
 export const getCalendar = () => request<CalendarView>('/staff/ops/calendar');
+/** How schools and groups pay their deposit (managers); '' = the team sends the details. */
+export const getGroupPayment = () => request<{ bankDetails: string }>('/staff/ops/group-payment');
+export const saveGroupPayment = (bankDetails: string) => request<{ bankDetails: string }>('/staff/ops/group-payment', { method: 'PUT', body: JSON.stringify({ bankDetails }) });
 export interface StaffParkStatus { state: 'open' | 'partial' | 'closed'; message: string; pausedActivities: string[]; pausedNames: string[]; updatedAt: string | null; updatedBy: string | null }
 export const getParkStatus = () => request<StaffParkStatus>('/staff/ops/park-status');
 export interface LiveOpsView { updatedAt: string | null; updatedBy: string; activities: Record<string, { name: string; waitMin: number | null; meetingPoint: string; note: string; paused: boolean }> }

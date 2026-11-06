@@ -60,7 +60,7 @@ const TERMS: Section[] = [
     _t('Your reference and QR code are your ticket. Your booking holds places for the day and arrival slot you chose; we do our best to keep activity waiting times short, but activities run in order of arrival and may be subject to a queue at busy times.'),
   ] },
   { h: _t('Changes and cancellation'), p: [
-    _t('There is no cancellation fee for a booking that has not been paid: tell us by phone, WhatsApp or e-mail and we release your places. To change the date, the slot or your party, contact us and we will update your ticket. Once activities have been paid for, the no-refund rule in the safety waiver applies.'),
+    _t('You can change the date, the arrival time, your party or your activities, or cancel, free of charge up to the day of your visit: use “Change or cancel” on your ticket page, or tell us by phone, WhatsApp or e-mail. If you have already paid, we refund what you paid, or the difference when a change lowers the total. Expo deals and photo and video packages are the exceptions: they are non refundable. On the day itself, an activity that has been paid for and can go ahead is not refunded if you choose not to take part, as the safety waiver states.'),
     _t('Some activities depend on the weather. When rain or wind makes an activity unsafe, we pause it and you may wait, choose another activity, or move your visit to another day at no cost. Weather is not a ground for a refund of activities already paid.'),
   ] },
   { h: _t('Taking part'), p: [
